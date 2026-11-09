@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- La structure de l'interface (comme du HTML). Le style est dans Hud.uss (comme du CSS). -->
+    <Style src="Hud.uss" />
+    <ui:VisualElement name="root" class="root" picking-mode="Ignore">
+        <ui:VisualElement class="top-bar" picking-mode="Ignore">
+            <ui:Label name="floor" text="Étage 1" class="floor" />
+            <ui:VisualElement class="counters" picking-mode="Ignore">
+                <ui:Label name="pot" text="Cagnotte : 0" class="counter pot" />
+                <ui:Label name="wallet" text="Porte-monnaie : 0" class="counter" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:Label name="message" text="" class="message" />
+        <ui:VisualElement class="spacer" picking-mode="Ignore" />
+        <ui:VisualElement class="actions" picking-mode="Ignore">
+            <ui:Button name="cashout" text="Encaisser" class="btn btn-safe" />
+            <ui:Button name="continue" text="Continuer" class="btn btn-risk" />
+            <ui:Button name="replay" text="Rejouer" class="btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,87 @@
+/* Style de l'interface. Couleurs : or (#FFD54A) pour l'argent, vert = sûr, rouge = risque. */
+
+.root {
+    flex-grow: 1;
+    padding: 32px;
+}
+
+.top-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.floor {
+    font-size: 64px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #3A2200;
+}
+
+.counters {
+    align-items: flex-end;
+}
+
+.counter {
+    font-size: 30px;
+    color: #FFFFFF;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 8px 18px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.pot {
+    color: #FFD54A;
+}
+
+.message {
+    font-size: 36px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #000000;
+    white-space: normal;
+    margin-top: 16px;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.actions {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.btn {
+    font-size: 34px;
+    min-width: 260px;
+    height: 84px;
+    margin: 0 16px;
+    border-radius: 16px;
+    border-width: 0;
+    color: #FFFFFF;
+    background-color: #5B5BD6;
+    -unity-font-style: bold;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.btn:hover {
+    scale: 1.06 1.06;
+}
+
+.btn:active {
+    scale: 0.96 0.96;
+}
+
+.btn-safe {
+    background-color: #2E9E5B;
+}
+
+.btn-risk {
+    background-color: #D64545;
+}
