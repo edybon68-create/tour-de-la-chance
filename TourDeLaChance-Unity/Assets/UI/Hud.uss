@@ -89,27 +89,150 @@
     color: #FFFFFF;
     background-color: #5B5BD6;
     -unity-font-style: bold;
+    /* Survol : échelle 1,05 en 0,08 s ; appui : 0,95 (§3.10). */
     transition-property: scale;
-    transition-duration: 0.1s;
+    transition-duration: 0.08s;
 }
 
 .btn:hover {
-    scale: 1.06 1.06;
+    scale: 1.05 1.05;
 }
 
 .btn:active {
-    scale: 0.96 0.96;
+    scale: 0.95 0.95;
 }
 
 .btn-safe {
     background-color: #2E9E5B;
 }
 
-.btn-risk {
-    background-color: #D64545;
-}
-
 /* Bouton Boutique : couleur or, pour l'associer aux pièces. */
 .btn-shop {
     background-color: #C99A1E;
+}
+
+/* ---------- Ajouts « game feel » (spec sons-animations) ---------- */
+
+.top-left {
+    align-items: flex-start;
+}
+
+/* Les deux petits boutons du son, sous « Étage N ». */
+.sound-toggles {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.sound-toggle {
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: rgba(42, 42, 58, 0.8); /* #2A2A3A à 80 % */
+    border-width: 0;
+    border-radius: 8px;
+    padding: 4px 10px;
+    margin: 0 8px 0 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.sound-toggle:hover {
+    scale: 1.05 1.05;
+}
+
+.sound-toggle:active {
+    scale: 0.95 0.95;
+}
+
+/* « … : non » : le bouton passe à moitié transparent. */
+.sound-toggle--off {
+    opacity: 0.5;
+}
+
+/* Le bouton « Encaisser X » : texte + pièce, en ligne. */
+.btn-cashout {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+}
+
+.btn-cashout-text {
+    font-size: 34px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    padding: 0;
+    margin: 0;
+}
+
+/* Voile plein écran couleur nuit, invisible au repos (le code change son opacité).
+   Les marges négatives annulent le padding de .root : il couvre tout l'écran. */
+.veil {
+    position: absolute;
+    left: -32px;
+    top: -32px;
+    right: -32px;
+    bottom: -32px;
+    background-color: #1F1730;
+    opacity: 0;
+}
+
+.fx-layer {
+    position: absolute;
+    left: -32px;
+    top: -32px;
+    right: -32px;
+    bottom: -32px;
+}
+
+/* Le texte flottant « +20 » au-dessus du coffre choisi. */
+.float-text {
+    position: absolute;
+    font-size: 48px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #3A2200;
+    -unity-text-align: middle-center;
+    width: 200px;
+    margin-left: -100px;
+    margin-top: -30px;
+}
+
+/* Une pièce volante (encaissement) : 28 px, même image que .coin. */
+.flying-coin {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    margin-top: -14px;
+    background-image: url("../Art/icones_detourees/piece.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* La bannière « Étage N » au centre de l'écran. */
+.banner {
+    position: absolute;
+    left: -32px;
+    top: -32px;
+    right: -32px;
+    bottom: -32px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+.banner-floor {
+    font-size: 72px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #3A2200;
+}
+
+.banner-tier {
+    font-size: 32px;
+    color: #F4EEE6;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #1F1730;
 }

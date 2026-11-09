@@ -5,6 +5,15 @@
     <Style src="Title.uss" />
     <ui:VisualElement name="title-root" class="title-root">
         <ui:VisualElement name="logo" class="title-logo" picking-mode="Ignore" />
-        <ui:Button name="play" text="Jouer" class="title-play" />
+        <!-- L'enveloppe "play-wrap" respire (échelle animée par le code) ; le bouton
+             à l'intérieur garde son effet de survol du USS. -->
+        <ui:VisualElement name="play-wrap" class="title-play-wrap" picking-mode="Ignore">
+            <ui:Button name="play" text="Jouer" class="title-play" />
+        </ui:VisualElement>
+        <!-- Les deux boutons du son, en haut à gauche comme dans le HUD (§6.2). -->
+        <ui:VisualElement class="title-sound-toggles" picking-mode="Ignore">
+            <ui:Button name="music-toggle" text="Musique : oui" class="sound-toggle" />
+            <ui:Button name="effects-toggle" text="Effets : oui" class="sound-toggle" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

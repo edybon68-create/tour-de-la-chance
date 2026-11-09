@@ -24,7 +24,17 @@ SEUIL_FOND = 0.16   # distance de couleur (0..1) en dessous de laquelle un pixel
 SEUIL_OPAQUE = 0.26 # au-delà, le pixel est complètement opaque (entre les deux : demi-transparent)
 # Réglages plus serrés pour les icônes dont l'objet ressemble au fond
 # (le pompon blanc du chapeau de fête a des ombres lavande).
-SEUILS_SPECIAUX = {"chapeau_fete.png": (0.035, 0.07)}
+SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
+    "chapeau_fete.png", "echarpe.png", "collier_fleurs.png", "lunettes_coeur.png",
+    "matiere_arc_en_ciel.png", "matiere_cristal.png", "matiere_argent.png", "boite_skins_1.png",
+    "boite_accessoires_1.png", "chapeau_bonnet.png"]}
+# Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
+# de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
+# les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
+OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png"}
+SEUIL_TROU = 0.035
+# Images qui ne sont pas des icônes du shop : on les laisse de côté.
+IGNORER = set()
 
 
 def dilater(masque):
@@ -64,6 +74,10 @@ def detourer(chemin_entree, chemin_sortie):
         if suivant.sum() == atteint.sum():
             break
         atteint = suivant
+
+    # 3 bis. Trous intérieurs pour les objets en anneau.
+    if os.path.basename(chemin_entree) in OBJETS_TROUES:
+        atteint |= dist < SEUIL_TROU
 
     # 4. Transparence progressive sur la zone de fond atteinte.
     alpha = np.ones((h, w), dtype=np.float32)

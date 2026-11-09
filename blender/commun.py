@@ -69,6 +69,31 @@ MATERIAUX = {
     "M_PierreClaire": ("#8A90B0", 0.0, 0.75),
     "M_PierreFlanc": ("#434A63", 0.0, 0.90),
     "M_Incrustation": ("#6A4C9C", 0.3, 0.50),
+    # Accessoires de la « Boîte d'accessoires n°1 » (docs/specs/boites.md §5.6, bible §2.8).
+    # Un 4e nombre (facultatif) = intensité d'émission (lumière propre), bible §4.1 :
+    # seulement pour l'auréole (Légendaire) et l'anneau de la planète (Secret).
+    "M_LaineTurquoise": ("#2BB8C4", 0.0, 0.85),
+    "M_LaineBlanche": ("#F4EEE6", 0.0, 0.85),
+    "M_LaineMenthe": ("#3CC48A", 0.0, 0.85),
+    "M_VerreSombre": ("#2A2A3A", 0.0, 0.10),
+    "M_SatinFonce": ("#8E2A20", 0.0, 0.50),
+    "M_VerreRose": ("#FF6FB5", 0.0, 0.20),
+    "M_BlancCasse": ("#F4EEE6", 0.0, 0.50),
+    "M_PetaleRose": ("#FF6FB5", 0.0, 0.60),
+    "M_PetaleBlanc": ("#F4EEE6", 0.0, 0.60),
+    "M_CoeurFleur": ("#FFD54A", 0.0, 0.60),
+    "M_FeutreViolet": ("#4B2E83", 0.0, 0.80),
+    "M_RubanJaune": ("#FFD54A", 0.0, 0.50),
+    "M_MasqueBleu": ("#3A5BD9", 0.0, 0.50),
+    "M_MasqueBord": ("#22357F", 0.0, 0.50),
+    "M_Plume": ("#F4EEE6", 0.0, 0.70),
+    "M_PlumeOmbre": ("#D9D2E4", 0.0, 0.70),
+    "M_AilePapillon": ("#2BB8C4", 0.0, 0.40),
+    "M_TachePapillon": ("#F28C38", 0.0, 0.40),
+    "M_BordPapillon": ("#34286A", 0.0, 0.40),
+    "M_Aureole": ("#FFF1A8", 0.0, 0.30, 1.5),
+    "M_Planete": ("#B48CFF", 0.0, 0.40),
+    "M_AnneauPlanete": ("#FFD54A", 0.0, 0.40, 0.5),
 }
 
 
@@ -89,13 +114,19 @@ def materiau(nom):
     Un seul matériau par rôle : les objets d'un même rôle le partagent."""
     if nom in bpy.data.materials:
         return bpy.data.materials[nom]
-    hexa, metal, rugosite = MATERIAUX[nom]
+    hexa, metal, rugosite = MATERIAUX[nom][:3]
+    emission = MATERIAUX[nom][3] if len(MATERIAUX[nom]) > 3 else 0.0
     mat = bpy.data.materials.new(nom)
     mat.use_nodes = True
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
     bsdf.inputs["Base Color"].default_value = hex_vers_lineaire(hexa)
     bsdf.inputs["Metallic"].default_value = metal
     bsdf.inputs["Roughness"].default_value = rugosite
+    if emission > 0:
+        # Lumière propre de la même couleur que la base (bible §4.1). Dans Unity, le
+        # programmeur active le mot-clé _EMISSION et règle _EmissionColor = couleur × intensité.
+        bsdf.inputs["Emission Color"].default_value = hex_vers_lineaire(hexa)
+        bsdf.inputs["Emission Strength"].default_value = emission
     # Couleur d'affichage dans la vue 3D (mode Solid) : pratique pour s'y retrouver.
     mat.diffuse_color = hex_vers_lineaire(hexa)
     return mat
@@ -458,6 +489,10 @@ def verifier_fbx(chemin):
         p = o.matrix_world.translation
         ligne = f"  {o.name:<16} {o.type:<6} pos Unity=({-p.x:+.3f}; {p.z:+.3f}; {-p.y:+.3f})"
         ligne += f" echelle={tuple(round(s, 3) for s in o.matrix_world.to_scale())}"
+        if o.parent is not None:
+            # Rotation locale (par rapport au parent), en degrés, axes Blender du fichier.
+            r = o.matrix_local.to_euler()
+            ligne += f" rotLocale=({math.degrees(r.x):+.1f};{math.degrees(r.y):+.1f};{math.degrees(r.z):+.1f})"
         if o.type == "MESH":
             pts = [o.matrix_world @ v.co for v in o.data.vertices]
             mn = Vector((min(v.x for v in pts), min(v.y for v in pts), min(v.z for v in pts)))
@@ -610,7 +645,21 @@ def rendre_vue_jeu(nom_fichier, largeur=1280, hauteur=720, camera_unity=None,
     regard = direction_depuis_unity(0.0, -math.sin(incl), math.cos(incl))
     cam.rotation_euler = regard.to_track_quat("-Z", "Y").to_euler()
     scene.camera = cam
+    soleil, cj = lumieres_jeu(scene)
+    regler_rendu(scene, largeur, hauteur)
+    os.makedirs(DOSSIER_CAPTURES, exist_ok=True)
+    chemin = os.path.join(DOSSIER_CAPTURES, nom_fichier)
+    scene.render.filepath = chemin
+    bpy.ops.render.render(write_still=True)
+    # On retire caméra et lumières : on peut rappeler la fonction pour un autre point de vue.
+    for o in (cam, soleil, cj):
+        bpy.data.objects.remove(o, do_unlink=True)
+    print("Rendu vue jeu :", chemin)
+    return chemin
 
+
+def lumieres_jeu(scene):
+    """Soleil et contre-jour placés comme dans Tour.unity. Renvoie (soleil, contre_jour)."""
     # Soleil : même orientation que la Directional Light de Unity (elle éclaire vers son +Z).
     from mathutils import Quaternion
     qx, qy, qz, qw = SOLEIL_JEU_ROTATION
@@ -630,7 +679,11 @@ def rendre_vue_jeu(nom_fichier, largeur=1280, hauteur=720, camera_unity=None,
     cj = bpy.data.objects.new("ContreJour", cj_data)
     cj.location = depuis_unity(0, 3.5, 4)
     scene.collection.objects.link(cj)
+    return soleil, cj
 
+
+def regler_rendu(scene, largeur, hauteur):
+    """Moteur EEVEE, taille de l'image, couleurs « Standard », sortie PNG."""
     for moteur in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
         try:
             scene.render.engine = moteur
@@ -642,15 +695,6 @@ def rendre_vue_jeu(nom_fichier, largeur=1280, hauteur=720, camera_unity=None,
     scene.render.film_transparent = False
     scene.view_settings.view_transform = "Standard"
     scene.render.image_settings.file_format = "PNG"
-    os.makedirs(DOSSIER_CAPTURES, exist_ok=True)
-    chemin = os.path.join(DOSSIER_CAPTURES, nom_fichier)
-    scene.render.filepath = chemin
-    bpy.ops.render.render(write_still=True)
-    # On retire caméra et lumières : on peut rappeler la fonction pour un autre point de vue.
-    for o in (cam, soleil, cj):
-        bpy.data.objects.remove(o, do_unlink=True)
-    print("Rendu vue jeu :", chemin)
-    return chemin
 
 
 def importer_fbx(chemin, position_unity=(0, 0, 0)):
@@ -664,3 +708,254 @@ def importer_fbx(chemin, position_unity=(0, 0, 0)):
         if o.parent is None:
             o.location = depuis_unity(*position_unity) + o.location
     return nouveaux
+
+
+# ---------------------------------------------------------------------------------------
+# 8. Accessoires portés (Boîte d'accessoires n°1, docs/specs/boites.md §5.4 et §5.6)
+# ---------------------------------------------------------------------------------------
+# Où est le personnage dans la scène Tour.unity (Unity) : sa base est en (0 ; 0 ; 2).
+JOUEUR_POSITION = (0.0, 0.0, 2.0)
+
+# Points d'accroche : objets vides enfants de `Joueur`, positions LOCALES à Joueur (Unity).
+# Chaque accessoire a son origine pile sur son point d'accroche : dans Unity on l'instancie
+# comme enfant du point, position et rotation locales à zéro.
+ACCROCHES = {
+    "tete": ("PointChapeau", (0.0, 2.0, 0.0)),    # sommet de la tête (existant)
+    "visage": ("PointVisage", (0.0, 1.6, -0.49)),  # devant, à hauteur des yeux
+    "cou": ("PointCou", (0.0, 1.3, 0.0)),          # centre du corps à hauteur du « col »
+    "dos": ("PointDos", (0.0, 1.3, 0.5)),          # milieu du dos
+}
+
+# Mesures du personnage (blender/personnage.py), en coordonnées Unity locales à Joueur.
+TETE_CENTRE_Y = 1.5     # centre de la demi-sphère du haut
+TETE_RAYON = 0.5
+
+
+def rayon_corps(y):
+    """Rayon de la capsule à la hauteur y (Unity, local à Joueur). Sert à coller un
+    accessoire contre le corps sans le traverser (écharpe, collier, ailes)."""
+    if y >= TETE_CENTRE_Y:
+        return math.sqrt(max(TETE_RAYON ** 2 - (y - TETE_CENTRE_Y) ** 2, 0.0))
+    if y >= 0.775:  # le tronc s'évase de 0,50 à 0,525 en descendant
+        return 0.5 + 0.025 * (TETE_CENTRE_Y - y) / 0.725
+    if y >= 0.525:
+        return 0.525
+    return math.sqrt(max(0.525 ** 2 - (0.525 - y) ** 2, 0.0))
+
+
+def perso(x, y, z):
+    """Point donné en Unity LOCAL À JOUEUR -> coordonnées Blender « personnage ».
+    Les scripts d'accessoires construisent dans ce repère (plus facile pour coller au
+    corps), puis `vers_accroche()` ramène tout sur le point d'accroche."""
+    return depuis_unity(x, y, z)
+
+
+def matrice_accroche(emplacement):
+    """Translation qui amène le point d'accroche de l'emplacement à l'origine."""
+    return Matrix.Translation(-depuis_unity(*ACCROCHES[emplacement][1]))
+
+
+def vers_accroche(obj, emplacement):
+    """Pour un accessoire en UN seul maillage construit dans le repère « personnage » :
+    décale sa géométrie pour que le point d'accroche devienne son origine.
+    (Pour un accessoire en plusieurs pièces, on range les pièces sous un objet vide placé
+    sur le point d'accroche, puis on ramène ce vide à l'origine : voir `racine_accroche`.)"""
+    obj.data.transform(matrice_accroche(emplacement))
+    obj.location = (0, 0, 0)
+    return obj
+
+
+def racine_accroche(nom, emplacement, enfants):
+    """Crée l'objet vide racine `nom` sur le point d'accroche (repère « personnage »),
+    y range les `enfants` sans les déplacer, puis ramène le tout à l'origine : chaque
+    pièce garde son pivot, et l'origine de l'ensemble = le point d'accroche."""
+    racine = vide(nom, depuis_unity(*ACCROCHES[emplacement][1]))
+    for e in enfants:
+        parenter(e, racine)
+    racine.location = (0, 0, 0)
+    bpy.context.view_layer.update()
+    return racine
+
+
+def repere(position, avant, haut=Vector((0, 0, 1))):
+    """Matrice d'un petit repère local : axe Y local = `avant` (l'épaisseur d'une plaque),
+    axe Z local = au plus près de `haut`, origine = `position`."""
+    # Base orthonormée : Y = avant, X = perpendiculaire à avant et haut, Z = le reste.
+    y = Vector(avant).normalized()
+    x = y.cross(Vector(haut)).normalized()
+    z = x.cross(y)
+    rot = Matrix((x, y, z)).transposed().to_4x4()
+    return Matrix.Translation(Vector(position)) @ rot
+
+
+def contour_ellipse(rx, rz, n=16, cx=0.0, cz=0.0, depart=0.0):
+    """Contour 2D (x, z) d'une ellipse, sens inverse des aiguilles d'une montre."""
+    return [(cx + rx * math.cos(depart + 2 * math.pi * k / n),
+             cz + rz * math.sin(depart + 2 * math.pi * k / n)) for k in range(n)]
+
+
+def contour_rectangle_arrondi(largeur, hauteur, rayon, par_coin=3, cx=0.0, cz=0.0):
+    """Contour 2D (x, z) d'un rectangle aux coins arrondis, centré sur (cx, cz)."""
+    pts = []
+    lx, lz = largeur / 2 - rayon, hauteur / 2 - rayon
+    for i, (sx, sz) in enumerate(((1, 1), (-1, 1), (-1, -1), (1, -1))):
+        a0 = math.pi / 2 * i
+        for k in range(par_coin + 1):
+            a = a0 + (math.pi / 2) * k / par_coin
+            pts.append((cx + sx * lx + rayon * math.cos(a), cz + sz * lz + rayon * math.sin(a)))
+    return pts
+
+
+def bm_plaque(bm, contour, epaisseur, matrice=None, mat=0):
+    """Plaque plate : `contour` 2D (x = côté, z = haut) extrudé sur `epaisseur`, centré sur
+    y = 0 (l'avant de la plaque regarde +Y local), puis placé par `matrice`."""
+    verts = bm_prisme(bm, contour, epaisseur, axe="Y", decalage=-epaisseur / 2, mat=mat)
+    if matrice is not None:
+        bmesh.ops.transform(bm, matrix=matrice, verts=verts)
+    return verts
+
+
+def bm_tore(bm, grand_rayon, petit_rayon, segments=24, segments_tube=8, mat=0,
+            matrice=None, rayon_fn=None):
+    """Tore horizontal (anneau, bouée) centré sur l'origine, dans le plan XY Blender.
+    `rayon_fn(angle)` (facultatif) fait varier l'épaisseur du tube selon l'angle."""
+    anneaux = []
+    for s in range(segments):
+        a = 2 * math.pi * s / segments
+        r_tube = petit_rayon if rayon_fn is None else rayon_fn(a)
+        anneau = []
+        for t in range(segments_tube):
+            b = 2 * math.pi * t / segments_tube
+            rr = grand_rayon + r_tube * math.cos(b)
+            anneau.append((rr * math.cos(a), rr * math.sin(a), r_tube * math.sin(b)))
+        anneaux.append(anneau)
+    rangs = [[bm.verts.new(p) for p in anneau] for anneau in anneaux]
+    faces = []
+    for s in range(segments):
+        A, B = rangs[s], rangs[(s + 1) % segments]
+        for t in range(segments_tube):
+            u = (t + 1) % segments_tube
+            f = bm.faces.new((A[t], B[t], B[u], A[u]))
+            f.material_index = mat
+            faces.append(f)
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    verts = [v for r in rangs for v in r]
+    if matrice is not None:
+        bmesh.ops.transform(bm, matrix=matrice, verts=verts)
+    return verts
+
+
+def rendre_porte(racine, nom_fichier, emplacement, taille=640, y_min=0.85):
+    """Miniature de l'accessoire PORTÉ par le personnage, vue depuis la position de la
+    caméra du jeu (0 ; 5 ; −7), avec la lumière de Tour.unity.
+    - importe `personnage.fbx` à sa place dans la scène (0 ; 0 ; 2) ;
+    - pose l'accessoire sur son point d'accroche ;
+    - vise le haut du personnage et resserre le champ de vision (un « zoom » : la
+      perspective est exactement celle du joueur, l'image est simplement recadrée).
+    Tout est remis comme avant à la fin (l'accessoire revient à l'origine pour l'export)."""
+    scene = bpy.context.scene
+    bpy.context.view_layer.update()
+    depart = racine.location.copy()
+    racine.location = depart + depuis_unity(*JOUEUR_POSITION) \
+        + depuis_unity(*ACCROCHES[emplacement][1])
+    perso_objs = importer_fbx(os.path.join(DOSSIER_MODELES, "personnage.fbx"), JOUEUR_POSITION)
+    bpy.context.view_layer.update()
+    monde_nuit(scene, ambiance=0.8)
+
+    # Points à faire entrer dans l'image : l'accessoire entier + le haut du personnage
+    # (au-dessus de y_min, là où on voit les accessoires depuis la caméra).
+    pts = []
+    for o in descendants(racine):
+        if o.type == "MESH":
+            pts += [o.matrix_world @ Vector(c) for c in o.bound_box]
+    for o in perso_objs:
+        if o.type == "MESH":
+            for c in o.bound_box:
+                p = o.matrix_world @ Vector(c)
+                p.z = max(p.z, y_min)
+                pts.append(p)
+    mn = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+    mx = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    cible = (mn + mx) / 2
+
+    cam_data = bpy.data.cameras.new("CameraPortee")
+    cam_data.clip_start = 0.3
+    cam = bpy.data.objects.new("CameraPortee", cam_data)
+    scene.collection.objects.link(cam)
+    cam.location = depuis_unity(*CAMERA_JEU_POSITION)
+    regard = (cible - cam.location).normalized()
+    cam.rotation_euler = regard.to_track_quat("-Z", "Y").to_euler()
+    bpy.context.view_layer.update()
+    inverse = cam.matrix_world.inverted()
+    m = 0.0
+    for p in pts:
+        q = inverse @ p
+        m = max(m, abs(q.x / -q.z), abs(q.y / -q.z))
+    cam_data.sensor_fit = "AUTO"
+    cam_data.angle = 2 * math.atan(m * 1.10)
+    scene.camera = cam
+
+    soleil, cj = lumieres_jeu(scene)
+    regler_rendu(scene, taille, taille)
+    os.makedirs(DOSSIER_CAPTURES, exist_ok=True)
+    chemin = os.path.join(DOSSIER_CAPTURES, nom_fichier)
+    scene.render.filepath = chemin
+    bpy.ops.render.render(write_still=True)
+    print("Miniature portée :", chemin)
+
+    for o in [cam, soleil, cj] + perso_objs:
+        bpy.data.objects.remove(o, do_unlink=True)
+    racine.location = depart
+    bpy.context.view_layer.update()
+    return chemin
+
+
+def finir_accessoire(racine, nom, emplacement):
+    """Fin commune des scripts d'accessoires : rapport, miniature portée, export, contrôle."""
+    C_total = rapport(racine)
+    rendre_porte(racine, f"blender_{nom}.png", emplacement)
+    chemin = exporter_fbx(racine, f"{nom}.fbx")
+    verifier_fbx(chemin)
+    print(f"RESUME {nom} triangles={C_total}")
+    return C_total
+
+
+def bm_balayage(bm, chemin, section, haut=Vector((0, 0, 1)), mat=0, boucher=True):
+    """Fait glisser une `section` 2D (liste de (côté, haut)) le long d'un `chemin` (liste de
+    points 3D) : idéal pour une branche de lunettes, un pan d'écharpe, une bande.
+    À chaque point, le repère suit la direction du chemin. Bouts bouchés si `boucher`."""
+    chemin = [Vector(p) for p in chemin]
+    anneaux = []
+    for i, p in enumerate(chemin):
+        if i == 0:
+            t = chemin[1] - chemin[0]
+        elif i == len(chemin) - 1:
+            t = chemin[-1] - chemin[-2]
+        else:
+            t = chemin[i + 1] - chemin[i - 1]
+        t.normalize()
+        cote = t.cross(Vector(haut)).normalized()
+        h = cote.cross(t).normalized()
+        anneaux.append([p + cote * a + h * b for a, b in section])
+    rangs = bm_anneaux(bm, anneaux, mats=[mat] * (len(anneaux) - 1))
+    faces = []
+    if boucher:
+        for r in (rangs[0], rangs[-1]):
+            f = bm.faces.new(r)
+            f.material_index = mat
+            faces.append(f)
+    bmesh.ops.recalc_face_normals(bm, faces=list({f for r in rangs for v in r for f in v.link_faces}))
+    return [v for r in rangs for v in r]
+
+
+def repere_verre(x_unity, ecart=0.56, y_unity=1.6):
+    """Repère d'un verre de lunettes posé devant l'œil situé en x_unity (±0,18), en
+    coordonnées Blender « personnage » : origine au centre du verre, Y local = normale de
+    la tête (le verre épouse la courbe du visage), Z local ≈ vers le haut.
+    `ecart` = distance au centre de la tête (0,5 = la peau ; les yeux ressortent à 0,53)."""
+    centre_tete = perso(0, TETE_CENTRE_Y, 0)
+    bx = -x_unity
+    dz = y_unity - TETE_CENTRE_Y
+    by = math.sqrt(TETE_RAYON ** 2 - bx ** 2 - dz ** 2)
+    n = Vector((bx, by, dz)).normalized()
+    return repere(centre_tete + n * ecart, n)

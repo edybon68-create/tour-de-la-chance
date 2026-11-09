@@ -1,0 +1,147 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93272cdcda0b4d03999375c08fe90cb, type: 3}
+  m_Name: Sons
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.SoundBank
+  entries:
+  - id: 0
+    clip: {fileID: 8300000, guid: 8f13360ccf66043aea4c4153c4d2e82a, type: 3}
+    volume: 0.25
+    varyPitch: 1
+    ducksMusic: 0
+  - id: 1
+    clip: {fileID: 8300000, guid: f573a81f735d047309bc1256a6a2fdda, type: 3}
+    volume: 0.5
+    varyPitch: 1
+    ducksMusic: 0
+  - id: 2
+    clip: {fileID: 8300000, guid: 0df3f58d279ee47c08965ccfab603d2c, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 3
+    clip: {fileID: 8300000, guid: 8a000d1a485d344ea9d5f70dfc386258, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 4
+    clip: {fileID: 8300000, guid: 54bb3b848986543a585694d2def67e46, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 5
+    clip: {fileID: 8300000, guid: 096ec5f1173ba47acb1fbcedcf269467, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 6
+    clip: {fileID: 8300000, guid: eb1fb3e7d94774a31ae3c08e4aa4621c, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 7
+    clip: {fileID: 8300000, guid: 32d99b3b0da1b49eaa4744702908156e, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 8
+    clip: {fileID: 8300000, guid: 983b848efa34c43e7990b2af425d50a9, type: 3}
+    volume: 0.4
+    varyPitch: 1
+    ducksMusic: 0
+  - id: 9
+    clip: {fileID: 8300000, guid: 8c9b3d4d4049347668f2261cdf3bf6b2, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 10
+    clip: {fileID: 8300000, guid: b03a97ca9ca2a43be8b14e47fdf305cf, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 11
+    clip: {fileID: 8300000, guid: 4b56f1c9e2d0148f0b99734e32b9723e, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 12
+    clip: {fileID: 8300000, guid: d166a560b6b304f979ae91dbb4017904, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 13
+    clip: {fileID: 8300000, guid: b4fa3e85bbd6943bc98f83df6db15a19, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 14
+    clip: {fileID: 8300000, guid: ca59c05b9a6c04ffca70a79a69999ada, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 15
+    clip: {fileID: 8300000, guid: d33b99102bc874717a6d8214bcc628ac, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 16
+    clip: {fileID: 8300000, guid: 3aaada54f2f744f1993f4a26e2733b10, type: 3}
+    volume: 0.35
+    varyPitch: 1
+    ducksMusic: 0
+  - id: 17
+    clip: {fileID: 8300000, guid: 0e0f0894466af4562aee9e4ed9eb2559, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 18
+    clip: {fileID: 8300000, guid: edd3cb9e97e0546e7857ec3ca63a0b2f, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 19
+    clip: {fileID: 8300000, guid: e5f3985d2fab1445697838c5a0818e7f, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 20
+    clip: {fileID: 8300000, guid: 40553901ac0ee456ea9563bc3fdfdfd1, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 21
+    clip: {fileID: 8300000, guid: 92a977b034c2c40e5a3b91de9c016d03, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 22
+    clip: {fileID: 8300000, guid: 48a9b89b287dc451d8cb30fd9dc86bc0, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 23
+    clip: {fileID: 8300000, guid: 3096f6c5139d34a3da321a138e6dcc3c, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 24
+    clip: {fileID: 8300000, guid: e4255a722049448eba39ae9c1a485af3, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 25
+    clip: {fileID: 8300000, guid: 381d345f41fe240f6b383ed688bc1488, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  ambientMusic: {fileID: 8300000, guid: 58e40e343f5cd43519388ca3e196e9be, type: 3}
+  tensionMusic: {fileID: 8300000, guid: 8b5333f591c154b4d966b3a03221b8d6, type: 3}

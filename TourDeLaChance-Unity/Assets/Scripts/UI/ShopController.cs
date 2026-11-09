@@ -16,6 +16,7 @@ namespace TourDeLaChance
     {
         [SerializeField] GameManager game;
         [SerializeField] PlayerAvatar avatar;
+        [SerializeField] PlayerAnimator avatarAnimator; // petit saut d'accueil à l'aperçu
 
         VisualElement root, cardsRow;
         Label walletLabel, missingLabel;
@@ -49,6 +50,7 @@ namespace TourDeLaChance
             actionButton.clicked += OnActionClicked;
             game.Changed += OnGameChanged;
             Shop.Changed += Refresh;
+            UiSounds.Register(root); // ui_survol / ui_clic sur tous les boutons du panneau
 
             panelShown = false;
             root.style.display = DisplayStyle.None; // caché au démarrage
@@ -63,6 +65,7 @@ namespace TourDeLaChance
             actionButton.clicked -= OnActionClicked;
             game.Changed -= OnGameChanged;
             Shop.Changed -= Refresh;
+            UiSounds.Unregister(root);
         }
 
         void Update()
@@ -110,6 +113,7 @@ namespace TourDeLaChance
         {
             selected = item;
             avatar.Show(item);
+            if (avatarAnimator != null) avatarAnimator.WelcomeHop();
             Refresh();
         }
 
@@ -120,11 +124,19 @@ namespace TourDeLaChance
             if (selected == null || Time.unscaledTime < ignoreClicksUntil) return;
             if (!Shop.IsOwned(selected))
             {
-                if (Shop.TryBuy(selected)) ignoreClicksUntil = Time.unscaledTime + ClickPauseAfterBuy;
+                if (Shop.TryBuy(selected))
+                {
+                    ignoreClicksUntil = Time.unscaledTime + ClickPauseAfterBuy;
+                    if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.PiecesAchat);
+                }
             }
             else if (!Shop.IsEquipped(selected))
             {
-                if (Shop.TryEquip(selected)) avatar.Show(selected);
+                if (Shop.TryEquip(selected))
+                {
+                    avatar.Show(selected);
+                    if (avatarAnimator != null) avatarAnimator.WelcomeHop();
+                }
             }
             // (Shop.Changed déclenche Refresh)
         }

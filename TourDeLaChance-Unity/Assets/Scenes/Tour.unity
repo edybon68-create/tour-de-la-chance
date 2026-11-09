@@ -151,6 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopController
   game: {fileID: 597386551}
   avatar: {fileID: 1912642489}
+  avatarAnimator: {fileID: 1912642491}
 --- !u!114 &105359409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -777,9 +778,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.Chest
   lid: {fileID: 264690162}
   body: {fileID: 264690161}
+  model: {fileID: 264690160}
   closedColor: {r: 0.55, g: 0.35, b: 0.2, a: 1}
-  treasureColor: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
-  trapColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  treasureColor: {r: 1, g: 0.784, b: 0.227, a: 1}
+  trapColor: {r: 0.851, g: 0.102, b: 0.102, a: 1}
 --- !u!65 &835987481
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -812,6 +814,7 @@ GameObject:
   - component: {fileID: 865624841}
   - component: {fileID: 865624840}
   - component: {fileID: 865624839}
+  - component: {fileID: 865624842}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -832,6 +835,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.HudController
   game: {fileID: 597386551}
+  chestTrial: {fileID: 597386552}
 --- !u!114 &865624840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -870,6 +874,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &865624842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 865624838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce414e1a9bf8246608faca2780628f61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ClimbOverlay
+  game: {fileID: 597386551}
+  decor: {fileID: 935008395}
 --- !u!1 &866086859
 GameObject:
   m_ObjectHideFlags: 0
@@ -902,9 +920,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.Chest
   lid: {fileID: 827173603}
   body: {fileID: 827173601}
+  model: {fileID: 827173602}
   closedColor: {r: 0.55, g: 0.35, b: 0.2, a: 1}
-  treasureColor: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
-  trapColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  treasureColor: {r: 1, g: 0.784, b: 0.227, a: 1}
+  trapColor: {r: 0.851, g: 0.102, b: 0.102, a: 1}
 --- !u!4 &866086861
 Transform:
   m_ObjectHideFlags: 0
@@ -990,9 +1009,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.Chest
   lid: {fileID: 1558556528}
   body: {fileID: 1558556527}
+  model: {fileID: 1558556526}
   closedColor: {r: 0.55, g: 0.35, b: 0.2, a: 1}
-  treasureColor: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
-  trapColor: {r: 0.85, g: 0.1, b: 0.1, a: 1}
+  treasureColor: {r: 1, g: 0.784, b: 0.227, a: 1}
+  trapColor: {r: 0.851, g: 0.102, b: 0.102, a: 1}
 --- !u!65 &893866759
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1014,6 +1034,136 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.5, y: 1.1, z: 1.1}
   m_Center: {x: 0, y: 0.55, z: 0}
+--- !u!1 &935008394
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 935008401}
+  - component: {fileID: 935008400}
+  - component: {fileID: 935008399}
+  - component: {fileID: 935008398}
+  - component: {fileID: 935008397}
+  - component: {fileID: 935008396}
+  - component: {fileID: 935008395}
+  m_Layer: 0
+  m_Name: Spectacle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &935008395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a74e040b2de0d40c3bf11c59a2b26959, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.AltitudeDecor
+  game: {fileID: 597386551}
+  tiers:
+  - {fileID: 11400000, guid: 4c9a5f95876544edf91fd0f91b9bb518, type: 2}
+  - {fileID: 11400000, guid: b603dc05c35274a65957b446fe9d5b6a, type: 2}
+  - {fileID: 11400000, guid: 5b9696efaf8234b20b95a9ce154ba61c, type: 2}
+  - {fileID: 11400000, guid: 4df5606c5459d458681581c5eb54c4b7, type: 2}
+  skyRenderer: {fileID: 1403152802}
+  mainLight: {fileID: 536490755}
+  cloudMaterial: {fileID: 2100000, guid: 4970d372a53bc40d0b0135331830bc29, type: 2}
+--- !u!114 &935008396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 755bc69b8a505446daa10349dd5a6ead, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.TrapCloud
+  cloudMaterial: {fileID: 2100000, guid: a575d7505f7e24d2b809b7d33c2bc9fb, type: 2}
+--- !u!114 &935008397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 822be425aacdb44cc8b41b5710f75e67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.CoinBurst
+  coinMaterial: {fileID: 2100000, guid: e2e676bd763e64462923984bddbd42c5, type: 2}
+--- !u!114 &935008398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8c699c2ee9984ef9b2006cd982caa95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.MusicPlayer
+  bank: {fileID: 11400000, guid: f8ee972524c5d442c8ff10623baa5b33, type: 2}
+--- !u!114 &935008399
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12c267d18c4434d548e89355cc45d21e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.SoundManager
+  bank: {fileID: 11400000, guid: f8ee972524c5d442c8ff10623baa5b33, type: 2}
+  music: {fileID: 935008398}
+--- !u!114 &935008400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 034cc2a25495e422ca4c9bb8c7db97dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.FeelDirector
+  game: {fileID: 597386551}
+  chestTrial: {fileID: 597386552}
+  player: {fileID: 1912642491}
+  cameraRig: {fileID: 2128271485}
+  coinBurst: {fileID: 935008397}
+  trapCloud: {fileID: 935008396}
+  music: {fileID: 935008398}
+--- !u!4 &935008401
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935008394}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1050027341
 GameObject:
   m_ObjectHideFlags: 0
@@ -1412,6 +1562,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1912642490}
   - component: {fileID: 1912642489}
+  - component: {fileID: 1912642491}
   m_Layer: 0
   m_Name: Joueur
   m_TagString: Untagged
@@ -1442,13 +1593,25 @@ Transform:
   m_GameObject: {fileID: 1912642488}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2}
+  m_LocalPosition: {x: 0, y: 0.3, z: 2.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 519074787}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1912642491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912642488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb6a42c6183184130ab67aeb8c7793c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.PlayerAnimator
 --- !u!1001 &2010660546
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1559,6 +1722,96 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 10, y: 0.5, z: 10}
   m_Center: {x: 0, y: -0.25, z: 0}
+--- !u!1 &2100479591
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2100479594}
+  - component: {fileID: 2100479593}
+  - component: {fileID: 2100479592}
+  m_Layer: 0
+  m_Name: Estrade
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!23 &2100479592
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100479591}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 34fe18175f5c04feb9567cedc117d202, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 1
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &2100479593
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100479591}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &2100479594
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2100479591}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.15, z: 2.8}
+  m_LocalScale: {x: 1.4, y: 0.15, z: 1.4}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2128271480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1571,6 +1824,7 @@ GameObject:
   - component: {fileID: 2128271483}
   - component: {fileID: 2128271482}
   - component: {fileID: 2128271481}
+  - component: {fileID: 2128271485}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1697,6 +1951,18 @@ Transform:
   - {fileID: 1403152800}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2128271485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2128271480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c0288f0a99864b1a9ac1cb1da59782c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.CameraRig
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1713,3 +1979,5 @@ SceneRoots:
   - {fileID: 1050027344}
   - {fileID: 395545680}
   - {fileID: 2010660546}
+  - {fileID: 2100479594}
+  - {fileID: 935008401}

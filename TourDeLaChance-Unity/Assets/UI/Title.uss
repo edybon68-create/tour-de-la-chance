@@ -23,20 +23,60 @@
     font-size: 48px;
     min-width: 340px;
     height: 104px;
-    margin: 24px 0 48px 0;
+    margin: 0;
     border-radius: 20px;
     border-width: 0;
     color: #3A2200;
     background-color: #FFD54A;
     -unity-font-style: bold;
     transition-property: scale;
-    transition-duration: 0.1s;
+    transition-duration: 0.08s;
 }
 
 .title-play:hover {
-    scale: 1.06 1.06;
+    scale: 1.05 1.05;
 }
 
 .title-play:active {
-    scale: 0.96 0.96;
+    scale: 0.95 0.95;
+}
+
+/* L'enveloppe du bouton « Jouer » (c'est elle qui respire). */
+.title-play-wrap {
+    margin: 24px 0 48px 0;
+    align-items: center;
+}
+
+/* Les boutons du son, posés en haut à gauche par-dessus l'écran titre.
+   Même style que dans le HUD (classe .sound-toggle, recopiée ici car chaque
+   écran a sa propre feuille de style). */
+.title-sound-toggles {
+    position: absolute;
+    left: 32px;
+    top: 32px;
+    flex-direction: row;
+}
+
+.sound-toggle {
+    font-size: 16px;
+    color: #FFFFFF;
+    background-color: rgba(42, 42, 58, 0.8);
+    border-width: 0;
+    border-radius: 8px;
+    padding: 4px 10px;
+    margin: 0 8px 0 0;
+    transition-property: scale;
+    transition-duration: 0.08s;
+}
+
+.sound-toggle:hover {
+    scale: 1.05 1.05;
+}
+
+.sound-toggle:active {
+    scale: 0.95 0.95;
+}
+
+.sound-toggle--off {
+    opacity: 0.5;
 }

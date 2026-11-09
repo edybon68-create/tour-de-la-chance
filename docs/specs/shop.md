@@ -1,5 +1,17 @@
 # Spécification — Le shop de cosmétiques (version 1)
 
+> **REMPLACÉE par `docs/specs/boites.md` (shop v2 : boîtes à surprises, raretés, inventaire,
+> index).** Ce document est gardé comme historique et comme référence pour deux parties qui
+> restent valables :
+> - **§2 Le personnage** (construction, position, absence de collider) — complété par
+>   `boites.md` §5.4 (nouveaux points d'accroche Visage, Cou, Dos) ;
+> - **§4.1 et §4.2** : le rendu des 5 couleurs et la construction en primitives des 4 chapeaux
+>   existants (identifiants inchangés ; leurs **prix sont abandonnés** : ils sont maintenant
+>   dans les boîtes avec une rareté).
+>
+> Tout le reste (achat direct, prix, panneau en bas d'écran, clé `shop_owned`, boutons
+> « Encaisser / Continuer », état `Decision`) est **périmé**.
+
 > Jalon 3 du GDD. Cette spec décrit **quoi** faire, pas **comment** le coder.
 > Elle s'appuie sur le prototype existant : `GameManager` (états `Choosing`, `Revealing`,
 > `Decision`, `Lost`, `CashedOut`), `Wallet` (statique, PlayerPrefs), `HudController`
@@ -26,7 +38,7 @@ Il n'existe pas encore de personnage. On en crée un très simple, qui porte les
 
 | Élément | Primitive | Position (dans la scène) | Taille | Couleur |
 |---|---|---|---|---|
-| `Joueur` (objet parent vide) | — | (0 ; 0 ; 2) | — | — |
+| `Joueur` (objet parent vide) | — | **(0 ; 0,3 ; 2,8)**, sur une estrade (voir `docs/specs/sons-animations.md` §4.3 ; avant : (0 ; 0 ; 2)) | — | — |
 | `Corps` (enfant de `Joueur`) | Capsule | locale (0 ; 1 ; 0) | échelle (1 ; 1 ; 1) → 1 m de large, 2 m de haut | la couleur équipée (défaut : bleu, voir §4.1) |
 | `OeilGauche` (enfant de `Joueur`) | Sphère | locale (-0,18 ; 1,6 ; -0,45) | échelle 0,15 | noir #111111 (ne change jamais) |
 | `OeilDroit` (enfant de `Joueur`) | Sphère | locale (0,18 ; 1,6 ; -0,45) | échelle 0,15 | noir #111111 (ne change jamais) |
@@ -36,15 +48,18 @@ Repères :
 - Les coffres sont en z = 0 (le coffre du milieu en x = 0) et la caméra en (0 ; 5 ; -7).
   Le personnage est donc **derrière le coffre du milieu**, face à la caméra (les yeux
   regardent vers les z négatifs). Le bas de la capsule est caché par le coffre : c'est voulu.
-- Les couvercles des coffres s'ouvrent vers l'arrière jusqu'à z ≈ 0,9 : le personnage
-  (avant de la capsule en z = 1,5) ne doit pas être traversé.
+- Les couvercles des coffres s'ouvrent vers l'arrière jusqu'à z ≈ 0,9 (jusqu'à ≈ 1,2 avec le
+  bombé) : le personnage ne doit pas être traversé. Mise à jour : en (0 ; 0 ; 2), le
+  personnage était caché par les couvercles ouverts ; il est désormais reculé et surélevé
+  (avant de la capsule en z = 2,3), voir `docs/specs/sons-animations.md` §4.
 - **Aucun collider** sur le personnage, les yeux ni les chapeaux : un clic sur eux ne doit pas
   gêner le choix des coffres (le clic des coffres utilise un rayon physique).
 - Les yeux servent à montrer où est « l'avant » (utile pour la visière de la casquette).
 - Matériaux : shader URP Lit, comme le reste du projet.
 
 ### 2.2 Ce que fait le personnage
-Rien d'autre que d'afficher la couleur et le chapeau équipés. Pas d'animation dans cette version.
+Afficher la couleur et le chapeau équipés. (Ses animations — respiration, saut de joie,
+tête basse — sont décrites dans `docs/specs/sons-animations.md` §3.7.)
 Il est visible en permanence (pendant les épreuves aussi), et se met à jour immédiatement quand
 on équipe un objet ou quand on prévisualise un objet dans le shop (§5.4).
 
