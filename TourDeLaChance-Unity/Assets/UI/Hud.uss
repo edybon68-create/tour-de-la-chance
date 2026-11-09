@@ -23,13 +23,32 @@
     align-items: flex-end;
 }
 
+/* Un compteur : une "pilule" sombre qui range le texte et la pièce en ligne. */
 .counter {
-    font-size: 30px;
-    color: #FFFFFF;
+    flex-direction: row;
+    align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
-    padding: 8px 18px;
+    padding: 8px 14px 8px 18px;
     border-radius: 12px;
     margin-bottom: 8px;
+}
+
+.counter-text {
+    font-size: 30px;
+    color: #FFFFFF;
+    padding: 0;
+    margin: 0;
+}
+
+/* La petite pièce d'or à côté des montants. Le chemin est relatif à ce fichier .uss.
+   "scale-to-fit" garde les proportions de l'image sans la déformer. */
+.coin {
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
+    background-image: url("../Art/icones_detourees/piece.png");
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
 }
 
 .pot {

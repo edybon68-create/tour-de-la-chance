@@ -13,6 +13,7 @@ namespace TourDeLaChance
     {
         [SerializeField] GameManager game;
 
+        VisualElement hudRoot;
         Label floorLabel, potLabel, walletLabel, messageLabel;
         Button cashOutButton, continueButton, replayButton, shopButton;
 
@@ -20,6 +21,7 @@ namespace TourDeLaChance
         {
             // On retrouve les éléments de Hud.uxml par leur "name".
             var root = GetComponent<UIDocument>().rootVisualElement;
+            hudRoot = root.Q<VisualElement>("root");
             floorLabel = root.Q<Label>("floor");
             potLabel = root.Q<Label>("pot");
             walletLabel = root.Q<Label>("wallet");
@@ -50,6 +52,11 @@ namespace TourDeLaChance
 
         void Refresh()
         {
+            // Écran titre : le HUD entier est caché (l'écran titre est affiché par-dessus).
+            bool title = game.State == GameState.Title;
+            Show(hudRoot, !title);
+            if (title) return;
+
             floorLabel.text = $"Étage {game.Floor}";
             potLabel.text = $"Cagnotte : {game.Pot}";
             walletLabel.text = $"Porte-monnaie : {Wallet.Coins}";

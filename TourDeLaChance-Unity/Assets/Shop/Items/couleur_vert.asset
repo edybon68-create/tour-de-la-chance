@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Vert menthe
   category: 0
   price: 75
+  icon: {fileID: 21300000, guid: 7a53b3348fb9c4274b039076aa319474, type: 3}
   color: {r: 0.23529412, g: 0.76862746, b: 0.5411765, a: 1}
   metallic: 0
   smoothness: 0.3

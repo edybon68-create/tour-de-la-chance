@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- L'écran titre, affiché par-dessus tout au lancement. Style : Title.uss.
+         Le fond uni a la même couleur que le fond du logo (#1E1936) : on ne voit pas
+         les bords de l'image. Le bouton « Jouer » est branché par TitleController. -->
+    <Style src="Title.uss" />
+    <ui:VisualElement name="title-root" class="title-root">
+        <ui:VisualElement name="logo" class="title-logo" picking-mode="Ignore" />
+        <ui:Button name="play" text="Jouer" class="title-play" />
+    </ui:VisualElement>
+</ui:UXML>

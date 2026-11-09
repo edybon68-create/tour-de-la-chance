@@ -16,6 +16,7 @@ MonoBehaviour:
   displayName: Rouge tomate
   category: 0
   price: 50
+  icon: {fileID: 21300000, guid: 99733d27d4c9a4bfcb1196fd703d7b2a, type: 3}
   color: {r: 0.8392157, g: 0.27058825, b: 0.27058825, a: 1}
   metallic: 0
   smoothness: 0.3

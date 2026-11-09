@@ -8,7 +8,11 @@
             <!-- 1. Titre à gauche, porte-monnaie, bouton Fermer à droite -->
             <ui:VisualElement class="shop-header">
                 <ui:Label text="Boutique" class="shop-title" />
-                <ui:Label name="shop-wallet" text="0 pièces" class="shop-wallet" />
+                <!-- Porte-monnaie : le montant + une petite pièce d'or -->
+                <ui:VisualElement class="shop-wallet-row">
+                    <ui:Label name="shop-wallet" text="Porte-monnaie : 0" class="shop-wallet" />
+                    <ui:VisualElement class="coin" />
+                </ui:VisualElement>
                 <ui:Button name="close" text="Fermer ×" class="shop-close" />
             </ui:VisualElement>
             <!-- 2. Les onglets -->

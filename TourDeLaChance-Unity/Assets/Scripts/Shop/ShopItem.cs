@@ -19,6 +19,11 @@ namespace TourDeLaChance
         [Tooltip("Prix en pièces du porte-monnaie. 0 = gratuit, possédé d'office.")]
         [SerializeField, Min(0)] int price;
 
+        [Header("Carte du shop")]
+        [Tooltip("L'image affichée sur la carte (icône détourée, réglée en Sprite). " +
+                 "Vide = symbole de secours dessiné par l'interface (ex. : « Aucun chapeau »).")]
+        [SerializeField] Sprite icon;
+
         [Header("Couleur (catégorie Couleur, et visuel de la carte)")]
         [SerializeField] Color color = Color.white;
         [SerializeField, Range(0f, 1f)] float metallic;
@@ -34,6 +39,7 @@ namespace TourDeLaChance
         public ShopCategory Category => category;
         public int Price => price;
         public bool IsFree => price == 0;
+        public Sprite Icon => icon;
         public Color Color => color;
         public float Metallic => metallic;
         public float Smoothness => smoothness;

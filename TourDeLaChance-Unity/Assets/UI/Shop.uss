@@ -26,9 +26,31 @@
     -unity-font-style: bold;
 }
 
+.shop-wallet-row {
+    flex-direction: row;
+    align-items: center;
+}
+
 .shop-wallet {
     font-size: 30px;
     color: #FFD54A;
+}
+
+/* La petite pièce d'or à côté des montants (même image que dans le HUD).
+   Le chemin est relatif à ce fichier .uss ; "scale-to-fit" garde les proportions. */
+.coin {
+    width: 36px;
+    height: 36px;
+    margin-left: 6px;
+    background-image: url("../Art/icones_detourees/piece.png");
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+/* Version plus petite, pour le prix écrit sur les cartes */
+.coin--small {
+    width: 28px;
+    height: 28px;
 }
 
 .shop-close {
@@ -96,21 +118,50 @@
     border-color: #FFD54A;
 }
 
-/* Visuel d'une couleur : un carré rempli */
+/* La zone du visuel : un carré de taille fixe, au centre de la carte, pour que toutes
+   les icônes soient alignées même si les images n'ont pas exactement le même cadrage. */
+.card-visual {
+    width: 140px;
+    height: 140px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* L'icône de l'objet (image détourée). L'image est posée par le code (ShopController). */
+.card-icon {
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Secours si une couleur n'a pas d'icône : un carré rempli de la couleur */
 .card-swatch {
     width: 90px;
     height: 90px;
     border-radius: 12px;
 }
 
-/* Visuel d'un chapeau : son nom en grand (en attendant les icônes) */
-.card-hat {
-    font-size: 26px;
-    height: 90px;
-    color: #FFFFFF;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    white-space: normal;
+/* « Aucun chapeau » : un cercle barré dessiné en USS (pas d'image).
+   Le cercle = un carré aux coins très arrondis avec une bordure épaisse. */
+.card-none {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    border-width: 8px;
+    border-color: #C9C3D6;
+}
+
+/* La barre : un trait vertical placé au milieu du cercle, puis tourné de 45°.
+   (96 - 2×8 de bordure = 80 px d'intérieur ; (80 - 8) / 2 = 36 px pour le centrer.) */
+.card-none-bar {
+    position: absolute;
+    width: 8px;
+    height: 80px;
+    left: 36px;
+    top: 0;
+    background-color: #C9C3D6;
+    rotate: 45deg;
 }
 
 .card-name {
@@ -119,10 +170,19 @@
     -unity-text-align: middle-center;
 }
 
+/* La ligne d'état (« Équipé ✓ », « Possédé », ou le prix + une pièce) */
+.card-state-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .card-state {
     font-size: 24px;
     color: #DDDDDD;
     -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
 }
 
 .card-state--price {

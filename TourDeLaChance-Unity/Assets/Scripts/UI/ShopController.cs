@@ -134,7 +134,7 @@ namespace TourDeLaChance
         {
             if (!panelShown) return;
 
-            walletLabel.text = $"Porte-monnaie : {Wallet.Coins} pièces";
+            walletLabel.text = $"Porte-monnaie : {Wallet.Coins}"; // la pièce d'or suit (Shop.uxml)
             SetClass(colorTab, "shop-tab--active", currentTab == ShopCategory.Couleur);
             SetClass(hatTab, "shop-tab--active", currentTab == ShopCategory.Chapeau);
 
@@ -154,26 +154,18 @@ namespace TourDeLaChance
             card.AddToClassList("card");
             SetClass(card, "card--selected", item == selected);
 
-            if (item.Category == ShopCategory.Couleur)
-            {
-                var swatch = new VisualElement();
-                swatch.AddToClassList("card-swatch");
-                swatch.style.backgroundColor = item.Color;
-                card.Add(swatch);
-            }
-            else
-            {
-                var hatName = new Label(item.DisplayName);
-                hatName.AddToClassList("card-hat");
-                card.Add(hatName);
-            }
+            card.Add(CreateVisual(item));
 
             var nameLabel = new Label(item.DisplayName);
             nameLabel.AddToClassList("card-name");
             card.Add(nameLabel);
 
+            // Ligne d'état : un texte, plus une petite pièce d'or quand c'est un prix.
+            var stateRow = new VisualElement();
+            stateRow.AddToClassList("card-state-row");
             var state = new Label();
             state.AddToClassList("card-state");
+            stateRow.Add(state);
             if (Shop.IsEquipped(item))
             {
                 state.text = "Équipé ✓";
@@ -185,11 +177,56 @@ namespace TourDeLaChance
             }
             else
             {
-                state.text = $"{item.Price} pièces";
+                state.text = item.Price.ToString();
                 state.AddToClassList("card-state--price");
+                var coin = new VisualElement();
+                coin.AddToClassList("coin");
+                coin.AddToClassList("coin--small");
+                stateRow.Add(coin);
             }
-            card.Add(state);
+            card.Add(stateRow);
             return card;
+        }
+
+        /// Le visuel de la carte, dans un cadre carré de taille fixe (classe card-visual)
+        /// pour que toutes les icônes soient centrées et alignées.
+        static VisualElement CreateVisual(ShopItem item)
+        {
+            var frame = new VisualElement();
+            frame.AddToClassList("card-visual");
+            frame.pickingMode = PickingMode.Ignore; // le clic doit atteindre la carte
+
+            if (item.Icon != null)
+            {
+                // Cas normal : l'icône détourée de la fiche ShopItem.
+                var icon = new VisualElement();
+                icon.AddToClassList("card-icon");
+                icon.style.backgroundImage = new StyleBackground(item.Icon);
+                icon.pickingMode = PickingMode.Ignore;
+                frame.Add(icon);
+            }
+            else if (item.Category == ShopCategory.Chapeau)
+            {
+                // Pas d'icône pour un chapeau = « Aucun chapeau » : un cercle barré en USS.
+                var circle = new VisualElement();
+                circle.AddToClassList("card-none");
+                circle.pickingMode = PickingMode.Ignore;
+                var bar = new VisualElement();
+                bar.AddToClassList("card-none-bar");
+                bar.pickingMode = PickingMode.Ignore;
+                circle.Add(bar);
+                frame.Add(circle);
+            }
+            else
+            {
+                // Secours pour une couleur sans icône : un carré de la couleur.
+                var swatch = new VisualElement();
+                swatch.AddToClassList("card-swatch");
+                swatch.style.backgroundColor = item.Color;
+                swatch.pickingMode = PickingMode.Ignore;
+                frame.Add(swatch);
+            }
+            return frame;
         }
 
         /// Le bouton d'action suit le tableau de la spec (§5.2, zone d'action).

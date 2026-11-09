@@ -62,6 +62,13 @@ MATERIAUX = {
     "M_Feutre": ("#1E1E1E", 0.0, 0.85),
     "M_Satin": ("#C0392B", 0.0, 0.50),
     "M_Rubis": ("#D62839", 0.0, 0.10),
+    # Décor : le sol de l'étage (bible §2.1 et §4)
+    "M_PierreDalle": ("#5B6380", 0.0, 0.85),
+    "M_PierreDalleVariante": ("#535A75", 0.0, 0.85),
+    "M_PierreJoint": ("#3C4258", 0.0, 0.95),
+    "M_PierreClaire": ("#8A90B0", 0.0, 0.75),
+    "M_PierreFlanc": ("#434A63", 0.0, 0.90),
+    "M_Incrustation": ("#6A4C9C", 0.3, 0.50),
 }
 
 
@@ -465,6 +472,27 @@ def verifier_fbx(chemin):
 # ---------------------------------------------------------------------------------------
 # 6. Miniature de rendu (vue de 3/4 avant, comme la caméra du jeu)
 # ---------------------------------------------------------------------------------------
+def monde_nuit(scene, ambiance=1.0):
+    """Monde : fond violet nuit uni (ce que voit la caméra) + lumière d'ambiance douce
+    violette (ce que « voient » les objets), comme le ciel en Gradient de la scène Unity."""
+    monde = bpy.data.worlds.new("Monde")
+    scene.world = monde
+    monde.use_nodes = True
+    nt = monde.node_tree
+    eclairage = nt.nodes["Background"]  # ce que « voient » les objets (ambiance)
+    eclairage.inputs["Color"].default_value = hex_vers_lineaire("#8C7AB8")
+    eclairage.inputs["Strength"].default_value = ambiance
+    visible = nt.nodes.new("ShaderNodeBackground")  # ce que voit la caméra (fond uni)
+    visible.inputs["Color"].default_value = hex_vers_lineaire("#1F1730")
+    chemin_rayon = nt.nodes.new("ShaderNodeLightPath")
+    melange = nt.nodes.new("ShaderNodeMixShader")
+    nt.links.new(chemin_rayon.outputs["Is Camera Ray"], melange.inputs["Fac"])
+    nt.links.new(eclairage.outputs["Background"], melange.inputs[1])
+    nt.links.new(visible.outputs["Background"], melange.inputs[2])
+    nt.links.new(melange.outputs["Shader"], nt.nodes["World Output"].inputs["Surface"])
+    return monde
+
+
 def rendre_miniature(racine, nom_fichier, recul=1.0):
     """Rend une image 640x640 de l'objet, vu de devant, d'au-dessus (≈35° comme la caméra
     du jeu) et un peu de côté (3/4). Fond violet nuit #1F1730, lumière chaude en haut à
@@ -478,22 +506,7 @@ def rendre_miniature(racine, nom_fichier, recul=1.0):
     centre = (mn + mx) / 2
     taille = (mx - mn).length
 
-    # Monde : fond violet nuit + lumière d'ambiance douce.
-    monde = bpy.data.worlds.new("Monde")
-    scene.world = monde
-    monde.use_nodes = True
-    nt = monde.node_tree
-    eclairage = nt.nodes["Background"]  # ce que « voient » les objets (ambiance)
-    eclairage.inputs["Color"].default_value = hex_vers_lineaire("#8C7AB8")
-    eclairage.inputs["Strength"].default_value = 1.0
-    visible = nt.nodes.new("ShaderNodeBackground")  # ce que voit la caméra (fond uni)
-    visible.inputs["Color"].default_value = hex_vers_lineaire("#1F1730")
-    chemin_rayon = nt.nodes.new("ShaderNodeLightPath")
-    melange = nt.nodes.new("ShaderNodeMixShader")
-    nt.links.new(chemin_rayon.outputs["Is Camera Ray"], melange.inputs["Fac"])
-    nt.links.new(eclairage.outputs["Background"], melange.inputs[1])
-    nt.links.new(visible.outputs["Background"], melange.inputs[2])
-    nt.links.new(melange.outputs["Shader"], nt.nodes["World Output"].inputs["Surface"])
+    monde_nuit(scene)
 
     # Caméra : avant = +Y Blender. Légèrement décalée vers la gauche de l'image (+X Blender
     # quand on regarde l'avant) pour la vue de 3/4.
@@ -556,3 +569,98 @@ def rendre_miniature(racine, nom_fichier, recul=1.0):
 def graine(n=7):
     """Graine fixe pour l'aléatoire : le même script donne toujours le même modèle."""
     random.seed(n)
+
+
+# ---------------------------------------------------------------------------------------
+# 7. Rendu « vue du jeu » (même caméra et même lumière que la scène Unity Tour.unity)
+# ---------------------------------------------------------------------------------------
+# Valeurs relevées dans Tour.unity (en coordonnées Unity) :
+CAMERA_JEU_POSITION = (0.0, 5.0, -7.0)
+CAMERA_JEU_INCLINAISON = 35.0      # degrés vers le bas
+CAMERA_JEU_CHAMP = 60.0            # champ de vision vertical (field of view)
+# Rotation de la Directional Light (quaternion Unity x, y, z, w).
+SOLEIL_JEU_ROTATION = (0.40821788, -0.23456968, 0.10938163, 0.8754261)
+
+
+def direction_depuis_unity(x, y, z):
+    """Comme depuis_unity(), mais pour une direction (un vecteur, pas un point)."""
+    return Vector((-x, -z, y))
+
+
+def rendre_vue_jeu(nom_fichier, largeur=1280, hauteur=720, camera_unity=None,
+                   inclinaison=None):
+    """Rend la scène Blender ENTIÈRE telle que la verrait la caméra du jeu.
+    Pourquoi : un sol se juge depuis le point de vue du joueur (ce qui est caché par les
+    coffres, ce qui sort de l'écran…), pas en vue de 3/4 générique.
+    `camera_unity` / `inclinaison` permettent un point de vue plus large pour un aperçu."""
+    scene = bpy.context.scene
+    monde_nuit(scene, ambiance=0.8)
+
+    pos = camera_unity or CAMERA_JEU_POSITION
+    incl = math.radians(inclinaison if inclinaison is not None else CAMERA_JEU_INCLINAISON)
+    cam_data = bpy.data.cameras.new("CameraJeu")
+    cam_data.sensor_fit = "VERTICAL"          # Unity donne le champ de vision VERTICAL
+    cam_data.angle_y = math.radians(CAMERA_JEU_CHAMP)
+    cam_data.clip_start = 0.3
+    cam_data.clip_end = 1000
+    cam = bpy.data.objects.new("CameraJeu", cam_data)
+    scene.collection.objects.link(cam)
+    cam.location = depuis_unity(*pos)
+    # Regard Unity : vers +Z, penché de `incl` vers le bas.
+    regard = direction_depuis_unity(0.0, -math.sin(incl), math.cos(incl))
+    cam.rotation_euler = regard.to_track_quat("-Z", "Y").to_euler()
+    scene.camera = cam
+
+    # Soleil : même orientation que la Directional Light de Unity (elle éclaire vers son +Z).
+    from mathutils import Quaternion
+    qx, qy, qz, qw = SOLEIL_JEU_ROTATION
+    d_unity = Quaternion((qw, qx, qy, qz)) @ Vector((0, 0, 1))
+    d = direction_depuis_unity(*d_unity)
+    soleil_data = bpy.data.lights.new("Soleil", "SUN")
+    soleil_data.color = hex_vers_lineaire("#FFF1D6")[:3]
+    soleil_data.energy = 3.0
+    soleil_data.angle = math.radians(3)       # ombres douces
+    soleil = bpy.data.objects.new("Soleil", soleil_data)
+    soleil.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
+    scene.collection.objects.link(soleil)
+    # Contre-jour violet derrière le personnage, comme dans Tour.unity (0 ; 3,5 ; 4).
+    cj_data = bpy.data.lights.new("ContreJour", "POINT")
+    cj_data.color = hex_vers_lineaire("#B48CFF")[:3]
+    cj_data.energy = 300.0
+    cj = bpy.data.objects.new("ContreJour", cj_data)
+    cj.location = depuis_unity(0, 3.5, 4)
+    scene.collection.objects.link(cj)
+
+    for moteur in ("BLENDER_EEVEE_NEXT", "BLENDER_EEVEE"):
+        try:
+            scene.render.engine = moteur
+            break
+        except TypeError:
+            continue
+    scene.render.resolution_x = largeur
+    scene.render.resolution_y = hauteur
+    scene.render.film_transparent = False
+    scene.view_settings.view_transform = "Standard"
+    scene.render.image_settings.file_format = "PNG"
+    os.makedirs(DOSSIER_CAPTURES, exist_ok=True)
+    chemin = os.path.join(DOSSIER_CAPTURES, nom_fichier)
+    scene.render.filepath = chemin
+    bpy.ops.render.render(write_still=True)
+    # On retire caméra et lumières : on peut rappeler la fonction pour un autre point de vue.
+    for o in (cam, soleil, cj):
+        bpy.data.objects.remove(o, do_unlink=True)
+    print("Rendu vue jeu :", chemin)
+    return chemin
+
+
+def importer_fbx(chemin, position_unity=(0, 0, 0)):
+    """Importe un FBX déjà exporté (ex. coffre.fbx) et le place à une position Unity.
+    Sert uniquement aux rendus de contrôle (jamais exporté avec l'objet en cours).
+    Renvoie la liste des objets importés."""
+    avant = set(bpy.data.objects)
+    bpy.ops.import_scene.fbx(filepath=chemin, axis_forward="-Z", axis_up="Y")
+    nouveaux = [o for o in bpy.data.objects if o not in avant]
+    for o in nouveaux:
+        if o.parent is None:
+            o.location = depuis_unity(*position_unity) + o.location
+    return nouveaux

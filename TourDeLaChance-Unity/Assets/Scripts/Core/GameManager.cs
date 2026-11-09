@@ -6,6 +6,8 @@ namespace TourDeLaChance
     /// Les différents moments d'une partie (une "machine à états").
     public enum GameState
     {
+        Title,      // écran titre : la partie n'a pas encore commencé (placé en premier,
+                    // c'est donc l'état par défaut dès le chargement de la scène)
         Choosing,   // le joueur choisit un coffre
         Revealing,  // animation d'ouverture en cours
         Decision,   // gagné : encaisser ou continuer ?
@@ -55,7 +57,18 @@ namespace TourDeLaChance
             chestTrial.Finished -= OnTrialFinished;
         }
 
-        void Start() => NewRun();
+        // Au lancement, on reste sur l'écran titre : aucun coffre n'est préparé
+        // (chestTrial.Begin() n'est pas appelé), donc ils ne sont pas cliquables,
+        // et CanOpenShop est faux (l'état n'est ni Choosing, ni Lost, ni CashedOut).
+        void Start() => SetState(GameState.Title);
+
+        /// Le bouton « Jouer » de l'écran titre : lance la toute première partie.
+        /// Ignoré si on a déjà quitté l'écran titre.
+        public void StartGame()
+        {
+            if (State != GameState.Title) return;
+            NewRun();
+        }
 
         /// Nouvelle partie : retour à l'étage 1, cagnotte vide.
         public void NewRun()

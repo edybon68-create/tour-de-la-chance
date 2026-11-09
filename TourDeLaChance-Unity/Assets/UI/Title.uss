@@ -1,0 +1,42 @@
+/* Style de l'écran titre. Le fond reprend la couleur RÉELLE du fond de logo_titre.png
+   (#1E1936, mesurée dans l'image ; un peu plus bleue que le #1F1730 demandé à Gemini) :
+   ainsi on ne voit pas le rectangle de l'image. */
+
+.title-root {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    background-color: #1E1936;
+    padding: 32px;
+}
+
+/* Le logo occupe tout l'espace libre, en gardant ses proportions (scale-to-fit). */
+.title-logo {
+    flex-grow: 1;
+    align-self: stretch;
+    background-image: url("../Art/logo/logo_titre.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Le gros bouton « Jouer », or comme les pièces, avec le même rebond que le HUD. */
+.title-play {
+    font-size: 48px;
+    min-width: 340px;
+    height: 104px;
+    margin: 24px 0 48px 0;
+    border-radius: 20px;
+    border-width: 0;
+    color: #3A2200;
+    background-color: #FFD54A;
+    -unity-font-style: bold;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.title-play:hover {
+    scale: 1.06 1.06;
+}
+
+.title-play:active {
+    scale: 0.96 0.96;
+}

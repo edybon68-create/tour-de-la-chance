@@ -5,8 +5,15 @@
         <ui:VisualElement class="top-bar" picking-mode="Ignore">
             <ui:Label name="floor" text="Étage 1" class="floor" />
             <ui:VisualElement class="counters" picking-mode="Ignore">
-                <ui:Label name="pot" text="Cagnotte : 0" class="counter pot" />
-                <ui:Label name="wallet" text="Porte-monnaie : 0" class="counter" />
+                <!-- Chaque compteur = un texte + une petite pièce d'or (image dans Hud.uss). -->
+                <ui:VisualElement class="counter" picking-mode="Ignore">
+                    <ui:Label name="pot" text="Cagnotte : 0" class="counter-text pot" />
+                    <ui:VisualElement class="coin" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement class="counter" picking-mode="Ignore">
+                    <ui:Label name="wallet" text="Porte-monnaie : 0" class="counter-text" />
+                    <ui:VisualElement class="coin" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="spacer" picking-mode="Ignore" />
