@@ -9,8 +9,9 @@
                 <ui:Label name="wallet" text="Porte-monnaie : 0" class="counter" />
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Label name="message" text="" class="message" />
         <ui:VisualElement class="spacer" picking-mode="Ignore" />
+        <!-- Le message est en bas, au-dessus des boutons, pour ne jamais cacher le chapeau. -->
+        <ui:Label name="message" text="" class="message" picking-mode="Ignore" />
         <ui:VisualElement class="actions" picking-mode="Ignore">
             <ui:Button name="cashout" text="Encaisser" class="btn btn-safe" />
             <ui:Button name="continue" text="Continuer" class="btn btn-risk" />

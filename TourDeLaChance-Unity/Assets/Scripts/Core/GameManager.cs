@@ -90,6 +90,10 @@ namespace TourDeLaChance
             if (!CanOpenShop) return;
             ShopOpen = true;
             chestTrial.InputLocked = true;
+            // En fin de partie, les couvercles ouverts cachent le personnage :
+            // on les referme pour qu'il serve bien d'aperçu.
+            if (State == GameState.Lost || State == GameState.CashedOut)
+                chestTrial.CloseAllLids();
             Changed?.Invoke();
         }
 

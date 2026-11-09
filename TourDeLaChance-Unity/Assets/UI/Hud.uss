@@ -44,7 +44,11 @@
     -unity-text-outline-width: 1px;
     -unity-text-outline-color: #000000;
     white-space: normal;
-    margin-top: 16px;
+    align-self: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    padding: 8px 24px;
+    border-radius: 14px;
+    margin-bottom: 16px;
 }
 
 .spacer {

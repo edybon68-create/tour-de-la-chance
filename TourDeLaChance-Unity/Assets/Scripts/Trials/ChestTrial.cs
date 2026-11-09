@@ -38,6 +38,13 @@ namespace TourDeLaChance
             waitingForChoice = true;
         }
 
+        /// Referme tous les coffres (visuel uniquement : le piège ne change pas).
+        /// Utile en fin de partie pour dégager la vue sur le personnage.
+        public void CloseAllLids()
+        {
+            foreach (var chest in chests) chest.ResetChest();
+        }
+
         public void Choose(int index)
         {
             if (InputLocked || !waitingForChoice || index < 0 || index >= chests.Length) return;

@@ -99,6 +99,9 @@ namespace TourDeLaChance
         {
             currentTab = category;
             selected = Shop.GetEquipped(category);
+            // L'aperçu de cette catégorie suit la carte sélectionnée (sinon on garderait
+            // l'aperçu d'un objet qui n'est plus sélectionné). L'autre catégorie ne bouge pas.
+            if (selected != null) avatar.Show(selected);
             Refresh();
         }
 
