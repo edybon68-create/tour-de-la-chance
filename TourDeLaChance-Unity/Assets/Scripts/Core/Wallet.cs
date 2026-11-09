@@ -18,5 +18,16 @@ namespace TourDeLaChance
             PlayerPrefs.SetInt(SaveKey, Coins + amount);
             PlayerPrefs.Save(); // écrit tout de suite sur le disque
         }
+
+        /// Dépense des pièces (pour le shop). Renvoie true si c'est fait.
+        /// Si le solde est insuffisant, on REFUSE et on ne change rien :
+        /// le porte-monnaie ne peut jamais passer sous zéro.
+        public static bool TrySpend(int amount)
+        {
+            if (amount < 0 || Coins < amount) return false;
+            PlayerPrefs.SetInt(SaveKey, Coins - amount);
+            PlayerPrefs.Save();
+            return true;
+        }
     }
 }

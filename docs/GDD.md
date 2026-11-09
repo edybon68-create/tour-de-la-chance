@@ -54,10 +54,25 @@ Plus on monte, plus les épreuves risquées apparaissent souvent.
 ## 6. Le shop (cosmétiques uniquement)
 Aucun objet du shop ne change les chances de gagner : c'est purement esthétique.
 
+Détails complets (règles, écrans, sauvegarde, critères) : `docs/specs/shop.md`.
+
+**Version 1 (jalon 3)** : deux catégories, portées par un personnage simple (une capsule
+derrière les coffres). On achète, puis on équipe ; un seul objet équipé par catégorie.
+Le shop s'ouvre au début de partie (étage 1, avant de choisir) et sur les écrans
+Perdu / Encaissé, jamais pendant une épreuve.
+
+| Catégorie | Objets (prix en pièces) |
+|---|---|
+| Couleurs du personnage | Bleu ciel (gratuit, défaut), Rouge tomate 50, Vert menthe 75, Violet magique 150, Or massif 300 |
+| Chapeaux | Aucun (gratuit, défaut), Casquette 100, Chapeau de fête 150, Haut-de-forme 250, Couronne royale 500 |
+
+Repère d'équilibrage : un joueur moyen gagne ~15 pièces par partie en moyenne (il perd
+souvent) → premier achat en ~3-4 parties, couronne en ~33 parties, tout le shop en ~105.
+
+**Plus tard** (hors version 1) :
+
 | Catégorie | Exemples | Prix indicatif |
 |---|---|---|
-| Chapeaux | Haut-de-forme, couronne, casquette | 100 – 500 |
-| Couleurs du personnage | Rouge, or, arc-en-ciel | 50 – 300 |
 | Dés | Dé doré, dé en cristal | 150 – 400 |
 | Effets de victoire | Confettis, feux d'artifice | 200 – 600 |
 

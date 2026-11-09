@@ -18,6 +18,10 @@ namespace TourDeLaChance
         /// Prévient quand l'épreuve est terminée : true = gagné, false = piégé.
         public event Action<bool> Finished;
 
+        /// Quand c'est vrai, les coffres ignorent souris et clavier (ex. : shop ouvert).
+        /// C'est le GameManager qui décide de bloquer ; le piège déjà tiré ne change pas.
+        public bool InputLocked { get; set; }
+
         int trapIndex;
         bool waitingForChoice;
 
@@ -36,7 +40,7 @@ namespace TourDeLaChance
 
         public void Choose(int index)
         {
-            if (!waitingForChoice || index < 0 || index >= chests.Length) return;
+            if (InputLocked || !waitingForChoice || index < 0 || index >= chests.Length) return;
             waitingForChoice = false;
             ChoiceMade?.Invoke();
             StartCoroutine(Reveal(index));
@@ -60,7 +64,9 @@ namespace TourDeLaChance
 
         void Update()
         {
-            if (!waitingForChoice) return;
+            // Un panneau UI Toolkit n'arrête pas le rayon physique ni le clavier :
+            // il faut donc ce blocage explicite.
+            if (!waitingForChoice || InputLocked) return;
 
             // Raccourcis clavier 1, 2, 3
             var kb = Keyboard.current;

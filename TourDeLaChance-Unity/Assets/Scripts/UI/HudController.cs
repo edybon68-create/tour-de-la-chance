@@ -5,7 +5,7 @@ namespace TourDeLaChance
 {
     /// <summary>
     /// L'interface (HUD) : affiche l'étage, la cagnotte, le porte-monnaie, un message,
-    /// et les boutons Encaisser / Continuer / Rejouer. Elle ne décide de rien :
+    /// et les boutons Encaisser / Continuer / Rejouer / Boutique. Elle ne décide de rien :
     /// elle montre l'état du GameManager et lui transmet les clics.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -14,7 +14,7 @@ namespace TourDeLaChance
         [SerializeField] GameManager game;
 
         Label floorLabel, potLabel, walletLabel, messageLabel;
-        Button cashOutButton, continueButton, replayButton;
+        Button cashOutButton, continueButton, replayButton, shopButton;
 
         void OnEnable()
         {
@@ -27,11 +27,14 @@ namespace TourDeLaChance
             cashOutButton = root.Q<Button>("cashout");
             continueButton = root.Q<Button>("continue");
             replayButton = root.Q<Button>("replay");
+            shopButton = root.Q<Button>("shop");
 
             cashOutButton.clicked += game.CashOut;
             continueButton.clicked += game.Continue;
             replayButton.clicked += game.NewRun;
+            shopButton.clicked += game.OpenShop;
             game.Changed += Refresh;
+            Shop.Changed += Refresh; // après un achat, le porte-monnaie change
             Refresh();
         }
 
@@ -40,7 +43,9 @@ namespace TourDeLaChance
             cashOutButton.clicked -= game.CashOut;
             continueButton.clicked -= game.Continue;
             replayButton.clicked -= game.NewRun;
+            shopButton.clicked -= game.OpenShop;
             game.Changed -= Refresh;
+            Shop.Changed -= Refresh;
         }
 
         void Refresh()
@@ -49,11 +54,15 @@ namespace TourDeLaChance
             potLabel.text = $"Cagnotte : {game.Pot}";
             walletLabel.text = $"Porte-monnaie : {Wallet.Coins}";
 
-            bool decision = game.State == GameState.Decision;
-            bool over = game.State == GameState.Lost || game.State == GameState.CashedOut;
+            // Shop ouvert : on cache les boutons et le message (la barre du haut reste).
+            bool shop = game.ShopOpen;
+            bool decision = !shop && game.State == GameState.Decision;
+            bool over = !shop && (game.State == GameState.Lost || game.State == GameState.CashedOut);
             Show(cashOutButton, decision);
             Show(continueButton, decision);
             Show(replayButton, over);
+            Show(shopButton, game.CanOpenShop); // la règle est dans le GameManager
+            Show(messageLabel, !shop);
 
             messageLabel.text = game.State switch
             {

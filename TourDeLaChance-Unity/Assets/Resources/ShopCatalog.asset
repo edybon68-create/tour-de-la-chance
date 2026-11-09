@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52f93291e2b2740ed9f01f9e1a466e26, type: 3}
+  m_Name: ShopCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopCatalog
+  items:
+  - {fileID: 11400000, guid: 7d07bbf06ddd2484eab96d87021d63db, type: 2}
+  - {fileID: 11400000, guid: f7e362fb097484ea3b5feb2a1bf71f94, type: 2}
+  - {fileID: 11400000, guid: 682112bef9b5c48f7a047a7aa6943edb, type: 2}
+  - {fileID: 11400000, guid: b709030e398fa49cabfb1bb6ffdbf3da, type: 2}
+  - {fileID: 11400000, guid: f60920ec722814b7c8938ac848e0d953, type: 2}
+  - {fileID: 11400000, guid: 53e29cef8643e45248339583c76c42cc, type: 2}
+  - {fileID: 11400000, guid: ea3fd4b67236b4407a4a63d6268fa29d, type: 2}
+  - {fileID: 11400000, guid: 55b70f90db8ad40ec98dfd817d165fdb, type: 2}
+  - {fileID: 11400000, guid: 86a1fabe7db524d698df362adbe95011, type: 2}
+  - {fileID: 11400000, guid: e644817f264514ab39e520a04233b16c, type: 2}

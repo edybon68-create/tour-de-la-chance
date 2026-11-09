@@ -15,6 +15,8 @@
             <ui:Button name="cashout" text="Encaisser" class="btn btn-safe" />
             <ui:Button name="continue" text="Continuer" class="btn btn-risk" />
             <ui:Button name="replay" text="Rejouer" class="btn" />
+            <!-- Ouvre le shop. Visible seulement quand le GameManager le permet. -->
+            <ui:Button name="shop" text="Boutique" class="btn btn-shop" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Le panneau du shop. Il occupe la moitié basse de l'écran pour laisser voir
+         le personnage (en haut au centre), qui sert d'aperçu. Style : Shop.uss.
+         Les cartes sont créées par le code (ShopController), à partir du catalogue. -->
+    <Style src="Shop.uss" />
+    <ui:VisualElement name="shop-root" class="shop-root" picking-mode="Ignore">
+        <ui:VisualElement name="panel" class="shop-panel">
+            <!-- 1. Titre à gauche, porte-monnaie, bouton Fermer à droite -->
+            <ui:VisualElement class="shop-header">
+                <ui:Label text="Boutique" class="shop-title" />
+                <ui:Label name="shop-wallet" text="0 pièces" class="shop-wallet" />
+                <ui:Button name="close" text="Fermer ×" class="shop-close" />
+            </ui:VisualElement>
+            <!-- 2. Les onglets -->
+            <ui:VisualElement class="shop-tabs">
+                <ui:Button name="tab-couleur" text="Couleurs" class="shop-tab" />
+                <ui:Button name="tab-chapeau" text="Chapeaux" class="shop-tab" />
+            </ui:VisualElement>
+            <!-- 3. La rangée de cartes (remplie par le code) -->
+            <ui:VisualElement name="cards" class="shop-cards" />
+            <!-- 4. La zone d'action pour la carte sélectionnée -->
+            <ui:VisualElement class="shop-actions">
+                <ui:Button name="action" text="Acheter" class="shop-action" />
+                <ui:Label name="missing" text="" class="shop-missing" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

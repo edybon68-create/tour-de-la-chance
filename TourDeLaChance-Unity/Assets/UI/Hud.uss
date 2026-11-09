@@ -85,3 +85,8 @@
 .btn-risk {
     background-color: #D64545;
 }
+
+/* Bouton Boutique : couleur or, pour l'associer aux pièces. */
+.btn-shop {
+    background-color: #C99A1E;
+}

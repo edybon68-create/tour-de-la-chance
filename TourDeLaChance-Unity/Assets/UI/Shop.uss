@@ -1,0 +1,175 @@
+/* Style du shop. Or (#FFD54A) = argent, vert = acheter, bleu = équiper. */
+
+.shop-root {
+    flex-grow: 1;
+    justify-content: flex-end;   /* pousse le panneau en bas de l'écran */
+    padding: 0 32px 24px 32px;
+}
+
+.shop-panel {
+    height: 50%;                 /* la moitié basse de l'écran */
+    background-color: rgba(0, 0, 0, 0.78);
+    border-radius: 24px;
+    padding: 20px 32px;
+}
+
+/* --- 1. En-tête --- */
+.shop-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.shop-title {
+    font-size: 44px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+}
+
+.shop-wallet {
+    font-size: 30px;
+    color: #FFD54A;
+}
+
+.shop-close {
+    font-size: 28px;
+    height: 56px;
+    min-width: 160px;
+    border-radius: 12px;
+    border-width: 0;
+    color: #FFFFFF;
+    background-color: #555555;
+    -unity-font-style: bold;
+}
+
+/* --- 2. Onglets --- */
+.shop-tabs {
+    flex-direction: row;
+    margin-top: 8px;
+}
+
+.shop-tab {
+    font-size: 28px;
+    height: 52px;
+    min-width: 200px;
+    margin: 0 12px 0 0;
+    border-radius: 12px;
+    border-width: 0;
+    color: #CCCCCC;
+    background-color: #333333;
+}
+
+/* L'onglet actif est mis en évidence */
+.shop-tab--active {
+    color: #222222;
+    background-color: #FFD54A;
+    -unity-font-style: bold;
+}
+
+/* --- 3. Cartes --- */
+.shop-cards {
+    flex-direction: row;
+    justify-content: center;
+    flex-grow: 1;
+    margin-top: 12px;
+}
+
+.card {
+    width: 260px;
+    margin: 0 10px;
+    padding: 10px;
+    border-radius: 16px;
+    border-width: 4px;
+    border-color: rgba(0, 0, 0, 0);
+    background-color: #2A2A3A;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card:hover {
+    background-color: #3A3A50;
+}
+
+/* La carte sélectionnée : contour or épais */
+.card--selected {
+    border-width: 6px;
+    border-color: #FFD54A;
+}
+
+/* Visuel d'une couleur : un carré rempli */
+.card-swatch {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+}
+
+/* Visuel d'un chapeau : son nom en grand (en attendant les icônes) */
+.card-hat {
+    font-size: 26px;
+    height: 90px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.card-name {
+    font-size: 24px;
+    color: #FFFFFF;
+    -unity-text-align: middle-center;
+}
+
+.card-state {
+    font-size: 24px;
+    color: #DDDDDD;
+    -unity-text-align: middle-center;
+}
+
+.card-state--price {
+    color: #FFD54A;
+    -unity-font-style: bold;
+}
+
+.card-state--equipped {
+    color: #6FE39A;
+    -unity-font-style: bold;
+}
+
+/* --- 4. Zone d'action --- */
+.shop-actions {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.shop-action {
+    font-size: 30px;
+    height: 70px;
+    min-width: 320px;
+    border-radius: 14px;
+    border-width: 0;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+}
+
+.shop-action--buy {
+    background-color: #2E9E5B;
+}
+
+.shop-action--equip {
+    background-color: #3B7DD8;
+}
+
+/* Bouton grisé (désactivé) */
+.shop-action:disabled {
+    background-color: #555555;
+    color: #AAAAAA;
+    opacity: 1;
+}
+
+.shop-missing {
+    font-size: 26px;
+    color: #FF9A9A;
+    margin-left: 20px;
+}

@@ -27,6 +27,19 @@ namespace TourDeLaChance
         public int LastGain { get; private set; }
         public GameState State { get; private set; }
 
+        /// Le shop est un panneau ouvert "par-dessus" l'état courant, PAS un nouvel état :
+        /// à la fermeture, on retrouve le même étage, le même état et le même piège.
+        public bool ShopOpen { get; private set; }
+
+        /// Peut-on ouvrir le shop ? (spec shop §3.1) Seulement au début de partie
+        /// (étage 1, aucun coffre choisi), sur l'écran Perdu ou sur l'écran Encaissé.
+        /// Jamais pendant une épreuve.
+        public bool CanOpenShop =>
+            !ShopOpen &&
+            ((Floor == 1 && State == GameState.Choosing) ||
+             State == GameState.Lost ||
+             State == GameState.CashedOut);
+
         /// L'interface s'abonne à cet événement pour se mettre à jour.
         public event Action Changed;
 
@@ -47,6 +60,7 @@ namespace TourDeLaChance
         /// Nouvelle partie : retour à l'étage 1, cagnotte vide.
         public void NewRun()
         {
+            if (ShopOpen) return; // on ferme d'abord le shop
             Floor = 1;
             Pot = 0;
             StartFloor();
@@ -55,7 +69,7 @@ namespace TourDeLaChance
         /// Le joueur prend le risque de monter d'un étage.
         public void Continue()
         {
-            if (State != GameState.Decision) return;
+            if (ShopOpen || State != GameState.Decision) return;
             Floor++;
             StartFloor();
         }
@@ -63,11 +77,30 @@ namespace TourDeLaChance
         /// Le joueur sécurise sa cagnotte.
         public void CashOut()
         {
-            if (State != GameState.Decision) return;
+            if (ShopOpen || State != GameState.Decision) return;
             LastGain = Pot;
             Wallet.Add(Pot);
             Pot = 0;
             SetState(GameState.CashedOut);
+        }
+
+        /// Ouvre le shop (si c'est permis) et bloque les coffres.
+        public void OpenShop()
+        {
+            if (!CanOpenShop) return;
+            ShopOpen = true;
+            chestTrial.InputLocked = true;
+            Changed?.Invoke();
+        }
+
+        /// Ferme le shop et débloque les coffres. On ne relance PAS chestTrial.Begin() :
+        /// le coffre piégé reste le même.
+        public void CloseShop()
+        {
+            if (!ShopOpen) return;
+            ShopOpen = false;
+            chestTrial.InputLocked = false;
+            Changed?.Invoke();
         }
 
         void StartFloor()
