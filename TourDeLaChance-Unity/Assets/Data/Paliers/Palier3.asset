@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Palier3
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.AltitudeTier
   displayName: Au-dessus des nuages !
-  background: {fileID: 2800000, guid: c1ab44a2ba9ba4fbdb6395e0eb99f9a7, type: 3}
-  backgroundTint: {r: 0.75, g: 0.9, b: 1.3, a: 1}
+  background: {fileID: 2800000, guid: 2067ee5f960d7452bb978cf538437e23, type: 3}
+  backgroundTint: {r: 1, g: 1, b: 1, a: 1}
   lightColor: {r: 0.9098039, g: 0.9254902, b: 1, a: 1}
   lightIntensity: 1.25
   ambientSky: {r: 0.56078434, g: 0.627451, b: 0.84705883, a: 1}

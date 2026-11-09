@@ -15,9 +15,14 @@ MonoBehaviour:
   id: chapeau_couronne
   displayName: Couronne royale
   category: 1
-  price: 500
+  slot: 0
+  rarity: super_rare
+  free: 0
   icon: {fileID: 21300000, guid: 436b0f5d9a22a41fabc5161a16262fc1, type: 3}
+  skinStyle: 0
   color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
-  metallic: 1
-  smoothness: 0.8
-  hatPrefab: {fileID: 8163305123220073116, guid: 6b5f01f2544334a86a8fe265b6ab53dd, type: 3}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
+  metallic: 0
+  smoothness: 0.3
+  accessoryPrefab: {fileID: 8163305123220073116, guid: 6b5f01f2544334a86a8fe265b6ab53dd, type: 3}
+  animation: 0

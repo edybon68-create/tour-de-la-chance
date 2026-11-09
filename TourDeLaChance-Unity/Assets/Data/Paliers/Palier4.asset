@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Palier4
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.AltitudeTier
   displayName: "Dans les \xE9toiles !"
-  background: {fileID: 2800000, guid: c1ab44a2ba9ba4fbdb6395e0eb99f9a7, type: 3}
-  backgroundTint: {r: 0.55, g: 0.85, b: 0.75, a: 1}
+  background: {fileID: 2800000, guid: 09b2c7c797fe84dbe954542239c512b9, type: 3}
+  backgroundTint: {r: 1, g: 1, b: 1, a: 1}
   lightColor: {r: 0.9411765, g: 0.9019608, b: 1, a: 1}
   lightIntensity: 1.1
   ambientSky: {r: 0.41568628, g: 0.3529412, b: 0.6901961, a: 1}

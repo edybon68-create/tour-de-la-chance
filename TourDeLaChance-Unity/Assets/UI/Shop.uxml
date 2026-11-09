@@ -1,31 +1,61 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <!-- Le panneau du shop. Il occupe la moitié basse de l'écran pour laisser voir
-         le personnage (en haut au centre), qui sert d'aperçu. Style : Shop.uss.
-         Les cartes sont créées par le code (ShopController), à partir du catalogue. -->
+    <!-- Le panneau latéral du shop (spec boites §7.2) : à droite de l'écran, sous la barre
+         du haut, pour laisser voir le personnage au centre (il sert d'aperçu).
+         Trois onglets : Boutique (les boîtes), Inventaire (équiper, vendre), Index (la
+         collection). Les cartes sont créées par le code (ShopController, InventoryPage,
+         IndexPage) à partir du catalogue : AUCUN pourcentage n'est écrit ici.
+         Style : Shop.uss. Tailles pour la référence 1920 × 1080 (= spec × 1,5). -->
     <Style src="Shop.uss" />
     <ui:VisualElement name="shop-root" class="shop-root" picking-mode="Ignore">
         <ui:VisualElement name="panel" class="shop-panel">
-            <!-- 1. Titre à gauche, porte-monnaie, bouton Fermer à droite -->
+            <!-- 1. Les trois onglets et le bouton Fermer -->
             <ui:VisualElement class="shop-header">
-                <ui:Label text="Boutique" class="shop-title" />
-                <!-- Porte-monnaie : le montant + une petite pièce d'or -->
-                <ui:VisualElement class="shop-wallet-row">
-                    <ui:Label name="shop-wallet" text="Porte-monnaie : 0" class="shop-wallet" />
-                    <ui:VisualElement class="coin" />
+                <ui:Button name="tab-boutique" text="Boutique" class="shop-tab" />
+                <ui:Button name="tab-inventaire" text="Inventaire" class="shop-tab" />
+                <ui:Button name="tab-index" text="Index" class="shop-tab" />
+                <ui:Button name="close" text="×" class="shop-close" />
+            </ui:VisualElement>
+            <!-- 2. Rappel du porte-monnaie (icône pièce + nombre) -->
+            <ui:VisualElement class="shop-wallet-row" picking-mode="Ignore">
+                <ui:VisualElement class="coin" picking-mode="Ignore" />
+                <ui:Label name="shop-wallet" text="0" class="shop-wallet" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- 3a. Onglet Boutique : une carte par boîte (créées par le code) -->
+            <ui:ScrollView name="page-boutique" class="shop-page shop-scroll" />
+
+            <!-- 3b. Onglet Inventaire -->
+            <ui:VisualElement name="page-inventaire" class="shop-page">
+                <ui:VisualElement class="subtabs">
+                    <ui:Button name="inv-skins" text="Skins" class="subtab" />
+                    <ui:Button name="inv-accessoires" text="Accessoires" class="subtab" />
                 </ui:VisualElement>
-                <ui:Button name="close" text="Fermer ×" class="shop-close" />
+                <ui:ScrollView name="inv-list" class="shop-scroll" />
+                <!-- Zone d'action pour la carte sélectionnée -->
+                <ui:VisualElement class="inv-actions">
+                    <ui:Label name="inv-selected" text="" class="inv-selected" picking-mode="Ignore" />
+                    <ui:VisualElement class="inv-buttons">
+                        <ui:Button name="inv-equip" text="Équiper" class="action-btn action-btn--equip" />
+                        <ui:Button name="inv-sell" text="Vendre 1 doublon" class="action-btn action-btn--sell" />
+                    </ui:VisualElement>
+                    <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="action-btn action-btn--sellall" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <!-- 2. Les onglets -->
-            <ui:VisualElement class="shop-tabs">
-                <ui:Button name="tab-couleur" text="Couleurs" class="shop-tab" />
-                <ui:Button name="tab-chapeau" text="Chapeaux" class="shop-tab" />
-            </ui:VisualElement>
-            <!-- 3. La rangée de cartes (remplie par le code) -->
-            <ui:VisualElement name="cards" class="shop-cards" />
-            <!-- 4. La zone d'action pour la carte sélectionnée -->
-            <ui:VisualElement class="shop-actions">
-                <ui:Button name="action" text="Acheter" class="shop-action" />
-                <ui:Label name="missing" text="" class="shop-missing" />
+
+            <!-- 3c. Onglet Index -->
+            <ui:VisualElement name="page-index" class="shop-page">
+                <ui:VisualElement name="idx-tabs" class="subtabs" />
+                <ui:VisualElement class="progress-row" picking-mode="Ignore">
+                    <ui:Label name="idx-progress" text="0 / 16 trouvés" class="progress-text" picking-mode="Ignore" />
+                    <ui:VisualElement class="progress-bar" picking-mode="Ignore">
+                        <ui:VisualElement name="idx-bar-fill" class="progress-fill" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:ScrollView name="idx-grid" class="shop-scroll" />
+                <ui:VisualElement class="idx-info-row">
+                    <ui:Label name="idx-info" text="" class="idx-info" picking-mode="Ignore" />
+                    <ui:Button name="idx-goto" text="Voir dans l'inventaire" class="link-btn" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -15,9 +15,14 @@ MonoBehaviour:
   id: chapeau_fete
   displayName: "Chapeau de f\xEAte"
   category: 1
-  price: 150
+  slot: 0
+  rarity: commun
+  free: 0
   icon: {fileID: 21300000, guid: 1f18fc2d76a704e33a71cd73ea5d49d2, type: 3}
+  skinStyle: 0
   color: {r: 1, g: 0.43529412, b: 0.70980394, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   metallic: 0
   smoothness: 0.3
-  hatPrefab: {fileID: 8731364199153387000, guid: 7673a6e1dcff642e197df0d748d40d0f, type: 3}
+  accessoryPrefab: {fileID: 8731364199153387000, guid: 7673a6e1dcff642e197df0d748d40d0f, type: 3}
+  animation: 0

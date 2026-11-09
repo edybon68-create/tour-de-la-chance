@@ -1,48 +1,64 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace TourDeLaChance
 {
     /// <summary>
-    /// Un objet du shop (une couleur ou un chapeau), décrit comme une "fiche" de données.
+    /// Un objet cosmétique (un skin ou un accessoire), décrit comme une "fiche" de données.
     /// C'est un ScriptableObject : un fichier .asset qu'on crée et règle dans l'éditeur,
-    /// sans écrire de code. Pour ajouter un objet, on crée une nouvelle fiche et on
-    /// l'ajoute au catalogue (ShopCatalog).
-    /// RÈGLE D'OR : ces fiches ne contiennent que du visuel, rien qui touche aux chances.
+    /// sans écrire de code. Pour l'ajouter au jeu, on le met dans une boîte du catalogue
+    /// (ShopCatalog), ou dans la liste des objets gratuits.
+    /// RÈGLE D'OR : ces fiches ne contiennent que du visuel, rien qui touche aux chances du jeu.
     /// </summary>
-    [CreateAssetMenu(fileName = "NouvelObjet", menuName = "Tour de la Chance/Objet du shop")]
+    [CreateAssetMenu(fileName = "NouvelObjet", menuName = "Tour de la Chance/Objet cosmétique")]
     public class ShopItem : ScriptableObject
     {
         [Tooltip("Identifiant unique, écrit dans la sauvegarde. Ne JAMAIS le changer une fois publié.")]
         [SerializeField] string id = "couleur_xxx";
         [SerializeField] string displayName = "Nouvel objet";
         [SerializeField] ShopCategory category;
-        [Tooltip("Prix en pièces du porte-monnaie. 0 = gratuit, possédé d'office.")]
-        [SerializeField, Min(0)] int price;
+        [Tooltip("Pour un accessoire : l'emplacement où il se porte.")]
+        [SerializeField] AccessorySlot slot;
+        [Tooltip("Identifiant de la rareté (commun, rare…), comme dans le catalogue. " +
+                 "Vide pour un objet gratuit.")]
+        [SerializeField] string rarity = "";
+        [Tooltip("Objet gratuit, possédé d'office (Bleu ciel, « Rien sur la tête »…). " +
+                 "Jamais dans une boîte, jamais vendable.")]
+        [SerializeField] bool free;
 
-        [Header("Carte du shop")]
-        [Tooltip("L'image affichée sur la carte (icône détourée, réglée en Sprite). " +
-                 "Vide = symbole de secours dessiné par l'interface (ex. : « Aucun chapeau »).")]
+        [Header("Carte (Inventaire, Index, résultat)")]
+        [Tooltip("L'icône détourée (réglée en Sprite). Vide = symbole de secours dessiné par l'interface.")]
         [SerializeField] Sprite icon;
 
-        [Header("Couleur (catégorie Couleur, et visuel de la carte)")]
+        [Header("Skin : rendu du corps")]
+        [SerializeField] SkinStyle skinStyle = SkinStyle.Uni;
+        [Tooltip("Couleur principale (fond du motif, couleur unie…).")]
         [SerializeField] Color color = Color.white;
+        [Tooltip("Deuxième couleur : bandes, pois, étoiles.")]
+        [SerializeField] Color secondaryColor = Color.white;
         [SerializeField, Range(0f, 1f)] float metallic;
         [SerializeField, Range(0f, 1f)] float smoothness = 0.3f;
 
-        [Header("Chapeau (catégorie Chapeau)")]
-        [Tooltip("Le modèle posé sur PointChapeau. Vide = pas de chapeau.")]
-        [SerializeField] GameObject hatPrefab;
+        [Header("Accessoire : modèle et animation")]
+        [Tooltip("Le modèle posé sur le point d'accroche de l'emplacement. Vide = rien (« Aucun »).")]
+        [FormerlySerializedAs("hatPrefab")] // ancien nom (v1) : les fiches existantes restent branchées
+        [SerializeField] GameObject accessoryPrefab;
+        [SerializeField] AccessoryAnimation animation = AccessoryAnimation.Aucune;
 
         // Propriétés en lecture seule : le reste du code peut lire, mais pas modifier.
         public string Id => id;
         public string DisplayName => displayName;
         public ShopCategory Category => category;
-        public int Price => price;
-        public bool IsFree => price == 0;
+        public AccessorySlot Slot => slot;
+        public string RarityId => rarity;
+        public bool IsFree => free;
         public Sprite Icon => icon;
+        public SkinStyle SkinStyle => skinStyle;
         public Color Color => color;
+        public Color SecondaryColor => secondaryColor;
         public float Metallic => metallic;
         public float Smoothness => smoothness;
-        public GameObject HatPrefab => hatPrefab;
+        public GameObject AccessoryPrefab => accessoryPrefab;
+        public AccessoryAnimation Animation => animation;
     }
 }

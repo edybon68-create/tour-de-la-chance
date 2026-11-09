@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cfbc46aca18b438b9c35bd5c4c908b3, type: 3}
+  m_Name: motif_pois
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
+  id: motif_pois
+  displayName: "Pois de f\xEAte"
+  category: 0
+  slot: 0
+  rarity: rare
+  free: 0
+  icon: {fileID: 21300000, guid: 799a73aaf31f64574a65ceebf0e86309, type: 3}
+  skinStyle: 2
+  color: {r: 0.9490196, g: 0.48235294, b: 0.6901961, a: 1}
+  secondaryColor: {r: 0.95686275, g: 0.93333334, b: 0.9019608, a: 1}
+  metallic: 0
+  smoothness: 0.5
+  accessoryPrefab: {fileID: 0}
+  animation: 0

@@ -12,14 +12,89 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52f93291e2b2740ed9f01f9e1a466e26, type: 3}
   m_Name: ShopCatalog
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopCatalog
-  items:
+  rarities:
+  - id: commun
+    displayName: Commun
+    color: {r: 0.6039216, g: 0.627451, b: 0.6901961, a: 1}
+    textColor: {r: 0.6039216, g: 0.627451, b: 0.6901961, a: 1}
+    weight: 500
+    sellValue: 10
+  - id: peu_commun
+    displayName: Peu commun
+    color: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
+    textColor: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
+    weight: 250
+    sellValue: 15
+  - id: rare
+    displayName: Rare
+    color: {r: 0.23137255, g: 0.54509807, b: 0.92156863, a: 1}
+    textColor: {r: 0.37254903, g: 0.63529414, b: 0.9411765, a: 1}
+    weight: 140
+    sellValue: 25
+  - id: super_rare
+    displayName: Super rare
+    color: {r: 0.6392157, g: 0.36078432, b: 0.8784314, a: 1}
+    textColor: {r: 0.70980394, g: 0.49019608, b: 0.9098039, a: 1}
+    weight: 70
+    sellValue: 40
+  - id: legendaire
+    displayName: "L\xE9gendaire"
+    color: {r: 1, g: 0.62352943, b: 0.10980392, a: 1}
+    textColor: {r: 1, g: 0.62352943, b: 0.10980392, a: 1}
+    weight: 30
+    sellValue: 60
+  - id: secret
+    displayName: Secret
+    color: {r: 1, g: 0.30980393, b: 0.84705883, a: 1}
+    textColor: {r: 1, g: 0.30980393, b: 0.84705883, a: 1}
+    weight: 10
+    sellValue: 80
+  boxes:
+  - id: boite_skins_1
+    displayName: "Bo\xEEte de skins n\xB01"
+    price: 100
+    icon: {fileID: 21300000, guid: bac01fbbe698c486fbb72ce6eabb4a3c, type: 3}
+    items:
+    - {fileID: 11400000, guid: f7e362fb097484ea3b5feb2a1bf71f94, type: 2}
+    - {fileID: 11400000, guid: 682112bef9b5c48f7a047a7aa6943edb, type: 2}
+    - {fileID: 11400000, guid: 5a9ae7b8e16354664a060496fede2f9e, type: 2}
+    - {fileID: 11400000, guid: 6457ac5a1413f4d24af7cf8c16a9d16c, type: 2}
+    - {fileID: 11400000, guid: 313ef97f59bf645bf9c293499648e444, type: 2}
+    - {fileID: 11400000, guid: b709030e398fa49cabfb1bb6ffdbf3da, type: 2}
+    - {fileID: 11400000, guid: d8de9509cd0bc4da9b9d75ec6048b8df, type: 2}
+    - {fileID: 11400000, guid: fc094104ab0004d7baf4aac79112c6ca, type: 2}
+    - {fileID: 11400000, guid: 6297245cf65f44db892a50a714caf6a5, type: 2}
+    - {fileID: 11400000, guid: 2d270f12e40fd43f9961c584fe8c75aa, type: 2}
+    - {fileID: 11400000, guid: ba91af4b67bbf453b8d895f03c4226e9, type: 2}
+    - {fileID: 11400000, guid: 463c130818bf7411ba3d5899837d51cf, type: 2}
+    - {fileID: 11400000, guid: f60920ec722814b7c8938ac848e0d953, type: 2}
+    - {fileID: 11400000, guid: e4f68f22613a04a98a09c09ec8d8fde4, type: 2}
+    - {fileID: 11400000, guid: 458870826e99447d1a4d1b90d2e9d16c, type: 2}
+    - {fileID: 11400000, guid: 42652c4d2aa684507ad0affcb1514498, type: 2}
+  - id: boite_accessoires_1
+    displayName: "Bo\xEEte d'accessoires n\xB01"
+    price: 100
+    icon: {fileID: 21300000, guid: de0bf9f591992441ba97a481e04aeb0c, type: 3}
+    items:
+    - {fileID: 11400000, guid: ea3fd4b67236b4407a4a63d6268fa29d, type: 2}
+    - {fileID: 11400000, guid: 55b70f90db8ad40ec98dfd817d165fdb, type: 2}
+    - {fileID: 11400000, guid: 5c565c5853e854a0da81bafe830e9758, type: 2}
+    - {fileID: 11400000, guid: a391337c7046346cb9c921d54e6f8f15, type: 2}
+    - {fileID: 11400000, guid: 02c6154f6d0a6431cb3e8fee192e15d0, type: 2}
+    - {fileID: 11400000, guid: 86a1fabe7db524d698df362adbe95011, type: 2}
+    - {fileID: 11400000, guid: d279626c8a536412ba09624b31185fa3, type: 2}
+    - {fileID: 11400000, guid: bb6a4c3a772ca49609400777372d5ac6, type: 2}
+    - {fileID: 11400000, guid: d20b696a5248c450caf9ab2253ecf7ba, type: 2}
+    - {fileID: 11400000, guid: d09cfdf6851f14f7b885ef6592fa71d8, type: 2}
+    - {fileID: 11400000, guid: bc16b762a28a24915864609331013d07, type: 2}
+    - {fileID: 11400000, guid: c97f50ba98a2a4c7ba6b00b7794c1735, type: 2}
+    - {fileID: 11400000, guid: e644817f264514ab39e520a04233b16c, type: 2}
+    - {fileID: 11400000, guid: d888359e1235e45e7a777474fcd8b199, type: 2}
+    - {fileID: 11400000, guid: 3153e678ce3d74f378af4db24454fb87, type: 2}
+    - {fileID: 11400000, guid: 9401f7cb80e9c40b2aa371a38adcf153, type: 2}
+  freeItems:
   - {fileID: 11400000, guid: 7d07bbf06ddd2484eab96d87021d63db, type: 2}
-  - {fileID: 11400000, guid: f7e362fb097484ea3b5feb2a1bf71f94, type: 2}
-  - {fileID: 11400000, guid: 682112bef9b5c48f7a047a7aa6943edb, type: 2}
-  - {fileID: 11400000, guid: b709030e398fa49cabfb1bb6ffdbf3da, type: 2}
-  - {fileID: 11400000, guid: f60920ec722814b7c8938ac848e0d953, type: 2}
   - {fileID: 11400000, guid: 53e29cef8643e45248339583c76c42cc, type: 2}
-  - {fileID: 11400000, guid: ea3fd4b67236b4407a4a63d6268fa29d, type: 2}
-  - {fileID: 11400000, guid: 55b70f90db8ad40ec98dfd817d165fdb, type: 2}
-  - {fileID: 11400000, guid: 86a1fabe7db524d698df362adbe95011, type: 2}
-  - {fileID: 11400000, guid: e644817f264514ab39e520a04233b16c, type: 2}
+  - {fileID: 11400000, guid: a2941624ef29d4b8381031d27a7512b5, type: 2}
+  - {fileID: 11400000, guid: 2864d9d48a2f04fe584df239a3fe965b, type: 2}
+  - {fileID: 11400000, guid: 6f77b7de27490489a87294a7bb74c0cd, type: 2}

@@ -1,235 +1,571 @@
-/* Style du shop. Or (#FFD54A) = argent, vert = acheter, bleu = équiper. */
+/* Style du panneau latéral du shop (spec boites §7.2 à §7.5).
+   Les tailles sont pour la résolution de référence 1920 × 1080 (HudPanelSettings) :
+   ce sont celles de la spec (écrites pour 1280 × 720) multipliées par 1,5.
+   Couleurs : or #FFD54A = argent / sélection, vert #2E9E5B = ouvrir, bleu #3B7DD8 = équiper.
+   Les couleurs de RARETÉ ne sont pas ici : le code les lit dans le catalogue (une seule source). */
 
 .shop-root {
-    flex-grow: 1;
-    justify-content: flex-end;   /* pousse le panneau en bas de l'écran */
-    padding: 0 32px 24px 32px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
+/* Le panneau : 660 px de large (440 × 1,5), toute la hauteur sous la barre du haut,
+   fond #2A2A3A à 92 %, coins arrondis à gauche. Le code le fait glisser (translate). */
 .shop-panel {
-    height: 50%;                 /* la moitié basse de l'écran */
-    background-color: rgba(0, 0, 0, 0.78);
-    border-radius: 24px;
-    padding: 20px 32px;
+    position: absolute;
+    right: 0;
+    top: 176px;
+    bottom: 0;
+    width: 660px;
+    background-color: rgba(42, 42, 58, 0.92);
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+    padding: 14px 18px 14px 18px;
 }
 
-/* --- 1. En-tête --- */
+/* --- 1. Onglets --- */
 .shop-header {
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    align-items: stretch;
+    flex-shrink: 0;
 }
 
-.shop-title {
-    font-size: 44px;
-    color: #FFD54A;
+.shop-tab {
+    flex-grow: 1;
+    font-size: 26px;
+    height: 58px;
+    margin: 0 6px 0 0;
+    border-radius: 10px 10px 0 0;
+    border-width: 0 0 4px 0;
+    border-color: rgba(0, 0, 0, 0);
+    color: #C9C3D6;
+    background-color: rgba(0, 0, 0, 0.2);
     -unity-font-style: bold;
 }
 
+.shop-tab:hover {
+    background-color: #33334A;
+}
+
+/* Onglet actif : fond #3A3A50 et soulignement or de 3 px (4,5 px à notre échelle). */
+.shop-tab--active {
+    color: #FFFFFF;
+    background-color: #3A3A50;
+    border-color: #FFD54A;
+}
+
+.shop-close {
+    width: 58px;
+    height: 58px;
+    font-size: 36px;
+    margin: 0;
+    border-radius: 12px;
+    border-width: 0;
+    color: #FFFFFF;
+    background-color: #555566;
+    -unity-font-style: bold;
+}
+
+.shop-close:hover {
+    background-color: #6A6A80;
+}
+
+/* --- 2. Porte-monnaie --- */
 .shop-wallet-row {
     flex-direction: row;
     align-items: center;
+    justify-content: flex-end;
+    margin: 8px 4px 6px 0;
+    flex-shrink: 0;
 }
 
 .shop-wallet {
     font-size: 30px;
     color: #FFD54A;
+    -unity-font-style: bold;
+    margin-left: 6px;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #3A2200;
 }
 
-/* La petite pièce d'or à côté des montants (même image que dans le HUD).
-   Le chemin est relatif à ce fichier .uss ; "scale-to-fit" garde les proportions. */
 .coin {
-    width: 36px;
-    height: 36px;
-    margin-left: 6px;
+    width: 34px;
+    height: 34px;
     background-image: url("../Art/icones_detourees/piece.png");
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
 }
 
-/* Version plus petite, pour le prix écrit sur les cartes */
 .coin--small {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
+    margin-left: 4px;
 }
 
-.shop-close {
-    font-size: 28px;
-    height: 56px;
-    min-width: 160px;
-    border-radius: 12px;
-    border-width: 0;
+/* --- 3. Pages --- */
+.shop-page {
+    flex-grow: 1;
+    flex-shrink: 1;
+    display: none;
+}
+
+.shop-page--active {
+    display: flex;
+}
+
+.shop-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+/* Les barres de défilement restent discrètes. */
+.shop-scroll .unity-scroller--vertical {
+    width: 12px;
+}
+
+/* --- Carte de boîte (onglet Boutique) --- */
+.box-card {
+    background-color: #33334A;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.box-top {
+    flex-direction: row;
+    align-items: center;
+}
+
+.box-image {
+    width: 180px;
+    height: 180px;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.box-title-col {
+    flex-grow: 1;
+    margin-left: 16px;
+}
+
+.box-name {
+    font-size: 32px;
     color: #FFFFFF;
-    background-color: #555555;
+    -unity-font-style: bold;
+    white-space: normal;
+}
+
+.price-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.price-text {
+    font-size: 30px;
+    color: #FFD54A;
     -unity-font-style: bold;
 }
 
-/* --- 2. Onglets --- */
-.shop-tabs {
+/* Progression « Collection : 7 / 16 » et barre fine (or, jamais une couleur de rareté). */
+.progress-row {
+    margin: 10px 0 8px 0;
+    flex-shrink: 0;
+}
+
+.progress-text {
+    font-size: 22px;
+    color: #E6E1EE;
+    margin-bottom: 4px;
+}
+
+.progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    background-color: #FFD54A;
+    border-radius: 4px;
+}
+
+/* Tableau des taux de drop : toujours visible. */
+.rates {
+    background-color: rgba(0, 0, 0, 0.18);
+    border-radius: 10px;
+    padding: 6px 10px;
+}
+
+.rate-row {
     flex-direction: row;
-    margin-top: 8px;
+    align-items: center;
+    height: 34px;
 }
 
-.shop-tab {
-    font-size: 28px;
-    height: 52px;
-    min-width: 200px;
-    margin: 0 12px 0 0;
-    border-radius: 12px;
+.rate-row--header {
+    border-bottom-width: 1px;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.rate-cell {
+    font-size: 21px;
+    color: #E6E1EE;
+    padding: 0;
+    margin: 0;
+}
+
+.rate-row--header .rate-cell {
+    color: #A8A2B8;
+    font-size: 18px;
+}
+
+.rate-dot-cell {
+    width: 34px;
+    align-items: center;
+    justify-content: center;
+}
+
+.rate-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+}
+
+.rate-name {
+    flex-grow: 1;
+    -unity-font-style: bold;
+}
+
+.rate-chance {
+    width: 120px;
+    -unity-text-align: middle-right;
+}
+
+.rate-count {
+    width: 110px;
+    -unity-text-align: middle-right;
+}
+
+.rates-note {
+    font-size: 18px;
+    color: #A8A2B8;
+    white-space: normal;
+    margin: 6px 2px 10px 2px;
+}
+
+.complete-banner {
+    font-size: 21px;
+    color: #FFD54A;
+    background-color: rgba(255, 213, 74, 0.12);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    white-space: normal;
+    -unity-font-style: bold;
+}
+
+.box-buttons {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.open-btn {
+    font-size: 30px;
+    height: 72px;
+    min-width: 280px;
+    margin: 0;
+    border-radius: 14px;
     border-width: 0;
-    color: #CCCCCC;
-    background-color: #333333;
+    color: #FFFFFF;
+    background-color: #2E9E5B;
+    -unity-font-style: bold;
 }
 
-/* L'onglet actif est mis en évidence */
-.shop-tab--active {
+.open-btn:hover {
+    background-color: #38B36A;
+}
+
+.open-btn:disabled {
+    background-color: #555566;
+    color: #AAAAAA;
+    opacity: 1;
+}
+
+.missing {
+    font-size: 22px;
+    color: #D64545;
+    margin-left: 14px;
+    -unity-font-style: bold;
+}
+
+.link-btn {
+    font-size: 22px;
+    color: #C9C3D6;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    margin: 8px 0 0 0;
+    padding: 4px 6px;
+    -unity-font-style: bold;
+    align-self: flex-start;
+}
+
+.link-btn:hover {
+    color: #FFD54A;
+}
+
+/* --- Sous-onglets (Inventaire, Index) --- */
+.subtabs {
+    flex-direction: row;
+    margin: 0 0 8px 0;
+    flex-shrink: 0;
+}
+
+.subtab {
+    font-size: 22px;
+    height: 46px;
+    flex-grow: 1;
+    margin: 0 6px 0 0;
+    border-radius: 10px;
+    border-width: 0;
+    color: #C9C3D6;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.subtab--active {
     color: #222222;
     background-color: #FFD54A;
     -unity-font-style: bold;
 }
 
-/* --- 3. Cartes --- */
-.shop-cards {
-    flex-direction: row;
-    justify-content: center;
-    flex-grow: 1;
-    margin-top: 12px;
+/* --- Grille de cartes d'objets (Inventaire et Index) --- */
+.row-title {
+    font-size: 24px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    margin: 6px 0 4px 2px;
 }
 
-.card {
-    width: 260px;
-    margin: 0 10px;
-    padding: 10px;
-    border-radius: 16px;
+.grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* Le cadre extérieur montre la SÉLECTION (contour or épais) ; la carte intérieure
+   porte le liseré de RARETÉ (couleur posée par le code). */
+.item-frame {
+    width: 146px;
+    margin: 0 4px 8px 0;
+    padding: 0;
+    border-radius: 14px;
     border-width: 4px;
     border-color: rgba(0, 0, 0, 0);
-    background-color: #2A2A3A;
-    align-items: center;
-    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0);
 }
 
-.card:hover {
-    background-color: #3A3A50;
-}
-
-/* La carte sélectionnée : contour or épais */
-.card--selected {
-    border-width: 6px;
+.item-frame--selected {
     border-color: #FFD54A;
 }
 
-/* La zone du visuel : un carré de taille fixe, au centre de la carte, pour que toutes
-   les icônes soient alignées même si les images n'ont pas exactement le même cadrage. */
-.card-visual {
-    width: 140px;
-    height: 140px;
+.item-card {
+    border-radius: 10px;
+    border-width: 3px;
+    border-color: #5A5A70;
+    background-color: #2A2A3A;
+    padding: 4px 4px 6px 4px;
+    align-items: center;
+    min-height: 196px;
+}
+
+.item-frame:hover .item-card {
+    background-color: #3A3A50;
+}
+
+.item-number {
+    font-size: 16px;
+    color: #A8A2B8;
+    align-self: flex-start;
+    margin: 0;
+    padding: 0 2px;
+}
+
+.item-visual {
+    width: 96px;
+    height: 96px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-/* L'icône de l'objet (image détourée). L'image est posée par le code (ShopController). */
-.card-icon {
+.item-icon {
     width: 100%;
     height: 100%;
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* Secours si une couleur n'a pas d'icône : un carré rempli de la couleur */
-.card-swatch {
-    width: 90px;
-    height: 90px;
+/* Silhouette d'un objet non obtenu : l'icône teintée #15121F à 0,9 d'opacité. */
+.item-icon--silhouette {
+    -unity-background-image-tint-color: rgba(21, 18, 31, 0.9);
+}
+
+/* Secret non obtenu : un grand « ? » rose. */
+.item-question {
+    font-size: 72px;
+    color: #FF4FD8;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.item-swatch {
+    width: 70px;
+    height: 70px;
     border-radius: 12px;
 }
 
-/* « Aucun chapeau » : un cercle barré dessiné en USS (pas d'image).
-   Le cercle = un carré aux coins très arrondis avec une bordure épaisse. */
-.card-none {
-    width: 96px;
-    height: 96px;
-    border-radius: 48px;
-    border-width: 8px;
+/* « Rien » : un cercle barré dessiné en USS (pas d'image). */
+.item-none {
+    width: 70px;
+    height: 70px;
+    border-radius: 35px;
+    border-width: 6px;
     border-color: #C9C3D6;
 }
 
-/* La barre : un trait vertical placé au milieu du cercle, puis tourné de 45°.
-   (96 - 2×8 de bordure = 80 px d'intérieur ; (80 - 8) / 2 = 36 px pour le centrer.) */
-.card-none-bar {
+.item-none-bar {
     position: absolute;
-    width: 8px;
-    height: 80px;
-    left: 36px;
+    width: 6px;
+    height: 58px;
+    left: 26px;
     top: 0;
     background-color: #C9C3D6;
     rotate: 45deg;
 }
 
-.card-name {
-    font-size: 24px;
+.item-name {
+    font-size: 18px;
     color: #FFFFFF;
     -unity-text-align: middle-center;
+    white-space: normal;
+    margin: 2px 0 0 0;
+    padding: 0;
+    -unity-font-style: bold;
 }
 
-/* La ligne d'état (« Équipé ✓ », « Possédé », ou le prix + une pièce) */
-.card-state-row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-state {
-    font-size: 24px;
-    color: #DDDDDD;
+.item-rarity {
+    font-size: 15px;
+    -unity-font-style: bold;
     -unity-text-align: middle-center;
     margin: 0;
     padding: 0;
 }
 
-.card-state--price {
-    color: #FFD54A;
-    -unity-font-style: bold;
+.item-extra {
+    font-size: 15px;
+    color: #C9C3D6;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
 }
 
-.card-state--equipped {
+.item-extra--equipped {
     color: #6FE39A;
     -unity-font-style: bold;
 }
 
-/* --- 4. Zone d'action --- */
-.shop-actions {
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    margin-top: 12px;
-}
-
-.shop-action {
-    font-size: 30px;
-    height: 70px;
-    min-width: 320px;
-    border-radius: 14px;
-    border-width: 0;
-    color: #FFFFFF;
+/* Badge « ×3 » en haut à droite. */
+.item-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 17px;
+    color: #222222;
+    background-color: #E6E1EE;
+    border-radius: 9px;
+    padding: 0 7px;
     -unity-font-style: bold;
 }
 
-.shop-action--buy {
-    background-color: #2E9E5B;
+/* --- Zone d'action de l'Inventaire --- */
+.inv-actions {
+    flex-shrink: 0;
+    border-top-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 8px;
 }
 
-.shop-action--equip {
+.inv-selected {
+    font-size: 22px;
+    color: #E6E1EE;
+    margin-bottom: 6px;
+}
+
+.inv-buttons {
+    flex-direction: row;
+    margin-bottom: 8px;
+}
+
+.action-btn {
+    font-size: 24px;
+    height: 58px;
+    margin: 0 8px 0 0;
+    border-radius: 12px;
+    border-width: 0;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    padding: 0 18px;
+}
+
+.action-btn--equip {
     background-color: #3B7DD8;
+    flex-grow: 1;
 }
 
-/* Bouton grisé (désactivé) */
-.shop-action:disabled {
-    background-color: #555555;
+.action-btn--equip:hover {
+    background-color: #4A8CE6;
+}
+
+.action-btn--sell {
+    background-color: #5B5BD6;
+    flex-grow: 1;
+}
+
+.action-btn--sell:hover {
+    background-color: #6B6BE6;
+}
+
+.action-btn--sellall {
+    background-color: #5B5BD6;
+    margin: 0;
+}
+
+.action-btn--sellall:hover {
+    background-color: #6B6BE6;
+}
+
+.action-btn:disabled {
+    background-color: #555566;
     color: #AAAAAA;
     opacity: 1;
 }
 
-.shop-missing {
-    font-size: 26px;
-    color: #FF9A9A;
-    margin-left: 20px;
+/* --- Index --- */
+.idx-info-row {
+    flex-shrink: 0;
+    min-height: 60px;
+    border-top-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    padding-top: 6px;
+}
+
+.idx-info {
+    font-size: 21px;
+    color: #E6E1EE;
+    white-space: normal;
 }

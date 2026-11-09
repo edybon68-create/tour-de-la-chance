@@ -15,9 +15,14 @@ MonoBehaviour:
   id: couleur_or
   displayName: Or massif
   category: 0
-  price: 300
+  slot: 0
+  rarity: super_rare
+  free: 0
   icon: {fileID: 21300000, guid: 2e26bb5a81cf248bca73d3ea206cea57, type: 3}
+  skinStyle: 0
   color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   metallic: 1
   smoothness: 0.8
-  hatPrefab: {fileID: 0}
+  accessoryPrefab: {fileID: 0}
+  animation: 0

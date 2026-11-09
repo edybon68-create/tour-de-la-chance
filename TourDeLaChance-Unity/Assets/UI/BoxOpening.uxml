@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- L'écran d'ouverture d'une boîte (spec boites §7.6 et §7.7). Il recouvre TOUT
+         (HUD et panneau du shop) : son UIDocument est dessiné au-dessus des autres.
+         Le résultat est déjà tiré et sauvegardé quand il s'affiche : il ne fait que le raconter.
+         Les effets (halo, rayons, étincelles) sont créés par le code (BoxOpeningController).
+         Style : BoxOpening.uss. -->
+    <Style src="BoxOpening.uss" />
+    <ui:VisualElement name="ov-root" class="ov-root">
+        <ui:VisualElement name="ov-veil" class="ov-full ov-veil" picking-mode="Ignore" />
+        <!-- Tout ce qui tremble avec l'écran (secousse de la révélation) -->
+        <ui:VisualElement name="ov-content" class="ov-full" picking-mode="Ignore">
+            <!-- Le « centre de la scène » : un point (taille 0) autour duquel tout est placé -->
+            <ui:VisualElement name="ov-stage" class="ov-stage" picking-mode="Ignore" />
+            <!-- L'écran de résultat, sous la carte -->
+            <ui:VisualElement name="ov-result" class="ov-result" picking-mode="Ignore">
+                <ui:Label name="ov-name" text="" class="ov-name" picking-mode="Ignore" />
+                <ui:Label name="ov-rarity" text="" class="ov-rarity" picking-mode="Ignore" />
+                <ui:Label name="ov-boxline" text="" class="ov-boxline" picking-mode="Ignore" />
+                <ui:Label name="ov-badge" text="" class="ov-badge" picking-mode="Ignore" />
+                <ui:VisualElement class="ov-buttons" picking-mode="Ignore">
+                    <ui:Button name="ov-equip" text="Équiper" class="ov-btn ov-btn--equip" />
+                    <ui:Button name="ov-sell" text="Vendre" class="ov-btn ov-btn--sell" />
+                    <ui:Button name="ov-reopen" text="Rouvrir" class="ov-btn ov-btn--reopen no-ui-sound" />
+                    <ui:Button name="ov-ok" text="OK" class="ov-btn ov-btn--ok" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <!-- Écran noir du Secret, avec « … » au centre -->
+        <ui:VisualElement name="ov-black" class="ov-full ov-black" picking-mode="Ignore">
+            <ui:Label text="…" class="ov-dots" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <!-- Flash plein écran (blanc à l'ouverture, coloré à la révélation) -->
+        <ui:VisualElement name="ov-flash" class="ov-full ov-flash" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -6,50 +5,75 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// L'interface du shop (Shop.uxml). Elle AFFICHE le catalogue et TRANSMET les clics :
-    /// acheter et équiper sont décidés par la classe Shop, ouvrir/fermer par le GameManager.
-    /// Elle s'occupe aussi de l'aperçu : cliquer une carte montre l'objet sur le personnage,
-    /// et fermer le shop remet les objets équipés.
+    /// Le panneau latéral du shop (Shop.uxml, spec boites §7.2 et §7.3). Il AFFICHE et
+    /// TRANSMET les clics : ouvrir une boîte, équiper et vendre sont décidés par la classe
+    /// Shop ; ouvrir / fermer le panneau par le GameManager.
+    ///
+    /// Il gère : le glissement du panneau, les trois onglets, le rappel du porte-monnaie,
+    /// la page « Boutique » (une carte par boîte), et l'aperçu sur le personnage. Les pages
+    /// « Inventaire » et « Index » sont confiées à InventoryPage et IndexPage.
+    /// Fermer le panneau ou changer d'onglet remet les objets équipés sur le personnage.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class ShopController : MonoBehaviour
     {
+        enum Tab { Boutique, Inventaire, Index }
+
         [SerializeField] GameManager game;
         [SerializeField] PlayerAvatar avatar;
         [SerializeField] PlayerAnimator avatarAnimator; // petit saut d'accueil à l'aperçu
+        [SerializeField] BoxOpeningController opening;  // l'écran d'ouverture d'une boîte
 
-        VisualElement root, cardsRow;
-        Label walletLabel, missingLabel;
-        Button closeButton, colorTab, hatTab, actionButton;
+        const float PanelWidth = 660f;   // 440 px de la spec × 1,5 (référence 1920 × 1080)
+        const float SlideInTime = 0.25f;  // ease-out
+        const float SlideOutTime = 0.2f;  // ease-in
 
-        ShopCategory currentTab = ShopCategory.Couleur;
-        ShopItem selected;
+        VisualElement root, panel, pageBoutique, pageInventaire, pageIndex;
+        ScrollView boxList;
+        Label walletLabel;
+        Button closeButton, tabBoutique, tabInventaire, tabIndex;
+        InventoryPage inventory;
+        IndexPage index;
+
+        Tab currentTab = Tab.Boutique;
         bool panelShown;
+        float slideTime = -1f; // ≥ 0 pendant un glissement
+        bool slidingIn;
+        readonly RollingCounter wallet = new RollingCounter();
 
-        // Anti double-clic : juste après un achat, le bouton devient « Équiper ».
-        // Sans cette petite pause, le 2e clic d'un double-clic équiperait l'objet
-        // alors que le joueur voulait seulement l'acheter.
-        const float ClickPauseAfterBuy = 0.4f;
-        float ignoreClicksUntil;
+        /// Le panneau est-il affiché (pour les tests) ?
+        public bool PanelShown => panelShown;
 
         void OnEnable()
         {
             var doc = GetComponent<UIDocument>().rootVisualElement;
             root = doc.Q<VisualElement>("shop-root");
-            cardsRow = doc.Q<VisualElement>("cards");
+            panel = doc.Q<VisualElement>("panel");
+            pageBoutique = doc.Q<VisualElement>("page-boutique");
+            boxList = doc.Q<ScrollView>("page-boutique");
+            pageInventaire = doc.Q<VisualElement>("page-inventaire");
+            pageIndex = doc.Q<VisualElement>("page-index");
             walletLabel = doc.Q<Label>("shop-wallet");
-            missingLabel = doc.Q<Label>("missing");
             closeButton = doc.Q<Button>("close");
-            colorTab = doc.Q<Button>("tab-couleur");
-            hatTab = doc.Q<Button>("tab-chapeau");
-            actionButton = doc.Q<Button>("action");
+            tabBoutique = doc.Q<Button>("tab-boutique");
+            tabInventaire = doc.Q<Button>("tab-inventaire");
+            tabIndex = doc.Q<Button>("tab-index");
+
+            inventory = new InventoryPage(pageInventaire);
+            index = new IndexPage(pageIndex);
+            inventory.PreviewRequested += Preview;
+            inventory.Equipped += OnEquipped;
+            inventory.Sold += OnSold;
+            index.PreviewRequested += Preview;
+            index.ShowInInventoryRequested += ShowInInventory;
 
             closeButton.clicked += game.CloseShop;
-            colorTab.clicked += ShowColorTab;
-            hatTab.clicked += ShowHatTab;
-            actionButton.clicked += OnActionClicked;
+            tabBoutique.clicked += OnTabBoutique;
+            tabInventaire.clicked += OnTabInventaire;
+            tabIndex.clicked += OnTabIndex;
             game.Changed += OnGameChanged;
             Shop.Changed += Refresh;
+            if (opening != null) opening.Closed += OnOpeningClosed;
             UiSounds.Register(root); // ui_survol / ui_clic sur tous les boutons du panneau
 
             panelShown = false;
@@ -60,21 +84,32 @@ namespace TourDeLaChance
         void OnDisable()
         {
             closeButton.clicked -= game.CloseShop;
-            colorTab.clicked -= ShowColorTab;
-            hatTab.clicked -= ShowHatTab;
-            actionButton.clicked -= OnActionClicked;
+            tabBoutique.clicked -= OnTabBoutique;
+            tabInventaire.clicked -= OnTabInventaire;
+            tabIndex.clicked -= OnTabIndex;
             game.Changed -= OnGameChanged;
             Shop.Changed -= Refresh;
+            if (opening != null) opening.Closed -= OnOpeningClosed;
             UiSounds.Unregister(root);
         }
 
         void Update()
         {
-            // La touche Échap ferme le shop, comme le bouton « Fermer ».
+            // Échap ferme le panneau, comme « × » — sauf pendant (ou juste à la fin d')une
+            // ouverture de boîte : là, Échap appartient à l'écran d'ouverture.
             var kb = Keyboard.current;
-            if (game.ShopOpen && kb != null && kb.escapeKey.wasPressedThisFrame)
+            bool openingBusy = opening != null && opening.BlocksEscape;
+            if (game.ShopOpen && !openingBusy && kb != null && kb.escapeKey.wasPressedThisFrame)
                 game.CloseShop();
+
+            wallet.Tick(Time.deltaTime);
+            walletLabel.text = wallet.Displayed.ToString();
+            AnimateSlide();
         }
+
+        // =====================================================================
+        // Ouvrir / fermer le panneau
+        // =====================================================================
 
         /// Le GameManager a changé : on ouvre ou ferme le panneau pour suivre ShopOpen.
         void OnGameChanged()
@@ -85,202 +120,246 @@ namespace TourDeLaChance
             if (panelShown)
             {
                 root.style.display = DisplayStyle.Flex;
-                SelectTab(ShopCategory.Couleur); // onglet « Couleurs » par défaut
+                wallet.Snap(Wallet.Coins);
+                SelectTab(Tab.Boutique); // onglet « Boutique » par défaut (spec §7.1)
+                StartSlide(true);
             }
             else
             {
-                root.style.display = DisplayStyle.None;
+                StartSlide(false);
                 avatar.ShowEquipped(); // fin de l'aperçu : on remet les objets équipés
             }
         }
 
-        void ShowColorTab() => SelectTab(ShopCategory.Couleur);
-        void ShowHatTab() => SelectTab(ShopCategory.Chapeau);
-
-        /// Change d'onglet : la carte sélectionnée devient l'objet équipé de cet onglet.
-        void SelectTab(ShopCategory category)
+        void StartSlide(bool goingIn)
         {
-            currentTab = category;
-            selected = Shop.GetEquipped(category);
-            // L'aperçu de cette catégorie suit la carte sélectionnée (sinon on garderait
-            // l'aperçu d'un objet qui n'est plus sélectionné). L'autre catégorie ne bouge pas.
-            if (selected != null) avatar.Show(selected);
-            Refresh();
+            slidingIn = goingIn;
+            slideTime = 0f;
+            AnimateSlide();
         }
 
-        /// Clic sur une carte : sélection + aperçu sur le personnage (rien n'est sauvegardé).
-        void SelectCard(ShopItem item)
+        /// Glissement depuis la droite : 0,25 s ease-out à l'ouverture, 0,2 s ease-in à la fermeture.
+        void AnimateSlide()
         {
-            selected = item;
-            avatar.Show(item);
-            if (avatarAnimator != null) avatarAnimator.WelcomeHop();
-            Refresh();
-        }
-
-        /// Clic sur le bouton d'action : acheter ou équiper selon l'état de l'objet.
-        /// Shop.TryBuy / TryEquip vérifient eux-mêmes si c'est permis.
-        void OnActionClicked()
-        {
-            if (selected == null || Time.unscaledTime < ignoreClicksUntil) return;
-            if (!Shop.IsOwned(selected))
+            if (slideTime < 0f) return;
+            slideTime += Time.deltaTime;
+            float duration = slidingIn ? SlideInTime : SlideOutTime;
+            float k = Mathf.Clamp01(slideTime / duration);
+            float x = slidingIn ? PanelWidth * (1f - Ease.Out(k)) : PanelWidth * Ease.In(k);
+            panel.style.translate = new Translate(x, 0f);
+            if (k >= 1f)
             {
-                if (Shop.TryBuy(selected))
-                {
-                    ignoreClicksUntil = Time.unscaledTime + ClickPauseAfterBuy;
-                    if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.PiecesAchat);
-                }
+                slideTime = -1f;
+                if (!slidingIn) root.style.display = DisplayStyle.None;
             }
-            else if (!Shop.IsEquipped(selected))
-            {
-                if (Shop.TryEquip(selected))
-                {
-                    avatar.Show(selected);
-                    if (avatarAnimator != null) avatarAnimator.WelcomeHop();
-                }
-            }
-            // (Shop.Changed déclenche Refresh)
         }
 
-        /// Redessine tout le panneau à partir de l'état du Shop et du porte-monnaie.
+        // =====================================================================
+        // Onglets
+        // =====================================================================
+
+        void OnTabBoutique() => SelectTab(Tab.Boutique);
+        void OnTabInventaire() => SelectTab(Tab.Inventaire);
+        void OnTabIndex() => SelectTab(Tab.Index);
+
+        /// Change d'onglet : l'aperçu s'arrête (on remet les objets équipés).
+        void SelectTab(Tab tab, ShopItem inventoryFocus = null, LootBox indexFocus = null)
+        {
+            currentTab = tab;
+            avatar.ShowEquipped();
+            ShopUi.SetClass(tabBoutique, "shop-tab--active", tab == Tab.Boutique);
+            ShopUi.SetClass(tabInventaire, "shop-tab--active", tab == Tab.Inventaire);
+            ShopUi.SetClass(tabIndex, "shop-tab--active", tab == Tab.Index);
+            ShopUi.SetClass(pageBoutique, "shop-page--active", tab == Tab.Boutique);
+            ShopUi.SetClass(pageInventaire, "shop-page--active", tab == Tab.Inventaire);
+            ShopUi.SetClass(pageIndex, "shop-page--active", tab == Tab.Index);
+
+            switch (tab)
+            {
+                case Tab.Boutique: RefreshBoutique(); boxList.scrollOffset = Vector2.zero; break;
+                case Tab.Inventaire: inventory.Open(inventoryFocus); break;
+                case Tab.Index: index.Open(indexFocus); break;
+            }
+        }
+
+        /// Raccourci « Voir dans l'inventaire » depuis l'Index.
+        void ShowInInventory(ShopItem item) => SelectTab(Tab.Inventaire, inventoryFocus: item);
+
+        /// La collection ou le porte-monnaie a changé : on redessine la page visible.
         void Refresh()
         {
             if (!panelShown) return;
-
-            walletLabel.text = $"Porte-monnaie : {Wallet.Coins}"; // la pièce d'or suit (Shop.uxml)
-            SetClass(colorTab, "shop-tab--active", currentTab == ShopCategory.Couleur);
-            SetClass(hatTab, "shop-tab--active", currentTab == ShopCategory.Chapeau);
-
-            // Les cartes sont recréées à chaque fois : il n'y en a que 5, c'est très simple.
-            cardsRow.Clear();
-            List<ShopItem> items = Shop.ItemsIn(currentTab);
-            foreach (var item in items)
-                cardsRow.Add(CreateCard(item));
-
-            RefreshAction();
+            if (wallet.Target != Wallet.Coins) wallet.RollTo(Wallet.Coins, 0.4f, Ease.Out);
+            switch (currentTab)
+            {
+                case Tab.Boutique: RefreshBoutique(); break;
+                case Tab.Inventaire: inventory.Refresh(); break;
+                case Tab.Index: index.Refresh(); break;
+            }
         }
 
-        VisualElement CreateCard(ShopItem item)
+        // =====================================================================
+        // Aperçu, équiper, vendre (transmis par les pages)
+        // =====================================================================
+
+        void Preview(ShopItem item)
         {
-            // Une carte est un bouton (cliquable) qui contient visuel, nom et étiquette d'état.
-            var card = new Button(() => SelectCard(item));
-            card.AddToClassList("card");
-            SetClass(card, "card--selected", item == selected);
+            avatar.Show(item);
+            if (avatarAnimator != null) avatarAnimator.WelcomeHop();
+        }
 
-            card.Add(CreateVisual(item));
+        void OnEquipped(ShopItem item)
+        {
+            avatar.ShowEquipped();
+            if (avatarAnimator != null) avatarAnimator.WelcomeHop();
+        }
 
-            var nameLabel = new Label(item.DisplayName);
-            nameLabel.AddToClassList("card-name");
-            card.Add(nameLabel);
+        void OnSold()
+        {
+            if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Vente);
+        }
 
-            // Ligne d'état : un texte, plus une petite pièce d'or quand c'est un prix.
-            var stateRow = new VisualElement();
-            stateRow.AddToClassList("card-state-row");
-            var state = new Label();
-            state.AddToClassList("card-state");
-            stateRow.Add(state);
-            if (Shop.IsEquipped(item))
-            {
-                state.text = "Équipé ✓";
-                state.AddToClassList("card-state--equipped");
-            }
-            else if (Shop.IsOwned(item))
-            {
-                state.text = item.IsFree ? "Gratuit" : "Possédé";
-            }
-            else
-            {
-                state.text = item.Price.ToString();
-                state.AddToClassList("card-state--price");
-                var coin = new VisualElement();
-                coin.AddToClassList("coin");
-                coin.AddToClassList("coin--small");
-                stateRow.Add(coin);
-            }
-            card.Add(stateRow);
+        /// Fin de l'écran d'ouverture (« OK ») : retour à l'onglet Boutique, objets équipés.
+        void OnOpeningClosed()
+        {
+            if (panelShown) SelectTab(Tab.Boutique);
+            else avatar.ShowEquipped();
+        }
+
+        // =====================================================================
+        // Page « Boutique » : une carte par boîte (spec §7.3)
+        // =====================================================================
+
+        void RefreshBoutique()
+        {
+            boxList.Clear();
+            foreach (var box in Shop.Boxes) boxList.Add(BoxCard(box));
+        }
+
+        VisualElement BoxCard(LootBox box)
+        {
+            var card = new VisualElement();
+            card.AddToClassList("box-card");
+
+            // 1. Image + nom + prix
+            var top = new VisualElement { pickingMode = PickingMode.Ignore };
+            top.AddToClassList("box-top");
+            var image = new VisualElement { pickingMode = PickingMode.Ignore };
+            image.AddToClassList("box-image");
+            if (box.icon != null) image.style.backgroundImage = new StyleBackground(box.icon);
+            top.Add(image);
+            var titleCol = new VisualElement { pickingMode = PickingMode.Ignore };
+            titleCol.AddToClassList("box-title-col");
+            titleCol.Add(ShopUi.NewLabel(box.displayName, "box-name"));
+            var priceRow = new VisualElement { pickingMode = PickingMode.Ignore };
+            priceRow.AddToClassList("price-row");
+            priceRow.Add(ShopUi.NewLabel(box.price.ToString(), "price-text"));
+            var coin = new VisualElement { pickingMode = PickingMode.Ignore };
+            coin.AddToClassList("coin");
+            coin.AddToClassList("coin--small");
+            priceRow.Add(coin);
+            titleCol.Add(priceRow);
+            top.Add(titleCol);
+            card.Add(top);
+
+            // 2. Progression
+            int found = Shop.FoundCount(box), total = box.items.Count;
+            var progressRow = new VisualElement { pickingMode = PickingMode.Ignore };
+            progressRow.AddToClassList("progress-row");
+            progressRow.Add(ShopUi.NewLabel($"Collection : {found} / {total}", "progress-text"));
+            var bar = new VisualElement { pickingMode = PickingMode.Ignore };
+            bar.AddToClassList("progress-bar");
+            var fill = new VisualElement { pickingMode = PickingMode.Ignore };
+            fill.AddToClassList("progress-fill");
+            fill.style.width = Length.Percent(total > 0 ? 100f * found / total : 0f);
+            bar.Add(fill);
+            progressRow.Add(bar);
+            card.Add(progressRow);
+
+            // 3. Tableau des taux : TOUT est lu dans le catalogue (aucun chiffre en dur).
+            card.Add(RatesTable(box));
+            card.Add(ShopUi.NewLabel("Chaque ouverture donne 1 objet. Les chances sont toujours les mêmes, à chaque ouverture.", "rates-note"));
+
+            // 5. Collection complète : la boîte reste ouvrable.
+            if (Shop.IsComplete(box))
+                card.Add(ShopUi.NewLabel("Collection complète ! Chaque ouverture donnera un doublon.", "complete-banner"));
+
+            // 4. Bouton « Ouvrir — 100 » (grisé + « Il te manque X pièces » si pas assez).
+            var buttons = new VisualElement();
+            buttons.AddToClassList("box-buttons");
+            var openButton = new Button(() => OnOpenClicked(box)) { text = $"Ouvrir — {box.price}" };
+            openButton.AddToClassList("open-btn");
+            openButton.AddToClassList(UiSounds.SilentClass); // le son de paiement suffit
+            bool canOpen = Shop.CanOpen(box);
+            openButton.SetEnabled(canOpen);
+            buttons.Add(openButton);
+            if (!canOpen) buttons.Add(ShopUi.NewLabel($"Il te manque {Shop.MissingCoins(box)} pièces", "missing"));
+            card.Add(buttons);
+
+            var link = new Button(() => SelectTab(Tab.Index, indexFocus: box)) { text = "Voir le contenu" };
+            link.AddToClassList("link-btn");
+            card.Add(link);
             return card;
         }
 
-        /// Le visuel de la carte, dans un cadre carré de taille fixe (classe card-visual)
-        /// pour que toutes les icônes soient centrées et alignées.
-        static VisualElement CreateVisual(ShopItem item)
+        VisualElement RatesTable(LootBox box)
         {
-            var frame = new VisualElement();
-            frame.AddToClassList("card-visual");
-            frame.pickingMode = PickingMode.Ignore; // le clic doit atteindre la carte
-
-            if (item.Icon != null)
+            var table = new VisualElement { pickingMode = PickingMode.Ignore };
+            table.AddToClassList("rates");
+            table.Add(RateRow(null, "Rareté", "Chance", "Objets", header: true));
+            foreach (var rarity in Shop.Catalog.Rarities)
             {
-                // Cas normal : l'icône détourée de la fiche ShopItem.
-                var icon = new VisualElement();
-                icon.AddToClassList("card-icon");
-                icon.style.backgroundImage = new StyleBackground(item.Icon);
-                icon.pickingMode = PickingMode.Ignore;
-                frame.Add(icon);
+                int count = Shop.ItemsOfRarity(box, rarity.id).Count;
+                table.Add(RateRow(rarity, rarity.displayName, ShopUi.Percent(Shop.RarityChance(rarity)),
+                                  count.ToString(), header: false));
             }
-            else if (item.Category == ShopCategory.Chapeau)
-            {
-                // Pas d'icône pour un chapeau = « Aucun chapeau » : un cercle barré en USS.
-                var circle = new VisualElement();
-                circle.AddToClassList("card-none");
-                circle.pickingMode = PickingMode.Ignore;
-                var bar = new VisualElement();
-                bar.AddToClassList("card-none-bar");
-                bar.pickingMode = PickingMode.Ignore;
-                circle.Add(bar);
-                frame.Add(circle);
-            }
-            else
-            {
-                // Secours pour une couleur sans icône : un carré de la couleur.
-                var swatch = new VisualElement();
-                swatch.AddToClassList("card-swatch");
-                swatch.style.backgroundColor = item.Color;
-                swatch.pickingMode = PickingMode.Ignore;
-                frame.Add(swatch);
-            }
-            return frame;
+            return table;
         }
 
-        /// Le bouton d'action suit le tableau de la spec (§5.2, zone d'action).
-        void RefreshAction()
+        static VisualElement RateRow(RarityDef rarity, string name, string chance, string count, bool header)
         {
-            actionButton.RemoveFromClassList("shop-action--buy");
-            actionButton.RemoveFromClassList("shop-action--equip");
-            missingLabel.text = "";
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("rate-row");
+            if (header) row.AddToClassList("rate-row--header");
 
-            if (selected == null)
+            var dotCell = new VisualElement { pickingMode = PickingMode.Ignore };
+            dotCell.AddToClassList("rate-dot-cell");
+            if (rarity != null)
             {
-                actionButton.style.display = DisplayStyle.None;
-                return;
+                var dot = new VisualElement { pickingMode = PickingMode.Ignore };
+                dot.AddToClassList("rate-dot");
+                dot.style.backgroundColor = rarity.color; // pastille : couleur de base
+                dotCell.Add(dot);
             }
-            actionButton.style.display = DisplayStyle.Flex;
+            row.Add(dotCell);
 
-            if (!Shop.IsOwned(selected))
-            {
-                actionButton.text = $"Acheter — {selected.Price}";
-                actionButton.AddToClassList("shop-action--buy");
-                bool canBuy = Shop.CanBuy(selected);
-                actionButton.SetEnabled(canBuy);
-                if (!canBuy)
-                    missingLabel.text = $"Il te manque {Shop.MissingCoins(selected)} pièces";
-            }
-            else if (!Shop.IsEquipped(selected))
-            {
-                actionButton.text = "Équiper";
-                actionButton.AddToClassList("shop-action--equip");
-                actionButton.SetEnabled(true);
-            }
-            else
-            {
-                actionButton.text = "Équipé ✓";
-                actionButton.SetEnabled(false);
-            }
+            var nameLabel = ShopUi.NewLabel(name, "rate-cell");
+            nameLabel.AddToClassList("rate-name");
+            if (rarity != null) ShopUi.ColorText(nameLabel, rarity); // nom : couleur « texte »
+            row.Add(nameLabel);
+            var chanceLabel = ShopUi.NewLabel(chance, "rate-cell");
+            chanceLabel.AddToClassList("rate-chance");
+            row.Add(chanceLabel);
+            var countLabel = ShopUi.NewLabel(count, "rate-cell");
+            countLabel.AddToClassList("rate-count");
+            row.Add(countLabel);
+            return row;
         }
 
-        static void SetClass(VisualElement element, string className, bool on)
+        /// Clic sur « Ouvrir » : la règle (payer, tirer, sauvegarder) est dans Shop.TryOpenBox ;
+        /// ici on transmet le clic puis on lance l'animation avec le résultat déjà connu.
+        /// Double-clic : au 2e clic, l'écran d'ouverture recouvre déjà tout (et Shop refuse
+        /// si le solde ne suffit plus).
+        void OnOpenClicked(LootBox box)
         {
-            if (on) element.AddToClassList(className);
-            else element.RemoveFromClassList(className);
+            if (opening == null || opening.IsBusy) return;
+            if (Shop.TryOpenBox(box, out var result)) opening.Play(result);
         }
+
+        /// OUTIL DE TEST : simule un clic sur « Ouvrir » d'une boîte (depuis `script eval`).
+        public void DebugClickOpen(string boxId) => OnOpenClicked(Shop.FindBox(boxId));
+
+        /// OUTIL DE TEST : affiche un onglet (0 = Boutique, 1 = Inventaire, 2 = Index).
+        public void DebugSelectTab(int tab) => SelectTab((Tab)tab);
     }
 }

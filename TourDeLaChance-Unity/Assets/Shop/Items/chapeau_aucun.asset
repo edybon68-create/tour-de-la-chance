@@ -13,11 +13,16 @@ MonoBehaviour:
   m_Name: chapeau_aucun
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: chapeau_aucun
-  displayName: Aucun chapeau
+  displayName: "Rien sur la t\xEAte"
   category: 1
-  price: 0
+  slot: 0
+  rarity: 
+  free: 1
   icon: {fileID: 0}
+  skinStyle: 0
   color: {r: 1, g: 1, b: 1, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   metallic: 0
   smoothness: 0.3
-  hatPrefab: {fileID: 0}
+  accessoryPrefab: {fileID: 0}
+  animation: 0

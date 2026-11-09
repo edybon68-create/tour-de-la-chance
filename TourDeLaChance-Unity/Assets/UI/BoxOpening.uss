@@ -1,0 +1,169 @@
+/* Écran d'ouverture d'une boîte (spec boites §7.6, §7.7). Tailles pour la référence
+   1920 × 1080 : celles de la spec (pour 1280 × 720) multipliées par 1,5.
+   Les couleurs de rareté sont posées par le code (lues dans le catalogue). */
+
+.ov-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: none;
+}
+
+.ov-full {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+/* Voile violet nuit #1F1730 à 85 % */
+.ov-veil {
+    background-color: rgba(31, 23, 48, 0.85);
+}
+
+/* Le centre de la scène : à mi-largeur, un peu au-dessus du milieu (pour laisser la place
+   à l'écran de résultat en dessous). Taille 0 : les effets sont placés autour de ce point. */
+.ov-stage {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    width: 0;
+    height: 0;
+    overflow: visible;
+}
+
+/* Un effet centré sur le point de la scène (taille et décalage posés par le code). */
+.ov-centered {
+    position: absolute;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.ov-card {
+    position: absolute;
+    align-items: center;
+}
+
+.ov-card-icon {
+    width: 330px;
+    height: 330px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Texte « Rare ! », « LÉGENDAIRE ! »… : une lettre par Label (pour les faire sauter). */
+.ov-rarity-word {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 4px;
+}
+
+.ov-letter {
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: #3A2200;
+    padding: 0;
+    margin: 0;
+}
+
+.ov-spark {
+    position: absolute;
+}
+
+.ov-black {
+    background-color: #0B0812;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.ov-dots {
+    font-size: 96px;
+    color: #E6E1EE;
+    -unity-font-style: bold;
+}
+
+.ov-flash {
+    background-color: #FFFFFF;
+    opacity: 0;
+}
+
+/* --- Écran de résultat --- */
+.ov-result {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 66%;
+    align-items: center;
+    display: none;
+}
+
+.ov-name {
+    font-size: 44px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #000000;
+}
+
+.ov-rarity {
+    font-size: 28px;
+    -unity-font-style: bold;
+}
+
+.ov-boxline {
+    font-size: 22px;
+    color: #C9C3D6;
+    margin-top: 2px;
+}
+
+.ov-badge {
+    font-size: 24px;
+    -unity-font-style: bold;
+    border-radius: 10px;
+    padding: 2px 14px;
+    margin: 8px 0 12px 0;
+}
+
+.ov-badge--new {
+    color: #3A2200;
+    background-color: #FFD54A;
+}
+
+.ov-badge--dup {
+    color: #222222;
+    background-color: #B8B4C4;
+}
+
+.ov-buttons {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.ov-btn {
+    font-size: 28px;
+    height: 70px;
+    min-width: 180px;
+    margin: 0 8px;
+    padding: 0 22px;
+    border-radius: 14px;
+    border-width: 0;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+}
+
+.ov-btn--equip { background-color: #3B7DD8; }
+.ov-btn--equip:hover { background-color: #4A8CE6; }
+.ov-btn--sell { background-color: #5B5BD6; }
+.ov-btn--sell:hover { background-color: #6B6BE6; }
+.ov-btn--reopen { background-color: #2E9E5B; }
+.ov-btn--reopen:hover { background-color: #38B36A; }
+.ov-btn--ok { background-color: #555566; }
+.ov-btn--ok:hover { background-color: #6A6A80; }
+
+.ov-btn:disabled {
+    background-color: #444455;
+    color: #9A9AAA;
+    opacity: 1;
+}

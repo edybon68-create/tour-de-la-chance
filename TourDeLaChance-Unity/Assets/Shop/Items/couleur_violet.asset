@@ -15,9 +15,14 @@ MonoBehaviour:
   id: couleur_violet
   displayName: Violet magique
   category: 0
-  price: 150
+  slot: 0
+  rarity: peu_commun
+  free: 0
   icon: {fileID: 21300000, guid: 19d6580b6d7b14905aa65e6136fa9d13, type: 3}
+  skinStyle: 0
   color: {r: 0.5568628, g: 0.35686275, b: 0.8392157, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   metallic: 0
   smoothness: 0.6
-  hatPrefab: {fileID: 0}
+  accessoryPrefab: {fileID: 0}
+  animation: 0
