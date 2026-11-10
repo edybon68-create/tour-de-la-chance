@@ -27,7 +27,8 @@ SEUIL_OPAQUE = 0.26 # au-delà, le pixel est complètement opaque (entre les deu
 SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
     "chapeau_fete.png", "echarpe.png", "collier_fleurs.png", "lunettes_coeur.png",
     "matiere_arc_en_ciel.png", "matiere_cristal.png", "matiere_argent.png", "boite_skins_1.png",
-    "boite_accessoires_1.png", "chapeau_bonnet.png"]}
+    "boite_accessoires_1.png", "chapeau_bonnet.png",
+    "icone_inventaire.png", "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png"]}
 # Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
 # de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
 # les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
