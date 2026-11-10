@@ -13,16 +13,24 @@ namespace TourDeLaChance
     /// et on remet TOUT à zéro à chaque fois, pour qu'un skin ne « bave » jamais sur le
     /// suivant (plus de transparence ni de lumière propre après un Cristal ou une Galaxie).
     /// Il n'a aucun collider : il ne gêne pas le clic sur les coffres.
+    ///
+    /// v3 : le personnage est un CHEVAL (modèle avec ses propres UV, que l'on garde). Chaque
+    /// accessoire est posé sur son point avec son décalage et son échelle (fiche de l'objet).
+    /// L'arc-en-ciel devient un dégradé qui défile vers le haut, avec des paillettes.
     /// </summary>
     public class PlayerAvatar : MonoBehaviour
     {
-        [SerializeField] Renderer body;      // la capsule "Corps" (seule à changer de skin)
+        [SerializeField] Renderer body;      // le "Corps" du cheval (seul à changer de skin)
 
-        [Header("Points d'accroche (enfants de Joueur)")]
-        [SerializeField] Transform hatPoint;   // PointChapeau (0 ; 2,0 ; 0)
-        [SerializeField] Transform facePoint;  // PointVisage  (0 ; 1,6 ; −0,49)
-        [SerializeField] Transform neckPoint;  // PointCou     (0 ; 1,3 ; 0)
-        [SerializeField] Transform backPoint;  // PointDos     (0 ; 1,3 ; 0,5)
+        [Header("Points d'accroche (dans le modèle du cheval)")]
+        [SerializeField] Transform hatPoint;   // PointChapeau (0 ; 1,86 ; 0,03)
+        [SerializeField] Transform facePoint;  // PointVisage  (0 ; 1,68 ; −0,253)
+        [SerializeField] Transform neckPoint;  // PointCou     (0 ; 1,05 ; 0,01)
+        [SerializeField] Transform backPoint;  // PointDos     (0 ; 0,95 ; 0,296)
+
+        [Header("Effets des Légendaires (facultatif)")]
+        [SerializeField] RainbowSparkles sparkles;   // paillettes de l'arc-en-ciel
+        [SerializeField] PlayerAnimator playerAnimator; // pour accélérer pendant le saut de joie
 
         [Header("Matériaux de départ des skins spéciaux (URP Lit)")]
         [Tooltip("Matériau URP Lit réglé en « Transparent » (pour le Cristal).")]
@@ -62,8 +70,9 @@ namespace TourDeLaChance
             if (ready || body == null) return;
             ready = true;
 
-            // Le modèle personnage.fbx n'a pas de coordonnées de texture : on fabrique des UV
-            // cylindriques sur une copie du maillage, pour que les motifs puissent s'afficher.
+            // Le cheval a ses propres UV (cylindriques, couture à l'arrière) : on les garde.
+            // Un modèle SANS coordonnées de texture recevrait des UV cylindriques fabriquées
+            // sur une copie du maillage (sinon les motifs ne pourraient pas s'afficher).
             var filter = body.GetComponent<MeshFilter>();
             if (filter != null) filter.sharedMesh = SkinTextures.AddCylindricalUVs(filter.sharedMesh);
 
@@ -127,6 +136,8 @@ namespace TourDeLaChance
             //    (aucune texture, aucune émission résiduelle).
             mat.SetTexture(BaseMapId, Texture2D.whiteTexture);
             mat.SetTextureScale(BaseMapId, Vector2.one);
+            mat.SetTextureOffset(BaseMapId, Vector2.zero);
+            rainbowOffset = 0f;
             mat.SetColor(EmissionColorId, Color.black);
             if (mat.HasProperty(EmissionMapId)) mat.SetTexture(EmissionMapId, null);
             mat.SetFloat(MetallicId, item.Metallic);
@@ -157,9 +168,19 @@ namespace TourDeLaChance
                     mat.SetTexture(EmissionMapId, SkinTextures.GalaxyStars());
                     mat.SetTextureScale(BaseMapId, new Vector2(4f, 3f)); // URP applique ce tiling à toutes les cartes
                     break;
+                case SkinStyle.ArcEnCiel:
+                    // v3 §8.1 : un dégradé qui fait un tour complet des couleurs, utilisé comme
+                    // image ET comme lumière propre. On en voit la moitié à la fois (tiling 0,5).
+                    mat.SetColor(BaseColorId, Color.white);
+                    mat.SetTexture(BaseMapId, SkinTextures.RainbowGradient());
+                    mat.SetTexture(EmissionMapId, SkinTextures.RainbowGradient());
+                    mat.SetColor(EmissionColorId, Color.white * RainbowEmission);
+                    mat.SetTextureScale(BaseMapId, new Vector2(1f, 0.5f));
+                    break;
             }
 
             body.sharedMaterial = mat;
+            if (sparkles != null) sparkles.SetActive(item.SkinStyle == SkinStyle.ArcEnCiel);
             UpdateAnimatedSkin(0f);
         }
 
@@ -170,18 +191,28 @@ namespace TourDeLaChance
             UpdateAnimatedSkin(skinTime);
         }
 
-        /// Couleurs animées : arc-en-ciel (tour complet des teintes en 6 s, émission 0,8) et
-        /// scintillement des étoiles de la galaxie (intensité 0,6 ↔ 1,2, période 2 s).
-        /// Pur affichage : cela continue pendant les épreuves.
+        /// Arc-en-ciel v3 : le dégradé monte de 0,25 par seconde (un tour en 4 s), trois fois
+        /// plus vite pendant le saut de joie (il « s'excite »). Lumière propre × 1,0 (sous le
+        /// plafond de 1,5 de la bible).
+        const float RainbowEmission = 1f;
+        float rainbowOffset;
+
+        /// La couleur de l'arc-en-ciel « du moment » (pour teinter les paillettes).
+        public Color RainbowColorNow => Color.HSVToRGB(Mathf.Repeat(-rainbowOffset + 0.5f, 1f), 0.75f, 1f);
+
+        /// Couleurs animées : arc-en-ciel qui défile et scintillement des étoiles de la
+        /// galaxie (intensité 0,6 ↔ 1,2, période 2 s). Pur affichage : cela continue pendant
+        /// les épreuves.
         void UpdateAnimatedSkin(float t)
         {
             var mat = body.sharedMaterial;
             switch (shownSkin.SkinStyle)
             {
                 case SkinStyle.ArcEnCiel:
-                    Color rainbow = Color.HSVToRGB(Mathf.Repeat(t / 6f, 1f), 0.65f, 1f);
-                    mat.SetColor(BaseColorId, rainbow);
-                    mat.SetColor(EmissionColorId, rainbow * 0.8f);
+                    bool excited = playerAnimator != null && playerAnimator.IsJoyJumping;
+                    rainbowOffset = Mathf.Repeat(rainbowOffset + 0.25f * (excited ? 3f : 1f) * Time.deltaTime, 1f);
+                    // Décalage vers le bas de l'image = les bandes de couleur MONTENT le long du cheval.
+                    mat.SetTextureOffset(BaseMapId, new Vector2(0f, -rainbowOffset));
                     break;
                 case SkinStyle.Galaxie:
                     float intensity = 0.9f + 0.3f * Mathf.Sin(2f * Mathf.PI * t / 2f);
@@ -210,8 +241,10 @@ namespace TourDeLaChance
             if (item.AccessoryPrefab == null || point == null) return;
             var instance = Instantiate(item.AccessoryPrefab, point, false);
             instance.name = item.Id;
-            instance.transform.localPosition = Vector3.zero;
+            // v3 : enfant du point, décalage et échelle propres à l'objet, rotation nulle.
+            instance.transform.localPosition = item.AttachOffset;
             instance.transform.localRotation = Quaternion.identity;
+            instance.transform.localScale = Vector3.one * item.AttachScale;
             foreach (var c in instance.GetComponentsInChildren<Collider>()) Destroy(c); // aucun collider
             if (item.Animation != AccessoryAnimation.Aucune)
                 instance.AddComponent<AccessoryMotion>().Setup(item.Animation);

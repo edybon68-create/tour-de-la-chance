@@ -90,7 +90,15 @@ namespace TourDeLaChance
         }
 
         /// Trésor choisi : saut de joie (+0,6 m, 0,7 s).
-        public void JumpOfJoy() => StartAction(JumpRoutine(0.6f, 0.08f, 0.20f, 0.20f, 0.10f, 0.12f, false, true));
+        public void JumpOfJoy()
+        {
+            joyUntil = Time.time + 0.7f;
+            StartAction(JumpRoutine(0.6f, 0.08f, 0.20f, 0.20f, 0.10f, 0.12f, false, true));
+        }
+
+        float joyUntil = -1f;
+        /// Vrai pendant le saut de joie (l'arc-en-ciel s'y « excite » : il défile 3 × plus vite).
+        public bool IsJoyJumping => Time.time < joyUntil;
 
         /// Encaisser : deux sauts à la suite (1,2 s), le second plus haut avec un tour complet.
         public void CashOutCelebration() => StartAction(CelebrationRoutine());

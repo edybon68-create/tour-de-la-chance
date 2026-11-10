@@ -5,6 +5,7 @@
          Les effets (halo, rayons, étincelles) sont créés par le code (BoxOpeningController).
          Style : BoxOpening.uss. -->
     <Style src="BoxOpening.uss" />
+    <Style src="Buttons.uss" />
     <ui:VisualElement name="ov-root" class="ov-root">
         <ui:VisualElement name="ov-veil" class="ov-full ov-veil" picking-mode="Ignore" />
         <!-- Tout ce qui tremble avec l'écran (secousse de la révélation) -->
@@ -18,10 +19,10 @@
                 <ui:Label name="ov-boxline" text="" class="ov-boxline" picking-mode="Ignore" />
                 <ui:Label name="ov-badge" text="" class="ov-badge" picking-mode="Ignore" />
                 <ui:VisualElement class="ov-buttons" picking-mode="Ignore">
-                    <ui:Button name="ov-equip" text="Équiper" class="ov-btn ov-btn--equip" />
-                    <ui:Button name="ov-sell" text="Vendre" class="ov-btn ov-btn--sell" />
-                    <ui:Button name="ov-reopen" text="Rouvrir" class="ov-btn ov-btn--reopen no-ui-sound" />
-                    <ui:Button name="ov-ok" text="OK" class="ov-btn ov-btn--ok" />
+                    <ui:Button name="ov-equip" text="Équiper" class="btn btn--bleu ov-btn" />
+                    <ui:Button name="ov-sell" text="Vendre" class="btn btn--sombre ov-btn" />
+                    <ui:Button name="ov-reopen" text="Rouvrir" class="btn btn--vert ov-btn no-ui-sound" />
+                    <ui:Button name="ov-ok" text="OK" class="btn btn--violet ov-btn" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

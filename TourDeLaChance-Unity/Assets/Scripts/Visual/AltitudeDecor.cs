@@ -4,7 +4,8 @@ using UnityEngine.Rendering;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// Le décor qui change avec l'altitude (spec §3.14) : fond de ciel, lumière principale,
+    /// Le décor qui change avec l'altitude (spec v3 §9 : du plein jour à la nuit étoilée) :
+    /// fond de ciel, couleur de fond de la caméra, lumière principale,
     /// lumière d'ambiance et nuages 3D sous l'étage. Pur affichage, recalculé à partir de
     /// l'étage (GameManager.Tier) : rien à sauvegarder.
     ///
@@ -104,6 +105,10 @@ namespace TourDeLaChance
                 skyBlock.SetColor(BaseColorId, data.backgroundTint);
                 skyRenderer.SetPropertyBlock(skyBlock);
             }
+
+            // 1 bis. La couleur de fond de la caméra (si l'image du ciel manquait).
+            var cam = Camera.main;
+            if (cam != null) cam.backgroundColor = data.cameraColor;
 
             // 2. La lumière principale (couleur et intensité seulement).
             if (mainLight != null)

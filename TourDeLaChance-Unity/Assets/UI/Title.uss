@@ -19,26 +19,15 @@
 }
 
 /* Le gros bouton « Jouer », or comme les pièces, avec le même rebond que le HUD. */
+/* Le gros bouton « Jouer », famille « or » des boutons bonbons (Buttons.uss).
+   overflow: hidden garde l'éclat qui passe à l'intérieur du bouton. */
 .title-play {
     font-size: 48px;
     min-width: 340px;
-    height: 104px;
+    height: 112px;
     margin: 0;
     border-radius: 20px;
-    border-width: 0;
-    color: #3A2200;
-    background-color: #FFD54A;
-    -unity-font-style: bold;
-    transition-property: scale;
-    transition-duration: 0.08s;
-}
-
-.title-play:hover {
-    scale: 1.05 1.05;
-}
-
-.title-play:active {
-    scale: 0.95 0.95;
+    overflow: hidden;
 }
 
 /* L'enveloppe du bouton « Jouer » (c'est elle qui respire). */
@@ -57,24 +46,13 @@
     flex-direction: row;
 }
 
+/* v3 (B4, §10.5) : texte 24 px, hauteur mini 48 px, marge 8 × 16, famille « sombre ». */
 .sound-toggle {
-    font-size: 16px;
-    color: #FFFFFF;
-    background-color: rgba(42, 42, 58, 0.8);
-    border-width: 0;
-    border-radius: 8px;
-    padding: 4px 10px;
+    font-size: 24px;
+    min-height: 48px;
+    padding: 8px 16px;
     margin: 0 8px 0 0;
-    transition-property: scale;
-    transition-duration: 0.08s;
-}
-
-.sound-toggle:hover {
-    scale: 1.05 1.05;
-}
-
-.sound-toggle:active {
-    scale: 0.95 0.95;
+    border-radius: 14px;
 }
 
 .sound-toggle--off {

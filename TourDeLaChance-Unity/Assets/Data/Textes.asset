@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3f5c0fad0fe04fb6a48be7963dd7aa8, type: 3}
+  m_Name: Textes
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.GameTexts
+  climbLines:
+  - "Et hop, un \xE9tage de plus !"
+  - "Tagada, tagada\u2026 \xE9tage {etage} !"
+  - "+{gain} ! La cagnotte fait la f\xEAte."
+  - "{cagnotte} pi\xE8ces dans la cagnotte\u2026 \xE7a tinte !"
+  - Mesdames et messieurs, le cheval monte encore !
+  - Le vertige ? Connais pas !
+  - "Les coffres commencent \xE0 te craindre."
+  - "\xC7a sent la barbe \xE0 papa par ici."
+  - Tu galopes vers les sommets !
+  - "Le man\xE8ge tourne, et toi tu montes !"
+  - "Un cavalier ne recule jamais\u2026 sauf pour encaisser."
+  - "Roulement de tambour\u2026 \xE9tage {etage} !"
+  - Le pigeon du toit te salue.
+  - Hennissement de victoire !
+  - "\xC9chec et\u2026 non, toujours en jeu !"
+  - "Attention \xE0 la marche ! (Il y en a beaucoup.)"
+  - "M\xEAme la grande roue est jalouse."
+  - Tu as la chance au bout du sabot !
+  - Plus haut, toujours plus haut !
+  - "La tour te trouve tr\xE8s sympathique."
+  floorTexts:
+  - floor: 2
+    text: "Premier \xE9tage gagn\xE9, l'aventure commence !"
+  - floor: 3
+    text: Jamais deux sans trois !
+  - floor: 5
+    text: "Cinq \xE9tages ! La foule retient son souffle."
+  - floor: 8
+    text: "Huit \xE9tages\u2026 les mouettes te regardent passer."
+  - floor: 13
+    text: "\xC9tage 13\u2026 surtout, ne regarde pas en bas."
+  - floor: 15
+    text: "Quinze ! Les \xE9toiles te font coucou."
+  - floor: 20
+    text: "Vingt ! M\xEAme le cheval n'y croit pas."
+  repeatFromFloor: 25
+  repeatEvery: 5
+  repeatText: "\xC9tage {etage} : tu as cass\xE9 la tour !"
+  recordLine: "\u2605 Nouveau record ! \u2605"
+  trapLines:
+  - "Pi\xE9g\xE9 ! Le coffre t'a fait une farce."
+  - "Bo\xEFng ! Retour \xE0 la case d\xE9part."
+  - "Oups\u2026 ce coffre-l\xE0 \xE9tait un farceur."
+  - Le clown de la tour te remercie pour ta cagnotte !
+  - "Pouf ! Ta cagnotte s'est envol\xE9e en fum\xE9e."
+  - "M\xEAme les meilleurs cavaliers tombent de cheval."
+  - "Ce coffre \xE9tait plein\u2026 de malice."
+  - "Hiii-hiii ! Rat\xE9 !"
+  - "La chance a pris sa pause go\xFBter."
+  - Le coffre rigole encore. Pas toi ?
+  - Perdu ! Mais quelle classe dans la chute.
+  - "Ta cagnotte part faire un tour de man\xE8ge\u2026 sans toi."
+  - "Le pi\xE8ge \xE9tait bien cach\xE9. Bravo \xE0 lui !"
+  - "\xC9chec\u2026 mais pas mat ! Rejoue !"
+  trapFloor1: "D\xE8s le premier coffre ? La tour te fait une blague !"
+  trapHighFloor: 7
+  trapHigh: "Si pr\xE8s des \xE9toiles\u2026 La prochaine fois !"
+  bigLoss: 300
+  trapBigLoss: "A\xEFe, {perte} pi\xE8ces envol\xE9es\u2026 Elles reviendront !"
+  lossLine: "Cagnotte perdue : {perte} pi\xE8ces."
+  noLossLine: Rien de perdu, rejoue !
+  cashOutLines:
+  - "Sage d\xE9cision, cavalier !"
+  - "Bien jou\xE9 ! Les pi\xE8ces sont \xE0 l'abri."
+  - Le porte-monnaie te dit merci.
+  - "Encaiss\xE9 ! Le coffre pi\xE9g\xE9 est tout d\xE9\xE7u."
+  - "Un vrai strat\xE8ge des \xE9checs !"
+  - Dans la poche (et dans la bourse) !
+  - "La prudence, \xE7a rapporte !"
+  - Hop, au chaud dans le porte-monnaie !
+  cashOutLine: "Tu encaisses {gain} pi\xE8ces."

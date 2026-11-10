@@ -9,9 +9,9 @@ namespace TourDeLaChance
     /// pour voir ce qui reste à trouver. 16 cases par boîte, dans l'ordre des numéros.
     /// Un objet non obtenu est en silhouette (le Secret affiche « ? » et « ??? ») ; cliquer
     /// une case non obtenue ne montre RIEN sur le personnage (la surprise reste entière).
-    /// Simple objet piloté par ShopController ; aucune règle de jeu ici.
+    /// Simple objet piloté par PanelsController ; aucune règle de jeu ici.
     /// </summary>
-    public class IndexPage
+    public class IndexPage : IDisposable
     {
         const string SecretId = "secret";
 
@@ -35,8 +35,13 @@ namespace TourDeLaChance
             progress = page.Q<Label>("idx-progress");
             info = page.Q<Label>("idx-info");
             gotoButton = page.Q<Button>("idx-goto");
-            gotoButton.clicked += () => { if (selected != null) ShowInInventoryRequested?.Invoke(selected); };
+            gotoButton.clicked += OnGoto;
         }
+
+        void OnGoto() { if (selected != null) ShowInInventoryRequested?.Invoke(selected); }
+
+        /// Correctif B9 : se désabonner de ce qu'on a branché.
+        public void Dispose() => gotoButton.clicked -= OnGoto;
 
         /// Ouvre l'Index sur une boîte (la première par défaut).
         public void Open(LootBox focus = null)
@@ -55,6 +60,8 @@ namespace TourDeLaChance
             {
                 var target = b;
                 var tab = new Button(() => { box = target; selected = null; Refresh(); }) { text = b.displayName };
+                tab.AddToClassList("btn");
+                tab.AddToClassList("btn--sombre");
                 tab.AddToClassList("subtab");
                 ShopUi.SetClass(tab, "subtab--active", b == box);
                 tabsRow.Add(tab);
@@ -77,6 +84,8 @@ namespace TourDeLaChance
             }
             grid.Add(cells);
             RefreshInfo();
+            ButtonStyler.Apply(tabsRow);
+            ButtonStyler.Apply(grid);
         }
 
         VisualElement Cell(ShopItem item, int number)

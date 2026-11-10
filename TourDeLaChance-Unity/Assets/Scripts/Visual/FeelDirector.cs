@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace TourDeLaChance
@@ -8,6 +9,10 @@ namespace TourDeLaChance
     /// Il ne change jamais l'étage, la cagnotte, le porte-monnaie ni le piège :
     /// on pourrait l'enlever, la partie marcherait quand même (sans spectacle).
     /// (Les animations de l'interface, elles, sont dans HudController et TitleController.)
+    ///
+    /// v3 : sons d'ouverture / fermeture des 4 panneaux, remélange de l'étage 1 (§12),
+    /// arrivée des coffres en plus (« pop ») et des coffres précieux (petit saut + son),
+    /// plus de pièces pour un coffre précieux (§5.3).
     /// </summary>
     public class FeelDirector : MonoBehaviour
     {
@@ -21,7 +26,9 @@ namespace TourDeLaChance
 
         // Pour repérer les changements (avant / après) à chaque événement Changed.
         GameState lastState;
-        bool lastShopOpen, lastLocked;
+        PanelId lastPanel;
+        bool lastLocked;
+        bool reshuffling; // « Rejouer » à l'étage 1 en cours (les coffres font « pouf »)
 
         // Invitation si le joueur hésite (§3.2) : 3 s sans survol ni choix, puis toutes les 5 s.
         float idleTime;
@@ -32,7 +39,9 @@ namespace TourDeLaChance
             game.Changed += OnGameChanged;
             game.ClimbStarted += OnClimbStarted;
             game.DescentStarted += OnDescentStarted;
+            game.ReshuffleStarted += OnReshuffleStarted;
             game.FloorPrepared += OnFloorPrepared;
+            game.FloorShown += OnFloorShown;
             chestTrial.HoverChanged += OnHoverChanged;
             chestTrial.SuspenseStarted += OnSuspenseStarted;
             chestTrial.PickedLidOpening += OnPickedLidOpening;
@@ -47,7 +56,9 @@ namespace TourDeLaChance
             game.Changed -= OnGameChanged;
             game.ClimbStarted -= OnClimbStarted;
             game.DescentStarted -= OnDescentStarted;
+            game.ReshuffleStarted -= OnReshuffleStarted;
             game.FloorPrepared -= OnFloorPrepared;
+            game.FloorShown -= OnFloorShown;
             chestTrial.HoverChanged -= OnHoverChanged;
             chestTrial.SuspenseStarted -= OnSuspenseStarted;
             chestTrial.PickedLidOpening -= OnPickedLidOpening;
@@ -86,15 +97,17 @@ namespace TourDeLaChance
                 }
             }
 
-            // Shop ouvert / fermé : clochette, et le personnage sort de la « tête basse ».
-            if (game.ShopOpen != lastShopOpen)
+            // Panneau ouvert / fermé / changé : clochette (les mêmes sons pour les 4 panneaux),
+            // et le cheval sort de la « tête basse ». Passer de l'un à l'autre : ui_clic.
+            if (game.PanelOpen != lastPanel)
             {
-                if (game.ShopOpen)
+                if (lastPanel == PanelId.None)
                 {
                     Play(Sfx.UiBoutiqueOuvre);
                     if (player != null) player.ReturnToRest(0.3f);
                 }
-                else Play(Sfx.UiBoutiqueFerme);
+                else if (game.PanelOpen == PanelId.None) Play(Sfx.UiBoutiqueFerme);
+                else Play(Sfx.UiClic);
             }
 
             // Fin du verrou de transition à l'étage 1 (après « Jouer » ou « Rejouer ») :
@@ -103,7 +116,7 @@ namespace TourDeLaChance
                 if (player != null) player.WelcomeHop();
 
             lastState = state;
-            lastShopOpen = game.ShopOpen;
+            lastPanel = game.PanelOpen;
             lastLocked = game.TransitionLocked;
         }
 
@@ -123,10 +136,60 @@ namespace TourDeLaChance
             SetTension(0f);
         }
 
-        // Dans le noir : le personnage est remis au repos (les coffres l'ont été par Begin).
+        /// « Rejouer » à l'étage 1 (v3 §12) : les couvercles se referment, le cheval sort de la
+        /// tête basse, puis les coffres rétrécissent (à 0,2 s, en 0,1 s). Ni caméra, ni voile.
+        void OnReshuffleStarted()
+        {
+            reshuffling = true;
+            Play(Sfx.CoffresRemelange);
+            chestTrial.CloseAllLids(animated: true, silent: true);
+            if (player != null) player.ReturnToRest(0.3f);
+            StartCoroutine(ShrinkChestsLater(0.2f, 0.1f));
+            SetTension(0f);
+        }
+
+        IEnumerator ShrinkChestsLater(float delay, float duration)
+        {
+            yield return new WaitForSeconds(delay);
+            for (int i = 0; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).ShrinkOut(duration);
+        }
+
+        // Le nouvel étage est prêt (dans le noir, ou au milieu du remélange).
         void OnFloorPrepared()
         {
+            if (reshuffling)
+            {
+                // Les coffres réapparaissent : 0 → 1,08 → 1 (0,2 s), de gauche à droite (0,05 s).
+                for (int i = 0; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).PopIn(0.05f * i, 0.2f);
+                return;
+            }
             if (player != null) player.SnapToRest();
+            // Coffres en plus (4e, 5e) : cachés, ils « pousseront » à la fin de la montée.
+            for (int i = 3; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).HideForPop();
+        }
+
+        /// Fin de la montée (ou du remélange, de la redescente, de « Jouer ») : le nouvel étage
+        /// se montre. Coffres en plus : ils poussent (0 → 1,08 → 1 en 0,25 s), son coffre_en_plus.
+        /// Coffres précieux : chacun fait un petit saut (0,1 m, 0,25 s, 0,08 s de décalage) et
+        /// le son coffres_precieux, plus aigu selon le rang. Pur affichage.
+        void OnFloorShown()
+        {
+            bool afterReshuffle = reshuffling;
+            reshuffling = false;
+            int count = chestTrial.ChestCount;
+            if (!afterReshuffle && count > 3)
+            {
+                for (int i = 3; i < count; i++) chestTrial.GetChest(i).PopIn(0f, 0.25f);
+                Play(Sfx.CoffreEnPlus);
+            }
+            int rank = chestTrial.RarityRank;
+            if (rank >= 1)
+            {
+                float start = afterReshuffle ? 0.25f : (count > 3 ? 0.25f : 0f); // après les « pop »
+                for (int i = 0; i < count; i++) chestTrial.GetChest(i).Hop(0.1f, 0.25f, start + 0.08f * i);
+                float[] pitches = { 1f, 1.06f, 1.12f, 1.19f };
+                Play(Sfx.CoffresPrecieux, 1f, pitches[Mathf.Clamp(rank - 1, 0, 3)]);
+            }
         }
 
         void SetTension(float level)
@@ -180,7 +243,9 @@ namespace TourDeLaChance
             }
             else
             {
-                if (coinBurst != null) coinBurst.Burst(position, CoinBurst.CountForFloor(game.Floor));
+                // v3 §5.3 : 4 pièces de plus par rang de rareté de coffre, au plus 40.
+                int coins = Mathf.Min(CoinBurst.MaxCoins, CoinBurst.CountForFloor(game.Floor) + 4 * chestTrial.RarityRank);
+                if (coinBurst != null) coinBurst.Burst(position, coins);
                 Play(Sfx.ResultatTresor);
                 Play(Sfx.PiecesJaillissement);
                 if (player != null) player.JumpOfJoy();
@@ -203,7 +268,7 @@ namespace TourDeLaChance
             idleTime += Time.deltaTime;
             if (idleTime >= nextInvite)
             {
-                // Les trois coffres sautent, de gauche à droite, avec 0,1 s de décalage. Pas de son.
+                // Les coffres présents sautent, de gauche à droite, avec 0,1 s de décalage. Pas de son.
                 for (int i = 0; i < chestTrial.ChestCount; i++)
                     chestTrial.GetChest(i).Hop(0.08f, 0.25f, 0.1f * i);
                 nextInvite += 5f;

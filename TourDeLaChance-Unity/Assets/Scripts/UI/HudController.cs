@@ -7,8 +7,10 @@ namespace TourDeLaChance
 {
     /// <summary>
     /// L'interface (HUD) : affiche l'étage, la cagnotte, le porte-monnaie, un message,
-    /// et les boutons Encaisser X / Rejouer / Boutique. Elle ne décide de rien :
+    /// et les boutons Encaisser X / Rejouer. Elle ne décide de rien :
     /// elle montre l'état du GameManager et lui transmet les clics.
+    /// (v3 : le bouton « Boutique » a disparu, remplacé par la colonne de boutons des
+    /// panneaux ; les messages de piège et d'encaissement sont tirés au hasard, TextPicker.)
     ///
     /// Elle s'occupe aussi des animations de l'interface (spec sons-animations §3.8 à §3.10) :
     /// compteurs qui défilent, texte flottant « +20 », pièces qui filent dans le
@@ -19,10 +21,12 @@ namespace TourDeLaChance
     {
         [SerializeField] GameManager game;
         [SerializeField] ChestTrial chestTrial;
+        [SerializeField] GameTexts texts; // les phrases (Assets/Data/Textes.asset)
 
         VisualElement hudRoot, fxLayer, potCounter, walletCounter, potCoin, walletCoin;
-        Label floorLabel, potLabel, walletLabel, messageLabel, cashOutText;
-        Button cashOutButton, replayButton, shopButton;
+        Label floorLabel, potLabel, walletLabel, messageLabel, messageSub, cashOutText;
+        Button cashOutButton, replayButton;
+        VisualElement messageBox;
         SoundToggleButtons soundButtons;
 
         // Les compteurs affichés, qui courent après les vraies valeurs.
@@ -31,7 +35,8 @@ namespace TourDeLaChance
 
         // Ce qu'on a vu au dernier rafraîchissement (pour repérer les changements).
         GameState lastState = GameState.Title;
-        bool lastShopOpen;
+        bool lastPanelOpen;
+        string endLine1 = "", endLine2 = ""; // message de fin de partie, tiré UNE fois par résultat
 
         // Effets en cours sur les compteurs
         float potPulseTime = -1f;     // grossissement après un gain
@@ -63,22 +68,26 @@ namespace TourDeLaChance
             potLabel = root.Q<Label>("pot");
             walletLabel = root.Q<Label>("wallet");
             messageLabel = root.Q<Label>("message");
+            messageSub = root.Q<Label>("message-sub");
+            messageBox = root.Q<VisualElement>("message-box");
             cashOutText = root.Q<Label>("cashout-text");
             cashOutButton = root.Q<Button>("cashout");
             replayButton = root.Q<Button>("replay");
-            shopButton = root.Q<Button>("shop");
             soundButtons = new SoundToggleButtons(root.Q<Button>("music-toggle"), root.Q<Button>("effects-toggle"));
             UiSounds.Register(hudRoot);
+            ButtonStyler.Register(hudRoot);
+            TextPicker.Use(texts);
 
             cashOutButton.clicked += game.CashOut;
             replayButton.clicked += game.NewRun;
-            shopButton.clicked += game.OpenShop;
             game.Changed += Refresh;
             game.ClimbStarted += OnClimbStarted;
-            Shop.Changed += Refresh; // après un achat, le porte-monnaie change
+            game.ReshuffleStarted += OnClimbStarted; // le message s'efface aussi (0,1 s)
+            Shop.Changed += Refresh;     // après un achat, le porte-monnaie change
+            Upgrades.Changed += Refresh; // idem après une amélioration
 
             // Au départ, tout est caché ; les boutons apparaissent avec leur animation.
-            foreach (var b in new VisualElement[] { cashOutButton, replayButton, shopButton })
+            foreach (var b in new VisualElement[] { cashOutButton, replayButton })
                 b.style.display = DisplayStyle.None;
             pot.Snap(game.Pot);
             wallet.Snap(Wallet.Coins);
@@ -89,10 +98,11 @@ namespace TourDeLaChance
         {
             cashOutButton.clicked -= game.CashOut;
             replayButton.clicked -= game.NewRun;
-            shopButton.clicked -= game.OpenShop;
             game.Changed -= Refresh;
             game.ClimbStarted -= OnClimbStarted;
+            game.ReshuffleStarted -= OnClimbStarted;
             Shop.Changed -= Refresh;
+            Upgrades.Changed -= Refresh;
             soundButtons?.Dispose();
             UiSounds.Unregister(hudRoot);
         }
@@ -120,7 +130,7 @@ namespace TourDeLaChance
             UpdateMessage(state, stateChanged);
 
             lastState = state;
-            lastShopOpen = game.ShopOpen;
+            lastPanelOpen = game.IsPanelOpen;
         }
 
         /// Les compteurs : on lance le bon défilement selon l'événement (tableau §3.8).
@@ -169,11 +179,11 @@ namespace TourDeLaChance
         /// Les boutons : chacun apparaît avec son animation quand il devient utile (§3.10).
         void UpdateButtons(GameState state, bool stateChanged)
         {
-            bool shop = game.ShopOpen;
+            bool shop = game.IsPanelOpen;
             bool locked = game.TransitionLocked;
             bool over = state == GameState.Lost || state == GameState.CashedOut;
 
-            // « Encaisser X » : pendant le choix, à partir de l'étage 2, shop fermé.
+            // « Encaisser X » : pendant le choix, à partir de l'étage 2, panneau fermé.
             bool showCashOut = !shop && state == GameState.Choosing && game.Floor >= 2;
             cashOutText.text = $"Encaisser {game.Pot}";
             if (showCashOut && !shown.Contains(cashOutButton))
@@ -187,24 +197,30 @@ namespace TourDeLaChance
                 HideAnimated(cashOutButton, 0.1f);
             }
 
-            // Fin de partie : « Rejouer » puis « Boutique », 0,3 s après le résultat,
-            // l'un après l'autre (0,08 s). Cachés pendant la redescente.
+            // Fin de partie : « Rejouer », 0,3 s après le résultat. Caché pendant la
+            // redescente / le remélange et quand un panneau est ouvert.
             bool showReplay = over && !shop && !locked;
-            bool showShop = game.CanOpenShop; // la règle est dans le GameManager
-            float delay = over && (stateChanged || lastShopOpen != shop) ? 0.3f : 0f;
+            float delay = over && (stateChanged || lastPanelOpen != shop) ? 0.3f : 0f;
 
             if (showReplay && !shown.Contains(replayButton)) ShowAnimated(replayButton, delay, 1f, null);
             else if (!showReplay && shown.Contains(replayButton)) HideNow(replayButton);
-
-            if (showShop && !shown.Contains(shopButton))
-                ShowAnimated(shopButton, over ? delay + 0.08f : 0f, 1f, null);
-            else if (!showShop && shown.Contains(shopButton)) HideNow(shopButton);
         }
 
         void UpdateMessage(GameState state, bool stateChanged)
         {
-            bool shop = game.ShopOpen;
+            bool shop = game.IsPanelOpen;
             bool over = state == GameState.Lost || state == GameState.CashedOut;
+
+            // Fin de partie : la phrase est tirée UNE fois, au moment du résultat (v3 §11).
+            if (stateChanged && state == GameState.Lost)
+            {
+                endLine1 = TextPicker.TrapLine(game.Floor, game.LastLoss);
+                endLine2 = TextPicker.LossLine(game.LastLoss);
+            }
+            else if (stateChanged && state == GameState.CashedOut)
+            {
+                endLine1 = TextPicker.CashOutLines(game.LastGain, out endLine2);
+            }
 
             messageLabel.text = state switch
             {
@@ -213,17 +229,19 @@ namespace TourDeLaChance
                     : "Choisis un coffre ! Un seul est piégé…",
                 GameState.Revealing => "…",
                 GameState.Climbing => $"+{game.LastGain} pièces ! On monte…",
-                GameState.Lost => "Piégé ! Tu perds ta cagnotte.",
-                GameState.CashedOut => $"Bien joué ! Tu encaisses {game.LastGain} pièces.",
+                GameState.Lost => endLine1,
+                GameState.CashedOut => endLine1,
                 _ => ""
             };
+            messageSub.text = over ? endLine2 : "";
+            messageSub.style.display = over && endLine2.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
-            // Shop ouvert, ou redescente en cours : pas de message.
+            // Panneau ouvert, ou redescente / remélange en cours : pas de message.
             bool visible = !shop && !(over && game.TransitionLocked);
-            messageLabel.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            messageBox.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (!visible) return;
 
-            if (stateChanged || lastShopOpen != shop)
+            if (stateChanged || lastPanelOpen != shop)
             {
                 // Fin de partie : le message apparaît avec le premier bouton (0,3 s plus tard).
                 // Début d'étage : il apparaît avec « Encaisser » (fin de la montée).
@@ -231,7 +249,7 @@ namespace TourDeLaChance
             }
         }
 
-        void OnClimbStarted() => FadeMessage(messageLabel.resolvedStyle.opacity, 0f, 0.1f, 0f);
+        void OnClimbStarted() => FadeMessage(messageBox.resolvedStyle.opacity, 0f, 0.1f, 0f);
 
         // ---------- Animations de l'interface ----------
 
@@ -262,7 +280,7 @@ namespace TourDeLaChance
                 potScale = 1f + 0.25f * Ease.Sine(potPulseTime / 0.25f);
                 if (potPulseTime >= 0.25f && !pot.Rolling) potPulseTime = -1f;
             }
-            else if (game.State == GameState.Choosing && game.Pot > 0 && !game.ShopOpen)
+            else if (game.State == GameState.Choosing && game.Pot > 0 && !game.IsPanelOpen)
             {
                 // Battement : période 1,2 s à l'étage 2, 0,1 s plus rapide par étage, minimum 0,7 s.
                 float period = Mathf.Max(0.7f, 1.2f - 0.1f * (game.Floor - 2));
@@ -377,7 +395,7 @@ namespace TourDeLaChance
         void FadeMessage(float from, float to, float duration, float delay)
         {
             if (messageFade != null) StopCoroutine(messageFade);
-            messageFade = StartCoroutine(FadeRoutine(messageLabel, from, to, duration, delay));
+            messageFade = StartCoroutine(FadeRoutine(messageBox, from, to, duration, delay));
         }
 
         static IEnumerator FadeRoutine(VisualElement element, float from, float to, float duration, float delay)
@@ -404,6 +422,8 @@ namespace TourDeLaChance
 
             var label = new Label($"+{gain}");
             label.AddToClassList("float-text");
+            // v3 §5.3.2 : le texte grossit avec la rareté du coffre (48 / 54 / 60 / 66 / 72).
+            label.style.fontSize = 48 + 6 * game.Setup.RarityRank;
             label.pickingMode = PickingMode.Ignore;
             label.style.left = local.x;
             label.style.top = local.y;

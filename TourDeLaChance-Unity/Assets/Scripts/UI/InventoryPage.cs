@@ -6,12 +6,12 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// L'onglet « Inventaire » du shop (spec boites §7.4) : ce qu'on possède, pour ÉQUIPER
+    /// Le panneau « Inventaire » (spec boites §7.4) : ce qu'on possède, pour ÉQUIPER
     /// et VENDRE les doublons. Ce n'est pas un MonoBehaviour : c'est un simple objet créé et
-    /// piloté par ShopController. Il affiche et transmet les clics ; les règles (équiper,
+    /// piloté par PanelsController. Il affiche et transmet les clics ; les règles (équiper,
     /// vendre, total des doublons) sont dans la classe Shop.
     /// </summary>
-    public class InventoryPage
+    public class InventoryPage : IDisposable
     {
         readonly ScrollView list;
         readonly Button skinsTab, accessoriesTab, equipButton, sellButton, sellAllButton;
@@ -37,12 +37,26 @@ namespace TourDeLaChance
             sellAllButton = page.Q<Button>("inv-sellall");
             selectedLabel = page.Q<Label>("inv-selected");
 
-            skinsTab.clicked += () => ShowCategory(ShopCategory.Skin, null);
-            accessoriesTab.clicked += () => ShowCategory(ShopCategory.Accessoire, null);
+            skinsTab.clicked += OnSkinsTab;
+            accessoriesTab.clicked += OnAccessoriesTab;
             equipButton.clicked += OnEquip;
             sellButton.clicked += OnSell;
             sellAllButton.clicked += OnSellAll;
         }
+
+        /// Correctif B9 : on se désabonne de TOUT ce à quoi on s'est abonné (appelé par
+        /// PanelsController quand il se désactive).
+        public void Dispose()
+        {
+            skinsTab.clicked -= OnSkinsTab;
+            accessoriesTab.clicked -= OnAccessoriesTab;
+            equipButton.clicked -= OnEquip;
+            sellButton.clicked -= OnSell;
+            sellAllButton.clicked -= OnSellAll;
+        }
+
+        void OnSkinsTab() => ShowCategory(ShopCategory.Skin, null);
+        void OnAccessoriesTab() => ShowCategory(ShopCategory.Accessoire, null);
 
         /// À l'ouverture de l'onglet : sous-onglet « Skins » par défaut (ou celui de l'objet
         /// demandé, depuis l'Index), carte sélectionnée = l'objet équipé (ou l'objet demandé).
@@ -96,6 +110,7 @@ namespace TourDeLaChance
                 }
             }
             RefreshActions();
+            ButtonStyler.Apply(list);
         }
 
         /// Les objets possédés d'une catégorie : d'abord le gratuit, puis les autres triés par

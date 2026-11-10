@@ -3,17 +3,18 @@
          Le fond uni a la même couleur que le fond du logo (#1E1936) : on ne voit pas
          les bords de l'image. Le bouton « Jouer » est branché par TitleController. -->
     <Style src="Title.uss" />
+    <Style src="Buttons.uss" />
     <ui:VisualElement name="title-root" class="title-root">
         <ui:VisualElement name="logo" class="title-logo" picking-mode="Ignore" />
         <!-- L'enveloppe "play-wrap" respire (échelle animée par le code) ; le bouton
              à l'intérieur garde son effet de survol du USS. -->
         <ui:VisualElement name="play-wrap" class="title-play-wrap" picking-mode="Ignore">
-            <ui:Button name="play" text="Jouer" class="title-play" />
+            <ui:Button name="play" text="Jouer" class="btn btn--or title-play" />
         </ui:VisualElement>
         <!-- Les deux boutons du son, en haut à gauche comme dans le HUD (§6.2). -->
         <ui:VisualElement class="title-sound-toggles" picking-mode="Ignore">
-            <ui:Button name="music-toggle" text="Musique : oui" class="sound-toggle" />
-            <ui:Button name="effects-toggle" text="Effets : oui" class="sound-toggle" />
+            <ui:Button name="music-toggle" text="Musique : oui" class="btn btn--sombre sound-toggle" />
+            <ui:Button name="effects-toggle" text="Effets : oui" class="btn btn--sombre sound-toggle" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

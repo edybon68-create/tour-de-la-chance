@@ -44,6 +44,11 @@ namespace TourDeLaChance
         [FormerlySerializedAs("hatPrefab")] // ancien nom (v1) : les fiches existantes restent branchées
         [SerializeField] GameObject accessoryPrefab;
         [SerializeField] AccessoryAnimation animation = AccessoryAnimation.Aucune;
+        [Tooltip("v3 (cheval) : décalage LOCAL du modèle par rapport à son point d'accroche, en m " +
+                 "(tableau REGLAGES de blender/cheval_accessoires.py).")]
+        [SerializeField] Vector3 attachOffset = Vector3.zero;
+        [Tooltip("v3 (cheval) : échelle uniforme du modèle sur son point d'accroche (1 = taille d'origine).")]
+        [SerializeField, Min(0.01f)] float attachScale = 1f;
 
         // Propriétés en lecture seule : le reste du code peut lire, mais pas modifier.
         public string Id => id;
@@ -60,5 +65,7 @@ namespace TourDeLaChance
         public float Smoothness => smoothness;
         public GameObject AccessoryPrefab => accessoryPrefab;
         public AccessoryAnimation Animation => animation;
+        public Vector3 AttachOffset => attachOffset;
+        public float AttachScale => attachScale;
     }
 }

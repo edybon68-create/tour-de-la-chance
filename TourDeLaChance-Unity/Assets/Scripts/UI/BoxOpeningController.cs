@@ -20,6 +20,11 @@ namespace TourDeLaChance
     /// Toute l'animation est calculée à partir d'une seule horloge (« t », en secondes depuis
     /// le clic sur « Ouvrir ») : à chaque image, on regarde où on en est et on place tout.
     /// Passer l'animation revient simplement à avancer l'horloge jusqu'au résultat.
+    ///
+    /// v3 : le Secret a sa cinématique de 5,4 s (SecretCinematic, spec v3 §8.3) ; les boutons
+    /// ne prennent jamais le focus et refusent les clics tant qu'ils apparaissent (B2) ; le
+    /// voile démarre à 0,6 dès la première image (B1) ; après « OK » sur un Légendaire ou un
+    /// Secret, le cheval fait la fête. Il prévient le GameManager qu'une ouverture est en cours.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class BoxOpeningController : MonoBehaviour
@@ -27,6 +32,7 @@ namespace TourDeLaChance
         [SerializeField] PlayerAvatar avatar;
         [SerializeField] PlayerAnimator avatarAnimator;
         [SerializeField] MusicPlayer music;
+        [SerializeField] GameManager game; // prévenu : « une ouverture de boîte est en cours »
 
         /// Les tailles de la spec sont écrites pour 1280 × 720 ; notre interface est réglée
         /// pour 1920 × 1080 : on multiplie donc les pixels de la spec par 1,5.
@@ -54,6 +60,7 @@ namespace TourDeLaChance
             public float duration;        // durée de la révélation (pause noire comprise)
             public float cardPeak;        // échelle max de la carte (1,15 ; 1,3 pour le Légendaire)
             public bool jumpingLetters, rainbow, black;
+            public bool secret;           // v3 : la cinématique du Secret
         }
 
         static RevealLook LookFor(string rarityId) => rarityId switch
@@ -62,7 +69,9 @@ namespace TourDeLaChance
             "rare" => new RevealLook { halo = 340, haloAlpha = 0.7f, rays = 8, raySpeed = 30, sparks = 18, flash = 0.3f, word = "Rare !", wordSize = 30, duration = 1.0f, cardPeak = 1.15f },
             "super_rare" => new RevealLook { halo = 380, haloAlpha = 0.75f, pulse = true, rays = 12, raySpeed = 45, sparks = 28, flash = 0.4f, shake = 6, shakeTime = 0.3f, word = "Super rare !", wordSize = 34, duration = 1.4f, cardPeak = 1.15f },
             "legendaire" => new RevealLook { halo = 440, haloAlpha = 0.8f, pulse = true, rays = 16, raySpeed = 60, sparks = 45, flash = 0.6f, shake = 10, shakeTime = 0.4f, word = "LÉGENDAIRE !", wordSize = 40, duration = 2.0f, cardPeak = 1.3f, jumpingLetters = true },
-            "secret" => new RevealLook { halo = 480, haloAlpha = 0.85f, pulse = true, rays = 20, raySpeed = 60, sparks = 60, flash = 0.8f, shake = 12, shakeTime = 0.5f, word = "SECRET !!!", wordSize = 44, duration = 2.6f, cardPeak = 1.15f, jumpingLetters = true, rainbow = true, black = true },
+            // v3 §8.3 : halo arc-en-ciel Ø 520, 24 rayons, 60 étincelles à l'impact, « SECRET !!! »
+            // en taille 56 ; la carte arrive à R + 2,4 s et la révélation dure 5,4 s.
+            "secret" => new RevealLook { halo = 520, haloAlpha = 0.85f, pulse = true, rays = 24, raySpeed = 60, sparks = 60, word = "SECRET !!!", wordSize = 56, duration = SecretCinematic.Duration, cardPeak = 1.15f, rainbow = true, secret = true },
             _ => new RevealLook { halo = 260, haloAlpha = 0.5f, word = "Commun", wordSize = 24, duration = 0.5f, cardPeak = 1.15f }
         };
 
@@ -70,7 +79,10 @@ namespace TourDeLaChance
         VisualElement root, veil, content, stage, result, black, flash;
         VisualElement glow, boxImage, halo, card, cardIcon, word;
         RaysElement rays;
-        Label nameLabel, rarityLabel, boxLine, badge;
+        Label nameLabel, rarityLabel, boxLine, badge, chanceLabel;
+        SecretCinematic secretFx;
+        // Sons de la cinématique déjà joués : coupure, battement, fissure, (éclat plus bas), confettis.
+        bool playedSecretBeat, playedSecretCrack, playedSecretShatter, playedSecretConfetti;
         Button equipButton, sellButton, reopenButton, okButton;
         readonly List<Label> letters = new List<Label>();
 
@@ -126,6 +138,9 @@ namespace TourDeLaChance
             okButton = doc.Q<Button>("ov-ok");
 
             BuildStage();
+            secretFx = new SecretCinematic(root, content);
+            // B2 : aucun bouton de cet écran ne prend le focus (Espace / Entrée ne les activent pas).
+            ButtonStyler.Register(root);
 
             equipButton.clicked += OnEquip;
             sellButton.clicked += OnSell;
@@ -166,6 +181,10 @@ namespace TourDeLaChance
             word = new VisualElement { pickingMode = PickingMode.Ignore };
             word.AddToClassList("ov-rarity-word");
             card.Add(word);
+            // v3 : sous « SECRET !!! », « Une chance sur 100 ! » (calculé dans le catalogue).
+            chanceLabel = new Label { pickingMode = PickingMode.Ignore };
+            chanceLabel.AddToClassList("ov-chance");
+            card.Add(chanceLabel);
             stage.Add(card);
 
             for (int i = 0; i < SparkPool; i++)
@@ -211,7 +230,17 @@ namespace TourDeLaChance
             playedShake = playedOpen = playedReveal = sparksDone = false;
             busy = true;
             rayAngle = 0f;
-            cardStart = RevealStart + (look.black ? SecretBlack : 0f);
+            cardStart = RevealStart + (look.black ? SecretBlack : 0f) + (look.secret ? SecretCinematic.CardStart : 0f);
+            playedSecretBeat = playedSecretCrack = playedSecretShatter = playedSecretConfetti = playedEclat = false;
+            if (look.secret) secretFx.Prepare();
+            else secretFx.Hide();
+            chanceLabel.style.display = look.secret ? DisplayStyle.Flex : DisplayStyle.None;
+            if (look.secret)
+            {
+                double chance = Shop.RarityChance(r.Rarity);
+                chanceLabel.text = chance > 0 ? $"Une chance sur {Mathf.RoundToInt((float)(100.0 / chance))} !" : "";
+            }
+            if (game != null) game.SetBoxOpening(true);
             revealEnd = RevealStart + look.duration;
             resultStart = revealEnd + 0.2f;
 
@@ -288,7 +317,10 @@ namespace TourDeLaChance
 
             float dt = Time.deltaTime;
             t += dt;
-            rayAngle += look.raySpeed * (t > revealEnd ? 0.5f : 1f) * dt; // plus doux sur le résultat
+            float raySpeed = look.raySpeed;
+            // Secret : « Calme » à R + 4,7 s, les rayons ralentissent à 30°/s.
+            if (look.secret && t - RevealStart >= SecretCinematic.CalmStart) raySpeed = 30f;
+            rayAngle += raySpeed * (t > revealEnd ? 0.5f : 1f) * dt; // plus doux sur le résultat
             UpdateSparks(dt);
             Render();
             UpdateButtons();
@@ -307,7 +339,9 @@ namespace TourDeLaChance
             skipped = true;
             sparksDone = true;
             playedShake = playedOpen = true; // on ne joue plus les sons de la boîte
+            playedSecretBeat = playedSecretCrack = playedSecretShatter = playedSecretConfetti = playedEclat = true;
             if (!playedReveal) { playedReveal = true; PlayReveal(); } // on entend quand même la révélation
+            if (look.secret && music != null) music.CancelSilence(); // la musique revient (0,5 s)
             t = Mathf.Max(t, resultStart);
             Render();
         }
@@ -315,13 +349,32 @@ namespace TourDeLaChance
         /// Place tout selon l'horloge t.
         void Render()
         {
-            // --- Voile : apparaît en 0,2 s ---
-            veil.style.opacity = Mathf.Clamp01(t / 0.2f);
+            // --- Voile : B1, il démarre à 0,6 d'opacité dès la première image, puis 0,85 en
+            //     0,2 s (sa couleur a déjà 85 % d'opacité : 0,6 / 0,85 ≈ 0,71 au départ) ---
+            veil.style.opacity = Mathf.Lerp(0.6f / 0.85f, 1f, Mathf.Clamp01(t / 0.2f));
 
             // --- Sons des phases communes (identiques pour toutes les raretés) ---
             if (!playedShake && t >= ArriveEnd) { playedShake = true; Play(Sfx.BoiteSecoue); }
             if (!playedOpen && t >= ShakeEnd) { playedOpen = true; Play(Sfx.BoiteOuverture); }
-            if (!playedReveal && t >= RevealStart) { playedReveal = true; PlayReveal(); }
+            // Le Secret garde sa fanfare pour l'arrivée de la carte (R + 2,4 s).
+            float revealSoundAt = RevealStart + (look.secret ? SecretCinematic.CardStart : 0f);
+            if (!playedReveal && t >= revealSoundAt) { playedReveal = true; PlayReveal(); }
+            Vector2 secretShake = Vector2.zero;
+            if (look.secret)
+            {
+                float since = t - RevealStart;
+                if (since >= 0f && !skipped)
+                {
+                    if (!playedSecretBeat && since >= 0f && music != null)
+                        music.Silence(SecretCinematic.CardStart); // les musiques descendent à 0 (coupure)
+                    if (!playedSecretBeat) { playedSecretBeat = true; Play(Sfx.SecretCoupure); }
+                    if (!playedSecretCrack && since >= SecretCinematic.BeatStart) { playedSecretCrack = true; Play(Sfx.SecretBattement); }
+                    if (!playedSecretShatter && since >= SecretCinematic.CrackStart) { playedSecretShatter = true; Play(Sfx.SecretFissure); }
+                    if (!playedEclat && since >= SecretCinematic.ShatterStart) { playedEclat = true; Play(Sfx.SecretEclat); }
+                    if (!playedSecretConfetti && since >= SecretCinematic.ImpactStart) { playedSecretConfetti = true; Play(Sfx.SecretConfettis); EmitSparks(); }
+                }
+                secretShake = secretFx.Render(since, skipped);
+            }
 
             // --- La boîte : arrivée, secousse, ouverture ---
             bool boxVisible = !skipped && t < RevealStart;
@@ -377,15 +430,32 @@ namespace TourDeLaChance
                 ? DisplayStyle.Flex : DisplayStyle.None;
 
             // --- La carte, le halo, les rayons ---
-            bool cardVisible = t >= cardStart;
+            bool cardVisible = t >= cardStart || (look.secret && skipped);
             card.style.display = cardVisible ? DisplayStyle.Flex : DisplayStyle.None;
             halo.style.display = cardVisible ? DisplayStyle.Flex : DisplayStyle.None;
             rays.style.display = cardVisible && look.rays > 0 ? DisplayStyle.Flex : DisplayStyle.None;
             if (cardVisible)
             {
+                // La carte est centrée sur la scène, même quand le mot de rareté (plus large
+                // que l'image) l'élargit : on la décale de la moitié de sa largeur réelle.
+                float cardWidth = card.resolvedStyle.width;
+                card.style.left = float.IsNaN(cardWidth) || cardWidth <= 0f ? -165f : -cardWidth * 0.5f;
                 float since = t - cardStart;
                 float cardScale = skipped ? 1f : CardScale(since);
-                card.style.scale = new Scale(new Vector3(cardScale, cardScale, 1f));
+                if (look.secret && !skipped)
+                {
+                    // La carte tombe en tournant comme une pièce, puis « tape » à l'impact.
+                    SecretCinematic.CardMotion(t - RevealStart, out float sx, out float dy);
+                    float impact = t - RevealStart - SecretCinematic.ImpactStart;
+                    float tap = impact >= 0f && impact < 0.3f ? Ease.Pop(impact / 0.3f, 1f, 1.25f) : 1f;
+                    card.style.scale = new Scale(new Vector3(sx * tap, tap, 1f));
+                    card.style.translate = new Translate(0f, dy);
+                }
+                else
+                {
+                    card.style.scale = new Scale(new Vector3(cardScale, cardScale, 1f));
+                    card.style.translate = new Translate(0f, 0f);
+                }
 
                 Color haloColor = look.rainbow ? Hue(t / 2f) : current.Rarity.color; // Secret : la teinte fait le tour en 2 s
                 haloColor.a = look.haloAlpha;
@@ -396,6 +466,9 @@ namespace TourDeLaChance
                 halo.style.opacity = appear;
                 rays.style.rotate = new Rotate(rayAngle);
                 rays.style.opacity = appear;
+                // Le Secret : le mot et sa ligne n'arrivent qu'à R + 3,7 s.
+                float wordSince = t - RevealStart - SecretCinematic.WordStart;
+                if (look.secret) chanceLabel.style.opacity = skipped ? 1f : Mathf.Clamp01((wordSince - 0.8f) / 0.2f);
 
                 // Lettres : elles sautent une à une (Légendaire, Secret) ; arc-en-ciel pour le Secret.
                 for (int i = 0; i < letters.Count; i++)
@@ -406,12 +479,21 @@ namespace TourDeLaChance
                         float k = (since - 0.3f - i * 0.07f) / 0.25f;
                         if (k > 0f && k < 1f) jump = -16f * Px * Mathf.Sin(Mathf.PI * k);
                     }
+                    if (look.secret && !skipped)
+                    {
+                        // Lettre par lettre depuis le haut, 0,08 s d'écart, avec un rebond.
+                        float k = (wordSince - i * 0.08f) / 0.3f;
+                        letters[i].style.opacity = k <= 0f ? 0f : 1f;
+                        jump = k <= 0f ? -200f * Px : -200f * Px * (1f - Ease.Pop(Mathf.Clamp01(k), 0f, 1.12f));
+                    }
+                    else letters[i].style.opacity = 1f;
                     letters[i].style.translate = new Translate(0f, jump);
                     if (look.rainbow) letters[i].style.color = Hue(t / 2f + i / (float)letters.Count);
                 }
 
-                // Étincelles : elles jaillissent une fois, au début de la révélation.
-                if (!sparksDone) { sparksDone = true; EmitSparks(); }
+                // Étincelles : elles jaillissent une fois, au début de la révélation
+                // (le Secret, lui, les garde pour l'impact).
+                if (!sparksDone) { sparksDone = true; if (!look.secret) EmitSparks(); }
             }
 
             // --- Secousse de l'écran pendant la révélation ---
@@ -422,7 +504,7 @@ namespace TourDeLaChance
                 shakeX = look.shake * Px * k * Mathf.Sin(2f * Mathf.PI * 25f * t);
                 shakeY = look.shake * Px * k * Mathf.Cos(2f * Mathf.PI * 21f * t) * 0.6f;
             }
-            content.style.translate = new Translate(shakeX, shakeY);
+            content.style.translate = new Translate(shakeX + secretShake.x, shakeY + secretShake.y);
 
             // --- L'écran de résultat, 0,2 s après la fin de la révélation ---
             if (!resultShown && t >= resultStart) ShowResult();
@@ -571,8 +653,17 @@ namespace TourDeLaChance
             }
         }
 
+        /// B2 : un bouton de l'écran de résultat n'agit qu'une fois son apparition finie.
+        bool Ready(Button b)
+        {
+            if (!resultShown) return false;
+            foreach (var (button, _) in appearing) if (button == b) return false;
+            return true;
+        }
+
         void OnEquip()
         {
+            if (!Ready(equipButton)) return;
             if (!Shop.TryEquip(current.Item)) return;
             if (avatar != null) avatar.ShowEquipped();
             if (avatarAnimator != null) avatarAnimator.WelcomeHop();
@@ -581,6 +672,7 @@ namespace TourDeLaChance
 
         void OnSell()
         {
+            if (!Ready(sellButton)) return;
             if (!Shop.TrySellDuplicate(current.Item)) return;
             Play(Sfx.Vente);
             RefreshButtonLabels();
@@ -590,7 +682,7 @@ namespace TourDeLaChance
         /// l'animation au temps 0 avec le nouveau résultat.
         void OnReopen()
         {
-            if (!resultShown) return;
+            if (!Ready(reopenButton)) return;
             if (Shop.TryOpenBox(current.Box, out var r)) Play(r);
         }
 
@@ -598,12 +690,21 @@ namespace TourDeLaChance
         public void Close()
         {
             if (!busy) return;
+            if (resultShown && !Ready(okButton)) return; // B2 : « OK » (ou Échap) attend la fin de l'apparition
+            bool celebrate = current.Rarity != null && (current.Rarity.id == "legendaire" || current.Rarity.id == "secret");
             busy = false;
             resultShown = false;
             closedFrame = Time.frameCount;
             root.style.display = DisplayStyle.None;
+            secretFx.Hide();
+            if (music != null) music.CancelSilence();
+            if (game != null) game.SetBoxOpening(false);
             Closed?.Invoke();
+            // v3 §8.3 : après « OK » sur un Légendaire ou un Secret, le cheval fait la fête.
+            if (celebrate && avatarAnimator != null) avatarAnimator.CashOutCelebration();
         }
+
+        bool playedEclat;
 
         // =====================================================================
         // Outils
@@ -619,6 +720,25 @@ namespace TourDeLaChance
         static Color WithAlpha(Color c, float a) { c.a = a; return c; }
 
         float Range(float min, float max) => min + (float)fxRandom.NextDouble() * (max - min);
+
+        /// OUTIL DE TEST : place l'horloge de l'animation à un instant précis (avec
+        /// Time.timeScale = 0, l'image reste figée : pratique pour une capture par phase).
+        public void DebugSetClock(float clock)
+        {
+            if (!busy) return;
+            t = clock;
+            Render();
+            UpdateButtons();
+        }
+
+        /// OUTIL DE TEST : joue l'animation d'un objet choisi (ex. le Secret) SANS rien tirer,
+        /// payer ni sauvegarder : seul l'affichage est testé.
+        public void DebugPlayItem(string itemId)
+        {
+            var item = Shop.Find(itemId);
+            if (item == null) return;
+            Play(new BoxResult { Box = Shop.BoxOf(item), Item = item, Rarity = Shop.RarityOf(item), IsNew = false, Count = Shop.CountOf(item) });
+        }
 
         /// OUTIL DE TEST : simule un clic sur un bouton de l'écran de résultat.
         public void DebugClick(string button)

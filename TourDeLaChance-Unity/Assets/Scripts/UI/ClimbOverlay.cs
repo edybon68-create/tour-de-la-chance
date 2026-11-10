@@ -9,19 +9,24 @@ namespace TourDeLaChance
     /// Pur affichage : il suit les événements ClimbStarted / DescentStarted du GameManager
     /// et ses durées (GameManager.ClimbDarkTime…), pour rester synchronisé avec la caméra.
     /// Il utilise les éléments "veil" et "banner" de Hud.uxml (même UIDocument que le HUD).
+    ///
+    /// v3 §11 : 2e ligne = nom du palier (étages 4, 7, 10), sinon texte spécial de l'étage,
+    /// sinon une phrase de montée au hasard (TextPicker). 3e ligne « ★ Nouveau record ! ★ »
+    /// quand le GameManager l'annonce. Le remélange de l'étage 1 n'a ni voile ni bannière.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class ClimbOverlay : MonoBehaviour
     {
         [SerializeField] GameManager game;
         [SerializeField] AltitudeDecor decor; // pour le nom du palier (2e ligne de la bannière)
+        [SerializeField] GameTexts texts;     // les phrases (Assets/Data/Textes.asset)
 
         // Moments de la montée, d'après le tableau §3.11.
         const float VeilStart = 0.10f;
         const float ReappearTime = GameManager.ClimbDarkTime + 0.05f;
 
         VisualElement veil, banner;
-        Label bannerFloor, bannerTier;
+        Label bannerFloor, bannerTier, bannerRecord;
         Coroutine veilRoutine, bannerRoutine;
 
         void OnEnable()
@@ -31,6 +36,8 @@ namespace TourDeLaChance
             banner = root.Q<VisualElement>("banner");
             bannerFloor = root.Q<Label>("banner-floor");
             bannerTier = root.Q<Label>("banner-tier");
+            bannerRecord = root.Q<Label>("banner-record");
+            TextPicker.Use(texts);
             veil.style.opacity = 0f;
             banner.style.opacity = 0f;
             game.ClimbStarted += OnClimbStarted;
@@ -50,6 +57,9 @@ namespace TourDeLaChance
         }
 
         void OnDescentStarted() => Restart(ref veilRoutine, DescentVeil());
+
+        /// Pour les tests : la dernière 2e ligne affichée par la bannière.
+        public string LastBannerLine { get; private set; } = "";
 
         void Restart(ref Coroutine slot, IEnumerator routine)
         {
@@ -95,8 +105,14 @@ namespace TourDeLaChance
             int floor = game.Floor; // l'étage a déjà changé (pendant le noir)
             bool newTier = GameManager.TierForFloor(floor) != GameManager.TierForFloor(floor - 1);
             bannerFloor.text = $"Étage {floor}";
-            bannerTier.text = newTier && decor != null ? decor.TierName(GameManager.TierForFloor(floor)) : "";
+            string tierName = newTier && decor != null ? decor.TierName(GameManager.TierForFloor(floor)) : "";
+            bannerTier.text = TextPicker.ClimbLine(floor, tierName, game.Pot, game.LastGain);
             bannerTier.style.display = string.IsNullOrEmpty(bannerTier.text) ? DisplayStyle.None : DisplayStyle.Flex;
+            bool record = game.NewRecordThisFloor;
+            bannerRecord.text = record && TextPicker.Texts != null ? TextPicker.Texts.recordLine : "";
+            bannerRecord.style.display = record ? DisplayStyle.Flex : DisplayStyle.None;
+            if (record && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Record);
+            LastBannerLine = bannerTier.text;
 
             for (float t = 0f; t < 1.1f; t += Time.deltaTime)
             {

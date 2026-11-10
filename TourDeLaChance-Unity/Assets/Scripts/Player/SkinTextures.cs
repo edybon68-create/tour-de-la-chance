@@ -15,7 +15,31 @@ namespace TourDeLaChance
     {
         const int Size = 64;
 
-        static Texture2D stripes, dots, galaxy;
+        static Texture2D stripes, dots, galaxy, rainbow;
+
+        /// Arc-en-ciel v3 (spec v3 §8.1) : 4 × 64 pixels, dégradé vertical qui fait UN TOUR
+        /// COMPLET du cercle des couleurs (saturation 0,75, luminosité 1). Il se répète sans
+        /// couture (le haut rejoint le bas : rouge → … → rouge).
+        public static Texture2D RainbowGradient()
+        {
+            if (rainbow == null)
+            {
+                rainbow = new Texture2D(4, 64, TextureFormat.RGBA32, false)
+                {
+                    name = "ArcEnCiel",
+                    wrapMode = TextureWrapMode.Repeat,
+                    filterMode = FilterMode.Bilinear,
+                    hideFlags = HideFlags.DontSave
+                };
+                for (int y = 0; y < 64; y++)
+                {
+                    Color c = Color.HSVToRGB(y / 64f, 0.75f, 1f);
+                    for (int x = 0; x < 4; x++) rainbow.SetPixel(x, y, c);
+                }
+                rainbow.Apply();
+            }
+            return rainbow;
+        }
 
         /// Rayures : 2 bandes par tuile (haut = couleur 1, bas = couleur 2). Répétée 4 fois
         /// en hauteur, cela fait les 8 bandes du sucre d'orge.

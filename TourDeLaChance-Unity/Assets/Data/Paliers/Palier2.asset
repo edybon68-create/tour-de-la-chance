@@ -15,12 +15,13 @@ MonoBehaviour:
   displayName: Dans les nuages !
   background: {fileID: 2800000, guid: 36856bd6e7eae4c2093277a15806af9e, type: 3}
   backgroundTint: {r: 1, g: 1, b: 1, a: 1}
-  lightColor: {r: 1, g: 0.9019608, b: 0.8784314, a: 1}
-  lightIntensity: 1.15
-  ambientSky: {r: 0.7058824, g: 0.6039216, b: 0.78431374, a: 1}
-  ambientEquator: {r: 0.47843137, g: 0.38431373, b: 0.5647059, a: 1}
-  ambientGround: {r: 0.22745098, g: 0.1882353, b: 0.28235295, a: 1}
+  cameraColor: {r: 0.7882353, g: 0.5411765, b: 0.5882353, a: 1}
+  lightColor: {r: 1, g: 0.84313726, b: 0.65882355, a: 1}
+  lightIntensity: 1.2
+  ambientSky: {r: 0.9411765, g: 0.7254902, b: 0.627451, a: 1}
+  ambientEquator: {r: 0.6901961, g: 0.47843137, b: 0.53333336, a: 1}
+  ambientGround: {r: 0.2901961, g: 0.1882353, b: 0.2509804, a: 1}
   cloudGroups: 6
   cloudMinY: -2.5
   cloudMaxY: -1.5
-  cloudColor: {r: 0.84705883, g: 0.8, b: 0.9019608, a: 1}
+  cloudColor: {r: 0.96862745, g: 0.827451, b: 0.7607843, a: 1}

@@ -11,12 +11,14 @@
     align-items: flex-start;
 }
 
+/* v3 §9 : lisible sur le ciel clair du jour → contour de 2 px + ombre de texte. */
 .floor {
     font-size: 64px;
     color: #FFD54A;
     -unity-font-style: bold;
-    -unity-text-outline-width: 1px;
+    -unity-text-outline-width: 2px;
     -unity-text-outline-color: #3A2200;
+    text-shadow: 0 3px 0 rgba(31, 23, 48, 0.6);
 }
 
 .counters {
@@ -55,7 +57,17 @@
     color: #FFD54A;
 }
 
+/* La boîte du message (fond sombre) et ses deux lignes. */
 .message {
+    align-self: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.45);
+    padding: 8px 24px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+}
+
+.message-text {
     font-size: 36px;
     color: #FFFFFF;
     -unity-font-style: bold;
@@ -63,11 +75,52 @@
     -unity-text-outline-width: 1px;
     -unity-text-outline-color: #000000;
     white-space: normal;
+    padding: 0;
+    margin: 0;
+}
+
+/* 2e ligne (« Cagnotte perdue : X pièces. ») : taille 28. */
+.message-sub {
+    font-size: 28px;
+    color: #E6E1EE;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #000000;
+    padding: 0;
+    margin: 2px 0 0 0;
+}
+
+/* v3 §5.6 : l'étiquette d'étage, une rangée de pastilles juste au-dessus du message. */
+.floor-tag {
+    flex-direction: row;
+    justify-content: center;
     align-self: center;
-    background-color: rgba(0, 0, 0, 0.45);
-    padding: 8px 24px;
+    margin-bottom: 10px;
+}
+
+.floor-pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(31, 23, 48, 0.75); /* #1F1730 à 75 % */
     border-radius: 14px;
-    margin-bottom: 16px;
+    padding: 4px 16px 4px 10px;
+    margin: 0 6px;
+}
+
+.floor-pill-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.floor-pill-text {
+    font-size: 26px;
+    color: #F4EEE6;
+    -unity-font-style: bold;
+    padding: 0;
+    margin: 0;
 }
 
 .spacer {
@@ -79,36 +132,12 @@
     justify-content: center;
 }
 
-.btn {
+/* Les gros boutons d'action (Encaisser, Rejouer). Leur style « bonbon » est dans Buttons.uss. */
+.btn-action, .btn-cashout {
     font-size: 34px;
     min-width: 260px;
-    height: 84px;
+    height: 92px;
     margin: 0 16px;
-    border-radius: 16px;
-    border-width: 0;
-    color: #FFFFFF;
-    background-color: #5B5BD6;
-    -unity-font-style: bold;
-    /* Survol : échelle 1,05 en 0,08 s ; appui : 0,95 (§3.10). */
-    transition-property: scale;
-    transition-duration: 0.08s;
-}
-
-.btn:hover {
-    scale: 1.05 1.05;
-}
-
-.btn:active {
-    scale: 0.95 0.95;
-}
-
-.btn-safe {
-    background-color: #2E9E5B;
-}
-
-/* Bouton Boutique : couleur or, pour l'associer aux pièces. */
-.btn-shop {
-    background-color: #C99A1E;
 }
 
 /* ---------- Ajouts « game feel » (spec sons-animations) ---------- */
@@ -123,24 +152,13 @@
     margin-top: 4px;
 }
 
+/* v3 (B4, §10.5) : texte 24 px, hauteur mini 48 px, marge 8 × 16, famille « sombre ». */
 .sound-toggle {
-    font-size: 16px;
-    color: #FFFFFF;
-    background-color: rgba(42, 42, 58, 0.8); /* #2A2A3A à 80 % */
-    border-width: 0;
-    border-radius: 8px;
-    padding: 4px 10px;
+    font-size: 24px;
+    min-height: 48px;
+    padding: 8px 16px;
     margin: 0 8px 0 0;
-    transition-property: scale;
-    transition-duration: 0.08s;
-}
-
-.sound-toggle:hover {
-    scale: 1.05 1.05;
-}
-
-.sound-toggle:active {
-    scale: 0.95 0.95;
+    border-radius: 14px;
 }
 
 /* « … : non » : le bouton passe à moitié transparent. */
@@ -160,6 +178,7 @@
     font-size: 34px;
     color: #FFFFFF;
     -unity-font-style: bold;
+    text-shadow: 0 2px 0 #1E6E3E;
     padding: 0;
     margin: 0;
 }
@@ -229,10 +248,31 @@
     -unity-text-outline-color: #3A2200;
 }
 
+/* v3 §9 : fond #1F1730 à 55 % derrière les lignes de la bannière (lisible sur le jour). */
+.banner-box {
+    align-items: center;
+    background-color: rgba(31, 23, 48, 0.55);
+    border-radius: 24px;
+    padding: 12px 40px 16px 40px;
+}
+
 .banner-tier {
     font-size: 32px;
     color: #F4EEE6;
     -unity-font-style: bold;
     -unity-text-outline-width: 1px;
     -unity-text-outline-color: #1F1730;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 1100px;
+}
+
+/* 3e ligne : « ★ Nouveau record ! ★ » (taille 26, or). */
+.banner-record {
+    font-size: 26px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: #3A2200;
+    margin-top: 4px;
 }

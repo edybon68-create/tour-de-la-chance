@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 799e8ae51a3f742e7be9fb4f30fbef9c, type: 3}
+  m_Name: UpgradeCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.UpgradeCatalog
+  upgrades:
+  - id: gains
+    displayName: Bourse magique
+    description: "Chaque tr\xE9sor rapporte plus de pi\xE8ces."
+    icon: {fileID: 21300000, guid: 934e59f2ab4cb4540ac97af62ed52aa2, type: 3}
+    levels:
+    - price: 0
+      value: 1
+      weights: 
+      effectText: Gain normal
+    - price: 150
+      value: 1.2
+      weights: 
+      effectText: "Tr\xE9sors +20 %"
+    - price: 400
+      value: 1.4
+      weights: 
+      effectText: "Tr\xE9sors +40 %"
+    - price: 900
+      value: 1.6
+      weights: 
+      effectText: "Tr\xE9sors +60 %"
+    - price: 1800
+      value: 1.8
+      weights: 
+      effectText: "Tr\xE9sors +80 %"
+    - price: 3500
+      value: 2
+      weights: 
+      effectText: "Tr\xE9sors \xD72 !"
+  - id: coffres
+    displayName: "Coffres pr\xE9cieux"
+    description: "Des coffres plus beaux, qui multiplient le gain de l'\xE9tage."
+    icon: {fileID: 21300000, guid: ed90845292de34f53b8f3e85bfd19787, type: 3}
+    levels:
+    - price: 0
+      value: 1
+      weights: 6400000000000000000000000000000000000000
+      effectText: 
+    - price: 200
+      value: 1
+      weights: 4b00000019000000000000000000000000000000
+      effectText: 
+    - price: 500
+      value: 1
+      weights: 37000000200000000d0000000000000000000000
+      effectText: 
+    - price: 1100
+      value: 1
+      weights: 2800000021000000140000000700000000000000
+      effectText: 
+    - price: 2200
+      value: 1
+      weights: 1e00000020000000180000000b00000003000000
+      effectText: 
+    - price: 4000
+      value: 1
+      weights: 140000001e0000001c0000000f00000007000000
+      effectText: 
+  - id: pieges
+    displayName: Coffre en plus
+    description: "Parfois 4 ou 5 coffres\u2026 et toujours un seul pi\xE8ge !"
+    icon: {fileID: 21300000, guid: 729f933f90f7940968f108da99a6a5f4, type: 3}
+    levels:
+    - price: 0
+      value: 1
+      weights: 640000000000000000000000
+      effectText: 
+    - price: 300
+      value: 1
+      weights: 4b0000001900000000000000
+      effectText: 
+    - price: 750
+      value: 1
+      weights: 320000003200000000000000
+      effectText: 
+    - price: 1500
+      value: 1
+      weights: 190000004b00000000000000
+      effectText: 
+    - price: 3000
+      value: 1
+      weights: 000000006400000000000000
+      effectText: 
+    - price: 6000
+      value: 1
+      weights: 000000003200000032000000
+      effectText: 
+  chestRarities:
+  - id: bois
+    displayName: Coffres en bois
+    shortName: Bois
+    multiplier: 1
+    bodyColor: {r: 0.54901963, g: 0.34901962, b: 0.2, a: 1}
+    fxColor: {r: 1, g: 1, b: 1, a: 1}
+    fxColor2: {r: 1, g: 1, b: 1, a: 1}
+    icon: {fileID: 21300000, guid: f846b584ca4c24b239ff2edf5f628cd4, type: 3}
+  - id: bronze
+    displayName: Coffres de bronze
+    shortName: Bronze
+    multiplier: 1.5
+    bodyColor: {r: 0.49411765, g: 0.24705882, b: 0.15686275, a: 1}
+    fxColor: {r: 0.6901961, g: 0.4392157, b: 0.22745098, a: 1}
+    fxColor2: {r: 0.6901961, g: 0.4392157, b: 0.22745098, a: 1}
+    icon: {fileID: 21300000, guid: da0e7cda257d342adac5da7805afd78e, type: 3}
+  - id: argent
+    displayName: Coffres d'argent
+    shortName: Argent
+    multiplier: 2
+    bodyColor: {r: 0.24313726, g: 0.36078432, b: 0.5411765, a: 1}
+    fxColor: {r: 0.7882353, g: 0.80784315, b: 0.84705883, a: 1}
+    fxColor2: {r: 0.7882353, g: 0.80784315, b: 0.84705883, a: 1}
+    icon: {fileID: 21300000, guid: 008c2f84b95714b6da8ae0a0f260d4f7, type: 3}
+  - id: or
+    displayName: Coffres d'or
+    shortName: Or
+    multiplier: 3
+    bodyColor: {r: 0.35686275, g: 0.1764706, b: 0.50980395, a: 1}
+    fxColor: {r: 0.9098039, g: 0.72156864, b: 0.1882353, a: 1}
+    fxColor2: {r: 0.9098039, g: 0.72156864, b: 0.1882353, a: 1}
+    icon: {fileID: 21300000, guid: fa265623bc1004c18861e1ab863931eb, type: 3}
+  - id: diamant
+    displayName: Coffres de diamant
+    shortName: Diamant
+    multiplier: 5
+    bodyColor: {r: 0.9019608, g: 0.9411765, b: 0.96862745, a: 1}
+    fxColor: {r: 0.62352943, g: 0.8901961, b: 1, a: 1}
+    fxColor2: {r: 0.95686275, g: 0.93333334, b: 0.9019608, a: 1}
+    icon: {fileID: 21300000, guid: 95e551f9f3d5a4f27b29751fe915a72b, type: 3}
+  baseChestCount: 3

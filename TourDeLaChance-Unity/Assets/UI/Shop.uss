@@ -4,74 +4,8 @@
    Couleurs : or #FFD54A = argent / sélection, vert #2E9E5B = ouvrir, bleu #3B7DD8 = équiper.
    Les couleurs de RARETÉ ne sont pas ici : le code les lit dans le catalogue (une seule source). */
 
-.shop-root {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-}
-
-/* Le panneau : 660 px de large (440 × 1,5), toute la hauteur sous la barre du haut,
-   fond #2A2A3A à 92 %, coins arrondis à gauche. Le code le fait glisser (translate). */
-.shop-panel {
-    position: absolute;
-    right: 0;
-    top: 176px;
-    bottom: 0;
-    width: 660px;
-    background-color: rgba(42, 42, 58, 0.92);
-    border-top-left-radius: 24px;
-    border-bottom-left-radius: 24px;
-    padding: 14px 18px 14px 18px;
-}
-
-/* --- 1. Onglets --- */
-.shop-header {
-    flex-direction: row;
-    align-items: stretch;
-    flex-shrink: 0;
-}
-
-.shop-tab {
-    flex-grow: 1;
-    font-size: 26px;
-    height: 58px;
-    margin: 0 6px 0 0;
-    border-radius: 10px 10px 0 0;
-    border-width: 0 0 4px 0;
-    border-color: rgba(0, 0, 0, 0);
-    color: #C9C3D6;
-    background-color: rgba(0, 0, 0, 0.2);
-    -unity-font-style: bold;
-}
-
-.shop-tab:hover {
-    background-color: #33334A;
-}
-
-/* Onglet actif : fond #3A3A50 et soulignement or de 3 px (4,5 px à notre échelle). */
-.shop-tab--active {
-    color: #FFFFFF;
-    background-color: #3A3A50;
-    border-color: #FFD54A;
-}
-
-.shop-close {
-    width: 58px;
-    height: 58px;
-    font-size: 36px;
-    margin: 0;
-    border-radius: 12px;
-    border-width: 0;
-    color: #FFFFFF;
-    background-color: #555566;
-    -unity-font-style: bold;
-}
-
-.shop-close:hover {
-    background-color: #6A6A80;
-}
+/* v3 : le cadre et la colonne des panneaux sont dans Panels.uss ; ce fichier garde le
+   style du contenu (cartes de boîtes, cartes d'objets, sous-onglets, zone d'action). */
 
 /* --- 2. Porte-monnaie --- */
 .shop-wallet-row {
@@ -277,26 +211,12 @@
     flex-wrap: wrap;
 }
 
+/* « Ouvrir — 250 » : famille verte des boutons bonbons (Buttons.uss). */
 .open-btn {
     font-size: 30px;
-    height: 72px;
+    height: 76px;
     min-width: 280px;
     margin: 0;
-    border-radius: 14px;
-    border-width: 0;
-    color: #FFFFFF;
-    background-color: #2E9E5B;
-    -unity-font-style: bold;
-}
-
-.open-btn:hover {
-    background-color: #38B36A;
-}
-
-.open-btn:disabled {
-    background-color: #555566;
-    color: #AAAAAA;
-    opacity: 1;
 }
 
 .missing {
@@ -328,21 +248,25 @@
     flex-shrink: 0;
 }
 
+/* Sous-onglets : famille « sombre » ; l'onglet actif est or. */
 .subtab {
     font-size: 22px;
-    height: 46px;
+    height: 54px;
     flex-grow: 1;
     margin: 0 6px 0 0;
-    border-radius: 10px;
-    border-width: 0;
-    color: #C9C3D6;
-    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
 }
 
 .subtab--active {
-    color: #222222;
+    color: #3A2200;
     background-color: #FFD54A;
-    -unity-font-style: bold;
+    border-top-color: #FFE27A;
+    border-bottom-color: #C99A1E;
+    text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.subtab--active:hover {
+    background-color: #FFE27A;
 }
 
 /* --- Grille de cartes d'objets (Inventaire et Index) --- */
@@ -511,48 +435,24 @@
     margin-bottom: 8px;
 }
 
+/* Boutons de la zone d'action (familles bleue et sombre, Buttons.uss). */
 .action-btn {
     font-size: 24px;
-    height: 58px;
+    height: 64px;
     margin: 0 8px 0 0;
-    border-radius: 12px;
-    border-width: 0;
-    color: #FFFFFF;
-    -unity-font-style: bold;
     padding: 0 18px;
 }
 
 .action-btn--equip {
-    background-color: #3B7DD8;
     flex-grow: 1;
-}
-
-.action-btn--equip:hover {
-    background-color: #4A8CE6;
 }
 
 .action-btn--sell {
-    background-color: #5B5BD6;
     flex-grow: 1;
 }
 
-.action-btn--sell:hover {
-    background-color: #6B6BE6;
-}
-
 .action-btn--sellall {
-    background-color: #5B5BD6;
     margin: 0;
-}
-
-.action-btn--sellall:hover {
-    background-color: #6B6BE6;
-}
-
-.action-btn:disabled {
-    background-color: #555566;
-    color: #AAAAAA;
-    opacity: 1;
 }
 
 /* --- Index --- */

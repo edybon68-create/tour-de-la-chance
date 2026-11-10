@@ -141,29 +141,21 @@
     justify-content: center;
 }
 
+/* Boutons du résultat : familles « bonbons » de Buttons.uss (bleu, sombre, vert, violet). */
 .ov-btn {
     font-size: 28px;
-    height: 70px;
+    height: 76px;
     min-width: 180px;
     margin: 0 8px;
     padding: 0 22px;
-    border-radius: 14px;
-    border-width: 0;
-    color: #FFFFFF;
-    -unity-font-style: bold;
 }
 
-.ov-btn--equip { background-color: #3B7DD8; }
-.ov-btn--equip:hover { background-color: #4A8CE6; }
-.ov-btn--sell { background-color: #5B5BD6; }
-.ov-btn--sell:hover { background-color: #6B6BE6; }
-.ov-btn--reopen { background-color: #2E9E5B; }
-.ov-btn--reopen:hover { background-color: #38B36A; }
-.ov-btn--ok { background-color: #555566; }
-.ov-btn--ok:hover { background-color: #6A6A80; }
-
-.ov-btn:disabled {
-    background-color: #444455;
-    color: #9A9AAA;
-    opacity: 1;
+/* v3 §8.3 : « Une chance sur 100 ! » sous « SECRET !!! » (taille 26 → 39 à notre échelle). */
+.ov-chance {
+    font-size: 39px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: #1F1730;
+    margin-top: 4px;
 }

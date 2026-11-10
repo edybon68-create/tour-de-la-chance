@@ -1,0 +1,104 @@
+/* Les boutons « bonbons de fête foraine » (spec v3 §10, art-bible §11), partagés par tous
+   les écrans (chaque UXML ajoute <Style src="Buttons.uss" />).
+   Anatomie : un BISEAU clair en haut (bordure haute 2 px), une ÉPAISSEUR sombre en bas
+   (bordure basse 8 px : le bouton a l'air posé sur un socle), un REFLET (dessiné par
+   le code, ButtonStyler) et il S'ENFONCE quand on appuie.
+   Tailles pour la référence 1920 × 1080. */
+
+.btn {
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    border-radius: 18px;
+    border-top-width: 2px;
+    border-bottom-width: 8px;
+    border-left-width: 0;
+    border-right-width: 0;
+    /* Couleurs par défaut (famille violette) ; chaque famille les remplace plus bas. */
+    background-color: #5B5BD6;
+    border-top-color: #7E7EEA;
+    border-bottom-color: #3B3BA0;
+    text-shadow: 0 2px 0 #3B3BA0;
+    /* Survol : 0,15 s avec un petit rebond (ease-out-back). */
+    transition-property: scale, translate, background-color, border-bottom-width;
+    transition-duration: 0.15s, 0.15s, 0.15s, 0.15s;
+    transition-timing-function: ease-out-back, ease-out-back, ease-out, ease-out-back;
+}
+
+/* Survol : il grossit (1,06) et s'éclaircit. */
+.btn:hover {
+    scale: 1.06 1.06;
+}
+
+/* Appui : il descend de 6 px et s'enfonce dans son socle (épaisseur 8 → 2 px), 0,06 s. */
+.btn:active {
+    scale: 0.97 0.97;
+    translate: 0 6px;
+    border-bottom-width: 2px;
+    transition-duration: 0.06s, 0.06s, 0.06s, 0.06s;
+    transition-timing-function: ease-out, ease-out, ease-out, ease-out;
+}
+
+/* Désactivé : gris, pas de reflet, pas d'agrandissement. */
+.btn:disabled {
+    background-color: #5A5A6E;
+    border-top-color: #6E6E84;
+    border-bottom-color: #3A3A48;
+    color: #B8B4C8;
+    text-shadow: 0 2px 0 #3A3A48;
+    opacity: 0.75;
+    scale: 1 1;
+    translate: 0 0;
+}
+
+/* Le reflet (vernis du jouet) est DESSINÉ par le code (ButtonStyler) : 18 % de blanc en
+   haut du bouton, 30 % au survol, rien quand le bouton est désactivé. */
+
+/* Texte d'un bouton qui contient d'autres éléments (« Jouer » et son éclat). */
+.btn-label {
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+/* L'éclat qui passe (seulement sur « Jouer ») : une bande blanche inclinée, déplacée par le code. */
+.btn-eclat {
+    position: absolute;
+    top: -20px;
+    bottom: -20px;
+    width: 40px;
+    left: 0;
+    background-color: rgba(255, 255, 255, 0.25);
+    rotate: 20deg;
+}
+
+/* ---------- Les familles de couleurs (§10.3) ---------- */
+
+/* Vert « sûr » : Encaisser, Ouvrir, Améliorer, Rouvrir */
+.btn--vert { background-color: #2E9E5B; border-top-color: #4CC27A; border-bottom-color: #1E6E3E; text-shadow: 0 2px 0 #1E6E3E; }
+.btn--vert:hover { background-color: #4CC27A; }
+
+/* Violet neutre : Rejouer, OK */
+.btn--violet { background-color: #5B5BD6; border-top-color: #7E7EEA; border-bottom-color: #3B3BA0; text-shadow: 0 2px 0 #3B3BA0; }
+.btn--violet:hover { background-color: #7E7EEA; }
+
+/* Or : Jouer (texte foncé, sans ombre claire) */
+.btn--or { background-color: #FFD54A; border-top-color: #FFE27A; border-bottom-color: #C99A1E; color: #3A2200; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.btn--or:hover { background-color: #FFE27A; }
+
+/* Bleu : Équiper */
+.btn--bleu { background-color: #3B7DD8; border-top-color: #64A0EE; border-bottom-color: #2858A0; text-shadow: 0 2px 0 #2858A0; }
+.btn--bleu:hover { background-color: #64A0EE; }
+
+/* Sombre : colonne de boutons, onglets, Vendre, sons */
+.btn--sombre { background-color: #2A2A3A; border-top-color: #3A3A50; border-bottom-color: #15121F; text-shadow: 0 2px 0 #15121F; }
+.btn--sombre:hover { background-color: #3A3A50; }
+
+/* Les états désactivés gagnent sur les familles (même gris pour tous). */
+.btn--vert:disabled, .btn--violet:disabled, .btn--or:disabled, .btn--bleu:disabled, .btn--sombre:disabled {
+    background-color: #5A5A6E;
+    border-top-color: #6E6E84;
+    border-bottom-color: #3A3A48;
+    color: #B8B4C8;
+    text-shadow: 0 2px 0 #3A3A48;
+}

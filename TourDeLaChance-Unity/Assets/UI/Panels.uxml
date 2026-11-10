@@ -1,0 +1,88 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <!-- Les 4 panneaux latéraux et leur colonne de boutons (spec v3 §4).
+         - La COLONNE (bord gauche) : un bouton par panneau, toujours visible (grisé quand
+           c'est interdit, caché seulement pendant l'ouverture d'une boîte).
+         - Le CADRE commun, collé à la colonne : en-tête (icône, titre, ×), rappel du
+           porte-monnaie, puis la page du panneau ouvert.
+         Les cartes sont créées par le code (PanelsController, BoutiquePage, InventoryPage,
+         IndexPage, UpgradesPage) à partir des catalogues : AUCUN chiffre n'est écrit ici.
+         Styles : Shop.uss (cartes des objets et des boîtes), Panels.uss (colonne, cadre,
+         améliorations), Buttons.uss (boutons « bonbons »). Référence 1920 × 1080. -->
+    <Style src="Shop.uss" />
+    <Style src="Panels.uss" />
+    <Style src="Buttons.uss" />
+    <ui:VisualElement name="panels-root" class="panels-root" picking-mode="Ignore">
+        <!-- Le cadre (derrière la colonne : il glisse « de derrière » elle) -->
+        <ui:VisualElement name="frame" class="panel-frame">
+            <ui:VisualElement class="panel-header">
+                <ui:VisualElement name="frame-icon" class="panel-header-icon" picking-mode="Ignore" />
+                <ui:Label name="frame-title" text="Boutique" class="panel-title" picking-mode="Ignore" />
+                <ui:Button name="close" text="×" class="btn btn--sombre panel-close" />
+            </ui:VisualElement>
+            <ui:VisualElement class="panel-wallet-row" picking-mode="Ignore">
+                <ui:VisualElement class="coin" picking-mode="Ignore" />
+                <ui:Label name="panel-wallet" text="0" class="shop-wallet" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="pot-note" text="" class="pot-note" picking-mode="Ignore" />
+
+            <!-- Boutique : une carte par boîte (créées par le code) -->
+            <ui:ScrollView name="page-boutique" class="shop-page shop-scroll" />
+
+            <!-- Inventaire -->
+            <ui:VisualElement name="page-inventaire" class="shop-page">
+                <ui:VisualElement class="subtabs">
+                    <ui:Button name="inv-skins" text="Skins" class="btn btn--sombre subtab" />
+                    <ui:Button name="inv-accessoires" text="Accessoires" class="btn btn--sombre subtab" />
+                </ui:VisualElement>
+                <ui:ScrollView name="inv-list" class="shop-scroll" />
+                <ui:VisualElement class="inv-actions">
+                    <ui:Label name="inv-selected" text="" class="inv-selected" picking-mode="Ignore" />
+                    <ui:VisualElement class="inv-buttons">
+                        <ui:Button name="inv-equip" text="Équiper" class="btn btn--bleu action-btn action-btn--equip" />
+                        <ui:Button name="inv-sell" text="Vendre 1 doublon" class="btn btn--sombre action-btn action-btn--sell" />
+                    </ui:VisualElement>
+                    <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="btn btn--sombre action-btn action-btn--sellall" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Index -->
+            <ui:VisualElement name="page-index" class="shop-page">
+                <ui:VisualElement name="idx-tabs" class="subtabs" />
+                <ui:VisualElement class="progress-row" picking-mode="Ignore">
+                    <ui:Label name="idx-progress" text="0 / 16 trouvés" class="progress-text" picking-mode="Ignore" />
+                    <ui:VisualElement class="progress-bar" picking-mode="Ignore">
+                        <ui:VisualElement name="idx-bar-fill" class="progress-fill" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:ScrollView name="idx-grid" class="shop-scroll" />
+                <ui:VisualElement class="idx-info-row">
+                    <ui:Label name="idx-info" text="" class="idx-info" picking-mode="Ignore" />
+                    <ui:Button name="idx-goto" text="Voir dans l'inventaire" class="link-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Améliorations : une carte par amélioration (créées par le code) -->
+            <ui:ScrollView name="page-ameliorations" class="shop-page shop-scroll" />
+        </ui:VisualElement>
+
+        <!-- La colonne de boutons (bord gauche, de y = 230 à 790) -->
+        <ui:VisualElement name="column" class="panel-column" picking-mode="Ignore">
+            <ui:Button name="col-boutique" class="btn btn--sombre col-btn">
+                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                <ui:Label text="Boutique" class="col-btn-text" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="col-inventaire" class="btn btn--sombre col-btn">
+                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                <ui:Label text="Inventaire" class="col-btn-text" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="col-index" class="btn btn--sombre col-btn">
+                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                <ui:Label text="Index" class="col-btn-text" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="col-ameliorations" class="btn btn--sombre col-btn">
+                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                <ui:Label text="Améliorations" class="col-btn-text col-btn-text--small" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

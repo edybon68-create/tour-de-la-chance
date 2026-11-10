@@ -18,6 +18,9 @@ namespace TourDeLaChance
         /// Un pourcentage avec 2 décimales au plus, sans zéros inutiles : 10 %, 6,25 %, 4,67 %.
         public static string Percent(double value) => value.ToString("0.##", French) + " %";
 
+        /// Un nombre « à la française », sans zéros inutiles : 1,5 ; 3 ; 1,13.
+        public static string Number(float value) => value.ToString("0.##", French);
+
         /// Couleur « texte » d'une rareté (plus claire pour Rare et Super rare, art-bible §10.2).
         public static void ColorText(VisualElement label, RarityDef rarity)
         {

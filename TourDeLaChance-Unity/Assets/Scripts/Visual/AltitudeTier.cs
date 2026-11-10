@@ -19,6 +19,8 @@ namespace TourDeLaChance
         public Texture2D background;
         [Tooltip("Teinte multipliée sur l'image (blanc = image telle quelle).")]
         public Color backgroundTint = Color.white;
+        [Tooltip("v3 : couleur de fond de la caméra (visible seulement si l'image manque).")]
+        public Color cameraColor = new Color(0.122f, 0.09f, 0.188f);
 
         [Header("Lumière principale (sa direction ne change pas)")]
         public Color lightColor = new Color(1f, 0.945f, 0.839f);

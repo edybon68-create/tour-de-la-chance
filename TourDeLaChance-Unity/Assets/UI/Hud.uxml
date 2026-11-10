@@ -1,6 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <!-- La structure de l'interface (comme du HTML). Le style est dans Hud.uss (comme du CSS). -->
     <Style src="Hud.uss" />
+    <Style src="Buttons.uss" />
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
         <!-- Le voile sombre des transitions d'étage (§3.11). Il est en premier : il passe
              devant la scène 3D mais derrière le reste de l'interface. -->
@@ -10,8 +11,8 @@
                 <ui:Label name="floor" text="Étage 1" class="floor" picking-mode="Ignore" />
                 <!-- Les deux boutons du son, sous « Étage N » (§6.2). -->
                 <ui:VisualElement class="sound-toggles" picking-mode="Ignore">
-                    <ui:Button name="music-toggle" text="Musique : oui" class="sound-toggle" />
-                    <ui:Button name="effects-toggle" text="Effets : oui" class="sound-toggle" />
+                    <ui:Button name="music-toggle" text="Musique : oui" class="btn btn--sombre sound-toggle" />
+                    <ui:Button name="effects-toggle" text="Effets : oui" class="btn btn--sombre sound-toggle" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="counters" picking-mode="Ignore">
@@ -27,24 +28,32 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="spacer" picking-mode="Ignore" />
-        <!-- Le message est en bas, au-dessus des boutons, pour ne jamais cacher le chapeau. -->
-        <ui:Label name="message" text="" class="message" picking-mode="Ignore" />
+        <!-- v3 §5.6 : l'étiquette d'étage (gain, rareté des coffres, nombre de coffres),
+             juste au-dessus du message. Les pastilles sont créées par le code (FloorTagView). -->
+        <ui:VisualElement name="floor-tag" class="floor-tag" picking-mode="Ignore" />
+        <!-- Le message est en bas, au-dessus des boutons, pour ne jamais cacher le chapeau.
+             v3 : une 2e ligne plus petite (« Cagnotte perdue : X pièces. »). -->
+        <ui:VisualElement name="message-box" class="message" picking-mode="Ignore">
+            <ui:Label name="message" text="" class="message-text" picking-mode="Ignore" />
+            <ui:Label name="message-sub" text="" class="message-sub" picking-mode="Ignore" />
+        </ui:VisualElement>
         <ui:VisualElement class="actions" picking-mode="Ignore">
             <!-- « Encaisser X » : proposé pendant le choix d'un coffre, à partir de l'étage 2. -->
-            <ui:Button name="cashout" class="btn btn-safe btn-cashout">
+            <ui:Button name="cashout" class="btn btn--vert btn-cashout">
                 <ui:Label name="cashout-text" text="Encaisser 0" class="btn-cashout-text" picking-mode="Ignore" />
                 <ui:VisualElement class="coin" picking-mode="Ignore" />
             </ui:Button>
-            <ui:Button name="replay" text="Rejouer" class="btn" />
-            <!-- Ouvre le shop. Visible seulement quand le GameManager le permet. -->
-            <ui:Button name="shop" text="Boutique" class="btn btn-shop" />
+            <ui:Button name="replay" text="Rejouer" class="btn btn--violet btn-action" />
         </ui:VisualElement>
         <!-- Calque des effets : textes « +20 » et pièces volantes (créés par le code). -->
         <ui:VisualElement name="fx-layer" class="fx-layer" picking-mode="Ignore" />
         <!-- La bannière « Étage N » de la montée, et le nom du palier s'il change. -->
         <ui:VisualElement name="banner" class="banner" picking-mode="Ignore">
-            <ui:Label name="banner-floor" text="Étage 2" class="banner-floor" picking-mode="Ignore" />
-            <ui:Label name="banner-tier" text="" class="banner-tier" picking-mode="Ignore" />
+            <ui:VisualElement name="banner-box" class="banner-box" picking-mode="Ignore">
+                <ui:Label name="banner-floor" text="Étage 2" class="banner-floor" picking-mode="Ignore" />
+                <ui:Label name="banner-tier" text="" class="banner-tier" picking-mode="Ignore" />
+                <ui:Label name="banner-record" text="" class="banner-record" picking-mode="Ignore" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

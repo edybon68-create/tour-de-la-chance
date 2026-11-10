@@ -38,10 +38,13 @@ namespace TourDeLaChance
 
         /// Secousse du piège : 0,25 s, nouvelle direction toutes les 0,033 s,
         /// amplitude 0,06 m qui décroît jusqu'à 0.
-        public void Shake()
+        public void Shake() => Shake(0.06f, 0.25f);
+
+        /// Secousse réglable (v3 §5.3.2 : coffre d'or 0,03 m / 0,2 s, diamant 0,05 m / 0,3 s).
+        public void Shake(float amplitude, float duration)
         {
             if (shake != null) StopCoroutine(shake);
-            shake = StartCoroutine(ShakeRoutine(0.25f, 0.06f));
+            shake = StartCoroutine(ShakeRoutine(duration, amplitude));
         }
 
         IEnumerator ShakeRoutine(float duration, float amplitude)

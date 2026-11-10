@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.3
   accessoryPrefab: {fileID: 919132149155446097, guid: 287594c0e2607471c80894ecd2c2d32a, type: 3}
   animation: 4
+  attachOffset: {x: 0, y: 0.17, z: 0.1}
+  attachScale: 0.8

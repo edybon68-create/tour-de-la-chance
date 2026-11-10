@@ -24,6 +24,7 @@ namespace TourDeLaChance
         double startDsp;
         float tensionLevel, tensionFrom, tensionTo, tensionTime = 1f;
         float duck = 1f, duckUntil = -1f;
+        float silenceUntil = -1f; // coupure totale (cinématique du Secret)
         float nextSyncCheck;
         const int MaxDriftSamples = 256; // ≈ 6 ms à 44,1 kHz
 
@@ -86,10 +87,13 @@ namespace TourDeLaChance
             tensionLevel = Mathf.Lerp(tensionFrom, tensionTo, Mathf.Clamp01(tensionTime));
 
             // Baisse pendant un jingle : descend vite (0,05 s), remonte doucement (0,5 s).
+            // v3 : pendant la « coupure » du Secret, elle descend à 0 (en 0,05 s).
+            bool silenced = Time.unscaledTime < silenceUntil;
             bool ducked = Time.unscaledTime < duckUntil;
-            duck = ducked
-                ? Mathf.MoveTowards(duck, 0.5f, Time.unscaledDeltaTime * 0.5f / 0.05f)
-                : Mathf.MoveTowards(duck, 1f, Time.unscaledDeltaTime * 0.5f / 0.5f);
+            float target = silenced ? 0f : ducked ? 0.5f : 1f;
+            duck = target < duck
+                ? Mathf.MoveTowards(duck, target, Time.unscaledDeltaTime / 0.05f)
+                : Mathf.MoveTowards(duck, target, Time.unscaledDeltaTime * 0.5f / 0.5f);
 
             ambient.volume = BaseVolume * fadeIn * duck;
             tension.volume = BaseVolume * tensionLevel * duck;
@@ -130,6 +134,16 @@ namespace TourDeLaChance
         {
             duckUntil = Mathf.Max(duckUntil, Time.unscaledTime + seconds);
         }
+
+        /// Coupe complètement la musique pendant "seconds" secondes (coupure du Secret, v3 §8.3).
+        /// Elle remonte ensuite en douceur (vers × 0,5 si une baisse est encore en cours).
+        public void Silence(float seconds)
+        {
+            silenceUntil = Time.unscaledTime + seconds;
+        }
+
+        /// Annule la coupure (on a passé la cinématique) : la musique revient en 0,5 s.
+        public void CancelSilence() => silenceUntil = -1f;
 
         void ApplyMute()
         {

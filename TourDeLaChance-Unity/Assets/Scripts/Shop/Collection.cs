@@ -17,6 +17,12 @@ namespace TourDeLaChance
     ///
     /// Migration v1 : l'ancienne sauvegarde (shop_owned = "couleur_or,chapeau_couronne")
     /// est convertie une fois, au premier chargement : chaque objet acheté = 1 exemplaire.
+    ///
+    /// v3 (correctifs B5 et B6, spec v3 §13) :
+    ///   - la migration n'a lieu QUE si le catalogue est chargé (sinon on ne touche à rien et
+    ///     on réessaie au prochain accès) ;
+    ///   - un identifiant INCONNU du catalogue est ignoré pour le jeu (ni affiché, ni compté,
+    ///     ni vendable) mais CONSERVÉ tel quel dans la sauvegarde, recopié à la fin du texte.
     /// </summary>
     public static class Collection
     {
@@ -54,11 +60,31 @@ namespace TourDeLaChance
         /// Remplace toute la collection (utilisé par « Vendre tous les doublons »).
         public static void Write(Dictionary<string, int> counts)
         {
-            string raw = string.Join(",", counts
+            // Sans catalogue, on ne sait pas quels identifiants sont connus : on n'écrit rien
+            // (on risquerait d'effacer la collection). Shop.Catalog a déjà affiché l'erreur.
+            if (Shop.Catalog == null) return;
+
+            var parts = counts
                 .Where(pair => pair.Value > 0 && IsKnownBoxItem(pair.Key))
-                .Select(pair => pair.Key + ":" + pair.Value.ToString(CultureInfo.InvariantCulture)));
-            PlayerPrefs.SetString(CountsKey, raw);
+                .Select(pair => pair.Key + ":" + pair.Value.ToString(CultureInfo.InvariantCulture))
+                .ToList();
+            // B6 : les morceaux inconnus de l'ancienne sauvegarde sont recopiés à la fin, tels quels.
+            parts.AddRange(UnknownParts(PlayerPrefs.GetString(CountsKey, "")));
+            PlayerPrefs.SetString(CountsKey, string.Join(",", parts));
             cachedRaw = null; // le prochain Read() décodera le nouveau texte
+        }
+
+        /// Les morceaux « id:nombre » de la sauvegarde dont l'identifiant n'est pas dans le
+        /// catalogue (objet retiré un temps, faute de frappe corrigée plus tard…).
+        static IEnumerable<string> UnknownParts(string raw)
+        {
+            foreach (string part in raw.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                int colon = part.LastIndexOf(':');
+                if (colon <= 0) continue;
+                string id = part.Substring(0, colon).Trim();
+                if (!IsKnownBoxItem(id) && Shop.Find(id) == null) yield return part.Trim();
+            }
         }
 
         /// Lit (et décode) la collection, en faisant la migration v1 si besoin.
@@ -91,6 +117,9 @@ namespace TourDeLaChance
         static void MigrateFromV1IfNeeded()
         {
             if (PlayerPrefs.HasKey(CountsKey)) return;
+            // B5 : sans catalogue, tous les objets paraîtraient « inconnus » : on ne migre pas,
+            // on n'écrit rien, on ne supprime rien. On réessaiera au prochain accès.
+            if (Shop.Catalog == null) return;
 
             string owned = PlayerPrefs.GetString(Shop.OldOwnedKey, "");
             var counts = new Dictionary<string, int>();
@@ -99,7 +128,8 @@ namespace TourDeLaChance
                 string id = part.Trim();
                 if (IsKnownBoxItem(id)) counts[id] = 1; // chaque objet acheté = 1 exemplaire
             }
-            Write(counts);                          // crée la clé (même vide) : migration faite
+            PlayerPrefs.SetString(CountsKey, "");   // crée la clé (même vide) : migration faite
+            Write(counts);
             PlayerPrefs.DeleteKey(Shop.OldOwnedKey);
             PlayerPrefs.Save();
             if (owned.Length > 0)

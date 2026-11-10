@@ -14,14 +14,37 @@
 > nouveaux objets (§2.7, §2.8), couleurs de rareté dans l'interface (§10), décor par altitude
 > (§5.1) et règles des prompts courts (§9).
 
+>
+> **Mise à jour « lot 3 » (v3, arbitrée par le DA)** — les demandes de `docs/specs/v3.md` sont
+> tranchées :
+> - le personnage devient un **cheval de jeu d'échecs jouet** : nouvelle fiche §6.2 (rédigée
+>   d'après le modèle `blender/personnage_cheval.py` et les rendus `docs/captures/cheval_*.png`) ;
+> - le **palier 1 passe en plein jour**, avec un ciel bleu nettement plus franc que ce que
+>   proposait la spec (demande de l'auteur), puis coucher de soleil, crépuscule et nuit : §1,
+>   §2.9 et §5.1 ;
+> - les **5 raretés de coffre** (Bois, Bronze, Argent, Or, Diamant) : §2.10 (une retouche : le
+>   corps du Bronze) ;
+> - le **masque de héros** change de couleurs (il disparaissait sur le corps bleu) : §2.8 ;
+> - le **style des boutons** (biseau, reflet, épaisseur, survol) : §11 ;
+> - les effets des coffres précieux et la cinématique Secret restent **dessinés par le code**
+>   (aucune image, aucune émission sur les coffres) : §10.3 ;
+> - nouvelles images : `art/prompts/lot3.md`.
+
 ---
 
 ## 1. L'ambiance en une phrase
 
-**Une fête foraine magique, la nuit, au sommet d'une tour : des objets-jouets en bois, en
-métal et en or, posés sur une pierre bleutée, éclairés par une lumière chaude.**
+**Une fête foraine magique au sommet d'une tour, du plein jour à la nuit étoilée : un cheval
+d'échecs jouet et des coffres en bois, en métal et en or, posés sur une pierre bleutée,
+éclairés par une lumière chaude.**
 
 Trois mots-clés : **jouet**, **chaleureux**, **lisible**.
+
+**Depuis la v3, le temps passe en montant** : en bas de la tour il fait grand jour (ciel bleu,
+nuages blancs), dans les nuages le soleil se couche, au-dessus c'est le crépuscule, et tout en
+haut la nuit étoilée. Ce qui ne change jamais : le décor reste **plus froid et plus calme** que
+les objets de jeu, et les coffres chauds ressortent sur tous les ciels (le bleu du jour et
+l'orange du bois sont des couleurs opposées : c'est le contraste idéal).
 
 - *Jouet* : formes simples, rondes, épaisses, comme des jouets en bois peint ou des pièces de
   jeu de société. Rien de réaliste, rien d'inquiétant.
@@ -160,7 +183,7 @@ blanc pur `#FFFFFF` est réservé aux petits détails (§2.6, règle 3).
 | Caramel | `#C98A4B` très brillant (bonbon) | Écharpe rayée | `#3CC48A` / `#F4EEE6` |
 | Blanc nacré | `#EDE6F2`, reflets de perle | Collier de fleurs | `#FF6FB5` / `#F4EEE6`, cœurs `#FFD54A` |
 | Sucre d'orge | rayures `#D64545` / `#F4EEE6` | Chapeau de sorcier | `#4B2E83`, ruban et étoile `#FFD54A` |
-| Pois de fête | `#F27BB0` + pois `#F4EEE6` | Masque de héros | `#3A5BD9`, bord `#22357F` |
+| Pois de fête | `#F27BB0` + pois `#F4EEE6` | Masque de héros | **v3 :** `#D63A6E` framboise, bord `#FFD54A` (voir ci-dessous) |
 | Argent poli | `#C9CED8` métal miroir | Petites ailes d'ange | `#F4EEE6`, ombre des plumes `#D9D2E4` |
 | Cristal | `#9FE3FF` transparent 0,55 | Ailes de papillon | `#2BB8C4`, taches `#F28C38`, bord `#34286A` |
 | Arc-en-ciel néon | teinte qui tourne, émission | Auréole lumineuse | `#FFF1A8`, émission |
@@ -179,6 +202,84 @@ blanc pur `#FFFFFF` est réservé aux petits détails (§2.6, règle 3).
 > `#6A4C9C` est gardé pour le bord du couvercle, ce qui donne du relief. Le médaillon en laiton
 > est placé **sur le ruban, au milieu de la face avant** (et non sur le dessus du couvercle) :
 > en vue de 3/4, c'est la face la plus visible, et le gros nœud occupe déjà le dessus.
+
+> **Arbitrage du DA (v3) — masque de héros.** Le bleu héros `#3A5BD9` et son bord `#22357F`
+> se voyaient à peine sur le cheval bleu ciel `#4A90D9` (même teinte, valeur proche : voir
+> `docs/captures/cheval_planche.png`). Nouvelles couleurs :
+> - **bandeau framboise `#D63A6E`** (satiné, smoothness 0,5) : une teinte chaude opposée au bleu
+>   par défaut, qui se lit aussi sur le vert, le jaune, le turquoise, l'argent et la galaxie ;
+> - **bord jaune or `#FFD54A`** (le jaune du chapeau de fête et de l'interface), d'au moins
+>   **4 cm**, tout autour du bandeau **et autour des deux trous** : c'est lui qui garantit la
+>   lecture sur les skins proches (Rose bonbon, Pois de fête, Sucre d'orge, Rouge tomate), et il
+>   encadre les yeux noirs au lieu de les noyer.
+>
+> Pourquoi pas un masque noir, le grand classique ? Les yeux du cheval sont noirs `#111111` : un
+> bandeau sombre autour les ferait disparaître. Pourquoi pas rouge vif ? Le rouge vif est réservé
+> au piège (§2.6). Le framboise reste un petit accent porté par le personnage, comme le rubis.
+> Le modèle 3D (remodelé pour épouser la tête du cheval, `v3.md` §16) et l'icône
+> `masque_heros.png` (lot 3) prennent ces couleurs. Toujours **sans emblème ni lettre**.
+
+### 2.9 Décor par palier d'altitude (v3 : du jour à la nuit)
+
+Valeurs à utiliser pour les images de fond (prompts) et dans Unity (`AltitudeDecor`). Les
+colonnes « Lumière » et « Ambiance » reprennent la spec `v3.md` §9, **sauf le palier 1**, que
+le DA rend plus bleu à la demande de l'auteur.
+
+| Palier | Étages | Ciel (image) : haut → centre → bas | Accents de l'image | Lumière principale | Ambiance (ciel / horizon / sol) | Fond caméra (si l'image manque) |
+|---|---|---|---|---|---|---|
+| 1 « En plein jour » | 1 – 3 | bleu ciel franc `#5FAEE8` → bleu clair `#A6D4F4` → bleu-gris lointain `#5A7598` | nuages blancs `#F4F8FC`, ombres des nuages `#B8CDE6`, fête foraine lointaine aux couleurs pastel voilées de bleu | `#FFF4E0`, **1,35** | `#BFDDF5` / `#90A8C8` / `#4A5470` | **`#7DBDEC`** (au lieu de `#8EC5EC`) |
+| 2 « Dans les nuages ! » | 4 – 6 | pêche `#F2B9A0` → rose poudré `#C98A96` → prune `#4A3040` | soleil couchant `#FFE2B0` bas **à droite**, dessus des nuages `#F7D3C2`, creux `#B07A88` | `#FFD7A8`, 1,2 | `#F0B9A0` / `#B07A88` / `#4A3040` | `#C98A96` |
+| 3 « Au-dessus des nuages ! » | 7 – 9 | violet-bleu `#2E2850` → `#6A5A98` → mer de nuages `#9A90D0` puis `#2E2850` tout en bas | fine bande rose-orangé `#E8A48C` à l'horizon (plus vive à droite), croissant de lune `#F0ECFF` en haut à droite, premières étoiles `#FFF1D6` | `#E6E0FF`, 1,15 | `#9A90D0` / `#6A5A98` / `#2E2850` | `#3E3668` |
+| 4 « Dans les étoiles ! » | 10 et + | inchangé (`ciel_palier4.png`) | aurore verte et violette en haut | `#F0E6FF`, 1,1 | `#6A5AB0` / `#3A6A80` / `#1A1430` | `#1F1730` |
+
+**Arbitrage du palier 1.** La spec demandait un « bleu moyen un peu sourd » plafonné à
+`#D6ECFA` ; l'auteur veut un ciel **bien plus visible**. Décision :
+- le **haut** du ciel est un vrai bleu ciel saturé `#5FAEE8` (on comprend tout de suite « il fait
+  beau ») ; le **centre**, derrière la tête du cheval, est plus clair et plus doux `#A6D4F4` ;
+- **pourquoi le centre plus clair** : depuis la caméra, la tête du cheval se découpe sur le ciel.
+  Le cheval par défaut est bleu `#4A90D9` : sur un centre bleu foncé, il disparaîtrait. Sur un
+  bleu pâle, il est nettement plus sombre que le fond (contraste ≈ 2:1, renforcé par le liseré lavande du contre-jour) et sa silhouette se lit ;
+- les **nuages blancs** ont le droit d'être presque blancs (`#F4F8FC`), mais **seulement en haut
+  et sur les côtés** (jamais au centre, jamais en bas derrière les boutons) ;
+- le **bas** de l'image reste le plus sombre (`#5A7598`, collines et fête foraine lointaines
+  voilées de bleu) : les boutons et messages s'y lisent ;
+- rien de rouge vif ni d'or dans le ciel (signaux réservés) : la fête foraine lointaine est en
+  pastels voilés.
+
+**La course du soleil** donne la cohérence entre les 4 images : au palier 1 il est hors champ en
+haut à gauche (comme la lumière principale du jeu) ; au palier 2 il se couche bas **à droite**
+(le côté gauche de l'écran porte la colonne de boutons, on le garde calme) ; au palier 3 il ne
+reste qu'une lueur rose-orangé à l'horizon, plus vive à droite, et un fin croissant de lune en
+haut à droite ; au palier 4, la nuit.
+
+**Les ciels existants** : `ciel_palier4.png` est **gardé** tel quel. `ciel_palier2.png` (brume
+lavande de nuit) et `ciel_palier3.png` (pleine lune bleu nuit) sont **remplacés** par le lot 3
+(on garde les anciens fichiers en `_v2` pour mémoire, voir `lot3.md`). `ciel_nuit.png` n'est plus
+utilisé par les paliers mais reste dans le projet (il va bien avec le logo et l'écran titre).
+
+### 2.10 Les 5 raretés de coffre (v3, repris de `v3.md` §5.3.1, une retouche)
+
+| Rareté | Corps fermé | Ferrures, coins, serrure | Détail (modèles 3D et icônes) | Couleur « UI » (étincelles, halo, étiquette) |
+|---|---|---|---|---|
+| Bois | `#8C5933` | métal sombre `#4A4E5A`, serrure laiton `#C99A1E` | — | — (pas d'effet) |
+| Bronze | **`#7E3F28` acajou** (au lieu de `#7A4A2E`) | bronze `#B0703A`, métal 1, smoothness 0,55 | rivets ronds sur les bandes | `#B0703A` |
+| Argent | bleu nuit peint `#3E5C8A` | argent `#C9CED8`, métal 1, smoothness 0,85 | étoile en relief sur la serrure | `#C9CED8` |
+| Or | violet royal laqué `#5B2D82` | doré `#E8B830`, métal 1, smoothness 0,8 | frise sur le bord du couvercle, 2 pierres `#D62839` | `#E8B830` |
+| Diamant | nacre glacée `#E6F0F7`, smoothness 0,7 | argent `#C9CED8` | 5 gemmes taillées `#9FE3FF` (smoothness 0,95) sur le couvercle et les coins | `#9FE3FF` (alterné avec `#F4EEE6`) |
+
+- **Retouche du Bronze** : `#7A4A2E` était presque le même brun que le Bois `#8C5933` ; tant que
+  le programmeur ne fait que reteinter le modèle actuel (avant les modèles §16), on n'aurait vu
+  la différence qu'aux ferrures. L'acajou `#7E3F28`, plus rouge et plus sombre, se distingue au
+  premier coup d'œil, sans approcher le rouge piège `#D91A1A` (beaucoup plus vif et plus clair).
+- **Progression lisible** : brun → brun-rouge → bleu → violet → blanc glacé ; métal sombre →
+  bronze → argent → doré → argent + gemmes. Chaque palier change **deux** choses (corps et
+  métal), donc on reconnaît la rareté même en silhouette colorée de 64 px.
+- Le doré des ferrures Or `#E8B830` reste différent de l'or trésor `#FFC83A` et ne couvre que de
+  petites surfaces. Le trésor (`#FFC83A`) et le piège (`#D91A1A`) se lisent sur les 5 corps.
+- Le Diamant n'émet pas de lumière : son éclat vient de sa nacre claire, de ses gemmes très
+  lisses et des étincelles UI (§10.3). **Jamais d'émission sur un coffre** (§4.1).
+- Ces couleurs de coffre **ne sont pas** les couleurs de rareté des objets des boîtes (§2.7) :
+  on ne les mélange pas (l'argent des coffres n'a rien à voir avec le bleu « Rare »).
 
 ---
 
@@ -335,31 +436,37 @@ Objectif : une lumière **chaude de fête foraine** sur les objets, une **nuit v
 Règle : on ne règle **pas** les couleurs des modèles pour compenser un mauvais éclairage. Si un
 objet paraît faux en jeu, on corrige l'éclairage d'abord.
 
-### 5.1 Le décor change avec l'altitude (`sons-animations.md` §3.14)
+### 5.1 Le décor change avec l'altitude (v3 : `v3.md` §9, couleurs au §2.9)
 
-Les réglages ci-dessus sont ceux du **palier 1**. Aux paliers suivants, seuls changent l'image
-du fond, la lumière principale, la lumière d'ambiance et les nuages 3D (valeurs dans
-`sons-animations.md` §3.14, validées par le DA). Le sol, les coffres, le personnage, le
-contre-jour et le post-traitement **ne changent pas**.
+Le tableau ci-dessus (lumière `#FFF1D6`, ambiance violette) est le **réglage de référence** des
+images et des icônes. **Dans le jeu**, chaque palier remplace l'image du fond, la lumière
+principale, la lumière d'ambiance, la couleur de fond de caméra et les nuages 3D (valeurs au
+§2.9). Le sol, les coffres, le personnage, le contre-jour et le post-traitement **ne changent
+pas**.
 
 | Palier | Étages | Image de fond | Idée visuelle | Valeur générale |
 |---|---|---|---|---|
-| 1 | 1 – 3 | `ciel_nuit.png` (= `ciel_palier1`) | nuit violette, nuages **au-dessus**, fête foraine au loin en bas | sombre |
-| 2 | 4 – 6 | `ciel_palier2.png` | **dans** les nuages : brume rose-lavande lumineuse, gros nuages tout autour | **moyenne** (le plus clair des 4) |
-| 3 | 7 – 9 | `ciel_palier3.png` | **au-dessus** de la mer de nuages : ciel bleu nuit dégagé, grosse lune ronde sur le côté | sombre |
-| 4 | 10 et + | `ciel_palier4.png` | **dans les étoiles** : ciel profond, aurore douce verte et violette | le plus sombre |
+| 1 | 1 – 3 | `ciel_palier1.png` **(nouveau, lot 3)** | **plein jour** : ciel bleu franc, gros nuages blancs **au-dessus** et au loin, fête foraine minuscule tout en bas | **la plus claire** des 4 |
+| 2 | 4 – 6 | `ciel_palier2.png` **(refait, lot 3)** | **dans** les nuages au **coucher du soleil** : brume pêche et rose, soleil bas à droite | moyenne-claire |
+| 3 | 7 – 9 | `ciel_palier3.png` **(refait, lot 3)** | **au-dessus** de la mer de nuages au **crépuscule** : haut violet-bleu, bande rose-orangé à l'horizon, premières étoiles, croissant de lune en haut à droite | sombre |
+| 4 | 10 et + | `ciel_palier4.png` (gardé) | **dans les étoiles** : nuit profonde, aurore douce verte et violette | la plus sombre |
 
 Règles communes aux 4 fonds :
-- La montée se lit **de bas en haut** : au palier 1 les nuages sont au-dessus de nous ; au
-  palier 2 ils nous entourent ; au palier 3 ils sont sous nous ; au palier 4 ils ont presque
-  disparu tout en bas.
-- **Rien de lumineux ni de net au centre** (c'est là que sont les coffres) ; la lune du palier 3
-  et l'aurore du palier 4 sont **en haut, sur un côté**.
+- La montée se lit **de bas en haut** (nuages au-dessus → autour → dessous → presque disparus)
+  **et dans le temps** (jour → coucher → crépuscule → nuit).
+- **Centre calme et sans détail net** (c'est là que se découpent le cheval et les coffres) ;
+  soleil, lune, aurore et gros nuages blancs sont **en haut ou sur les côtés**.
 - Le **bas** reste le plus sombre de l'image (barre de boutons, panneau, messages).
-- Même au palier 2, aucune zone plus claire que `#B49AC8` : les textes or à contour sombre
-  de l'interface doivent rester lisibles, et les coffres chauds doivent toujours ressortir.
+- **Plafonds de clarté** : palier 1, rien de plus clair que `#A6D4F4` au centre (les nuages
+  blancs `#F4F8FC` seulement en haut et sur les côtés) ; palier 2, rien de plus clair que
+  `#F7D3C2` hors du disque du soleil ; paliers 3 et 4, rien de plus clair que `#9A90D0` hors de
+  la lune et des étoiles.
+- **Lisibilité de l'interface sur les ciels clairs** (paliers 1 et 2) : « Étage N » reçoit un
+  contour de 2 px et une ombre portée (`text-shadow: 0 3px 0 rgba(31,23,48,0.6)`), la bannière
+  de montée un fond `#1F1730` à 55 % (`v3.md` §9). Les panneaux et compteurs ont déjà un fond
+  sombre : on ne change rien d'autre.
 - Mêmes nuages « pouf » arrondis et low-poly sur les 4 images (même famille que le nuage du
-  piège et les nuages 3D).
+  piège et les nuages 3D), mêmes étoiles et scintillements à 4 branches la nuit.
 
 ---
 
@@ -420,46 +527,78 @@ Coffre              origine au sol, au centre du corps (0 ; 0 ; 0)
 **Triangles visés** : **800 à 1 200** au total (corps + intérieur ~350, couvercle ~350,
 ferrures + serrure + charnières ~400).
 
-### 6.2 Le personnage (`Joueur`) — capsule avec des yeux
+### 6.2 Le personnage (`Joueur`) — le cheval de jeu d'échecs jouet (v3)
 
-**À quoi il ressemble** : un petit pion de jeu de société vivant. Une capsule douce et
-brillante, deux yeux noirs ronds avec un point de lumière qui lui donnent l'air curieux et
-sympathique. C'est tout : sa personnalité vient des couleurs et des chapeaux.
+> Fiche réécrite par le DA d'après le modèle livré (`blender/personnage_cheval.py`) et ses
+> rendus (`docs/captures/cheval_face.png`, `cheval_3_4.png`, `cheval_planche.png`). Elle
+> remplace la capsule des versions 1 et 2.
 
-**Dimensions (identiques au prototype)**
-- Capsule de 1,00 de diamètre et 2,00 de haut. Origine **à la base**, au centre (0 ; 0 ; 0) ;
-  le sommet de la tête est en y = 2,0.
-- Variante « jouet » autorisée : la base peut s'élargir très légèrement (diamètre 1,05 en bas)
-  pour un air plus stable, comme un pion. Pas plus.
+**À quoi il ressemble** : le **cavalier d'un jeu d'échecs en bois peint**, devenu vivant et
+mignon. Un socle rond de pion, un cou épais et rond qui monte en se bombant au poitrail, une
+tête de cheval aux formes de « boîte arrondie » avec un **long museau doux** qui avance vers
+nous et pique un peu du nez, deux **grands yeux noirs brillants** haut sur le front, deux
+petites **narines** sombres au bout du museau, deux **oreilles** courtes et épaisses, et une
+**crinière sculptée** en grosses mèches arrondies qui part du front, passe entre les oreilles et
+descend le long de la nuque. **Il regarde de face**, vers la caméra : on voit toujours ses deux
+yeux. Sa personnalité vient toujours des couleurs et des accessoires.
 
-**Hiérarchie**
+**Pourquoi de face et pas de profil comme un vrai cavalier d'échecs ?** De profil, on ne verrait
+qu'un œil depuis la caméra, et les lunettes ou le masque n'auraient plus de sens. De face, le
+museau qui avance suffit à dire « cheval » (testé à 28° de rotation : moins lisible, on garde 0°).
+
+**Dimensions** (`v3.md` §7.2)
+- Hauteur totale **2,0 m** (pointe des oreilles), comme l'ancienne capsule. Origine **à la
+  base**, au centre (0 ; 0 ; 0) : l'écrasement des animations garde le socle au sol.
+- Socle Ø **1,05**, ~0,25 de haut, avec une collerette de pion (deux anneaux étagés).
+- Cou : ~0,75 de large au poitrail, ~0,53 sous la mâchoire (le plus fin, à y ≈ 1,25).
+- Crâne ~0,62 de large ; museau ~0,41 de large, qui dépasse d'environ 0,6 devant le cou.
+- Yeux à y ≈ **1,68**, x = ±0,165 (au-dessus de 1,2 m : visibles derrière les couvercles ouverts).
+
+**Hiérarchie** (les noms sont ceux que le code cherche)
 ```
 Joueur              origine à la base (0 ; 0 ; 0)
-├── Corps           la capsule — UN SEUL matériau (M_PersoCorps, recoloré par le shop)
-├── OeilGauche      en (−0,18 ; 1,6 ; surface avant)
-├── OeilDroit       en (0,18 ; 1,6 ; surface avant)
-├── RefletGauche / RefletDroit   petits points blancs
-└── PointChapeau    objet vide en (0 ; 2,0 ; 0)
+├── Corps           socle + cou + tête + museau + oreilles + crinière — UN SEUL matériau
+│                   (M_PersoCorps, repeint par le shop), UV cylindriques, couture à l'arrière
+├── OeilGauche / OeilDroit       M_Yeux #111111, brillants
+├── RefletGauche / RefletDroit   M_Reflet #FFFFFF
+├── Narines         deux ovales sombres au bout du museau (M_Yeux, ne changent jamais)
+├── PointChapeau    (0 ; 1,88 ; 0,05), échelle 0,75 — entre les oreilles
+├── PointVisage     (0 ; 1,68 ; −0,32), échelle 0,7 — devant les yeux
+├── PointCou        (0 ; 1,15 ; −0,05), échelle 0,65 — centre de l'encolure
+└── PointDos        (0 ; 1,25 ; 0,35), échelle 0,9 — derrière l'encolure
 ```
-- `Corps` seul porte la couleur du shop : les yeux et reflets sont des objets séparés pour ne
-  jamais changer de couleur.
-- **Coordonnées de texture (UV) du `Corps`** (nouveau, pour les skins à motif, §4.1) : une
-  projection **cylindrique** (*UV → Cylinder Projection*, axe vertical), U qui fait le tour du
-  corps, V qui va de la base (0) au sommet (1), sans étirement visible sur la face avant. Sans
-  cette UV, les rayures du « Sucre d'orge » seraient de travers et les pois déformés. La couture
-  (là où U revient de 1 à 0) est placée **à l'arrière**, que la caméra ne voit jamais.
+(Positions en coordonnées Unity, `v3.md` §7.3 ; l'intégrateur les recale sur le modèle.)
 
-**Détails qui le rendent lisible en 3/4**
-1. **Yeux** : ovales légèrement verticaux (≈ 15 cm de large × 19 cm de haut, 6 cm d'épaisseur),
-   **à moitié enfoncés** dans la capsule (pas collés dessus, pas flottants). `#111111`, brillants.
-2. **Reflets** : dans chaque œil, un point blanc de 4 cm, en haut à gauche de l'œil (les deux
-   reflets du même côté, comme la lumière principale). C'est le détail qui rend vivant.
-3. Pas de bouche, pas de bras, pas de nez : la capsule doit rester un « porte-manteau »
-   neutre pour les chapeaux.
-4. Lissage complet (*Shade Smooth*), aucun biseau.
+- **Tout ce qui est « en bois » est dans `Corps`** (crinière, oreilles et socle compris) : un
+  skin repeint le cheval entier, rayures, pois, cristal et arc-en-ciel compris, sans code en plus.
+- **UV cylindriques** (axe vertical, V de 0 au socle à 1 aux oreilles, couture à l'arrière) :
+  les 8 bandes du « Sucre d'orge » restent horizontales et les pois ronds sur la face avant.
 
-**Triangles visés** : **700 à 1 000** (capsule 24 segments × 16 anneaux ≈ 750, yeux et reflets
-≈ 200).
+**Détails qui le rendent lisible**
+1. **Yeux** : ovales verticaux ≈ 17 × 21 cm, 6 cm d'épaisseur, à moitié enfoncés dans le front,
+   au-dessus de la racine du museau. Ce sont les plus gros détails du visage : ils doivent rester
+   lisibles à 64 px.
+2. **Reflets** : un point blanc de 4 cm en haut à gauche de chaque œil (les deux du même côté).
+3. **Narines** : deux petits ovales sombres (≈ 6 × 9 cm) au bout du museau, côte à côte. Pas de
+   bouche, pas de dents, pas de langue : le cheval reste doux et neutre.
+4. **Museau** : il avance vers la caméra et pique de ~18° vers le bas (air gentil, pas fier).
+   C'est **la** forme qui dit « cheval » vu de face.
+5. **Oreilles** : deux pointes épaisses (≥ 4 cm partout), à x ≈ ±0,14, sommet à y = 2,0. Elles
+   **traversent les chapeaux** : voulu, comme dans les dessins animés.
+6. **Crinière** : une crête de 5 à 6 grosses mèches arrondies (≈ 16 cm d'épaisseur), avec un
+   toupet sur le front entre les oreilles. Pas de mèches fines ni de poils.
+7. **Socle** : collerette de pion à deux anneaux étagés, bord biseauté. Il dit « pièce de jeu ».
+8. **Lissage** : *Smooth by Angle* 30° (volumes ronds lisses, petites arêtes nettes aux jonctions
+   socle/cou/tête : c'est l'aspect « pièces de bois assemblées »).
+
+**Ce qu'il n'a pas** : ni cavalier, ni selle, ni bride, ni pattes, ni queue, ni bouche, ni
+corne (ce n'est pas une licorne), ni ressemblance avec un cheval ou un poney de dessin animé
+connu.
+
+**Triangles visés** : **900 à 1 400** (`v3.md` §7.2).
+
+**Pour les images** (icônes de skins du lot 3) : on montre ce cheval **entier, socle compris**,
+vu de 3/4 face légèrement d'en haut, les deux yeux bien visibles (voir §9.3).
 
 ### 6.3 Les chapeaux — règles communes
 
@@ -469,6 +608,8 @@ Joueur              origine à la base (0 ; 0 ; 0)
   `PointChapeau`. Comme le haut de la capsule est une demi-sphère de rayon 0,5, les chapeaux
   à bord **descendent un peu sous y = 0** (de −0,05 à −0,15) pour bien coiffer la tête au lieu
   de flotter dessus. Les positions de la spec du shop restent la référence.
+- **v3 (cheval)** : `PointChapeau` est entre les oreilles, à l'échelle 0,75 (§6.2) ; les
+  chapeaux ne sont pas remodelés, et les oreilles qui les traversent sont voulues.
 - Avant = côté caméra (z négatif dans Unity), comme les yeux.
 - Les dimensions reprennent celles de la spec (`docs/specs/shop.md` §4.2), arrondies et
   enrichies. Tous visibles **depuis le dessus** : soigner la face supérieure.
@@ -573,7 +714,8 @@ y = 0** (origine au centre du dessus). 32 côtés (on voyait les facettes du dis
 | Objet | Triangles | Matériaux |
 |---|---|---|
 | Coffre (×3 dans la scène) | 800 – 1 200 | BoisCorps, BoisCouvercle, (BoisClair), Interieur, MetalSombre, Laiton, TrouSerrure |
-| Personnage | 700 – 1 000 | PersoCorps, Yeux, Reflet |
+| Personnage (cheval, v3) | 900 – 1 400 | PersoCorps, Yeux (yeux + narines), Reflet |
+| Coffres de rareté (Bronze, Argent, Or, Diamant) | 800 – 1 400 chacun | mêmes rôles que le coffre + matériaux du §2.10 |
 | Casquette | 250 – 400 | TissuRouge, TissuRougeFonce, Blanc |
 | Chapeau de fête | 200 – 350 | CartonRose, CartonJaune, Blanc |
 | Haut-de-forme | 250 – 400 | Feutre, Satin |
@@ -620,6 +762,8 @@ pièce géante, tour).
   pas de couronne copiée d'un jeu connu. Pour les boîtes : masque de héros **sans emblème ni
   lettre** (simple bandeau bleu), chapeau de sorcier **sans visage ni pli qui forme un visage**,
   lunettes de soleil sans logo sur les branches, boîtes cadeaux sans aucune inscription.
+- Pour le cheval (v3) : pas de pièce d'échecs copiée d'un jeu ou d'une marque connue, pas de
+  cheval ou poney de dessin animé reconnaissable, pas de corne, pas de cavalier, pas de bouche.
 - Le macabre et l'effrayant : le piège reste « cartoon » (ressort, nuage, pétard), jamais de
   sang, de crâne réaliste, de pièges qui blessent.
 - Les objets qui traversent la tête du personnage ou flottent au-dessus : chaque chapeau est
@@ -630,7 +774,9 @@ pièce géante, tour).
 ## 9. Pour les images (Gemini)
 
 Les prompts sont écrits dans `art/prompts/<lot>.md` (`lot1.md` : concept, 1res icônes, logo,
-ciel ; `lot2.md` : icônes des boîtes, boîtes, ciels des paliers). Le **premier prompt de chaque
+ciel ; `lot2.md` : icônes des boîtes, boîtes, ciels des paliers ; `lot3.md` : skins du cheval,
+ciels du jour à la nuit, coffres de rareté, améliorations, icônes des panneaux, masque de héros
+v3). Le **premier prompt de chaque
 conversation Gemini** commence par le **bloc de style commun** ci-dessous, recopié mot pour mot.
 On ne le modifie pas d'un lot à l'autre sans mettre à jour cette section.
 
@@ -645,6 +791,11 @@ relance fourni dans le fichier du lot.
 **Image de référence jointe** : chaque conversation commence en joignant une image déjà
 validée (bouton « + » de Gemini) : `couleur_rouge.png` pour les skins, `chapeau_casquette.png`
 pour les accessoires et les boîtes, `ciel_nuit.png` pour les ciels.
+**Depuis le lot 3** : pour les skins du cheval, on joint les rendus Blender
+`docs/captures/cheval_3_4.png` et `cheval_face.png` (forme) **et** `art/icones/couleur_rouge.png`
+(fond, lumière, cadrage) ; puis la première icône cheval validée (`couleur_bleu.png`) sert de
+référence en cas de relance. Pour les ciels v3, on joint `art/fonds/ciel_palier3.png` (version
+v2, pour le style des nuages seulement).
 
 ### 9.1 Bloc de style commun (en anglais)
 
@@ -655,6 +806,18 @@ STYLE: stylized low-poly 3D render in a cheerful toy style, like painted wooden 
 Seule exception : le logo avec titre, qui lève la règle « no text » pour le seul texte
 « Tour de la Chance ».
 
+**Variante « ciels v3 »** (lot 3, fonds des paliers seulement). Le bloc commun décrit une scène
+de nuit ; pour les ciels de jour, de coucher de soleil et de crépuscule, on garde **la première
+phrase (STYLE) et la dernière (RULES) mot pour mot**, et on remplace LIGHTING / PALETTE / MOOD
+par la ligne suivante, suivie de la description du palier (couleurs du §2.9) :
+
+```
+SKY MOOD: the same toy world, a magical fairground on top of a fairy-tale tower, seen at a different time of day; friendly, cozy, readable. Low contrast, soft gradients, calm empty center, darkest at the bottom.
+```
+
+Les icônes, elles, gardent le bloc commun complet et inchangé : c'est ce qui les rend
+identiques à celles des lots 1 et 2.
+
 ### 9.2 Conventions par type d'image
 
 | Type | Format | Fond | Angle |
@@ -662,8 +825,9 @@ Seule exception : le logo avec titre, qui lève la règle « no text » pour le 
 | Concept art, scènes | 16:9 | violet nuit `#1F1730` avec halo `#3A2850` | la caméra du jeu : 3/4 plongeant ~35° depuis l'avant |
 | Icônes du shop et de l'interface | carré 1:1 | **uni lavande très clair `#E6E1EE`**, sans dégradé ni ombre portée | 3/4, ~25° au-dessus, objet tourné ~20° vers la gauche, centré, ~70 % du cadre |
 | Logo, emblème | 16:9 (logo) / carré (emblème) | uni violet nuit `#1F1730` | de face, symétrique |
-| Fond de ciel | 16:9 (1376 × 768 en sortie de Gemini) | — (c'est le fond) | sombre, peu contrasté, centre légèrement plus clair, bas le plus sombre ; un fond par palier d'altitude (§5.1) |
-| Icône d'un objet **très clair ou lumineux** (Blanc nacré, Petites ailes d'ange, Auréole) | carré 1:1 | **uni bleu-gris moyen `#5B6380`** | comme les autres icônes |
+| Fond de ciel | 16:9 (1376 × 768 en sortie de Gemini) | — (c'est le fond) | peu contrasté, centre calme, bas le plus sombre ; un fond par palier d'altitude, du jour à la nuit (§2.9, §5.1) |
+| Icônes de skins du cheval (v3) | carré 1:1 | lavande `#E6E1EE` (bleu-gris `#5B6380` pour le Blanc nacré) | 3/4 **face** : ~25° au-dessus, cheval tourné ~20° vers la gauche, museau et **deux yeux** vers le spectateur, entier socle compris, ~75 % de la hauteur |
+| Icône d'un objet **très clair ou lumineux** (Blanc nacré, Petites ailes d'ange, Auréole ; v3 : `coffre_diamant`, `amelioration_coffres`) | carré 1:1 | **uni bleu-gris moyen `#5B6380`** | comme les autres icônes |
 | Effets de révélation (halo, rayons, étincelle) | — | — | **pas d'image** : dessinés par le code (§10.3) |
 
 **Pourquoi un 2e fond pour les objets clairs ?** Le blanc nacré `#EDE6F2`, le blanc cassé des
@@ -680,15 +844,19 @@ clair ne ressemble à aucun objet du shop (ni or, ni violet, ni blanc pur du pom
 ### 9.3 Règles de contenu pour les images
 - Les objets du shop reprennent exactement la forme et les couleurs des fiches §6 et de
   `docs/specs/shop.md` : les icônes doivent ressembler aux modèles 3D, pas l'inverse.
-- Capsule : seulement deux yeux noirs avec reflet ; ni bouche, ni bras, ni visière-hublot, ni sac à dos.
+- Capsule (lots 1-2) : seulement deux yeux noirs avec reflet ; ni bouche, ni bras, ni visière-hublot, ni sac à dos.
+- Cheval (lot 3) : pièce d'échecs jouet entière (socle de pion, cou, tête, museau, oreilles,
+  crinière) dans **une seule matière** ; deux grands yeux noirs avec reflet, deux narines
+  sombres ; ni bouche, ni pattes, ni queue, ni selle, ni cavalier, ni corne (fiche §6.2).
 - Casquette vierge (aucune lettre ni logo sur le devant).
 - Pièce d'or : motif « tour + étoile », jamais de chiffre, de signe monétaire ou de visage.
 - Le texte d'un titre généré se vérifie lettre par lettre ; en cas d'échec, emblème sans texte
   + titre écrit par l'interface (or `#FFD54A`, contour `#3A2200`).
 - Les images ne sont **pas** plaquées sur les modèles 3D (§3.1) : elles servent à l'interface,
   au fond et à la référence de style.
-- Les 16 icônes de skins montrent **la même capsule** que `couleur_rouge.png` (corps en pilule,
-  socle rond de pion, deux yeux noirs avec reflet) : seule la matière change.
+- Les 17 icônes de skins (v3) montrent **le même cheval** que la première icône validée
+  (`couleur_bleu.png` du lot 3) : seule la matière change, yeux et narines toujours noirs.
+  Les icônes capsule des lots 1-2 sont remplacées (anciennes gardées dans `art/icones/_capsule/`).
 - Les icônes d'accessoires montrent l'objet **seul**, sans personnage ni tête, avec le même
   cadrage que les chapeaux du lot 1. Les objets qui entourent le cou (écharpe, collier) sont
   montrés en anneau vide « comme autour d'un cou invisible ».
@@ -757,3 +925,60 @@ Ce que le programmeur dessine (blanc, teinté ensuite par la couleur de rareté)
 Style : bords doux, pas de dégradé multicolore dans une même forme (la couleur vient de la
 teinte), opacité max du halo comme dans `boites.md` §7.6. Les étincelles du Légendaire
 alternent `#FF9F1C` et l'or `#FFC83A` ; celles du Secret prennent des teintes de l'arc-en-ciel.
+
+**v3 — mêmes formes, deux nouveaux usages (validés par le DA)** :
+- **Ouverture des coffres précieux** (`v3.md` §5.3.2) : halo, rayons et étincelles réutilisés,
+  teintés par la **couleur « UI » de la rareté de coffre** (§2.10 : bronze `#B0703A`, argent
+  `#C9CED8`, doré `#E8B830`, diamant `#9FE3FF` / `#F4EEE6`). Ce ne sont pas des couleurs de
+  rareté d'objet : pas de conflit avec la règle §10.1. Le flash plein écran reste blanc.
+- **Cinématique du Secret** (`v3.md` §8.3) : point lumineux, fissures, morceaux, confettis,
+  carte qui tourne, tout en `Painter2D` / textures calculées. Couleurs : point rose `#FF4FD8`,
+  fissures, confettis et lettres de « SECRET !!! » dans un arc-en-ciel à saturation 0,75 (pas de
+  néon à 100 %, §8), fond arc-en-ciel à saturation 0,5. **Aucune image à générer.**
+
+---
+
+## 11. Les boutons « bonbons de fête foraine » (v3, arbitrage de `v3.md` §10)
+
+**Validé tel quel** dans son principe : chaque bouton ressemble à une touche de jouet en
+plastique verni, posée sur son socle. C'est la traduction en interface de nos biseaux 3D (§3.1) :
+la lumière vient d'en haut à gauche, donc le haut du bouton est clair et le bas sombre.
+
+### 11.1 Anatomie (référence 1920 × 1080)
+
+| Partie | Réglage | Pourquoi |
+|---|---|---|
+| **Biseau** (haut) | bordure haute 2 px, couleur « clair » | le bord qui attrape la lumière, comme le biseau d'un coffre |
+| **Épaisseur** (bas) | bordure basse **8 px**, couleur « sombre » ; côtés 0 | le bouton a l'air posé sur un socle : on a envie d'appuyer |
+| **Reflet** | élément ajouté par le code, en haut (4 px du haut, 10 px des côtés, 38 % de la hauteur), blanc à 18 %, coins 12 px | le vernis du jouet |
+| **Ombre** | il n'y a pas d'ombre portée en USS : l'« ombre » est l'épaisseur basse **plus** l'ombre du texte `text-shadow: 0 2px 0 <sombre>` | évite un élément en plus par bouton |
+| Coins | 18 px (colonne de boutons et panneaux : 20 px) | formes rondes et jouet |
+| Texte | blanc `#FFFFFF` gras (Or : `#3A2200`) | contraste ≥ 4,5:1 sur toutes les bases |
+
+### 11.2 États
+Ceux de `v3.md` §10.2, validés : **survol** = échelle 1,06 avec petit rebond, fond « clair »,
+reflet à 0,30 ; **appui** = descend de 6 px, épaisseur 8 → 2 px, échelle 0,97 ; **désactivé** =
+gris `#5A5A6E` (biseau `#6E6E84`, épaisseur `#3A3A48`, texte `#B8B4C8`), sans reflet. L'éclat qui
+passe est réservé au bouton « Jouer » (jamais sur un achat).
+
+### 11.3 Familles de couleurs (validées)
+
+| Famille | Base | Clair (biseau, survol) | Sombre (épaisseur, ombre du texte) |
+|---|---|---|---|
+| Vert « sûr » | `#2E9E5B` | `#4CC27A` | `#1E6E3E` |
+| Violet neutre | `#5B5BD6` | `#7E7EEA` | `#3B3BA0` |
+| Or (« Jouer ») | `#FFD54A` | `#FFE27A` | `#C99A1E` |
+| Bleu (« Équiper ») | `#3B7DD8` | `#64A0EE` | `#2858A0` |
+| Sombre (colonne, onglets, Vendre, sons) | `#2A2A3A` | `#3A3A50` | `#15121F` |
+
+**Remarques du DA**
+- Le vert « clair » `#4CC27A` est voisin du vert Peu commun `#4CC26A`, et le bleu « clair »
+  `#64A0EE` du texte Rare `#5FA2F0`. **Toléré** : sur un bouton, ce sont des **fonds pleins** qui
+  n'apparaissent qu'au survol, alors que les raretés ne sont que des liserés fins et des textes
+  (même raisonnement que §10.2 règle 4). On ne crée **pas** de bouton de la couleur d'une rareté.
+- Sur les ciels clairs des paliers 1 et 2, les boutons gardent leurs couleurs : leur épaisseur
+  sombre et leur texte ombré suffisent à les détacher. La colonne de boutons, en famille
+  « sombre » à 90 %, est même plus lisible sur le bleu du jour que sur la nuit.
+- Les **icônes** de la colonne (64 × 64) sont des images détourées du lot 3, posées sur le fond
+  sombre `#2A2A3A` : elles doivent donc rester lisibles sur du sombre (pas d'objet noir, d'où la
+  malle en bois clair et l'album coloré).

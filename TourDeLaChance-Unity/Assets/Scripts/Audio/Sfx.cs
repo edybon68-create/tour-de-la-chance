@@ -38,6 +38,23 @@ namespace TourDeLaChance
         RevelationRare,
         RevelationSuperRare,
         RevelationLegendaire,
-        RevelationSecret
+        RevelationSecret,
+        // v3 (spec v3 §14). AJOUTÉS À LA FIN : la fiche Sons.asset range les sons par leur
+        // numéro dans cette liste, insérer au milieu décalerait tous les suivants.
+        AmeliorationAchat,
+        AmeliorationMax,
+        Record,
+        CoffresPrecieux,
+        CoffreEnPlus,
+        CoffreEclatBronze,
+        CoffreEclatArgent,
+        CoffreEclatOr,
+        CoffreEclatDiamant,
+        CoffresRemelange,
+        SecretCoupure,
+        SecretBattement,
+        SecretFissure,
+        SecretEclat,
+        SecretConfettis
     }
 }

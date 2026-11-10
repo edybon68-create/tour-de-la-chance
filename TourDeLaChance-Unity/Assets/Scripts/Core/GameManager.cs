@@ -16,19 +16,27 @@ namespace TourDeLaChance
         CashedOut   // encaissé : la cagnotte va dans le porte-monnaie
     }
 
+    /// Les 4 panneaux latéraux (spec v3 §4.1). None = aucun panneau ouvert.
+    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations }
+
     /// <summary>
     /// Le chef d'orchestre : il connaît l'étage, la cagnotte, l'état de la partie,
-    /// et applique les règles du GDD (gain = 10 × étage, quitte ou double).
+    /// et applique les règles du GDD (quitte ou double).
     ///
-    /// Nouveau flux (spec sons-animations §2.1) : après un trésor, on monte TOUT SEUL à
-    /// l'étage suivant ; le bouton « Encaisser X » est proposé pendant le choix du coffre.
+    /// v3 : il PRÉPARE chaque étage (spec v3 §5.5) : il lit les niveaux d'amélioration à cet
+    /// instant, tire le nombre de coffres, leur rareté, calcule le gain, puis demande au
+    /// ChestTrial de tirer le piège. Le résultat (FloorSetup) est figé pour l'étage.
+    /// Il décide aussi QUAND un panneau peut s'ouvrir (CanOpenPanel) et lequel est ouvert,
+    /// et gère « Rejouer » (redescente, ou remélange sur place à l'étage 1), le record et la
+    /// cagnotte perdue (LastLoss).
+    ///
     /// C'est ce script qui mène la danse (le temps de la montée, le verrou anti-clic) :
     /// les scripts d'animation se contentent de suivre ses événements. Si une animation
     /// manque, la partie avance quand même.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
-        // ---------- Les durées du nouveau flux (lues aussi par l'affichage) ----------
+        // ---------- Les durées du flux (lues aussi par l'affichage) ----------
         // "const" = une valeur fixe, connue de tous (GameManager.ClimbDelay).
 
         /// Après un trésor, on attend un peu avant de monter (voir le trésor et le « +20 »).
@@ -42,8 +50,16 @@ namespace TourDeLaChance
         /// « Rejouer » : moment sombre de la redescente, puis durée totale.
         public const float DescentDarkTime = 0.25f;
         public const float DescentDuration = 0.55f;
+        /// « Rejouer » à l'étage 1 (spec v3 §12) : moment du nouveau tirage, puis durée totale.
+        public const float ReshuffleSwapTime = 0.3f;
+        public const float ReshuffleDuration = 0.55f;
         /// Durée du fondu de l'écran titre (les coffres attendent la fin).
         public const float TitleFadeDuration = 0.4f;
+
+        /// Clé de sauvegarde du plus haut étage atteint (spec v3 §17).
+        public const string RecordKey = "record_etage";
+        /// « Nouveau record ! » ne s'affiche que si l'ancien record vaut au moins ceci (§11.1).
+        public const int RecordBannerMinimum = 3;
 
         [SerializeField] ChestTrial chestTrial;
         [SerializeField] int coinsPerFloor = 10;
@@ -51,45 +67,75 @@ namespace TourDeLaChance
         public int Floor { get; private set; }
         public int Pot { get; private set; }        // la cagnotte de la partie en cours
         public int LastGain { get; private set; }
+        /// La cagnotte perdue au dernier piège (pour le message « Cagnotte perdue : X »).
+        public int LastLoss { get; private set; }
         public GameState State { get; private set; }
 
-        /// Le shop est un panneau ouvert "par-dessus" l'état courant, PAS un nouvel état :
-        /// à la fermeture, on retrouve le même étage, le même état et le même piège.
-        public bool ShopOpen { get; private set; }
+        /// Ce que vaut l'étage en cours (nombre de coffres, rareté, gain), figé à sa préparation.
+        public FloorSetup Setup { get; private set; }
 
-        /// Verrou de transition (montée, redescente, fondu du titre, anti-clic).
-        /// C'est un drapeau SÉPARÉ de ShopOpen : fermer le shop pendant une transition
+        /// Le panneau ouvert "par-dessus" l'état courant (PAS un nouvel état) : à la fermeture,
+        /// on retrouve le même étage, le même état et le même piège.
+        public PanelId PanelOpen { get; private set; }
+        public bool IsPanelOpen => PanelOpen != PanelId.None;
+
+        /// Une ouverture de boîte est en cours (prévenu par l'écran d'ouverture).
+        public bool BoxOpeningActive { get; private set; }
+
+        /// Verrou de transition (montée, redescente, remélange, fondu du titre, anti-clic).
+        /// C'est un drapeau SÉPARÉ des panneaux : fermer un panneau pendant une transition
         /// ne doit pas débloquer les coffres trop tôt.
         public bool TransitionLocked { get; private set; }
 
-        /// Le palier de décor (1 à 4) correspondant à l'étage actuel (§3.14).
+        /// Le palier de décor (1 à 4) correspondant à l'étage actuel.
         public int Tier => TierForFloor(Floor);
 
-        /// Peut-on ouvrir le shop ? (spec shop §3.1) Seulement au début de partie
-        /// (étage 1, aucun coffre choisi), sur l'écran Perdu ou sur l'écran Encaissé.
-        /// Jamais pendant une épreuve ni pendant une transition.
-        public bool CanOpenShop =>
-            !ShopOpen && !TransitionLocked &&
-            ((Floor == 1 && State == GameState.Choosing) ||
-             State == GameState.Lost ||
-             State == GameState.CashedOut);
+        /// Le plus haut étage atteint (sauvegardé).
+        public int Record => Mathf.Max(0, PlayerPrefs.GetInt(RecordKey, 0));
+
+        /// Vrai si l'étage qu'on vient de préparer bat le record pour la première fois de la
+        /// partie (et que l'ancien record valait au moins 3) : la bannière l'annonce.
+        public bool NewRecordThisFloor { get; private set; }
+
+        /// Peut-on ouvrir un panneau ? (spec v3 §4.2) Dès l'écran titre, et à tous les moments
+        /// calmes : choix d'un coffre (verrou retiré), écrans Perdu / Encaissé. Jamais pendant
+        /// une épreuve, une transition ou une ouverture de boîte.
+        public bool CanOpenPanel =>
+            !TransitionLocked && !BoxOpeningActive &&
+            (State == GameState.Title || State == GameState.Choosing ||
+             State == GameState.Lost || State == GameState.CashedOut);
 
         /// Peut-on encaisser ? Pendant le choix, à partir de l'étage 2 (avant, la cagnotte
-        /// vaut 0), shop fermé, hors verrou de transition.
+        /// vaut 0), panneau fermé, hors verrou de transition.
         public bool CanCashOut =>
-            !ShopOpen && !TransitionLocked &&
+            !IsPanelOpen && !TransitionLocked &&
             State == GameState.Choosing && Floor >= 2 && Pot > 0;
 
         /// L'interface s'abonne à cet événement pour se mettre à jour.
         public event Action Changed;
         /// La montée commence (0,6 s après un trésor) : caméra, voile, son…
         public event Action ClimbStarted;
-        /// « Rejouer » : la redescente vers l'étage 1 commence.
+        /// « Rejouer » depuis l'étage 2 ou plus : la redescente vers l'étage 1 commence.
         public event Action DescentStarted;
-        /// Pendant l'écran sombre : le nouvel étage est prêt (étage, piège, palier).
+        /// « Rejouer » à l'étage 1 : remélange sur place (ni caméra, ni voile).
+        public event Action ReshuffleStarted;
+        /// Le nouvel étage est prêt (étage, nombre de coffres, rareté, piège, palier).
         public event Action FloorPrepared;
+        /// Le nouvel étage se montre : fin de la montée / de la redescente / du remélange
+        /// (le message et l'étiquette d'étage apparaissent, les coffres précieux sautent).
+        public event Action FloorShown;
 
         Coroutine transition;
+        // Le générateur des RÈGLES (nombre de coffres, rareté, piège) : créé une fois, séparé
+        // de celui des effets visuels et de celui des boîtes.
+        readonly System.Random rulesRandom = new System.Random();
+
+        // Record : sa valeur au début de la partie, et s'il a déjà été annoncé.
+        int recordAtRunStart;
+        bool recordAnnounced;
+
+        // Outils de test : forcer le nombre de coffres / la rareté du prochain étage (−1 = non).
+        int forcedCount = -1, forcedRarity = -1;
 
         void OnEnable()
         {
@@ -103,9 +149,8 @@ namespace TourDeLaChance
             chestTrial.Finished -= OnTrialFinished;
         }
 
-        // Au lancement, on reste sur l'écran titre : aucun coffre n'est préparé
-        // (chestTrial.Begin() n'est pas appelé), donc ils ne sont pas cliquables,
-        // et CanOpenShop est faux (l'état n'est ni Choosing, ni Lost, ni CashedOut).
+        // Au lancement, on reste sur l'écran titre : aucun coffre n'est préparé, donc ils ne
+        // sont pas cliquables. Les panneaux, eux, sont permis (spec v3 §4.2).
         void Start() => SetState(GameState.Title);
 
         /// Le palier de décor d'un étage : 1-3 → 1, 4-6 → 2, 7-9 → 3, 10 et plus → 4.
@@ -118,25 +163,25 @@ namespace TourDeLaChance
         }
 
         /// Le bouton « Jouer » de l'écran titre : lance la toute première partie.
-        /// Ignoré si on a déjà quitté l'écran titre. Les coffres restent bloqués pendant
-        /// le fondu de l'écran titre.
+        /// Ignoré si on a déjà quitté l'écran titre ou si un panneau est ouvert.
         public void StartGame()
         {
-            if (State != GameState.Title) return;
-            Floor = 1;
-            Pot = 0;
-            chestTrial.Begin(Floor);
+            if (State != GameState.Title || IsPanelOpen) return;
+            BeginRun();
+            PrepareFloor();
+            FloorPrepared?.Invoke();
             SetLock(true);
             SetState(GameState.Choosing);
-            RunTransition(UnlockAfter(TitleFadeDuration));
+            RunTransition(StartRoutine());
         }
 
-        /// « Rejouer » : nouvelle partie, retour à l'étage 1 avec la petite redescente.
+        /// « Rejouer » : nouvelle partie. Depuis l'étage 2 ou plus : la petite redescente.
+        /// Depuis l'étage 1 (piège au premier coffre) : remélange sur place (spec v3 §12).
         public void NewRun()
         {
-            if (ShopOpen || TransitionLocked) return; // on ferme d'abord le shop
+            if (IsPanelOpen || TransitionLocked) return; // on ferme d'abord le panneau
             if (State != GameState.Lost && State != GameState.CashedOut) return;
-            RunTransition(DescentRoutine());
+            RunTransition(Floor <= 1 ? ReshuffleRoutine() : DescentRoutine());
         }
 
         /// Le joueur sécurise sa cagnotte (bouton « Encaisser X », pendant le choix).
@@ -152,35 +197,113 @@ namespace TourDeLaChance
             SetState(GameState.CashedOut);
         }
 
-        /// Ouvre le shop (si c'est permis) et bloque les coffres.
-        public void OpenShop()
+        // =====================================================================
+        // Les panneaux (spec v3 §4.2)
+        // =====================================================================
+
+        /// Ouvre un panneau (s'il est permis) ; s'il y en avait un autre, il est remplacé.
+        /// Les coffres sont bloqués tant qu'un panneau est ouvert. On n'appelle JAMAIS
+        /// chestTrial.Begin() ici : le coffre piégé de l'étage reste le même.
+        public void OpenPanel(PanelId panel)
         {
-            if (!CanOpenShop) return;
-            ShopOpen = true;
+            if (panel == PanelId.None) { ClosePanel(); return; }
+            if (panel == PanelOpen || !CanOpenPanel) return;
+            bool wasOpen = IsPanelOpen;
+            PanelOpen = panel;
             ApplyInputLock();
-            // En fin de partie, les couvercles ouverts cachent le personnage :
-            // on les referme (en douceur) pour qu'il serve bien d'aperçu.
-            if (State == GameState.Lost || State == GameState.CashedOut)
+            // En fin de partie, les couvercles ouverts cachent le cheval : on les referme
+            // (en douceur) pour qu'il serve bien d'aperçu.
+            if (!wasOpen && (State == GameState.Lost || State == GameState.CashedOut))
                 chestTrial.CloseAllLids(animated: true);
             Changed?.Invoke();
         }
 
-        /// Ferme le shop et débloque les coffres. On ne relance PAS chestTrial.Begin() :
-        /// le coffre piégé reste le même.
-        public void CloseShop()
+        /// Clic sur le bouton d'un panneau : l'ouvre, ou le ferme s'il est déjà ouvert.
+        public void TogglePanel(PanelId panel)
         {
-            if (!ShopOpen) return;
-            ShopOpen = false;
+            if (panel == PanelOpen) ClosePanel();
+            else OpenPanel(panel);
+        }
+
+        /// Ferme le panneau ouvert (« × », Échap, ou re-clic sur son bouton), sauf pendant une
+        /// ouverture de boîte. Les coffres sont débloqués (s'il n'y a pas de transition).
+        public void ClosePanel()
+        {
+            if (!IsPanelOpen || BoxOpeningActive) return;
+            PanelOpen = PanelId.None;
             ApplyInputLock();
             Changed?.Invoke();
         }
 
-        /// OUTIL DE TEST (spec §8, critère 43) : fixe l'étage puis déclenche une montée,
-        /// comme après un trésor, pour vérifier chaque palier de décor sans dépendre de la chance.
-        /// À appeler depuis `unity command script eval`, pendant le choix d'un coffre.
+        /// L'écran d'ouverture de boîte prévient qu'il commence (true) ou se ferme (false).
+        public void SetBoxOpening(bool active)
+        {
+            if (BoxOpeningActive == active) return;
+            BoxOpeningActive = active;
+            Changed?.Invoke();
+        }
+
+        // =====================================================================
+        // Préparer un étage (spec v3 §5.5)
+        // =====================================================================
+
+        /// Dans cet ordre : 1. lire les niveaux d'amélioration MAINTENANT ; 2. tirer le nombre
+        /// de coffres ; 3. tirer la rareté ; 4. calculer le gain ; 5. préparer les coffres (qui
+        /// tirent le piège). Tout est figé pour l'étage.
+        void PrepareFloor()
+        {
+            int gainsLevel = Upgrades.Level(Upgrades_.Gains);
+            int chestsLevel = Upgrades.Level(Upgrades_.Chests);
+            int trapsLevel = Upgrades.Level(Upgrades_.Traps);
+
+            int count = forcedCount > 0 ? forcedCount : Upgrades.DrawChestCount(trapsLevel, rulesRandom);
+            int rank = forcedRarity >= 0 ? forcedRarity : Upgrades.DrawChestRarity(chestsLevel, rulesRandom);
+            forcedCount = forcedRarity = -1; // un forçage ne vaut que pour UN étage
+            count = Mathf.Clamp(count, 3, ChestTrial.MaxChests);
+
+            Setup = new FloorSetup
+            {
+                ChestCount = count,
+                RarityRank = rank,
+                Rarity = Upgrades.Rarity(rank),
+                Gain = Upgrades.FloorGain(coinsPerFloor, Floor, gainsLevel, rank)
+            };
+            chestTrial.Begin(Floor, count, rank, rulesRandom);
+            UpdateRecord();
+        }
+
+        void BeginRun()
+        {
+            Floor = 1;
+            Pot = 0;
+            LastLoss = 0;
+            recordAtRunStart = Record;
+            recordAnnounced = false;
+        }
+
+        /// Le record est mis à jour à chaque étage préparé, s'il est battu (spec v3 §17).
+        void UpdateRecord()
+        {
+            NewRecordThisFloor = false;
+            if (Floor <= Record) return;
+            if (!recordAnnounced && Floor > recordAtRunStart && recordAtRunStart >= RecordBannerMinimum)
+            {
+                NewRecordThisFloor = true;
+                recordAnnounced = true; // une seule fois par partie
+            }
+            PlayerPrefs.SetInt(RecordKey, Floor);
+            PlayerPrefs.Save();
+        }
+
+        // =====================================================================
+        // Outils de test (depuis `unity command script eval`)
+        // =====================================================================
+
+        /// OUTIL DE TEST : fixe l'étage puis déclenche une montée, comme après un trésor,
+        /// pour vérifier chaque palier de décor sans dépendre de la chance.
         public void DebugClimbFrom(int floor)
         {
-            if (ShopOpen || TransitionLocked || State != GameState.Choosing) return;
+            if (IsPanelOpen || TransitionLocked || State != GameState.Choosing) return;
             chestTrial.CancelChoice();
             Floor = Mathf.Max(1, floor);
             // La cagnotte qu'on aurait gagnée jusqu'ici : 10 × (1 + 2 + … + étage).
@@ -191,13 +314,25 @@ namespace TourDeLaChance
             RunTransition(ClimbRoutine());
         }
 
+        /// OUTIL DE TEST : force le nombre de coffres (3 à 5, 0 = tirage normal) et la rareté
+        /// (0 à 4, −1 = tirage normal) du PROCHAIN étage préparé seulement.
+        public void DebugForceNextFloor(int count, int rarityRank)
+        {
+            forcedCount = count;
+            forcedRarity = rarityRank;
+        }
+
+        /// OUTIL DE TEST : le coffre piégé de l'étage (critère 2 : il ne change pas quand on
+        /// ouvre et ferme un panneau).
+        public int DebugTrapIndex => chestTrial.DebugTrapIndex;
+
         void OnChoiceMade() => SetState(GameState.Revealing);
 
         void OnTrialFinished(bool won)
         {
             if (won)
             {
-                LastGain = coinsPerFloor * Floor;
+                LastGain = Setup.Gain; // le gain FIGÉ à la préparation de l'étage
                 Pot += LastGain;
                 SetLock(true); // coffres et « Encaisser » ignorés jusqu'à la fin du verrou
                 SetState(GameState.Climbing);
@@ -206,33 +341,47 @@ namespace TourDeLaChance
             else
             {
                 LastGain = 0;
+                LastLoss = Pot;
                 Pot = 0;
                 SetState(GameState.Lost);
             }
         }
 
-        /// La montée automatique, étape par étape (§2.1). "yield return" = attendre.
+        // =====================================================================
+        // Les transitions (coroutines : "yield return" = attendre)
+        // =====================================================================
+
+        IEnumerator StartRoutine()
+        {
+            yield return new WaitForSeconds(TitleFadeDuration);
+            FloorShown?.Invoke();
+            SetLock(false);
+            Changed?.Invoke();
+        }
+
+        /// La montée automatique, étape par étape.
         IEnumerator ClimbRoutine()
         {
             yield return new WaitForSeconds(ClimbDelay);
             ClimbStarted?.Invoke();
 
             yield return new WaitForSeconds(ClimbDarkTime);
-            // Écran sombre : on change d'étage et on tire le nouveau piège.
+            // Écran sombre : on change d'étage et on prépare le nouveau (coffres, rareté, piège).
             Floor++;
-            chestTrial.Begin(Floor);
+            PrepareFloor();
             FloorPrepared?.Invoke();
             Changed?.Invoke(); // le compteur « Étage » change pendant le noir
 
             yield return new WaitForSeconds(ClimbDuration - ClimbDarkTime);
             SetState(GameState.Choosing); // le verrou reste posé…
+            FloorShown?.Invoke();
 
             yield return new WaitForSeconds(AntiClickLock);
             SetLock(false); // …et il est retiré ici : coffres et « Encaisser » actifs
             Changed?.Invoke();
         }
 
-        /// « Rejouer » : on redescend à l'étage 1 (version courte de la montée, à l'envers).
+        /// « Rejouer » depuis l'étage 2 ou plus : on redescend à l'étage 1.
         IEnumerator DescentRoutine()
         {
             SetLock(true);
@@ -240,23 +389,40 @@ namespace TourDeLaChance
             Changed?.Invoke();
 
             yield return new WaitForSeconds(DescentDarkTime);
-            Floor = 1;
-            Pot = 0;
-            chestTrial.Begin(Floor);
+            BeginRun();
+            PrepareFloor();
             FloorPrepared?.Invoke();
             Changed?.Invoke();
 
             yield return new WaitForSeconds(DescentDuration - DescentDarkTime);
             SetState(GameState.Choosing);
+            FloorShown?.Invoke();
 
             yield return new WaitForSeconds(AntiClickLock);
             SetLock(false);
             Changed?.Invoke();
         }
 
-        IEnumerator UnlockAfter(float seconds)
+        /// « Rejouer » à l'étage 1 (spec v3 §12) : on est déjà en bas, pas de redescente.
+        /// Les couvercles se ferment, les coffres font « pouf », et à 0,3 s le nouvel étage est
+        /// préparé (nouveau nombre, nouvelle rareté, nouveau piège) ; ils réapparaissent.
+        IEnumerator ReshuffleRoutine()
         {
-            yield return new WaitForSeconds(seconds);
+            SetLock(true);
+            ReshuffleStarted?.Invoke();
+            Changed?.Invoke();
+
+            yield return new WaitForSeconds(ReshuffleSwapTime);
+            BeginRun();
+            PrepareFloor();
+            FloorPrepared?.Invoke();
+            Changed?.Invoke();
+
+            yield return new WaitForSeconds(ReshuffleDuration - ReshuffleSwapTime);
+            SetState(GameState.Choosing);
+            FloorShown?.Invoke();
+
+            yield return new WaitForSeconds(AntiClickLock);
             SetLock(false);
             Changed?.Invoke();
         }
@@ -274,8 +440,8 @@ namespace TourDeLaChance
             ApplyInputLock();
         }
 
-        /// Les coffres sont bloqués si le shop est ouvert OU si une transition est en cours.
-        void ApplyInputLock() => chestTrial.InputLocked = ShopOpen || TransitionLocked;
+        /// Les coffres sont bloqués si un panneau est ouvert OU si une transition est en cours.
+        void ApplyInputLock() => chestTrial.InputLocked = IsPanelOpen || TransitionLocked;
 
         void SetState(GameState state)
         {

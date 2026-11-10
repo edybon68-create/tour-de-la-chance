@@ -12,7 +12,9 @@ namespace TourDeLaChance
     public class CoinBurst : MonoBehaviour
     {
         [SerializeField] Material coinMaterial; // M_Or
-        const int PoolSize = 30;
+        const int PoolSize = 40; // v3 : jusqu'à 40 pièces pour un coffre de diamant
+        /// Le plus grand nombre de pièces d'un jaillissement.
+        public const int MaxCoins = PoolSize;
         const float Gravity = 9.81f;
         const float MaxLife = 1.2f;
         const float ShrinkTime = 0.15f;
@@ -61,8 +63,8 @@ namespace TourDeLaChance
             }
         }
 
-        /// Nombre de pièces pour un étage : 8 + 2 × étage, maximum 30.
-        public static int CountForFloor(int floor) => Mathf.Min(PoolSize, 8 + 2 * floor);
+        /// Nombre de pièces pour un étage : 8 + 2 × étage, maximum 30 (v2, inchangé).
+        public static int CountForFloor(int floor) => Mathf.Min(30, 8 + 2 * floor);
 
         /// Fait jaillir "count" pièces depuis le centre d'un coffre.
         public void Burst(Vector3 chestPosition, int count)

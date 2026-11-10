@@ -8,23 +8,38 @@ namespace TourDeLaChance
     /// Un coffre : il sait se refermer, s'animer (survol, suspense, ouverture avec rebond)
     /// et changer de couleur selon son contenu : or = trésor, rouge = piège.
     ///
+    /// v3 : il a CINQ modèles (Bois, Bronze, Argent, Or, Diamant), tous de même taille, même
+    /// hiérarchie et mêmes pivots. SetRarity() montre le bon et cache les autres. Le Corps
+    /// reste UN seul matériau, repeint en or ou en rouge à la révélation, puis remis à la
+    /// couleur de sa rareté au prochain étage.
+    ///
     /// C'est de l'AFFICHAGE : le coffre ne sait pas lui-même s'il est piégé, c'est
     /// ChestTrial qui le lui dit au moment de la révélation.
     ///
-    /// Les animations bougent le modèle 3D (l'enfant "coffre"), pas l'objet racine :
-    /// ainsi le collider qui reçoit le clic reste immobile.
-    /// Règle : on mémorise la pose de repos au démarrage et on y revient exactement.
+    /// Les animations bougent le modèle 3D (l'enfant), pas l'objet racine : ainsi le collider
+    /// qui reçoit le clic reste immobile. On mémorise la pose de repos et on y revient exactement.
     /// </summary>
     public class Chest : MonoBehaviour
     {
-        [SerializeField] Transform lid;     // le couvercle (son pivot est à l'arrière, comme une charnière)
-        [SerializeField] Renderer body;     // le corps du coffre, qui change de couleur
-        [SerializeField] Transform model;   // le modèle 3D animé (enfant "coffre")
+        /// Les pièces d'un des 5 modèles (une par rareté de coffre).
+        [Serializable]
+        public class Look
+        {
+            public Transform model;     // la racine du modèle (animée)
+            public Transform lid;       // Charniere : le pivot du couvercle
+            public Renderer body;       // Corps : la seule partie repeinte
+            public Transform[] gems;    // Diamant : Gemme_0 (couvercle) puis Gemme_1..4 (coins)
+        }
+
+        [Tooltip("Les 5 modèles, dans l'ordre des raretés : Bois, Bronze, Argent, Or, Diamant.")]
+        [SerializeField] Look[] looks = new Look[0];
         [SerializeField] Color closedColor = new Color(0.55f, 0.35f, 0.2f);
         [SerializeField] Color treasureColor = new Color(1f, 0.784f, 0.227f);  // #FFC83A
         [SerializeField] Color trapColor = new Color(0.851f, 0.102f, 0.102f);  // #D91A1A
 
         public int Index { get; set; }
+        /// La rareté affichée (0 = Bois … 4 = Diamant).
+        public int RarityRank => rank;
 
         /// Le couvercle est-il (au moins un peu) ouvert ? (hors petit entrouvert du survol)
         public bool IsLidOpen => !idle && lidAngle > 20f;
@@ -33,36 +48,80 @@ namespace TourDeLaChance
         static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         MaterialPropertyBlock block;
 
-        // Pose de repos du modèle, mémorisée une fois pour toutes.
-        Vector3 restPosition, restScale;
-        Quaternion restRotation;
+        // Le modèle visible en ce moment, son couvercle et son corps.
+        Transform model, lid;
+        Renderer body;
+        int rank;
+
+        // Pose de repos du modèle (la même pour les 5 modèles), mémorisée une fois pour toutes.
+        Vector3 restPosition, restScale = Vector3.one;
+        Quaternion restRotation = Quaternion.identity;
+        Quaternion[] gemRest;
+        bool initialized;
 
         // "idle" = le coffre est au repos ou survolé : c'est Update qui le pose.
         // Sinon, une coroutine (suspense, ouverture…) a la main sur le modèle.
         bool idle = true;
         float lidAngle;
+        float extraScale = 1f; // « pouf » du remélange et apparition des coffres en plus
 
         // Survol
         bool hovered;
         float hoverProgress; // de 0 (repos) à 1 (survol complet), avance en 0,12 s
         float hoverTime;     // depuis combien de temps on survole
 
-        // Petit saut d'invitation (joueur qui hésite)
+        // Petit saut d'invitation (joueur qui hésite) ou d'arrivée (coffres précieux)
         float hopStart = -10f, hopHeight, hopDuration = 1f;
+        float gemTime;
 
-        void Awake()
+        void Awake() => Init();
+
+        /// Prépare le coffre (une seule fois). Appelé aussi par SetRarity/ResetChest : un coffre
+        /// désactivé (4e ou 5e) n'a pas encore reçu Awake quand ChestTrial le prépare.
+        void Init()
         {
+            if (initialized) return;
+            initialized = true;
             block = new MaterialPropertyBlock();
-            if (model == null) model = transform; // secours si le champ n'est pas rempli
-            restPosition = model.localPosition;
-            restRotation = model.localRotation;
-            restScale = model.localScale;
+            if (looks.Length > 0 && looks[0].model != null)
+            {
+                restPosition = looks[0].model.localPosition;
+                restRotation = looks[0].model.localRotation;
+                restScale = looks[0].model.localScale;
+            }
+            ShowLook(0);
+        }
+
+        void ShowLook(int r)
+        {
+            rank = Mathf.Clamp(r, 0, Mathf.Max(0, looks.Length - 1));
+            for (int i = 0; i < looks.Length; i++)
+                if (looks[i].model != null) looks[i].model.gameObject.SetActive(i == rank);
+            var look = looks.Length > 0 ? looks[rank] : null;
+            model = look != null && look.model != null ? look.model : transform;
+            lid = look?.lid;
+            body = look?.body;
+            gemRest = null;
+            if (look?.gems != null && look.gems.Length > 0)
+            {
+                gemRest = new Quaternion[look.gems.Length];
+                for (int i = 0; i < look.gems.Length; i++) if (look.gems[i] != null) gemRest[i] = look.gems[i].localRotation;
+            }
+        }
+
+        /// Montre le modèle d'une rareté de coffre (et retient la couleur du Corps fermé).
+        public void SetRarity(int rarityRank, Color? bodyColor)
+        {
+            Init();
+            if (rarityRank != rank) ShowLook(rarityRank);
+            if (bodyColor.HasValue) closedColor = bodyColor.Value;
         }
 
         // ---------- Repos et survol (pilotés image par image dans Update) ----------
 
         void Update()
         {
+            AnimateGems();
             if (!idle) return;
 
             // La progression du survol avance (ou recule) à vitesse constante…
@@ -81,11 +140,32 @@ namespace TourDeLaChance
                 float phase = hoverTime % 0.8f;
                 if (phase < 0.2f) y += w * 0.05f * Mathf.Sin(phase / 0.2f * Mathf.PI);
             }
-            // Saut d'invitation demandé par l'affichage (joueur qui hésite).
+            // Saut demandé par l'affichage (joueur qui hésite, arrivée d'un étage précieux).
             float hopT = (Time.time - hopStart) / hopDuration;
             if (hopT >= 0f && hopT <= 1f) y += hopHeight * Mathf.Sin(hopT * Mathf.PI);
 
             ApplyPose(Vector3.one * (1f + 0.06f * w), 0f, y);
+        }
+
+        /// Diamant : la grosse gemme du couvercle tourne sur elle-même, celles des coins
+        /// « respirent » chacune à leur tour. Pur affichage, aucune émission.
+        void AnimateGems()
+        {
+            var look = looks.Length > 0 ? looks[rank] : null;
+            if (look?.gems == null || gemRest == null) return;
+            gemTime += Time.deltaTime;
+            for (int i = 0; i < look.gems.Length; i++)
+            {
+                var g = look.gems[i];
+                if (g == null) continue;
+                if (i == 0) g.localRotation = gemRest[0] * Quaternion.Euler(0f, 60f * gemTime, 0f);
+                else
+                {
+                    float s = 1f + 0.08f * Mathf.Sin(2f * Mathf.PI * (gemTime / 1.6f + i * 0.25f));
+                    g.localScale = Vector3.one * s;
+                    g.localRotation = gemRest[i] * Quaternion.Euler(0f, 0f, 20f * Mathf.Sin(2f * Mathf.PI * gemTime / 2.4f + i));
+                }
+            }
         }
 
         /// Le curseur entre (true) ou sort (false) du coffre. Appelé par ChestTrial.
@@ -95,7 +175,7 @@ namespace TourDeLaChance
             hovered = value;
         }
 
-        /// Petit saut d'invitation (hauteur en m, durée en s, après un délai en s).
+        /// Petit saut (hauteur en m, durée en s, après un délai en s).
         public void Hop(float height, float duration, float delay)
         {
             hopHeight = height;
@@ -103,15 +183,17 @@ namespace TourDeLaChance
             hopStart = Time.time + delay;
         }
 
-        /// Remet le coffre fermé, couleur bois, exactement dans sa pose de repos.
+        /// Remet le coffre fermé, couleur de sa rareté, exactement dans sa pose de repos.
         public void ResetChest()
         {
+            Init();
             StopAllCoroutines();
             idle = true;
             hovered = false;
             hoverProgress = 0f;
             hopStart = -10f;
             lidAngle = 0f;
+            extraScale = 1f;
             ApplyPose(Vector3.one, 0f, 0f);
             SetColor(closedColor);
         }
@@ -121,8 +203,10 @@ namespace TourDeLaChance
         // "yield return null" = "attends l'image suivante".
 
         /// Suspense (§3.3) : tassement 0,08 s puis tremblement jusqu'à la fin de la durée.
-        /// Strictement le même pour un trésor et pour un piège.
-        public IEnumerator Suspense(float duration)
+        /// Strictement le même pour un trésor et pour un piège de la même rareté.
+        /// maxAmplitude : tremblement final (5° + 1° par rang). hopAtEnd : le Diamant saute de
+        /// 0,15 m pendant les 0,25 dernières secondes (DANS la durée : elle ne change pas).
+        public IEnumerator Suspense(float duration, float maxAmplitude = 5f, bool hopAtEnd = false)
         {
             idle = false;
             Vector3 startScale = model.localScale;
@@ -134,6 +218,7 @@ namespace TourDeLaChance
             // temps écoulé. Ainsi la durée totale est exacte (à une image près), et
             // strictement la même pour un trésor et pour un piège.
             const float squashTime = 0.08f;
+            const float hopTime = 0.25f;
             float shakeTime = Mathf.Max(0.01f, duration - squashTime);
             for (float t = 0f; t < duration; t += Time.deltaTime)
             {
@@ -146,13 +231,15 @@ namespace TourDeLaChance
                 }
                 else
                 {
-                    // 2. Tremblement : 16 allers-retours par seconde, amplitude de 1° à 5°,
+                    // 2. Tremblement : 16 allers-retours par seconde, amplitude de 1° au maximum,
                     //    couvercle qui claque de 0° à 6° à 12 Hz, échelle qui revient à 1.
                     float s = t - squashTime;
-                    float amplitude = Mathf.Lerp(1f, 5f, s / shakeTime);
+                    float amplitude = Mathf.Lerp(1f, maxAmplitude, s / shakeTime);
                     float rotZ = amplitude * Mathf.Sin(2f * Mathf.PI * 16f * s);
                     lidAngle = 3f - 3f * Mathf.Cos(2f * Mathf.PI * 12f * s);
-                    ApplyPose(Vector3.Lerp(squashed, Vector3.one, s / 0.1f), rotZ, 0f);
+                    float y = 0f;
+                    if (hopAtEnd && t > duration - hopTime) y = 0.15f * Mathf.Sin((t - (duration - hopTime)) / hopTime * Mathf.PI);
+                    ApplyPose(Vector3.Lerp(squashed, Vector3.one, s / 0.1f), rotZ, y);
                 }
                 yield return null;
             }
@@ -237,7 +324,7 @@ namespace TourDeLaChance
             ApplyPose(Vector3.one, 0f, 0f);
         }
 
-        /// Referme le couvercle en douceur (110° → 0° en 0,2 s, ease-in), puis couleur bois.
+        /// Referme le couvercle en douceur (110° → 0° en 0,2 s, ease-in), puis couleur de repos.
         public void CloseAnimated()
         {
             StopAllCoroutines();
@@ -248,13 +335,71 @@ namespace TourDeLaChance
         {
             idle = false;
             float start = lidAngle;
+            float startScale = model.localScale.x / restScale.x / Mathf.Max(0.001f, extraScale);
             for (float t = 0f; t < 0.2f; t += Time.deltaTime)
             {
                 lidAngle = Mathf.Lerp(start, 0f, Ease.In(t / 0.2f));
-                ApplyPose(Vector3.one, 0f, 0f);
+                ApplyPose(Vector3.one * Mathf.Lerp(startScale, 1f, t / 0.2f), 0f, 0f);
                 yield return null;
             }
             ResetChest();
+        }
+
+        /// Remélange (spec v3 §12) : le coffre rétrécit jusqu'à 0 (0,1 s, ease-in).
+        public void ShrinkOut(float duration)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ShrinkRoutine(duration));
+        }
+
+        IEnumerator ShrinkRoutine(float duration)
+        {
+            idle = false;
+            float start = extraScale;
+            float startLid = lidAngle;
+            for (float t = 0f; t < duration; t += Time.deltaTime)
+            {
+                float k = Ease.In(t / duration);
+                extraScale = Mathf.Lerp(start, 0f, k);
+                lidAngle = Mathf.Lerp(startLid, 0f, k);
+                ApplyPose(Vector3.one, 0f, 0f);
+                yield return null;
+            }
+            extraScale = 0f;
+            ApplyPose(Vector3.one, 0f, 0f);
+        }
+
+        /// Cache le coffre (échelle 0) en attendant PopIn : coffre en plus pendant la montée.
+        public void HideForPop()
+        {
+            StopAllCoroutines();
+            idle = false;
+            extraScale = 0f;
+            ApplyPose(Vector3.one, 0f, 0f);
+        }
+
+        /// Le coffre « pousse » : échelle 0 → 1,08 → 1 (durée donnée), après un délai.
+        public void PopIn(float delay, float duration)
+        {
+            StopAllCoroutines();
+            StartCoroutine(PopRoutine(delay, duration));
+        }
+
+        IEnumerator PopRoutine(float delay, float duration)
+        {
+            idle = false;
+            extraScale = 0f;
+            ApplyPose(Vector3.one, 0f, 0f);
+            if (delay > 0f) yield return new WaitForSeconds(delay);
+            for (float t = 0f; t < duration; t += Time.deltaTime)
+            {
+                extraScale = Ease.Pop(t / duration, 0f, 1.08f);
+                ApplyPose(Vector3.one, 0f, 0f);
+                yield return null;
+            }
+            extraScale = 1f;
+            idle = true; // Update reprend la main (survol, sauts)
+            ApplyPose(Vector3.one, 0f, 0f);
         }
 
         // ---------- Outils ----------
@@ -265,12 +410,13 @@ namespace TourDeLaChance
         {
             model.localPosition = restPosition + Vector3.up * y;
             model.localRotation = restRotation * Quaternion.Euler(0f, 0f, rotZ);
-            model.localScale = Vector3.Scale(restScale, scale);
-            lid.localRotation = Quaternion.Euler(lidAngle, 0f, 0f);
+            model.localScale = Vector3.Scale(restScale, scale) * extraScale;
+            if (lid != null) lid.localRotation = Quaternion.Euler(lidAngle, 0f, 0f);
         }
 
         void SetColor(Color color)
         {
+            if (body == null) return;
             // Un PropertyBlock change la couleur de CE coffre sans modifier
             // le matériau partagé par les autres coffres.
             body.GetPropertyBlock(block);

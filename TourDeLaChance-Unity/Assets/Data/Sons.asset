@@ -143,5 +143,80 @@ MonoBehaviour:
     volume: 0.9
     varyPitch: 0
     ducksMusic: 1
+  - id: 26
+    clip: {fileID: 8300000, guid: 1b399e09b6e3c46cbab081b40401e396, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 27
+    clip: {fileID: 8300000, guid: 952c14c56bbce48c4b8b94f8466aca49, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 28
+    clip: {fileID: 8300000, guid: 3cf0bf1dac834499f8588a1f0a5517c8, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 29
+    clip: {fileID: 8300000, guid: ccf55673d1ca045709946c76a26676cc, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 30
+    clip: {fileID: 8300000, guid: dbf2d9764e0964a9d94aab80c886399f, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 31
+    clip: {fileID: 8300000, guid: 00e3728468e2246fe912dd0052932f30, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 32
+    clip: {fileID: 8300000, guid: 30a29a730ee63407190dd90edb3fba4b, type: 3}
+    volume: 0.65
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 33
+    clip: {fileID: 8300000, guid: aff0c27206000403b8e7c4719fba5406, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 34
+    clip: {fileID: 8300000, guid: fbb3238d88bad44ca9abb61300e6fbf7, type: 3}
+    volume: 0.75
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 35
+    clip: {fileID: 8300000, guid: fded1dc35463b436980d79ac2e090f43, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 36
+    clip: {fileID: 8300000, guid: cc9b560490e9f4192ab68abe4361bce8, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 37
+    clip: {fileID: 8300000, guid: db15e5ce71a01498aba6e0b730caa650, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 38
+    clip: {fileID: 8300000, guid: f783e972bef3e4cc48786c940537650f, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 39
+    clip: {fileID: 8300000, guid: 40c230b3ef7d2473bba7d6195fe570c9, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 40
+    clip: {fileID: 8300000, guid: b2837a11dbd4446979b66bd87cb8caf1, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 1
   ambientMusic: {fileID: 8300000, guid: 58e40e343f5cd43519388ca3e196e9be, type: 3}
   tensionMusic: {fileID: 8300000, guid: 8b5333f591c154b4d966b3a03221b8d6, type: 3}
