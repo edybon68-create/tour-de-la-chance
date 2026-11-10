@@ -37,6 +37,9 @@ from mathutils import Matrix, Vector
 DOSSIER_PROJET = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DOSSIER_MODELES = os.path.join(DOSSIER_PROJET, "TourDeLaChance-Unity", "Assets", "Models")
 DOSSIER_CAPTURES = os.path.join(DOSSIER_PROJET, "docs", "captures")
+# Dossier d'attente : modèles prêts mais pas encore intégrés dans Unity (par exemple quand
+# l'auteur est en train de jouer dans l'éditeur et qu'il ne faut rien toucher dans Assets/).
+DOSSIER_EXPORTS = os.path.join(DOSSIER_PROJET, "blender", "exports")
 
 # ---------------------------------------------------------------------------------------
 # 1. Palette et matériaux (repris de docs/art-bible.md §2 et §4)
@@ -443,7 +446,7 @@ def preparer_axes_unity(racine):
         bpy.context.view_layer.update()
 
 
-def exporter_fbx(racine, nom_fichier):
+def exporter_fbx(racine, nom_fichier, dossier=None):
     """Exporte `racine` et ses enfants en FBX dans Assets/Models/.
     Réglages choisis pour Unity :
       - preparer_axes_unity() + axis_forward='-Z', axis_up='Y' : dans Unity, Y en haut,
@@ -452,8 +455,9 @@ def exporter_fbx(racine, nom_fichier):
       - pas d'os « leaf bones », pas de caméra ni de lumière.
     Attention : modifie les objets (rotation compensée) ; à appeler en dernier, après le
     rapport et la miniature."""
-    os.makedirs(DOSSIER_MODELES, exist_ok=True)
-    chemin = os.path.join(DOSSIER_MODELES, nom_fichier)
+    dossier = dossier or DOSSIER_MODELES  # `dossier` : par ex. DOSSIER_EXPORTS (attente)
+    os.makedirs(dossier, exist_ok=True)
+    chemin = os.path.join(dossier, nom_fichier)
     preparer_axes_unity(racine)
     selectionner(descendants(racine), racine)
     bpy.ops.export_scene.fbx(
@@ -528,7 +532,7 @@ def monde_nuit(scene, ambiance=1.0):
     return monde
 
 
-def rendre_miniature(racine, nom_fichier, recul=1.0):
+def rendre_miniature(racine, nom_fichier, recul=1.0, direction=None):
     """Rend une image 640x640 de l'objet, vu de devant, d'au-dessus (≈35° comme la caméra
     du jeu) et un peu de côté (3/4). Fond violet nuit #1F1730, lumière chaude en haut à
     gauche, petit contre-jour violet, comme dans la bible de style."""
@@ -545,7 +549,8 @@ def rendre_miniature(racine, nom_fichier, recul=1.0):
 
     # Caméra : avant = +Y Blender. Légèrement décalée vers la gauche de l'image (+X Blender
     # quand on regarde l'avant) pour la vue de 3/4.
-    direction = Vector((0.35, 1.0, 0.75)).normalized()
+    # `direction` (facultatif) : d'où l'on regarde, en axes Blender (+Y = devant).
+    direction = Vector(direction or (0.35, 1.0, 0.75)).normalized()
     cam_data = bpy.data.cameras.new("Camera")
     cam_data.lens = 50
     cam = bpy.data.objects.new("Camera", cam_data)
@@ -959,3 +964,177 @@ def repere_verre(x_unity, ecart=0.56, y_unity=1.6):
     by = math.sqrt(TETE_RAYON ** 2 - bx ** 2 - dz ** 2)
     n = Vector((bx, by, dz)).normalized()
     return repere(centre_tete + n * ecart, n)
+
+
+# ---------------------------------------------------------------------------------------
+# 9. Le personnage « cheval » (cavalier d'échecs, blender/personnage_cheval.py)
+# ---------------------------------------------------------------------------------------
+# Position du personnage dans la scène du jeu (sur l'estrade), en coordonnées Unity.
+CHEVAL_POSITION = (0.0, 0.3, 2.8)
+CHEVAL_FBX = os.path.join(DOSSIER_EXPORTS, "personnage_cheval.fbx")
+
+
+def _bornes(pts):
+    mn = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
+    mx = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    return mn, mx
+
+
+def estrade(position_unity=CHEVAL_POSITION):
+    """Petite estrade grise sous le personnage (contexte pour les rendus seulement)."""
+    bm = bmesh.new()
+    bm_revolution(bm, [(0.0, 0.3), (0.95, 0.3), (1.0, 0.27), (1.0, 0.0), (0.0, 0.0)], 32)
+    o = objet_depuis_bmesh("Estrade", bm, ["M_PierreClaire"])
+    o.location = depuis_unity(position_unity[0], 0, position_unity[2])
+    lisser_angle(o, 30)
+    return o
+
+
+def rendre_camera_jeu(objets, nom_fichier, taille=640, y_min=None, marge=1.10,
+                      camera_unity=None):
+    """Rend `objets` vus depuis la position de la caméra du jeu (0 ; 5 ; −7), avec la
+    lumière de Tour.unity. La caméra VISE les objets et resserre son champ (un « zoom ») :
+    la perspective est exactement celle du joueur, l'image est seulement recadrée.
+    `y_min` (hauteur Blender z) : ignore ce qui est plus bas (pour cadrer sur la tête)."""
+    scene = bpy.context.scene
+    bpy.context.view_layer.update()
+    pts = []
+    for o in objets:
+        if o.type != "MESH":
+            continue
+        for c in o.bound_box:
+            p = o.matrix_world @ Vector(c)
+            if y_min is not None:
+                p.z = max(p.z, y_min)
+            pts.append(p)
+    mn, mx = _bornes(pts)
+    cible = (mn + mx) / 2
+    monde_nuit(scene, ambiance=0.8)
+    cam_data = bpy.data.cameras.new("CameraJeu")
+    cam_data.clip_start = 0.3
+    cam = bpy.data.objects.new("CameraJeu", cam_data)
+    scene.collection.objects.link(cam)
+    cam.location = depuis_unity(*(camera_unity or CAMERA_JEU_POSITION))
+    cam.rotation_euler = (cible - cam.location).normalized().to_track_quat("-Z", "Y").to_euler()
+    bpy.context.view_layer.update()
+    inverse = cam.matrix_world.inverted()
+    m = max(max(abs(q.x / -q.z), abs(q.y / -q.z)) for q in (inverse @ p for p in pts))
+    cam_data.sensor_fit = "AUTO"
+    cam_data.angle = 2 * math.atan(m * marge)
+    scene.camera = cam
+    soleil, cj = lumieres_jeu(scene)
+    regler_rendu(scene, taille, taille)
+    os.makedirs(DOSSIER_CAPTURES, exist_ok=True)
+    chemin = os.path.join(DOSSIER_CAPTURES, nom_fichier)
+    scene.render.filepath = chemin
+    bpy.ops.render.render(write_still=True)
+    for o in (cam, soleil, cj):
+        bpy.data.objects.remove(o, do_unlink=True)
+    print("Rendu caméra du jeu :", chemin)
+    return chemin
+
+
+def poser_sur_point(racines, point, echelle=1.0, decalage=(0, 0, 0)):
+    """Pose un accessoire (ses objets racines, origine = point d'accroche) sur l'objet vide
+    `point` du cheval, avec une échelle uniforme et un décalage LOCAL donné en Unity —
+    exactement ce que fera Unity : enfant du point, localPosition = décalage,
+    localScale = échelle."""
+    # On ne reprend que la POSITION du point : les objets importés d'un FBX portent déjà
+    # une rotation de conversion d'axes, qu'il ne faut pas appliquer deux fois.
+    bpy.context.view_layer.update()
+    position = point.matrix_world.translation + direction_depuis_unity(*decalage)
+    for r in racines:
+        r.matrix_world = (Matrix.Translation(position)
+                          @ Matrix.Diagonal((echelle, echelle, echelle, 1.0)) @ r.matrix_world)
+    bpy.context.view_layer.update()
+
+
+def importer_cheval(position_unity=CHEVAL_POSITION):
+    """Importe le cheval exporté (blender/exports) à sa place sur l'estrade.
+    Renvoie (objets, dictionnaire nom -> objet)."""
+    objs = importer_fbx(CHEVAL_FBX, position_unity)
+    bpy.context.view_layer.update()
+    return objs, {o.name: o for o in objs}
+
+
+def rendre_porte_cheval(racine, nom_fichier, point, echelle=1.0, decalage=(0, 0, 0),
+                        y_min=1.0):
+    """Miniature d'un accessoire en cours de construction PORTÉ par le cheval, vue de la
+    caméra du jeu. L'accessoire est remis à l'origine après le rendu (pour l'export)."""
+    depart = racine.matrix_world.copy()
+    objs, par_nom = importer_cheval()
+    poser_sur_point([racine], par_nom[point], echelle, decalage)
+    hauteur_estrade = CHEVAL_POSITION[1]
+    chemin = rendre_camera_jeu(objs + descendants(racine), nom_fichier,
+                               y_min=hauteur_estrade + y_min)
+    for o in objs:
+        bpy.data.objects.remove(o, do_unlink=True)
+    racine.matrix_world = depart
+    bpy.context.view_layer.update()
+    return chemin
+
+
+def finir_accessoire_cheval(racine, nom, point, echelle=1.0, decalage=(0, 0, 0)):
+    """Fin des scripts d'accessoires « version cheval » : rapport, miniature portée par le
+    cheval (docs/captures/cheval_<nom>.png), export dans blender/exports/ (attente)."""
+    total = rapport(racine)
+    rendre_porte_cheval(racine, f"cheval_{nom}.png", point, echelle, decalage)
+    chemin = exporter_fbx(racine, f"{nom}.fbx", dossier=DOSSIER_EXPORTS)
+    verifier_fbx(chemin)
+    print(f"RESUME {nom} triangles={total}")
+    return total
+
+
+# Points d'accroche du cheval, en Unity LOCAL à Joueur. Valeurs MESURÉES sur le modèle par
+# personnage_cheval.py (il les affiche à chaque lancement) : si on change le cheval, on
+# recopie ici les nouvelles valeurs, puis on relance les accessoires « version cheval ».
+CHEVAL_ACCROCHES = {
+    "PointChapeau": (0.0, 1.86, 0.03),     # dessus du crâne, entre les oreilles
+    "PointVisage": (0.0, 1.68, -0.253),    # devant les yeux, sur le front
+    "PointCou": (0.0, 1.05, 0.01),         # centre du cou, sous la mâchoire
+    "PointDos": (0.0, 0.95, 0.296),        # surface arrière du cou, à hauteur d'épaules
+}
+CHEVAL_YEUX_X = 0.165          # yeux en Unity x = ±0,165 ...
+CHEVAL_YEUX_Y = 1.68           # ... et y = 1,68
+CHEVAL_YEUX_AVANT = -0.262     # le devant des yeux (Unity z)
+CHEVAL_CRANE_CENTRE = (0.0, 1.58, 0.03)   # centre du crâne (Unity)
+
+
+def vers_accroche_cheval(obj, point):
+    """Comme vers_accroche(), pour un accessoire construit dans le repère du cheval
+    (base du cheval à l'origine) : son origine devient le point d'accroche `point`."""
+    obj.data.transform(Matrix.Translation(-depuis_unity(*CHEVAL_ACCROCHES[point])))
+    obj.location = (0, 0, 0)
+    return obj
+
+
+def arbre_cheval():
+    """Charge le cheval (blender/exports) le temps de mesurer sa surface, et renvoie un
+    « arbre de recherche » (BVH) de son Corps, en coordonnées Blender, base à l'origine.
+    Les accessoires s'en servent pour se coller à la vraie forme de la tête par des rayons.
+    Le cheval est retiré de la scène ensuite (il n'est jamais exporté avec l'accessoire)."""
+    from mathutils.bvhtree import BVHTree
+    objs = importer_fbx(CHEVAL_FBX)
+    bpy.context.view_layer.update()
+    corps = next(o for o in objs if o.name.startswith("Corps"))
+    bm = bmesh.new()
+    bm.from_mesh(corps.data)
+    bm.transform(corps.matrix_world)
+    arbre = BVHTree.FromBMesh(bm)
+    bm.free()
+    for o in objs:
+        bpy.data.objects.remove(o, do_unlink=True)
+    return arbre
+
+
+def sur_cheval(arbre, angle, y_unity, ecart, centre=CHEVAL_CRANE_CENTRE):
+    """Point de la surface du cheval vu depuis l'axe vertical qui passe par `centre`
+    (Unity), dans la direction `angle` (radians, 0 = droit devant, positif = vers la
+    gauche de l'image), à la hauteur `y_unity`, décollé de `ecart` mètres vers l'extérieur.
+    Renvoie (point Blender, direction horizontale vers l'extérieur)."""
+    d = Vector((math.sin(angle), math.cos(angle), 0.0))
+    axe = depuis_unity(centre[0], y_unity, centre[2])
+    hit, _, _, _ = arbre.ray_cast(axe + d * 3.0, -d)
+    if hit is None:
+        hit = axe
+    return hit + d * ecart, d

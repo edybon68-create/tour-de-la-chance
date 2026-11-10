@@ -485,7 +485,87 @@ def volume_court_terme(x, fenetre=0.4):
     return 10 * np.log10(max(moyenne.max(), 1e-24))
 
 
-def finalise(x, duree, entree=0.005, sortie=0.005, pic_db=-1.0, cible_db=None):
+def _reponse_k(taille):
+    """
+    Réponse en fréquence de la « pondération K » (norme ITU-R BS.1770, celle des mesures
+    LUFS de la radio et du streaming) : l'oreille entend mal le très grave et entend un
+    peu plus fort les aigus. Deux étages : un passe-haut doux vers 38 Hz et une étagère
+    +4 dB au-dessus de ~1,7 kHz. On la calcule pour chaque fréquence de la FFT.
+    """
+    w = np.linspace(0, np.pi, taille // 2 + 1)
+    z = np.exp(-1j * w)
+    # étagère haute (formules RBJ), +4 dB, 1 681 Hz
+    gain, f0 = 4.0, 1681.0
+    A = 10 ** (gain / 40)
+    w0 = 2 * np.pi * f0 / SR
+    alpha = np.sin(w0) / 2 * np.sqrt(2)
+    c = np.cos(w0)
+    b = [A * ((A + 1) + (A - 1) * c + 2 * np.sqrt(A) * alpha), -2 * A * ((A - 1) + (A + 1) * c),
+         A * ((A + 1) + (A - 1) * c - 2 * np.sqrt(A) * alpha)]
+    a = [(A + 1) - (A - 1) * c + 2 * np.sqrt(A) * alpha, 2 * ((A - 1) - (A + 1) * c),
+         (A + 1) - (A - 1) * c - 2 * np.sqrt(A) * alpha]
+    h1 = (b[0] + b[1] * z + b[2] * z * z) / (a[0] + a[1] * z + a[2] * z * z)
+    b2, a2 = _biquad("passe_haut", 38.0, 0.5)
+    h2 = (b2[0] + b2[1] * z + b2[2] * z * z) / (a2[0] + a2[1] * z + a2[2] * z * z)
+    return h1 * h2
+
+
+def volume_pondere(x, fenetre=0.4):
+    """
+    Volume ressenti « à l'oreille » : comme volume_court_terme, mais après la pondération
+    K (voir _reponse_k). Résultat proche du « LUFS momentané max » des logiciels audio.
+    Plus juste que le RMS brut pour comparer un son très grave (battement de cœur) et un
+    son très aigu (crépitements) : le RMS surestime le premier et sous-estime le second.
+    """
+    m = x.mean(axis=1) if x.ndim == 2 else np.asarray(x, dtype=float)
+    taille = 1 << int(np.ceil(np.log2(len(m) + n_ech(0.25))))
+    y = np.fft.irfft(np.fft.rfft(m, taille) * _reponse_k(taille), taille)[:len(m)]
+    n = max(1, min(len(y), n_ech(fenetre)))
+    # moyenne glissante par somme cumulée (bien plus rapide qu'une convolution sur 48 s)
+    cumul = np.concatenate(([0.0], np.cumsum(y ** 2)))
+    moyenne = (cumul[n:] - cumul[:-n]) / n
+    return -0.691 + 10 * np.log10(max(moyenne.max(), 1e-24))
+
+
+def limiteur(x, reduction_db=6.0, anticipation=0.0015, relache=0.04):
+    """
+    Limiteur doux : rabote les pointes les plus fortes d'un son de `reduction_db` dB
+    (par rapport à son pic actuel), SANS les écrêter. Au lieu de couper l'onde (ce qui
+    ferait grésiller), on baisse le volume pendant un court instant autour de chaque pointe :
+    - « anticipation » : le volume commence à baisser 1,5 ms AVANT la pointe (on lit un
+      peu en avance), donc la pointe passe déjà à bon niveau ;
+    - « relâche » : il remonte ensuite doucement en 40 ms, sans à-coup audible.
+    À quoi ça sert ? Un son fait de petits clics très pointus (crépitements, éclats de
+    verre) atteint vite -1 dBFS en paraissant tout petit. Raboter ses pointes permet de le
+    remonter ensuite à un volume ressenti cohérent avec les autres sons.
+    """
+    x = np.asarray(x, dtype=float)
+    pic = np.max(np.abs(x))
+    if pic == 0 or reduction_db <= 0:
+        return x
+    seuil = pic * 10 ** (-reduction_db / 20.0)
+    na = max(1, n_ech(anticipation))
+    a = np.abs(x)
+    # maximum sur les na échantillons À VENIR (lecture en avance)
+    tenue = a.copy()
+    for k in range(1, na + 1):
+        tenue[:-k] = np.maximum(tenue[:-k], a[k:])
+    cible = np.minimum(1.0, seuil / np.maximum(tenue, 1e-12))
+    # descente immédiate, remontée lente (relâche exponentielle)
+    coef = np.exp(-1.0 / max(1, n_ech(relache)))
+    g = np.empty_like(cible)
+    precedent = 1.0
+    for i, c in enumerate(cible.tolist()):
+        precedent = c if c < precedent else c + (precedent - c) * coef
+        g[i] = precedent
+    # lissage sur na échantillons (passés) : la baisse devient une petite rampe, sans clic.
+    # Grâce à la lecture en avance, la rampe est terminée quand la pointe arrive.
+    g = np.convolve(np.concatenate([np.full(na - 1, 1.0), g]), np.ones(na) / na, "valid")
+    return x * g
+
+
+def finalise(x, duree, entree=0.005, sortie=0.005, pic_db=-1.0, cible_db=None,
+             cible_oreille=None, rabot_max_db=9.0):
     """
     La chaîne de fin commune à tous les effets : durée exacte, fondus, normalisation du
     pic à -1 dBFS. Si `cible_db` est donné et que le son paraît plus fort que cette cible
@@ -500,16 +580,68 @@ def finalise(x, duree, entree=0.005, sortie=0.005, pic_db=-1.0, cible_db=None):
         actuel = volume_court_terme(x)
         if actuel > cible_db:
             x = x * 10 ** ((cible_db - actuel) / 20.0)
+    if cible_oreille is not None:
+        x = _vers_cible_oreille(x, cible_oreille, pic_db, rabot_max_db, entree, sortie)
     return x
 
 
+def _vers_cible_oreille(x, cible, pic_db, rabot_max_db, entree, sortie):
+    """
+    Amène le volume « à l'oreille » (volume_pondere) d'un son vers `cible` (v3) :
+    - trop fort : on le baisse simplement (son pic passe sous -1 dBFS) ;
+    - trop faible parce que trop « pointu » : on rabote ses pointes avec le limiteur, juste
+      ce qu'il faut (recherche par dichotomie), sans dépasser `rabot_max_db` pour garder du
+      mordant aux attaques, puis on le renormalise à -1 dBFS.
+    """
+    actuel = volume_pondere(x)
+    if actuel > cible:
+        return x * 10 ** ((cible - actuel) / 20.0)
+
+    def essai(r):
+        y = normalise(fondus(limiteur(x, r), entree, sortie), pic_db)
+        return y, volume_pondere(y)
+
+    y, v = essai(rabot_max_db)
+    if v <= cible:
+        return y  # même au maximum du rabot on reste sous la cible : on garde ce résultat
+    bas, haut = 0.0, rabot_max_db
+    for _ in range(12):
+        milieu = (bas + haut) / 2
+        y, v = essai(milieu)
+        if v < cible:
+            bas = milieu
+        else:
+            haut = milieu
+    y, v = essai(haut)
+    return y * 10 ** (min(0.0, cible - v) / 20.0)
+
+
 RACINE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DOSSIER_AUDIO = os.path.join(RACINE, "TourDeLaChance-Unity", "Assets", "Audio")
+# Dossier de sortie PAR DÉFAUT : directement dans le projet Unity.
+DOSSIER_UNITY = os.path.join(RACINE, "TourDeLaChance-Unity", "Assets", "Audio")
+# Dossier « d'attente » : on y exporte quand on ne veut pas toucher au projet Unity
+# (par exemple pendant que quelqu'un joue dans l'éditeur). Même arborescence que
+# Assets/Audio : il suffira de copier son contenu dans Unity plus tard.
+DOSSIER_EXPORTS = os.path.join(RACINE, "audio", "exports")
+# Le dossier réellement utilisé. On peut le changer de deux façons :
+# - la variable d'environnement TDLC_AUDIO_SORTIE (chemin absolu ou relatif à la racine) ;
+# - la fonction definir_sortie(...) (c'est ce que fait generer_tout.py --sortie ...).
+DOSSIER_AUDIO = os.path.join(RACINE, os.environ.get("TDLC_AUDIO_SORTIE", DOSSIER_UNITY))
+
+
+def definir_sortie(dossier):
+    """
+    Change le dossier où ecris_wav() range les fichiers (et où analyse.py les mesure).
+    Un chemin relatif est compris depuis la racine du projet (ex. « audio/exports »).
+    """
+    global DOSSIER_AUDIO
+    DOSSIER_AUDIO = os.path.join(RACINE, dossier)
+    return DOSSIER_AUDIO
 
 
 def ecris_wav(categorie, nom, x):
     """
-    Écrit Assets/Audio/<categorie>/<nom>.wav en 44,1 kHz, 16 bits (mono ou stéréo).
+    Écrit <DOSSIER_AUDIO>/<categorie>/<nom>.wav en 44,1 kHz, 16 bits (mono ou stéréo).
     Un tableau à 2 colonnes est écrit en stéréo.
     """
     dossier = os.path.join(DOSSIER_AUDIO, categorie)

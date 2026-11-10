@@ -63,26 +63,47 @@ def boite_secoue(rng):
 def boite_ouverture(rng):
     """
     Le couvercle saute : « pop » feutré (sinus qui chute très vite + bruit sourd), puis un
-    souffle magique qui monte vers l'aigu, avec une petite traînée d'étincelles.
+    souffle magique qui monte vers l'aigu, avec trois clochettes et une traînée d'étincelles.
+
+    v3 (correctif B3) : 0,3 s au lieu de 0,6 s, pour coller à l'animation. Même recette,
+    tout est simplement resserré : souffle de 0,24 s, clochettes à 50 ms d'écart (au lieu
+    de 80), queues plus courtes, pour que le son s'éteigne de lui-même avant la fin
+    (« fin naturelle ») au lieu d'être coupé.
     """
-    d = 0.6
+    d = 0.3
     x = silence(d)
-    dp = 0.08
-    pop = sinus(glisse(420, 110, dp, "exp"), dp) * perc(dp, 0.001, 0.07)
-    feutre = filtre(bruit(dp, rng), "passe_bas", 1200, ordre=2) * perc(dp, 0.001, 0.03)
+    dp = 0.07
+    pop = sinus(glisse(420, 110, dp, "exp"), dp) * perc(dp, 0.001, 0.06)
+    feutre = filtre(bruit(dp, rng), "passe_bas", 1200, ordre=2) * perc(dp, 0.001, 0.025)
     ajoute(x, pop + 0.8 * feutre, 0.0)
-    ds = 0.55
+    ds = 0.24
     souffle = filtre(bruit(ds, rng), "passe_haut", 500)
     souffle = passe_bas_variable(souffle, glisse(900, 7000, ds), q=1.8)
     ts = temps(ds)
     env = np.sin(np.pi * np.clip(ts / ds, 0, 1)) ** 2
-    ajoute(x, 0.35 * souffle * env, 0.03)
+    ajoute(x, 0.35 * souffle * env, 0.02)
     # trois notes de clochette qui montent avec le souffle (le côté « magique »)
     for i, note in enumerate(["C6", "F6", "A6"]):
-        ajoute(x, clochette(hz(note), 0.3, 0.25), 0.1 + 0.08 * i, 0.18)
-    x += scintillement(d, rng, 10, 5000, 8000, debut=0.15, fin=0.45, chute=0.025, volume=0.15)
-    x = reverb(x, 0.12, 0.5)
-    return finalise(x, d, 0.001, 0.05)
+        ajoute(x, clochette(hz(note), 0.2, 0.15), 0.06 + 0.05 * i, 0.18)
+    x += scintillement(d, rng, 7, 5000, 8000, debut=0.09, fin=0.22, chute=0.02, volume=0.15)
+    x = reverb(x, 0.1, 0.3)
+    # cible « oreille » -16,5 : le même volume ressenti que la version de 0,6 s
+    return finalise(x, d, 0.001, 0.005, cible_oreille=-16.5)
+
+
+def _consomme_comme_boite_ouverture_v2(rng):
+    """
+    Pourquoi cette fonction ? Tous les sons de ce fichier tirent leurs hasards dans le MÊME
+    générateur `rng`, l'un après l'autre. Si la nouvelle boite_ouverture (plus courte) y
+    puisait moins de nombres, toutes les révélations qui suivent recevraient d'autres
+    nombres au hasard : leurs étincelles changeraient de place et les fichiers déjà
+    validés ne seraient plus reproduits à l'identique. On fait donc tirer à la nouvelle
+    version ses hasards dans son propre générateur, et ici on « avance » `rng` d'autant
+    de nombres que l'ancienne version (0,6 s) en consommait.
+    """
+    rng.uniform(-1.0, 1.0, n_ech(0.08))  # bruit du « pop »
+    rng.uniform(-1.0, 1.0, n_ech(0.55))  # bruit du souffle
+    rng.uniform(size=10 * 3)  # 10 étincelles x (instant, hauteur, volume)
 
 
 # --------------------------- révélations ---------------------------
@@ -220,17 +241,32 @@ def revelation_secret(rng):
     return finalise(x, d, 0.004, 0.3)
 
 
-def genere():
+def _ecrivain(seulement):
+    """Rend une fonction « écrire » qui ignore les sons absents de `seulement` (None = tous)."""
+    def ecris(categorie, nom, x):
+        if seulement is None or nom in seulement:
+            ecris_wav(categorie, nom, x)
+    return ecris
+
+
+def genere(seulement=None):
+    """
+    Calcule tous les sons du fichier (dans l'ordre : ils partagent le même tirage au
+    hasard) mais n'écrit que ceux de `seulement` si on le donne (ex. {"vente"}).
+    """
+    ecris = _ecrivain(seulement)
     rng = np.random.default_rng(404)
     print("Sons boite :")
-    ecris_wav("boite", "boite_secoue", boite_secoue(rng))
-    ecris_wav("boite", "boite_ouverture", boite_ouverture(rng))
-    ecris_wav("boite", "revelation_commun", revelation_commun())
-    ecris_wav("boite", "revelation_peu_commun", revelation_peu_commun(rng))
-    ecris_wav("boite", "revelation_rare", revelation_rare(rng))
-    ecris_wav("boite", "revelation_super_rare", revelation_super_rare(rng))
-    ecris_wav("boite", "revelation_legendaire", revelation_legendaire(rng))
-    ecris_wav("boite", "revelation_secret", revelation_secret(rng))
+    ecris("boite", "boite_secoue", boite_secoue(rng))
+    # générateur à part pour boite_ouverture (voir _consomme_comme_boite_ouverture_v2)
+    ecris("boite", "boite_ouverture", boite_ouverture(np.random.default_rng(4041)))
+    _consomme_comme_boite_ouverture_v2(rng)
+    ecris("boite", "revelation_commun", revelation_commun())
+    ecris("boite", "revelation_peu_commun", revelation_peu_commun(rng))
+    ecris("boite", "revelation_rare", revelation_rare(rng))
+    ecris("boite", "revelation_super_rare", revelation_super_rare(rng))
+    ecris("boite", "revelation_legendaire", revelation_legendaire(rng))
+    ecris("boite", "revelation_secret", revelation_secret(rng))
 
 
 if __name__ == "__main__":

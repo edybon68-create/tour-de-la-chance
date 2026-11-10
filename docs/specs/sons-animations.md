@@ -13,6 +13,12 @@
 > Nouvel état `Climbing` (« on monte »). Le décor change avec l'altitude (§3.14). Les sons des
 > boîtes à surprises sont ajoutés (§5) ; leur animation est dans `docs/specs/boites.md` §7.6.
 >
+> **Mise à jour v3 (`docs/specs/v3.md`).** « Rejouer » après un piège à l'étage 1 ne joue plus
+> la redescente mais un « remélange sur place » (§3.11, `v3.md` §12). Le décor commence **de
+> jour** (§3.14 remplacé par `v3.md` §9). Le suspense s'allonge avec la rareté des coffres
+> (`v3.md` §5.3.2). Les boutons de son passent à 24 px (§6.2). Nouveaux sons : `v3.md` §14.
+> Le personnage est un cheval (`v3.md` §7) : les animations ne changent pas.
+>
 > **Mot de vocabulaire.** Le *game feel* (ou *juice*, « jus ») regroupe tout ce qui ne change pas
 > les règles mais rend chaque action agréable : un objet qui rebondit, un son au bon moment,
 > un compteur qui défile. Un jeu sans *juice* marche, mais il paraît « mort ».
@@ -330,6 +336,12 @@ fermés, personnage au repos, **retour au décor du palier 1**), caméra y 7 →
 (0,3 s, ease-out). Pas de bannière. Son `ui_nouvelle_partie`. Mêmes règles de blocage, plus
 le même verrou anti-clic de 0,5 s à la fin.
 
+**v3 — seulement si l'étage est 2 ou plus.** À l'étage 1 (piège au premier coffre), on est
+déjà en bas : pas de caméra, pas de voile, pas de `ui_nouvelle_partie`, mais un **remélange sur
+place** de 0,55 s (couvercles qui se ferment, coffres qui font « pouf » et réapparaissent avec un
+nouveau piège, son `coffres_remelange`), puis le verrou anti-clic. Chronologie complète :
+`docs/specs/v3.md` §12.
+
 ### 3.12 Écran titre
 - À l'apparition : le logo passe de l'échelle 0,8 à 1,05 puis 1,0 (0,6 s) avec opacité
   0 → 1 ; ensuite il flotte doucement : ±6 px en vertical, période 3 s (sinus).
@@ -341,6 +353,9 @@ le même verrou anti-clic de 0,5 s à la fin.
   Pendant le fondu, les coffres ne sont pas encore cliquables (même blocage que §3.11).
 
 ### 3.13 Shop (panneau latéral, voir `docs/specs/boites.md` §7)
+> **v3** : 4 panneaux à **gauche** qui glissent depuis la colonne de boutons, mêmes durées et
+> mêmes sons pour les 4 (`docs/specs/v3.md` §4.4).
+
 - Ouverture / fermeture : le panneau glisse depuis la droite (0,25 s ease-out / 0,2 s
   ease-in) ; sons `ui_boutique_ouvre` / `ui_boutique_ferme`.
 - En `Lost` ou `CashedOut`, ouvrir le shop referme les couvercles : on garde ce comportement,
@@ -355,6 +370,11 @@ le même verrou anti-clic de 0,5 s à la fin.
 - Vendre un ou plusieurs doublons : `ui/vente` + défilement du porte-monnaie.
 
 ### 3.14 Le décor change avec l'altitude
+> **v3** : le tableau des paliers ci-dessous est **remplacé** par celui de `docs/specs/v3.md`
+> §9 (palier 1 de jour, palier 2 coucher de soleil dans les nuages, palier 3 crépuscule,
+> palier 4 nuit étoilée inchangé). Les règles (changement dans le noir, ce qui change, nuages
+> 3D, recalcul à partir de l'étage) restent valables.
+
 Plus on monte, plus la tour s'élève dans le ciel. Le décor change **par paliers**, toujours
 pendant l'écran sombre de la montée (§3.11, temps 0,50 s) : on ne voit jamais le changement
 se faire, on découvre le nouveau décor en arrivant.
@@ -506,6 +526,10 @@ sonore détaillée est celle du sound designer ; l'intention attendue est :
 | `vente` | ui | ~0,4 s | Pièces qui tombent dans la bourse, satisfait (différent de `pieces_achat`) | Vente d'un ou de tous les doublons |
 
 Soit **28 fichiers** : 8 `ui`, 4 `coffre`, 3 `resultat`, 3 `pieces`, 2 `musique`, 8 `boite`.
+
+**v3** : `boite_ouverture` doit durer **0,3 s** et `vente` **0,4 s** (correctif B3 : livrés à
+0,6 et 0,5 s). 15 nouveaux fichiers (améliorations, coffres précieux, remélange, record,
+cinématique Secret) : liste dans `docs/specs/v3.md` §14.
 Les durées des révélations suivent celles du tableau de `boites.md` §7.6 : si le sound
 designer livre des durées un peu différentes (±20 %), on garde les durées d'animation et on
 laisse le son finir.
@@ -589,7 +613,9 @@ musiques descendent à **× 0,5** en 0,05 s, puis remontent en 0,5 s après la f
 ### 6.2 Couper la musique et les effets
 - Deux petits boutons texte **sous « Étage N »** (en haut à gauche) : **« Musique : oui »** et
   **« Effets : oui »**. Un clic bascule sur « … : non » (et le bouton passe à opacité 0,5).
-  Taille du texte 16, fond `#2A2A3A` à 80 %, coins arrondis, même style de survol que §3.10.
+  Taille du texte **24** (v3, correctif B4 ; 16 avant), hauteur minimale 48 px, marge
+  intérieure 8 × 16 px (référence 1920 × 1080), fond `#2A2A3A` à 80 %, coins arrondis, style
+  des boutons de `docs/specs/v3.md` §10 (famille « sombre »).
 - **Visibles partout** : écran titre, partie, shop ouvert. (Le HUD est caché sur l'écran
   titre : il faut donc les afficher aussi par-dessus l'écran titre, par exemple dans
   `Title.uxml`, branchés sur la même logique.)

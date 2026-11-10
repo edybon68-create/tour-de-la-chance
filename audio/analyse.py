@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Contrôle des sons, puisqu'on ne peut pas les écouter : on les MESURE.
-Pour chaque WAV de Assets/Audio : durée, pic (dBFS), RMS (volume moyen, dBFS),
+Pour chaque WAV du dossier de sortie (Assets/Audio par défaut, ou audio/exports) : durée, pic (dBFS), RMS (volume moyen, dBFS),
+volume ressenti (RMS max sur 0,4 s) et volume « à l'oreille » (le même après pondération K, ~LUFS),
 échantillons saturés, premier/dernier échantillon (doivent être ~0 pour un effet : pas de clic).
 Pour les musiques : contrôle du raccord de boucle (le saut entre le dernier et le premier
 échantillon doit ressembler à un saut ordinaire entre deux échantillons voisins).
@@ -15,7 +16,8 @@ import wave
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from synth import DOSSIER_AUDIO, RACINE, volume_court_terme
+import synth
+from synth import volume_court_terme, volume_pondere
 
 
 def lis(chemin):
@@ -30,19 +32,23 @@ def db(v):
     return 20 * np.log10(max(v, 1e-12))
 
 
-def main():
-    print("\n%-36s %3s %7s %7s %7s %7s %4s %8s %8s" % (
-        "fichier", "can", "durée", "pic", "RMS", "ressenti", "sat", "début", "fin"))
+def main(dossier=None):
+    """Mesure tous les WAV de `dossier` (par défaut : le dossier de sortie de synth.py)."""
+    dossier = dossier or synth.DOSSIER_AUDIO
+    print("\nAnalyse de :", os.path.relpath(dossier, synth.RACINE))
+    print("\n%-36s %3s %7s %7s %7s %7s %7s %4s %8s %8s" % (
+        "fichier", "can", "durée", "pic", "RMS", "ressenti", "oreille", "sat", "début", "fin"))
     ok = True
-    for chemin in sorted(glob.glob(os.path.join(DOSSIER_AUDIO, "*", "*.wav"))):
+    for chemin in sorted(glob.glob(os.path.join(dossier, "*", "*.wav"))):
         x, c = lis(chemin)
-        nom = os.path.relpath(chemin, DOSSIER_AUDIO)
+        nom = os.path.relpath(chemin, dossier)
         pic = np.max(np.abs(x))
         rms = np.sqrt(np.mean(x ** 2))
         sat = int(np.sum(np.abs(x) >= 32767 / 32768))
         debut, fin = np.max(np.abs(x[0])), np.max(np.abs(x[-1]))
-        print("%-36s %3d %6.3fs %6.2f %7.2f %7.2f %4d %8.5f %8.5f" % (
-            nom, c, len(x) / 44100, db(pic), db(rms), volume_court_terme(x), sat, debut, fin))
+        print("%-36s %3d %6.3fs %6.2f %7.2f %7.2f %7.2f %4d %8.5f %8.5f" % (
+            nom, c, len(x) / 44100, db(pic), db(rms), volume_court_terme(x), volume_pondere(x),
+            sat, debut, fin))
         musique = "musique" in nom
         if sat or db(pic) > -0.95 or db(pic) < -12 or (not musique and (debut > 0.002 or fin > 0.002)):
             print("   !! à vérifier"); ok = False
@@ -70,4 +76,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Option : un dossier à analyser, ex. « audio/exports »
+    main(os.path.join(synth.RACINE, sys.argv[1]) if len(sys.argv) > 1 else None)

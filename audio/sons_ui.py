@@ -86,32 +86,50 @@ def vente(rng):
     """
     Vente d'un doublon (boîtes à tirage) : une petite cascade de pièces qui tombent
     l'une sur l'autre, puis le « pouf » feutré de la bourse qui se referme.
+
+    v3 (correctif B3) : 0,4 s au lieu de 0,5 s. Les 6 pièces tombent en 0,15 s (au lieu
+    de 0,2) et la bourse se ferme à 0,18 s ; les queues sont raccourcies pour que tout
+    soit éteint avant la fin du fichier.
     """
-    d = 0.5
+    d = 0.4
     x = silence(d)
-    instants = [0.0, 0.05, 0.095, 0.135, 0.17, 0.2]
+    instants = [0.0, 0.04, 0.075, 0.105, 0.13, 0.15]
     for i, t0 in enumerate(instants):
         f = rng.uniform(2600, 4200) * (1.0 - 0.04 * i)  # les pièces tombent de plus en plus bas
-        ajoute(x, ting(f, 0.12, 0.09), t0, 1.0 - 0.08 * i)
+        ajoute(x, ting(f, 0.11, 0.08), t0, 1.0 - 0.08 * i)
     # la bourse en tissu : bruit très sourd et bref
-    b = filtre(bruit(0.12, rng), "passe_bas", 600, ordre=2) * perc(0.12, 0.004, 0.08)
-    ajoute(x, b, 0.24, 2.5)
-    ajoute(x, sinus(glisse(160, 90, 0.1), 0.1) * perc(0.1, 0.003, 0.08), 0.24, 0.5)
-    x = reverb(x, 0.08, 0.4)
-    return finalise(x, d, 0.002, 0.03)
+    b = filtre(bruit(0.12, rng), "passe_bas", 600, ordre=2) * perc(0.12, 0.004, 0.07)
+    ajoute(x, b, 0.18, 2.5)
+    ajoute(x, sinus(glisse(160, 90, 0.1), 0.1) * perc(0.1, 0.003, 0.07), 0.18, 0.5)
+    x = reverb(x, 0.08, 0.3)
+    # cible « oreille » -14,5 : le même volume ressenti que la version de 0,5 s
+    return finalise(x, d, 0.002, 0.005, cible_oreille=-14.5)
 
 
-def genere():
+def _ecrivain(seulement):
+    """Rend une fonction « écrire » qui ignore les sons absents de `seulement` (None = tous)."""
+    def ecris(categorie, nom, x):
+        if seulement is None or nom in seulement:
+            ecris_wav(categorie, nom, x)
+    return ecris
+
+
+def genere(seulement=None):
+    """
+    Calcule tous les sons du fichier (dans l'ordre : ils partagent le même tirage au
+    hasard) mais n'écrit que ceux de `seulement` si on le donne (ex. {"vente"}).
+    """
+    ecris = _ecrivain(seulement)
     rng = np.random.default_rng(101)
     print("Sons ui :")
-    ecris_wav("ui", "ui_survol", ui_survol())
-    ecris_wav("ui", "ui_clic", ui_clic(rng))
-    ecris_wav("ui", "ui_jouer", ui_jouer())
-    ecris_wav("ui", "ui_etage_monte", ui_etage_monte(rng))
-    ecris_wav("ui", "ui_nouvelle_partie", ui_nouvelle_partie())
-    ecris_wav("ui", "ui_boutique_ouvre", ui_boutique(True))
-    ecris_wav("ui", "ui_boutique_ferme", ui_boutique(False))
-    ecris_wav("ui", "vente", vente(rng))
+    ecris("ui", "ui_survol", ui_survol())
+    ecris("ui", "ui_clic", ui_clic(rng))
+    ecris("ui", "ui_jouer", ui_jouer())
+    ecris("ui", "ui_etage_monte", ui_etage_monte(rng))
+    ecris("ui", "ui_nouvelle_partie", ui_nouvelle_partie())
+    ecris("ui", "ui_boutique_ouvre", ui_boutique(True))
+    ecris("ui", "ui_boutique_ferme", ui_boutique(False))
+    ecris("ui", "vente", vente(rng))
 
 
 if __name__ == "__main__":

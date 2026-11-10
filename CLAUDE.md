@@ -19,7 +19,10 @@ Jeu 3D « quitte ou double » sous Unity. L'auteur débute en programmation : **
 - Entrées : `UnityEngine.InputSystem` uniquement (l'ancien `Input` est désactivé).
 - Matériaux : shader URP Lit (`GraphicsSettings.currentRenderPipeline.defaultMaterial`).
 - Sauvegarde : `PlayerPrefs` (pas de cloud).
-- **Règle d'or : pièces virtuelles uniquement, aucun achat en argent réel, les cosmétiques ne changent pas les chances.**
+- **Règle d'or : pièces virtuelles uniquement, gagnées en jouant, aucun achat en argent réel.**
+  Les **cosmétiques** ne changent jamais les chances. Les **améliorations** (spec v3) sont une
+  progression assumée, achetée avec ces pièces, dont l'effet est affiché clairement.
+  Le spectacle ne triche jamais : même suspense et même animation pour un trésor et un piège.
 
 ## Piloter l'éditeur Unity (CLI)
 Toujours préfixer : `export PATH="$HOME/.unity/bin:$PATH"; export UNITY_PROJECT_PATH=/Users/edy/TourDeLaChance/TourDeLaChance-Unity`

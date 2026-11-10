@@ -10,6 +10,16 @@
 > `ShopItem`, `ShopCategory`, `PlayerAvatar`, `HudController`, `ShopController`.
 > Le nouveau flux d'étage (plus de bouton « Continuer ») est décrit dans
 > `docs/specs/sons-animations.md` §2 ; les sons des boîtes dans le même fichier, §5.
+>
+> **Mise à jour v3 (`docs/specs/v3.md`) — ce qui change ici :**
+> - prix des boîtes **250** (au lieu de 100) et revente **25 / 40 / 60 / 100 / 150 / 200**
+>   (§5.1, §5.2 corrigés ; l'équilibrage du §6 est remplacé par `v3.md` §6) ;
+> - le panneau à trois onglets devient **4 panneaux séparés** ouverts depuis une colonne de
+>   boutons à gauche, et la règle d'accès du §4.1 est remplacée (`v3.md` §4) ;
+> - la révélation du **Secret** devient une cinématique de 5,4 s (`v3.md` §8.3) ;
+> - les identifiants inconnus sont **conservés** dans la sauvegarde (§4.6, correctif B6) ;
+> - le personnage est un **cheval** : positions et échelles des points d'accroche dans `v3.md` §7.
+> Dans les exemples et critères ci-dessous, lire « 250 » partout où il est écrit « Ouvrir — 100 ».
 
 ---
 
@@ -57,6 +67,11 @@ entre encaisser maintenant ou risquer un étage de plus.
 ## 4. Règles
 
 ### 4.1 Quand peut-on ouvrir le panneau ?
+> **Remplacé en v3** par `docs/specs/v3.md` §4.2 : les panneaux s'ouvrent depuis la colonne de
+> boutons dès l'écran titre, pendant le choix d'un coffre à **tous** les étages, et sur les
+> écrans Perdu / Encaissé ; jamais pendant le suspense, la révélation ni une transition. Le
+> bouton « Boutique » du HUD disparaît. Le texte ci-dessous décrit la règle v2, pour mémoire.
+
 Inchangé par rapport à la v1, adapté au nouveau flux : le bouton **« Boutique »** du HUD est
 visible seulement dans ces trois situations.
 
@@ -152,7 +167,8 @@ ou si la somme des poids n'est pas 1000, afficher une erreur dans la console
 | Objet tiré nouveau | Badge « Nouveau ! » |
 | Tenter de vendre le dernier exemplaire | Impossible : bouton « Vendre » absent ou grisé |
 | Collection d'une boîte complète | La boîte reste ouvrable ; sa carte affiche « Collection complète ! Chaque ouverture donnera un doublon. » |
-| Identifiant inconnu dans la sauvegarde | Ignoré (objet supprimé, faute de frappe) ; s'il était équipé, retour à l'objet gratuit de la catégorie / de l'emplacement |
+| Identifiant inconnu dans la sauvegarde | Ignoré pour le jeu (non affiché, non compté, non vendable) **mais conservé tel quel dans la sauvegarde** à chaque écriture (v3, correctif B6) ; s'il était équipé, retour à l'objet gratuit de la catégorie / de l'emplacement |
+| Catalogue introuvable au chargement | Aucune migration, aucune écriture, aucune suppression de clé ; on réessaie au prochain accès (v3, correctif B5) |
 | Nombre d'exemplaires illisible, nul ou négatif dans la sauvegarde | Ignoré (l'objet compte comme non obtenu) |
 | Accessoire sauvegardé sur le mauvais emplacement | Ignoré, retour à « Aucun » pour cet emplacement |
 | Première partie (aucune sauvegarde) | Skin `couleur_bleu`, les 4 emplacements à « Aucun », collection vide |
@@ -166,12 +182,12 @@ ou si la somme des poids n'est pas 1000, afficher une erreur dans la console
 
 | Identifiant | Nom affiché | Couleur | Taux de drop | Poids (sur 1000) | Objets par boîte | Chance par objet | Valeur de vente d'un doublon |
 |---|---|---|---|---|---|---|---|
-| `commun` | Commun | gris `#9AA0B0` | **50 %** | 500 | 5 | 10 % | **10** pièces |
-| `peu_commun` | Peu commun | vert `#4CC26A` | **25 %** | 250 | 4 | 6,25 % | **15** |
-| `rare` | Rare | bleu `#3B8BEB` | **14 %** | 140 | 3 | 4,67 % | **25** |
-| `super_rare` | Super rare | violet `#A35CE0` | **7 %** | 70 | 2 | 3,5 % | **40** |
-| `legendaire` | Légendaire | orange doré `#FF9F1C` | **3 %** | 30 | 1 | 3 % | **60** |
-| `secret` | Secret | rose magique `#FF4FD8` (+ arc-en-ciel animé à la révélation) | **1 %** | 10 | 1 | 1 % | **80** |
+| `commun` | Commun | gris `#9AA0B0` | **50 %** | 500 | 5 | 10 % | **25** pièces (v2 : 10) |
+| `peu_commun` | Peu commun | vert `#4CC26A` | **25 %** | 250 | 4 | 6,25 % | **40** (v2 : 15) |
+| `rare` | Rare | bleu `#3B8BEB` | **14 %** | 140 | 3 | 4,67 % | **60** (v2 : 25) |
+| `super_rare` | Super rare | violet `#A35CE0` | **7 %** | 70 | 2 | 3,5 % | **100** (v2 : 40) |
+| `legendaire` | Légendaire | orange doré `#FF9F1C` | **3 %** | 30 | 1 | 3 % | **150** (v2 : 60) |
+| `secret` | Secret | rose magique `#FF4FD8` (+ arc-en-ciel animé à la révélation) | **1 %** | 10 | 1 | 1 % | **200** (v2 : 80) |
 
 - Somme des poids : 1000 (= 100 %).
 - « Chance par objet » = taux de la rareté ÷ nombre d'objets de cette rareté dans la boîte. Elle
@@ -186,8 +202,8 @@ ou si la somme des poids n'est pas 1000, afficher une erreur dans la console
 
 | Identifiant | Nom affiché | Prix | Contenu | Image (à produire) |
 |---|---|---|---|---|
-| `boite_skins_1` | Boîte de skins n°1 | **100 pièces** | 16 skins (§5.3) | `boite_skins_1.png` |
-| `boite_accessoires_1` | Boîte d'accessoires n°1 | **100 pièces** | 16 accessoires (§5.4) | `boite_accessoires_1.png` |
+| `boite_skins_1` | Boîte de skins n°1 | **250 pièces** (v3 ; v2 : 100) | 16 skins (§5.3) | `boite_skins_1.png` |
+| `boite_accessoires_1` | Boîte d'accessoires n°1 | **250 pièces** (v3 ; v2 : 100) | 16 accessoires (§5.4) | `boite_accessoires_1.png` |
 
 Chaque objet appartient à **une seule** boîte. Dans l'index, les objets sont numérotés
 n°01 à n°16 dans l'ordre des tableaux ci-dessous (du Commun au Secret).
@@ -396,6 +412,9 @@ Le DA met à jour `art-bible.md` (§4 « Émission », §8 « À éviter ») en 
 
 ## 6. Équilibrage
 
+> **Remplacé en v3** par `docs/specs/v3.md` §6 (boîtes à 250, revente ×2,5, améliorations qui
+> accélèrent les gains). Les calculs ci-dessous (boîte à 100) restent valables comme méthode.
+
 ### 6.1 Hypothèses
 - Gain par étage **inchangé** : `10 × étage` (GDD §5). Le nouveau flux ne change pas les
   chances : encaisser au début de l'étage N, c'est encaisser les étages 1 à N−1, exactement
@@ -443,6 +462,10 @@ Légendaire comme objectif de plusieurs sessions, la boîte complète comme déf
 ---
 
 ## 7. Écrans et flux
+
+> **v3** : §7.1 et §7.2 sont remplacés par `docs/specs/v3.md` §4 (colonne de 4 boutons à gauche,
+> 4 panneaux séparés à gauche, 660 px de large en référence 1920 × 1080). Le contenu des onglets
+> (§7.3 Boutique, §7.4 Inventaire, §7.5 Index) devient le contenu des panneaux du même nom.
 
 ### 7.1 Le bouton « Boutique » du HUD
 Inchangé : texte « Boutique », couleur `#C99A1E`, visible seulement dans les situations du §4.1,
@@ -572,6 +595,11 @@ réserve de 60 éléments réutilisés).
 | Légendaire | — | orange doré, Ø 440, pulse | 16 rayons, 60°/s | 45 (or et orange) | orange, 0,6 | ±10 px, 0,4 s | « LÉGENDAIRE ! » (40), lettres qui sautent une à une | 2,0 s ; la carte monte à 1,3 avant de revenir à 1 | `revelation_legendaire` |
 | Secret | écran noir 0,4 s avec « … » au centre | arc-en-ciel (la teinte fait le tour en 2 s), Ø 480, pulse | 20 rayons de couleurs alternées, 60°/s | 60 multicolores | blanc, 0,8 | ±12 px, 0,5 s | « SECRET !!! » (44), aux couleurs de l'arc-en-ciel | 2,6 s (pause noire comprise) | `revelation_secret` |
 
+> **v3** : la ligne « Secret » est remplacée par la cinématique de `docs/specs/v3.md` §8.3
+> (coupure, battements, fissures, éclat, carte qui tombe en tournant, confettis ; 5,4 s).
+> Correctifs : les panneaux ne se redessinent pas pendant l'ouverture (B1), les boutons de
+> l'écran d'ouverture ne prennent jamais le focus clavier (B2) — `v3.md` §13.
+
 Les halos, rayons et étincelles restent animés (doucement) tant que l'écran de résultat est affiché.
 
 **Passer l'animation** : à partir de **0,5 s** après le clic sur « Ouvrir », un clic n'importe
@@ -661,6 +689,9 @@ Fichiers fabriqués par le sound designer (voir `sons-animations.md` §5.2) :
 - Sauvegarde (`PlayerPrefs.Save()`) après **chaque** ouverture, vente et équipement.
 - On sauvegarde des **identifiants** (jamais des numéros de position), pour pouvoir ajouter
   des objets et des boîtes plus tard sans casser les sauvegardes.
+- **v3 (B6)** : un identifiant inconnu du catalogue présent dans `collection_counts` est
+  recopié tel quel à chaque écriture (jamais effacé), même s'il est ignoré par le jeu.
+- **v3 (B5)** : la migration du §9.2 n'a lieu que si le catalogue est chargé.
 
 ### 9.2 Migration depuis la v1
 Au chargement, si la clé `collection_counts` **n'existe pas** (`PlayerPrefs.HasKey`) :
@@ -674,6 +705,10 @@ et les 5 clés `shop_equipped_*`.
 ---
 
 ## 10. Critères d'acceptation
+
+> **v3** : les critères 1 à 3 (accès) sont remplacés par `docs/specs/v3.md` §19 (critères 1 à 7).
+> Dans les autres, lire les prix et reventes v3 : boîte 250, revente 25 / 40 / 60 / 100 / 150 /
+> 200 (ex. critère 7 : avec 240 pièces, « Il te manque 10 pièces » ; critère 18 : « +150 »).
 
 **Accès et panneau**
 1. Au début de l'étage 1 (avant tout choix), sur l'écran Perdu et sur l'écran Encaissé, le

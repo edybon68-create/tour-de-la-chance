@@ -12,7 +12,8 @@ pièces à temps… ou risque tout pour aller plus haut.
 |---|---|
 | Genre | Jeu de hasard « quitte ou double » (push-your-luck) |
 | Vue | 3D, caméra fixe en 3/4 au-dessus du personnage |
-| Style visuel | Low-poly coloré, ambiance fête foraine / casino magique |
+| Personnage | Un **cheval** de jouet, style cavalier de jeu d'échecs (v3 ; avant : une capsule) |
+| Style visuel | Low-poly coloré, ambiance fête foraine magique ; de jour au pied de la tour, la nuit tombe en montant |
 | Moteur | Unity 6.3 LTS, rendu URP |
 | Plateforme | Mac / PC (desktop) |
 | Joueurs | 1 joueur, hors ligne |
@@ -30,7 +31,10 @@ pièces à temps… ou risque tout pour aller plus haut.
                          │                        │                     │
               Montée AUTOMATIQUE                  │                     │
               vers l'étage N+1 ──> (boucle)       │                     │
-                                                  └──> Boutique / Rejouer <┘
+                                                  └──────> Rejouer <──────┘
+
+ Colonne de boutons à gauche, toujours visible : Boutique · Inventaire · Index · Améliorations
+ (ouvrables à tous les moments calmes, jamais pendant qu'une épreuve se joue, voir §6)
 ```
 **Nouveau flux (v2)** : après une épreuve gagnée, on monte **directement** à l'étage suivant
 (transition « on monte »). Pendant le choix du coffre suivant, un bouton **« Encaisser X »**
@@ -39,25 +43,37 @@ la cagnotte à l'abri. À l'étage 1, rien à encaisser (bouton caché). Coffres
 bloqués pendant la transition et 0,5 s après, pour éviter les clics accidentels.
 Détails : `docs/specs/sons-animations.md` §2.1 et §3.11.
 
-**Le décor change avec l'altitude** (pur affichage) : étages 1-3 sous les nuages, 4-6 dans
-les nuages, 7-9 au-dessus des nuages, 10 et plus dans les étoiles. Détails :
-`docs/specs/sons-animations.md` §3.14.
+**Le décor change avec l'altitude** (pur affichage) — **v3 : on commence de jour** : étages
+1-3 en plein jour (ciel bleu clair), 4-6 dans les nuages au coucher du soleil, 7-9 au-dessus
+des nuages au crépuscule, 10 et plus dans les étoiles. Détails : `docs/specs/v3.md` §9
+(remplace le tableau de `docs/specs/sons-animations.md` §3.14).
+
+**« Rejouer »** après un piège à l'étage 1 : pas de redescente (on est déjà en bas) mais un
+« remélange sur place » des coffres (`docs/specs/v3.md` §12). Chaque montée affiche une phrase
+drôle tirée au hasard, chaque piège aussi (`docs/specs/v3.md` §11).
 
 ## 4. Les épreuves (une par étage, tirée au hasard)
 | Épreuve | Principe | Chance de gagner |
 |---|---|---|
-| **Les 3 coffres** | Choisir 1 coffre sur 3 ; un seul est piégé | 66 % |
+| **Les 3 coffres** | Choisir 1 coffre sur 3 ; un seul est piégé (v3 : parfois 4 ou 5 coffres avec l'amélioration « Coffre en plus », toujours un seul piégé) | 66 % (jusqu'à 77,5 % en moyenne au maximum des améliorations) |
 | **Le dé** | Lancer un dé, il faut faire 3 ou plus | 66 % |
 | **La roue** | Faire tourner une roue à secteurs (gain / perte / bonus) | ~60 % |
 | **Pile ou face** | Une pièce géante, on choisit un côté | 50 % (gain doublé) |
 
 Plus on monte, plus les épreuves risquées apparaissent souvent.
 
-## 5. L'économie (première version, à équilibrer)
-- Gain de l'étage N = `10 × N` pièces (étage 1 = 10, étage 5 = 50…).
+## 5. L'économie (v3, détails et calculs : `docs/specs/v3.md` §5 et §6)
+- Gain de l'étage N = `arrondi(10 × N × Bourse × rareté des coffres)` pièces. Sans
+  amélioration : `10 × N` (étage 1 = 10, étage 5 = 50…). Le gain est figé quand l'étage est
+  préparé et affiché sur l'étiquette d'étage (« Trésor : +54 »).
+- **Rareté des coffres** (même rareté pour tous les coffres d'un étage, tirée et affichée avant
+  le choix) : Bois ×1, Bronze ×1,5, Argent ×2, Or ×3, Diamant ×5.
 - **Cagnotte** : la somme des gains de la partie en cours, perdue si on échoue.
 - **Porte-monnaie** : les pièces encaissées, gardées pour toujours (sauvegarde).
-- **Paliers de sécurité** : tous les 5 étages, une partie de la cagnotte est mise à l'abri.
+- **Paliers de sécurité** : tous les 5 étages, une partie de la cagnotte est mise à l'abri
+  (toujours prévu, pas encore fait).
+- Repères : au départ ~15 pièces par partie (~41 par minute) ; toutes améliorations au
+  maximum ~143 par partie (~293 par minute). Tout améliorer : ~3 h de jeu (26 300 pièces).
 
 ## 6. Le shop : boîtes à surprises (cosmétiques uniquement)
 Aucun objet ne change les chances de gagner : c'est purement esthétique.
@@ -66,31 +82,44 @@ Détails complets (règles, catalogue, écrans, animation, sauvegarde, critères
 `docs/specs/boites.md` (la v1 à achat direct, `docs/specs/shop.md`, est remplacée).
 
 **Version 2** : on ouvre des **boîtes** contre des pièces du porte-monnaie ; chaque boîte
-donne **un** cosmétique tiré au hasard selon sa **rareté**. Un panneau latéral à trois
-onglets : **Boutique** (les boîtes, leur prix, les taux affichés), **Inventaire** (équiper,
-vendre les doublons), **Index** (la collection : non obtenus en silhouette, Secrets en
-« ??? »). Ouvrable au début de l'étage 1 et sur les écrans Perdu / Encaissé, jamais pendant
-une partie en cours.
+donne **un** cosmétique tiré au hasard selon sa **rareté**.
+
+**Version 3 : quatre panneaux séparés** (`docs/specs/v3.md` §4), chacun ouvert par son bouton
+dans une **colonne toujours visible sur le bord gauche** : **Boutique** (les boîtes, leur prix,
+les taux affichés), **Inventaire** (équiper, vendre les doublons), **Index** (la collection :
+non obtenus en silhouette, Secrets en « ??? ») et **Améliorations** (§6 ter).
+**Quand peut-on les ouvrir ?** Dès l'écran titre, pendant le choix d'un coffre à **n'importe
+quel étage**, et sur les écrans Perdu / Encaissé. **Jamais pendant qu'une épreuve se joue**
+(suspense, ouverture, révélation), ni pendant une transition (montée, redescente, remélange,
+fondu du titre, verrou anti-clic). Pas de triche possible : le piège est déjà tiré, rien ne le
+montre ni ne le change, on ne paie qu'avec le porte-monnaie (jamais la cagnotte), et une
+amélioration achetée ne s'applique qu'à l'étage suivant.
 
 | Boîte | Prix | Contenu |
 |---|---|---|
-| Boîte de skins n°1 | 100 pièces | 16 skins (couleurs, motifs, matières) |
-| Boîte d'accessoires n°1 | 100 pièces | 16 accessoires sur 4 emplacements : Tête, Visage, Cou, Dos (un accessoire par emplacement) |
+| Boîte de skins n°1 | **250 pièces** (v3 ; 100 en v2) | 16 skins (couleurs, motifs, matières) |
+| Boîte d'accessoires n°1 | **250 pièces** | 16 accessoires sur 4 emplacements : Tête, Visage, Cou, Dos (un accessoire par emplacement) |
 
-| Rareté | Taux de drop | Objets par boîte | Revente d'un doublon |
+| Rareté | Taux de drop | Objets par boîte | Revente d'un doublon (v3) |
 |---|---|---|---|
-| Commun | 50 % | 5 | 10 |
-| Peu commun | 25 % | 4 | 15 |
-| Rare | 14 % | 3 | 25 |
-| Super rare | 7 % | 2 | 40 |
-| Légendaire | 3 % | 1 | 60 |
-| Secret | 1 % | 1 | 80 |
+| Commun | 50 % | 5 | 25 |
+| Peu commun | 25 % | 4 | 40 |
+| Rare | 14 % | 3 | 60 |
+| Super rare | 7 % | 2 | 100 |
+| Légendaire | 3 % | 1 | 150 |
+| Secret | 1 % | 1 | 200 |
 
 Les 5 couleurs et 4 chapeaux de la v1 sont gardés (même identifiant) et rangés dans les
 boîtes avec une rareté ; ceux déjà achetés restent possédés.
 
-Repère d'équilibrage (~15 pièces par partie, ~40 pièces par minute) : première boîte en
-~2,5 min, le Légendaire d'une boîte en ~1 h 15 en moyenne, une boîte complète en ~4 h.
+Repère d'équilibrage v3 (`docs/specs/v3.md` §6.5) : première boîte en ~6 min au départ ; le
+Légendaire d'une boîte en ~3 h sans amélioration, ~1 h à mi-parcours, ~25 min au maximum ;
+améliorations + 2 boîtes complètes en 6 à 7 h de jeu.
+
+**Secret** : son obtention déclenche une vraie cinématique (coupure noire, battements de cœur,
+fissures, l'écran qui vole en éclats, carte qui tombe en tournant, confettis), 5,4 s, toujours
+passable. Les Légendaires « Arc-en-ciel néon » et « Auréole » sont embellis
+(`docs/specs/v3.md` §8).
 
 **Garde-fous** : taux affichés = taux du code (une seule source), tirage fait et sauvegardé
 avant l'animation, suspense identique quelle que soit la rareté, pas de compte à rebours ni
@@ -103,7 +132,21 @@ toujours inférieure au prix d'une boîte.
 |---|---|---|
 | Dés | Dé doré, dé en cristal | (en boîte) |
 | Effets de victoire | Confettis, feux d'artifice | (en boîte) |
-| Boîtes n°2 | Nouveaux skins et accessoires | 100 |
+| Boîtes n°2 | Nouveaux skins et accessoires | 250 |
+
+## 6 ter. Les améliorations (v3, progression assumée)
+Achetées avec le porte-monnaie, **5 niveaux** chacune, prix croissants, effet à partir du
+prochain étage, affiché en chiffres dans le panneau et sur l'étiquette d'étage du HUD.
+Détails : `docs/specs/v3.md` §5.
+
+| Amélioration | Effet au niveau 1 → 5 | Prix des niveaux 1 à 5 |
+|---|---|---|
+| **Bourse magique** | Gain des trésors ×1,2 → ×2,0 | 150 · 400 · 900 · 1 800 · 3 500 |
+| **Coffres précieux** | Des coffres Bronze / Argent / Or / Diamant apparaissent ; gain moyen ×1,13 → ×2,01 | 200 · 500 · 1 100 · 2 200 · 4 000 |
+| **Coffre en plus** | Parfois 4 (puis 5) coffres, toujours 1 seul piégé ; risque moyen 31 % → 22,5 % | 300 · 750 · 1 500 · 3 000 · 6 000 |
+
+Garde-fous : toujours exactement 1 piège par étage, risque jamais sous 20 %, un piège fait
+toujours perdre toute la cagnotte, chiffres affichés = chiffres du code (une seule source).
 
 ## 6 bis. Sons et animations (game feel)
 Chaque moment de la boucle a son animation et son son : suspense (le coffre tremble, plus
@@ -116,21 +159,29 @@ musique en boucle + une couche de tension qui grandit avec l'étage. Deux bouton
 « Musique » / « Effets » mémorisés.
 
 Règle : le spectacle ne triche jamais — le suspense dure autant pour un trésor que pour un
-piège, et rien d'affiché ou d'entendu ne change les chances.
+piège, et rien d'affiché ou d'entendu ne change les chances. (v3 : les coffres précieux ont un
+suspense un peu plus long et une ouverture plus spectaculaire, **identiques pour un trésor et
+pour un piège** de la même rareté, rareté connue avant le choix.) Les boutons sont « bonbons de
+fête foraine » : biseau, reflet, épaisseur, rebond au survol et enfoncement à l'appui
+(`docs/specs/v3.md` §10).
 La caméra est fixe pendant le jeu ; elle ne bouge que pendant les transitions d'étage.
 
 Détails complets : `docs/specs/sons-animations.md`.
 
 ## 7. Liste des éléments à produire
-**Modèles 3D (Blender, par script)** : la tour et ses étages, le personnage, 3 coffres, le dé,
-la roue, la pièce géante, les chapeaux et les 12 nouveaux accessoires (`docs/specs/boites.md` §5.6).
+**Modèles 3D (Blender, par script)** : la tour et ses étages, le personnage (**cheval**, v3),
+le coffre et ses 4 variantes de rareté (bronze, argent, or, diamant), le dé, la roue, la pièce
+géante, les chapeaux et les 12 nouveaux accessoires (`docs/specs/boites.md` §5.6), plus les
+retouches pour le cheval (`docs/specs/v3.md` §16).
 
 **Images (Gemini)** : concept art général, textures (pierre de la tour, bois des coffres),
-icônes des cosmétiques et des 2 boîtes, images UI de révélation (halo, rayons, étincelle),
-4 fonds de ciel (un par palier d'altitude), logo du jeu.
+icônes des cosmétiques (skins à refaire avec le cheval) et des 2 boîtes, 4 fonds de ciel
+(jour, coucher de soleil, crépuscule, nuit étoilée), icônes des 4 panneaux, des 3
+améliorations et des 5 coffres de rareté, logo du jeu (`docs/specs/v3.md` §15).
 
 **Code (Unity C#)** : gestion de partie (nouveau flux d'étage), épreuves, économie,
-sauvegarde, boîtes / inventaire / index, décor par altitude, interface.
+améliorations, sauvegarde, boîtes / inventaire / index, 4 panneaux, décor par altitude,
+interface.
 
 ## 8. Étapes de développement (jalons)
 1. **Prototype gris** : des cubes, une seule épreuve (les 3 coffres), encaisser / continuer.
@@ -140,9 +191,22 @@ sauvegarde, boîtes / inventaire / index, décor par altitude, interface.
 5. **Équipe d'agents** : sous-agents spécialisés pour accélérer la suite.
 6. **Version 2** : nouveau flux d'étage (montée automatique + « Encaisser X »), décor par
    altitude, boîtes à surprises avec raretés, inventaire et index.
+7. **Version 3** (`docs/specs/v3.md`) : correctifs, 4 panneaux et colonne de boutons, boutons
+   stylés, boîtes à 250, améliorations, décor de jour, textes aléatoires, cheval, Légendaires
+   embellis et cinématique Secret.
 
-## 9. Règle d'or
+## 9. Règle d'or (mise à jour v3)
 Le jeu reste un jeu : **aucun achat en argent réel**, aucune pièce achetable.
 Les pièces se gagnent uniquement en jouant (et en revendant ses doublons). Les boîtes ne
 s'ouvrent qu'avec ces pièces virtuelles, leurs taux sont affichés exactement comme dans le
-code, et les cosmétiques ne changent jamais les chances.
+code.
+- Les **cosmétiques** ne changent **jamais** les chances, ni les gains, ni le piège.
+- Les **améliorations**, elles, changent le jeu : c'est une **progression assumée**, achetée
+  uniquement avec des pièces gagnées en jeu (jamais d'argent réel). Leur effet est affiché
+  clairement, en chiffres lus dans les mêmes données que le code. Il reste toujours exactement
+  un coffre piégé par étage (risque jamais sous 20 %), et une amélioration ne change jamais
+  l'étage en cours.
+- **Le spectacle ne triche jamais** : le résultat est tiré avant l'animation, et rien de ce
+  qu'on voit ou entend ne permet de le deviner.
+- Pas de pression : pas de compte à rebours, d'offre limitée, de prix barré ni de pastille
+  d'incitation.

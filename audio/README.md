@@ -4,33 +4,54 @@ Tous les sons du jeu sont **calculés** par des scripts Python : aucun enregistr
 son téléchargé, aucune imitation d'une musique ou d'un jingle existant. Relancer les scripts
 redonne **exactement** les mêmes fichiers (les tirages au hasard utilisent des graines fixes).
 
-Référence : `docs/specs/sons-animations.md` §5 (liste des sons) et §6 (mixage).
+Références : `docs/specs/sons-animations.md` §5 (liste des sons) et §6 (mixage) ;
+`docs/specs/v3.md` §14 (les 15 sons de la v3) et §13 (correctif B3 : deux sons raccourcis).
 
 ## Régénérer tous les sons
 
 Les scripts ont besoin de **numpy**, absent du Python de macOS mais fourni avec Blender :
 
 ```bash
-/Applications/Blender.app/Contents/Resources/4.5/python/bin/python3.11 audio/generer_tout.py
-# ou, équivalent :
-/Applications/Blender.app/Contents/MacOS/Blender --background --python audio/generer_tout.py
+PY=/Applications/Blender.app/Contents/Resources/4.5/python/bin/python3.11
+
+$PY audio/generer_tout.py                               # les 43 sons -> Assets/Audio du projet Unity
+$PY audio/generer_tout.py --sortie audio/exports        # les 43 sons -> audio/exports (Unity intact)
+$PY audio/generer_tout.py --v3 --sortie audio/exports   # seulement les 15 nouveaux + 2 corrigés
+$PY audio/analyse.py audio/exports                      # re-mesurer un dossier sans rien régénérer
+# avec Blender, les options se placent après « -- » :
+/Applications/Blender.app/Contents/MacOS/Blender --background --python audio/generer_tout.py -- --v3 --sortie audio/exports
 ```
 
-Cela écrit les WAV dans `TourDeLaChance-Unity/Assets/Audio/<categorie>/` puis affiche le
-tableau de contrôle (voir « Vérification » plus bas). Chaque script peut aussi être lancé seul.
+Par défaut, les WAV vont dans `TourDeLaChance-Unity/Assets/Audio/<categorie>/`. Avec
+`--sortie <dossier>` (ou la variable d'environnement `TDLC_AUDIO_SORTIE`), ils vont ailleurs,
+**avec la même arborescence** (`<categorie>/<nom>.wav`) : on s'en sert quand on ne doit pas
+toucher au projet Unity (par exemple pendant que quelqu'un joue dans l'éditeur). Pour les
+installer ensuite, il suffit de copier le contenu de `audio/exports/` dans `Assets/Audio/`
+(Unity crée les `.meta` tout seul ; réglages d'import : voir plus bas).
+
+À la fin, le tableau de contrôle s'affiche (voir « Vérification » plus bas). Chaque script
+peut aussi être lancé seul.
+
+**Reproductibilité vérifiée** : régénérer les 43 sons redonne au bit près les 26 fichiers
+déjà présents dans Unity qui n'ont pas changé (les révélations comprises, voir
+`_consomme_comme_boite_ouverture_v2` dans `sons_boite.py`), et le mode `--v3` produit
+exactement les mêmes fichiers que le mode complet.
 
 ## Les fichiers de ce dossier
 
 | Script | Rôle |
 |---|---|
-| `synth.py` | La boîte à outils commune : oscillateurs (sinus, carré, triangle, dents de scie, bruit), enveloppes (ADSR, percussive), glissandos, vibrato, filtres (passe-bas/haut/bande, passe-bas « qui s'ouvre »), timbres (boîte à musique, harpe, glockenspiel, clochette, pièce, orgue, cuivre), réverbération, fondus, normalisation, écriture WAV. |
+| `synth.py` | La boîte à outils commune : oscillateurs (sinus, carré, triangle, dents de scie, bruit), enveloppes (ADSR, percussive), glissandos, vibrato, filtres (passe-bas/haut/bande, passe-bas « qui s'ouvre »), timbres (boîte à musique, harpe, glockenspiel, clochette, pièce, orgue, cuivre), réverbération, fondus, normalisation, **limiteur doux**, mesures de volume (ressenti, « à l'oreille »), écriture WAV, choix du dossier de sortie. |
 | `sons_ui.py` | Les 7 sons `ui_*` + `vente`. |
 | `sons_coffre.py` | Les 4 sons `coffre_*`. |
 | `sons_resultat_pieces.py` | Les 3 sons `resultat_*` et les 3 sons `pieces_*`. |
 | `sons_boite.py` | Les sons des boîtes à tirage aléatoire (secouer, ouvrir, 6 révélations). |
+| `sons_v3.py` | v3 : `amelioration_achat`, `amelioration_max`, `record` (ui) et les 7 nouveaux sons de coffres. |
+| `sons_secret.py` | v3 : les 5 sons de la cinématique du Secret (`secret_*`, catégorie boite). |
 | `musique.py` | Les 2 musiques en boucle. |
 | `analyse.py` | Le contrôle par la mesure (on ne peut pas écouter, alors on mesure). |
-| `generer_tout.py` | Lance tout, puis l'analyse. |
+| `generer_tout.py` | Lance tout (ou seulement la v3 avec `--v3`), dans le dossier choisi (`--sortie`), puis l'analyse. |
+| `exports/` | Sons en attente d'être copiés dans `Assets/Audio/` (même arborescence). |
 
 ## Règles appliquées à tous les sons
 
@@ -48,18 +69,53 @@ tableau de contrôle (voir « Vérification » plus bas). Chaque script peut aus
     l'échelle monte ainsi vraiment jusqu'à `legendaire` (−12,4) et `secret` (−11,3).
     **Conséquence pour le code : jouer toutes les révélations au même volume** ; la
     progression est déjà dans les fichiers.
+- **Volume « à l'oreille » (v3)** : le volume ressenti ci-dessus est un RMS brut ; il
+  surestime les sons très graves (battement de cœur) et sous-estime les sons très aigus
+  (crépitements, éclats de verre), que l'oreille entend plus fort. Pour les sons v3, on
+  vise donc une valeur **pondérée K** (la pondération de la norme ITU-R BS.1770, celle des
+  mesures LUFS) : `synth.volume_pondere`, colonne « oreille » de l'analyse. Pour les sons
+  sans grave ni aigu extrêmes, les deux mesures sont proches (à 1 dB près), donc les sons
+  v3 restent cohérents avec les anciens.
+- **Limiteur doux (v3)** : un son fait de clics très pointus atteint -1 dBFS en paraissant
+  minuscule. `finalise(..., cible_oreille=...)` rabote alors ses pointes (au plus 9 dB) avec
+  `synth.limiteur` (qui baisse le volume 1,5 ms avant chaque pointe puis le relâche en
+  40 ms, sans écrêter l'onde) avant de renormaliser à -1 dBFS. Utilisé par les crépitements,
+  éclats de verre, fissures, bulles. À l'inverse, un son trop fort est simplement baissé
+  (pic sous -1 dBFS : `coffres_precieux`, `secret_coupure`, `amelioration_max`,
+  `coffre_eclat_argent`, `coffres_remelange`).
 - **Musiques** : pas de fondu (il ferait un trou de volume à chaque tour de boucle). Le
   raccord est assuré autrement, voir `musique_ambiance`.
 
 ## Volumes de lecture conseillés (`AudioSource.volume`)
 
-Pour les 19 sons de la spec : voir le tableau du §6.1 de la spec. Pour les nouveaux sons :
+Pour les 19 sons de la spec : voir le tableau du §6.1 de la spec. Pour les sons des boîtes (lot 2) :
 
 | Sons | Volume conseillé |
 |---|---|
 | `boite_secoue`, `boite_ouverture` | 0,7 (comme les coffres) |
 | `revelation_*` (les six) | 0,9 (comme les résultats ; tous au même volume) |
 | `vente` | 0,6 |
+
+Sons v3 (spec `v3.md` §14, valeurs reprises telles quelles : les fichiers sont déjà
+équilibrés entre eux, ces volumes ajoutent la hiérarchie voulue par le game-designer) :
+
+| Sons | Volume conseillé |
+|---|---|
+| `amelioration_achat` | 0,7 |
+| `amelioration_max` | 0,8 |
+| `record` | 0,7 |
+| `coffres_precieux`, `coffre_en_plus` | 0,5 |
+| `coffre_eclat_bronze` / `argent` / `or` / `diamant` | 0,6 / 0,65 / 0,7 / 0,75 |
+| `coffres_remelange` | 0,6 |
+| `secret_coupure`, `secret_battement`, `secret_fissure` | 0,8 |
+| `secret_eclat` | 0,9 |
+| `secret_confettis` | 0,6 |
+
+Atténuation de la musique (*ducking*, spec §14) : `secret_*`, `coffre_eclat_or` et
+`coffre_eclat_diamant` déclenchent la même atténuation que `resultat_*` ; pendant
+`secret_coupure`, la musique descend à **0**. `coffres_precieux` contient seulement des
+aigus : le code peut monter sa hauteur selon le rang (`AudioSource.pitch` 1,0 / 1,06 /
+1,12 / 1,19 par exemple, soit 0 à 3 demi-tons) sans qu'il devienne criard.
 
 Réglages d'import Unity (spec §5.1) : effets en *Decompress On Load* ; musiques en
 *Streaming* + *Load In Background*. Sons « variés » (hauteur 0,95–1,05 au hasard) :
@@ -80,7 +136,10 @@ Réglages d'import Unity (spec §5.1) : effets en *Decompress On Load* ; musique
 | `ui_nouvelle_partie` | 0,5 s | « Rejouer » : on redescend, sans tristesse. | Harpe plus douce (moins d'harmoniques), une octave de fa majeur vers le bas en 0,3 s. |
 | `ui_boutique_ouvre` | 0,3 s | Ouverture du shop : clochette d'entrée. | Deux notes de clochette sol5 → do6 (sinus + harmonique ×3). |
 | `ui_boutique_ferme` | 0,25 s | Fermeture du shop : la même, à l'envers. | do6 → sol5. |
-| `vente` | 0,5 s | Vente d'un doublon (boîtes) : pièces qui tombent dans la bourse. | 6 « ting » de pièce en cascade accélérée, de plus en plus graves et doux, puis un « pouf » de tissu (bruit passe-bas 600 Hz + petit sinus 160 → 90 Hz). Différent de `pieces_achat` (pas de clochette) : on *reçoit* des pièces. |
+| `vente` | 0,4 s | Vente d'un doublon (boîtes) : pièces qui tombent dans la bourse. | 6 « ting » de pièce en cascade accélérée (en 0,15 s), de plus en plus graves et doux, puis un « pouf » de tissu à 0,18 s (bruit passe-bas 600 Hz + petit sinus 160 → 90 Hz). Différent de `pieces_achat` (pas de clochette) : on *reçoit* des pièces. *v3, correctif B3 : 0,5 → 0,4 s, tout resserré, même volume « à l'oreille » (-14,5).* |
+| `amelioration_achat` | 0,6 s | Achat d'un niveau d'amélioration (1 à 4) : « tu deviens plus fort ». | « Ding-ding-ding » montant la5-do6-fa6 (80 ms d'écart, crescendo), clochette (sinus + ×4) doublée d'un glockenspiel discret ; puis une étincelle : sinus qui file de 2 500 à 5 200 Hz + 5 « tin » ; réverb légère. |
+| `amelioration_max` | 1,2 s | Achat du niveau 5 : le triomphe de l'amélioration. | La même montée de 3 notes, puis fanfare d'orgue de barbarie « ta-ta-taaa » si♭ – do – fa (le fa tenu 0,55 s), glockenspiel fa6-la6-do7 et 14 étincelles. Même famille que `resultat_encaisse` (l'orgue de manège) mais avec la montée en tête : on reconnaît « amélioration ». |
+| `record` | 1,0 s | Bannière « Nouveau record ! » : fierté, « Ta-da ! ». | Trompette synthétique (`cuivre`) : do5 bref (« ta ») puis fa5 tenu avec vibrato (« daaa »), harmonisé par trois cuivres plus doux (do5, la4, fa3) ; cymbale légère (bruit passe-haut 6 kHz), glockenspiel la5-do6-fa6, étincelles. Deux notes seulement : différent de l'appel en 3 notes du légendaire. |
 
 ### Coffres (`coffre/`)
 
@@ -90,6 +149,17 @@ Réglages d'import Unity (spec §5.1) : effets en *Decompress On Load* ; musique
 | `coffre_tremble` | 1,0 s | Suspense : le coffre claque, le cœur bat. À couper à l'ouverture. | 12 cliquetis de bois par seconde (passe-bande 800 Hz) de plus en plus forts, chacun doublé d'un petit « toc » grave ; dessous, un sinus qui monte de 110 à 220 Hz (la tension). Il continue jusqu'au bout (le code le coupe). |
 | `coffre_ouvre` | 0,35 s | Le couvercle s'ouvre d'un coup. | Grincement 0,15 s (triangle 400 → 700 Hz, vibrato rapide 38 Hz) puis « boum » sourd (sinus 135 → 105 Hz, chute 0,15 s) + choc de bruit passe-bas. |
 | `coffre_ferme` | 0,2 s | Les couvercles retombent (shop). | « Boum » seul : sinus 140 → 90 Hz + bruit passe-bas 700 Hz. |
+| `coffres_precieux` | 0,5 s | Un étage à coffres précieux arrive : « ooh, c'est joli ». | 8 clochettes aiguës (fa6 à fa7, notes de fa majeur) en pluie de plus en plus légère sur 0,3 s + léger souffle aigu, réverb. Aucun grave : on peut le transposer selon le rang. Baissé à -5,5 dBFS de pic (sinon trop présent pour un son d'annonce). |
+| `coffre_en_plus` | 0,3 s | Un 4e / 5e coffre apparaît : « pop ! » de bulle magique. | Bulle : sinus qui **monte** de 350 à 1 400 Hz en 70 ms (c'est ce qui fait « bulle ») + claquement humide (bruit passe-bande 2,5 kHz, 8 ms) ; puis deux clochettes fa6 et do7 et 3 étincelles. |
+| `coffre_eclat_bronze` | 0,4 s | Ouverture d'un coffre de bronze : métal chaud. | Petite cloche la5 (880 Hz) aux partiels de cloche ×2 / ×2,92 / ×4,1 + un peu de corps à l'octave basse, adoucie par un passe-bas 4 kHz (c'est la douceur qui la rend « chaude »). Le plus discret des éclats. |
+| `coffre_eclat_argent` | 0,6 s | Coffre d'argent : clair, net. | Carillon de verre pur 2 notes do6 → fa6 (90 ms d'écart, partiels ×2 et ×4,16) + souffle aigu dont le filtre s'ouvre de 3 à 9 kHz. |
+| `coffre_eclat_or` | 0,8 s | Coffre d'or : riche, éclatant. | Accord de harpe fa majeur égrené de bas en haut en 0,1 s (fa4 → do6), glockenspiel fa6 au sommet, 12 étincelles, réverb. |
+| `coffre_eclat_diamant` | 1,1 s | Coffre de diamant : le cristal chante, le plus « wow ». | Glissando de 10 verres de cristal en 0,33 s (pentatonique de fa, fa5 → fa7), puis éclat : accord de verre fa6-la6-do7, bouffée de bruit très aigu (> 7 kHz), gerbe de 25 étincelles ; enfin un verre qui « chante » (fa6 tenu, vibrato lent 5 Hz) ; réverb brillante 1 s. |
+| `coffres_remelange` | 0,5 s | Remélange de l'étage 1 : on rebat les cartes. | Trois couvercles qui claquent à 55 ms d'écart, du grave à l'aigu (sinus 150 → 100, 170 → 115, 190 → 130 Hz + choc de bruit étouffé), puis deux « pouf » de magicien à 0,2 et 0,32 s (souffle dont le filtre s'ouvre puis se ferme + petit sinus 320 → 180 Hz). |
+
+**Échelle des éclats** (volume « à l'oreille ») : bronze -17 < argent -15 < or -13,5 <
+diamant -12,5, en plus des volumes de lecture 0,6 → 0,75. Durée, hauteur, nombre de notes
+et d'étincelles montent aussi, comme pour les révélations.
 
 ### Résultats (`resultat/`)
 
@@ -112,7 +182,7 @@ Réglages d'import Unity (spec §5.1) : effets en *Decompress On Load* ; musique
 | Son | Durée | Rôle | Fabrication |
 |---|---|---|---|
 | `boite_secoue` | 1,0 s | La boîte tremble avant l'ouverture : suspense. | Secousses par paires (comme une boîte qu'on agite) qui accélèrent ; à chaque secousse, la paroi en bois cogne (passe-bande 450–600 Hz + « toc » sinus) et 2 ou 3 objets cliquettent dedans (bruit passe-bande 2,5–4,5 kHz, au hasard) ; un souffle qui s'éclaircit (400 → 2 200 Hz) monte dessous. |
-| `boite_ouverture` | 0,6 s | Le couvercle saute. | « Pop » feutré (sinus 420 → 110 Hz en 80 ms + bruit sourd), puis souffle magique dont le filtre monte de 900 à 7 000 Hz, trois clochettes do6-fa6-la6 et des étincelles. |
+| `boite_ouverture` | 0,3 s | Le couvercle saute. | « Pop » feutré (sinus 420 → 110 Hz en 70 ms + bruit sourd), puis souffle magique de 0,24 s dont le filtre monte de 900 à 7 000 Hz, trois clochettes do6-fa6-la6 à 50 ms d'écart et 7 étincelles. *v3, correctif B3 : 0,6 → 0,3 s, même recette resserrée, s'éteint d'elle-même (-46 dB sous le pic juste avant le fondu de 5 ms), même volume « à l'oreille » qu'avant (-16,5).* |
 | `revelation_commun` | 0,5 s | Objet commun. | Un seul « ding » de clochette (do6). Simple et propre. |
 | `revelation_peu_commun` | 0,8 s | Objet peu commun. | Deux notes de glockenspiel qui montent (la5 → do6) + 3 étincelles. |
 | `revelation_rare` | 1,1 s | Objet rare. | Arpège de 3 notes fa5-la5-do6, glockenspiel doublé d'une harpe à l'octave inférieure, 8 étincelles, réverb plus grande. |
@@ -125,6 +195,22 @@ Réglages d'import Unity (spec §5.1) : effets en *Decompress On Load* ; musique
 la réverb, nouveaux instruments (nappe au super rare, cuivres et timbale au légendaire),
 et volume ressenti (−19 → −12,4 dB). Toutes en fa majeur (la tonalité de la musique),
 sauf le secret, qui sort de la tonalité : c'est ce qui le rend « à part ».
+
+#### La cinématique du Secret (v3, `sons_secret.py`)
+
+Cinq sons qui s'enchaînent bout à bout, chacun calé sur sa phase (spec `v3.md` §8.3) :
+Coupure (R + 0) → Battement (R + 0,5) → Fissures (R + 1,3) → Éclat (R + 2,2) →
+`revelation_secret` (R + 2,4) → Confettis (R + 3,4). Du mystère qui finit en fête, jamais
+de peur : pas de grondement, pas de dissonance ; les notes tenues sont en ré♭ majeur, la
+tonalité « à part » de `revelation_secret`, pour que tout sonne comme un seul moment.
+
+| Son | Durée | Rôle | Fabrication |
+|---|---|---|---|
+| `secret_coupure` | 0,6 s | Panne de courant : « vwoum » qui descend, puis le noir. | Petit « clac » d'interrupteur (bruit sourd 30 ms), puis note électrique (dents de scie + octave) qui glisse de 220 à 35 Hz en 0,48 s pendant que son filtre se referme (3 000 → 120 Hz) ; le volume retombe à zéro, les 0,1 dernières secondes sont silencieuses. Cartoon : une seule descente courte. |
+| `secret_battement` | 0,8 s | Deux battements de cœur graves, doux, mystérieux. | Deux « poum-poum » à 0,4 s d'écart (calés sur le point rose qui bat) : sinus 72 → 48 Hz + harmoniques 2 et 3 (pour les petits haut-parleurs) + feutre de bruit grave, second coup plus doux 120 ms après ; dessous, un voile très discret ré♭6 + la♭6 qui ondule. |
+| `secret_fissure` | 0,9 s | Le cristal se fissure, la tension monte. | Craquements (3 à 6 micro-clics de bruit dans un filtre résonant) de plus en plus serrés (6 → 35 par seconde), aigus (1,5 → 7 kHz) et forts, avec de petits éclats de verre ; dessous, note pure 400 → 1 600 Hz et souffle qui s'éclaircit. Finit « au sommet » (fondu de sortie de 50 ms) : l'éclat prend le relais. |
+| `secret_eclat` | 0,6 s | La vitre magique vole en éclats + « whoosh », très brillant, sans violence. | Attaque douce de bruit aigu (aucun grave, pas de « boum »), 40 morceaux de verre qui tintent, très denses au début puis de plus en plus rares, « whoosh » (filtre qui balaie de 7 000 à 1 200 Hz), accord de verre ré♭6-fa6-la♭6 qui fleurit (le pont vers la fanfare). |
+| `secret_confettis` | 1,5 s | Impact : petits pétards de fête et crépitements joyeux. | Trois « pan ! » de cotillon (bruit passe-bande + petit sinus « bouchon » 900 → 400 Hz) à 0 / 0,1 / 0,28 s, chacun suivi d'un sifflet de papier qui monte ; 140 crépitements aigus au hasard qui se raréfient (les confettis retombent) ; 14 étincelles. |
 
 ### Musiques (`musique/`, stéréo)
 
@@ -157,8 +243,9 @@ sauf le secret, qui sort de la tonalité : c'est ce qui le rend « à part ».
 
 ## Vérification (puisqu'on ne peut pas écouter)
 
-`analyse.py` mesure chaque fichier :
-- **durée**, **pic** (dBFS), **RMS** (volume moyen), **volume ressenti** (0,4 s) ;
+`analyse.py` mesure chaque fichier (`$PY audio/analyse.py [dossier]`) :
+- **durée**, **pic** (dBFS), **RMS** (volume moyen), **volume ressenti** (0,4 s) et
+  volume **« à l'oreille »** (le même après pondération K, proche des LUFS) ;
 - **saturation** : nombre d'échantillons au maximum (doit être 0) ;
 - **premier et dernier échantillon** d'un effet : doivent valoir 0 (fondus = pas de clic) ;
 - **raccord de boucle** des musiques : le saut entre le dernier et le premier échantillon doit
