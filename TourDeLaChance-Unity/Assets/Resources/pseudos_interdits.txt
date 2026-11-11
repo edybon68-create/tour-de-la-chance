@@ -1,0 +1,61 @@
+# Mots interdits dans les pseudos du classement (spec v4 §12.7).
+# Un mot par ligne, en minuscules, sans accent. Un pseudo qui CONTIENT un de ces mots est
+# refusé (après « décodage » : 0→o, 1→i, 3→e, 4→a, 5→s, 7→t, @→a, $→s).
+# Les lignes qui commencent par # sont des commentaires. Tu peux ajouter des mots ici.
+# Mots de 3 lettres au moins (les plus courts sont ignorés : trop de faux refus).
+merde
+putain
+salope
+salaud
+connard
+connasse
+encule
+enfoire
+batard
+bordel
+niquer
+ntm
+fdp
+tapette
+pedale
+couille
+chatte
+foutre
+branleur
+abruti
+cretin
+debile
+idiot
+imbecile
+pouffiasse
+grognasse
+negre
+bougnoul
+youpin
+nazi
+hitler
+fuck
+shit
+bitch
+bastard
+asshole
+dick
+cock
+pussy
+cunt
+whore
+slut
+nigger
+nigga
+fag
+porn
+sexe
+sexy
+penis
+vagin
+suicide
+drogue
+cocaine
+weed
+# Retirés exprès car ils se cachent dans des mots innocents : « cul » (recul), « conne »
+# (connexion), « bite » (habiter), « nique » (unique), « pute » (dispute), « kill » (skill).

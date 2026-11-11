@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: aureole
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: aureole
-  displayName: "Aur\xE9ole lumineuse"
+  displayName: "Aur\xE9ole"
   category: 1
   slot: 0
   rarity: legendaire

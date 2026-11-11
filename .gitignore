@@ -36,3 +36,7 @@ crashlytics-build.properties
 # --- Python ---
 __pycache__/
 *.pyc
+
+# Sauvegardes de secours de scène créées par Unity après un plantage
+TourDeLaChance-Unity/Assets/_Recovery/
+TourDeLaChance-Unity/Assets/_Recovery.meta

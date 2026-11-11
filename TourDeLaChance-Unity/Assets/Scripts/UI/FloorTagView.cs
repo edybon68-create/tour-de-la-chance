@@ -5,9 +5,9 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// L'étiquette d'étage du HUD (spec v3 §5.6) : 3 pastilles qui disent ce que vaut
-    /// l'étage : « Trésor : +54 », « Coffres d'or ×3 » (seulement Bronze ou mieux) et
-    /// « 4 coffres · 1 piège ». Pur affichage : tout est lu dans le FloorSetup de l'étage
+    /// L'étiquette d'étage du HUD (spec v3 §5.6, v4 §9.4) : les pastilles qui disent ce que
+    /// vaut l'étage : « Trésor : +54 », « Coffres d'or ×3 » (seulement Bronze ou mieux),
+    /// « 4 coffres · 1 piège » et (v4) « Tenue +12 % » si la tenue donne un bonus. Pur affichage : tout est lu dans le FloorSetup de l'étage
     /// (préparé par le GameManager) et dans le catalogue des raretés : aucun chiffre en dur.
     ///
     /// Visible pendant le choix et la révélation ; cachée pendant la montée, en fin de
@@ -25,8 +25,8 @@ namespace TourDeLaChance
         static readonly Color TrapTint = new Color(0.85f, 0.25f, 0.25f);
 
         VisualElement tagRow;
-        Label gainText, rarityText, riskText;
-        VisualElement rarityPill, rarityIcon, riskIcon;
+        Label gainText, rarityText, riskText, outfitText;
+        VisualElement rarityPill, rarityIcon, riskIcon, outfitPill;
         bool visible;
         Coroutine fade;
 
@@ -38,6 +38,7 @@ namespace TourDeLaChance
             gainText = AddPill(coinIcon, Color.white, out _, out _);
             rarityText = AddPill(null, Color.white, out rarityPill, out rarityIcon);
             riskText = AddPill(trapIcon, TrapTint, out _, out riskIcon);
+            outfitText = AddPill(coinIcon, Color.white, out outfitPill, out _);
             tagRow.style.display = DisplayStyle.None;
             visible = false;
             game.Changed += Refresh;
@@ -71,6 +72,7 @@ namespace TourDeLaChance
         public string GainText => gainText.text;
         public string RarityText => rarityPill.style.display == DisplayStyle.None ? "" : rarityText.text;
         public string RiskText => riskText.text;
+        public string OutfitText => outfitPill.style.display == DisplayStyle.None ? "" : outfitText.text;
         public bool IsVisible => visible;
 
         void Fill()
@@ -86,6 +88,10 @@ namespace TourDeLaChance
             }
             // Toujours affichée, même sans amélioration : on montre la chance (1 piège sur N).
             riskText.text = $"{setup.ChestCount} coffres · 1 piège";
+            // v4 §9.4 : le bonus de tenue FIGÉ à la préparation de l'étage (déjà compris dans
+            // « Trésor : +X »). Équiper un objet pendant le choix ne change pas cette pastille.
+            outfitPill.style.display = setup.OutfitBonusPercent > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            outfitText.text = $"Tenue +{setup.OutfitBonusPercent} %";
             var wood = Upgrades.Rarity(0);
             if (trapIcon == null && wood != null && wood.icon != null) riskIcon.style.backgroundImage = new StyleBackground(wood.icon);
         }

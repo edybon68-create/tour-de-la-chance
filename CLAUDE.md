@@ -20,8 +20,10 @@ Jeu 3D « quitte ou double » sous Unity. L'auteur débute en programmation : **
 - Matériaux : shader URP Lit (`GraphicsSettings.currentRenderPipeline.defaultMaterial`).
 - Sauvegarde : `PlayerPrefs` (pas de cloud).
 - **Règle d'or : pièces virtuelles uniquement, gagnées en jouant, aucun achat en argent réel.**
-  Les **cosmétiques** ne changent jamais les chances. Les **améliorations** (spec v3) sont une
-  progression assumée, achetée avec ces pièces, dont l'effet est affiché clairement.
+  Les **cosmétiques** ne changent jamais les **chances** (piège, rareté des coffres) ; depuis la v4,
+  ils donnent un **bonus de pièces** selon leur rareté (gains seulement, plafonné à +50 %, affiché).
+  Les **améliorations** (specs v3/v4) sont une progression assumée, achetée avec ces pièces, dont
+  l'effet est affiché clairement. Rien ne modifie l'étage en cours.
   Le spectacle ne triche jamais : même suspense et même animation pour un trésor et un piège.
 
 ## Piloter l'éditeur Unity (CLI)

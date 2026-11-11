@@ -103,7 +103,8 @@ namespace TourDeLaChance
             {
                 if (lastPanel == PanelId.None)
                 {
-                    Play(Sfx.UiBoutiqueOuvre);
+                    // v4 §14 : les Réglages (petite fenêtre) s'ouvrent avec un son plus léger.
+                    Play(Sfx.UiBoutiqueOuvre, 1f, game.PanelOpen == PanelId.Reglages ? 1.12f : 0f);
                     if (player != null) player.ReturnToRest(0.3f);
                 }
                 else if (game.PanelOpen == PanelId.None) Play(Sfx.UiBoutiqueFerme);

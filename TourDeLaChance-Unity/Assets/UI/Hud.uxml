@@ -7,12 +7,15 @@
              devant la scène 3D mais derrière le reste de l'interface. -->
         <ui:VisualElement name="veil" class="veil" picking-mode="Ignore" />
         <ui:VisualElement class="top-bar" picking-mode="Ignore">
-            <ui:VisualElement class="top-left" picking-mode="Ignore">
-                <ui:Label name="floor" text="Étage 1" class="floor" picking-mode="Ignore" />
-                <!-- Les deux boutons du son, sous « Étage N » (§6.2). -->
-                <ui:VisualElement class="sound-toggles" picking-mode="Ignore">
-                    <ui:Button name="music-toggle" text="Musique : oui" class="btn btn--sombre sound-toggle" />
-                    <ui:Button name="effects-toggle" text="Effets : oui" class="btn btn--sombre sound-toggle" />
+            <!-- v4 §6.1 : le badge d'étage (écusson coloré selon le palier de décor). Le nombre
+                 est écrit par le code (FloorBadgeView) d'après l'état du jeu. La roue dentée
+                 des Réglages se place à sa droite (Panels.uxml). -->
+            <ui:VisualElement name="badge-holder" class="badge-holder" picking-mode="Ignore">
+                <ui:VisualElement name="badge" class="badge badge--palier1" picking-mode="Ignore">
+                    <ui:VisualElement name="badge-stars" class="badge-stars" picking-mode="Ignore" />
+                    <ui:Label text="ÉTAGE" class="badge-word" picking-mode="Ignore" />
+                    <ui:Label name="floor" text="1" class="badge-number" picking-mode="Ignore" />
+                    <ui:Label name="badge-record" text="RECORD" class="badge-record" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="counters" picking-mode="Ignore">
@@ -39,11 +42,11 @@
         </ui:VisualElement>
         <ui:VisualElement class="actions" picking-mode="Ignore">
             <!-- « Encaisser X » : proposé pendant le choix d'un coffre, à partir de l'étage 2. -->
-            <ui:Button name="cashout" class="btn btn--vert btn-cashout">
+            <ui:Button name="cashout" class="btn btn--vert btn--ombre btn-cashout">
                 <ui:Label name="cashout-text" text="Encaisser 0" class="btn-cashout-text" picking-mode="Ignore" />
                 <ui:VisualElement class="coin" picking-mode="Ignore" />
             </ui:Button>
-            <ui:Button name="replay" text="Rejouer" class="btn btn--violet btn-action" />
+            <ui:Button name="replay" text="Rejouer" class="btn btn--violet btn--ombre btn-action" />
         </ui:VisualElement>
         <!-- Calque des effets : textes « +20 » et pièces volantes (créés par le code). -->
         <ui:VisualElement name="fx-layer" class="fx-layer" picking-mode="Ignore" />

@@ -15,7 +15,7 @@ namespace TourDeLaChance
     {
         const int Size = 64;
 
-        static Texture2D stripes, dots, galaxy, rainbow;
+        static Texture2D stripes, dots, rainbow;
 
         /// Arc-en-ciel v3 (spec v3 §8.1) : 4 × 64 pixels, dégradé vertical qui fait UN TOUR
         /// COMPLET du cercle des couleurs (saturation 0,75, luminosité 1). Il se répète sans
@@ -85,37 +85,7 @@ namespace TourDeLaChance
             return dots;
         }
 
-        /// Galaxie : texture noire avec 7 petits points blancs placés par un générateur à
-        /// GRAINE FIXE (toujours le même ciel). Elle sert de carte d'émission : seules les
-        /// étoiles brillent, le fond garde la couleur du matériau.
-        public static Texture2D GalaxyStars()
-        {
-            if (galaxy == null)
-            {
-                galaxy = NewTexture("Galaxie");
-                var black = new Color(0f, 0f, 0f, 1f);
-                for (int y = 0; y < Size; y++)
-                    for (int x = 0; x < Size; x++)
-                        galaxy.SetPixel(x, y, black);
-
-                var random = new System.Random(2024); // graine fixe = même ciel à chaque lancement
-                for (int s = 0; s < 7; s++)
-                {
-                    float cx = random.Next(4, Size - 4), cy = random.Next(4, Size - 4);
-                    // Une tuile mesure ~0,8 m de large : 1 pixel ≈ 1,2 cm. Rayon 1 à 2,2 px → étoiles de 2 à 5 cm.
-                    float r = 1f + (float)random.NextDouble() * 1.2f;
-                    for (int y = (int)(cy - 4); y <= (int)(cy + 4); y++)
-                        for (int x = (int)(cx - 4); x <= (int)(cx + 4); x++)
-                        {
-                            float d = Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(cx, cy));
-                            float k = Mathf.Clamp01(r - d + 0.5f);
-                            if (k > 0f) galaxy.SetPixel(x, y, Color.Lerp(black, Color.white, Mathf.Max(k, galaxy.GetPixel(x, y).r)));
-                        }
-                }
-                galaxy.Apply(true);
-            }
-            return galaxy;
-        }
+        // (v4 : la Galaxie n'est plus une texture fixe ici, voir GalaxyTexture.)
 
         static Texture2D NewTexture(string name) => new Texture2D(Size, Size, TextureFormat.RGBA32, true)
         {

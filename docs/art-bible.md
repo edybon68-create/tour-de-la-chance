@@ -30,6 +30,16 @@
 >   (aucune image, aucune émission sur les coffres) : §10.3 ;
 > - nouvelles images : `art/prompts/lot3.md`.
 
+>
+> **Mise à jour « lot 4 » (v4, interface)** — l'auteur veut une interface « dans l'esprit des
+> jeux Roblox », sans rien copier de la marque. Nouvelle section **§12 « Interface v4 »** :
+> palette UI et variables USS, police **Fredoka** (OFL), boutons à contour épais et socle,
+> boutons ronds d'icône (colonnes gauche et droite, Paramètres, Fermer), **pop-ups centrées**,
+> onglets, cartes à liseré de rareté (4 px), **barre de défilement stylée**, **badge d'étage**,
+> compteurs, toasts, pop-ups Paramètres et Classement. Elle remplace la réalisation du §11 et le
+> §2.5. Nouvelles images (icône Classement, roue dentée, médailles, icônes de son) :
+> `art/prompts/lot4.md`.
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -136,6 +146,8 @@ sont bonnes** et sont conservées. Ce qui change :
 Panneaux `#2A2A3A` / cartes survolées `#3A3A50`, bouton neutre `#5B5BD6`, bouton « Équiper »
 `#3B7DD8`, bouton « Boutique » `#C99A1E`, rouge d'alerte `#D64545`, contour des textes or
 `#3A2200`. Le fond violet nuit `#1F1730` s'accorde avec ces panneaux bleu-violet : on garde.
+**v4** : la palette de l'interface est remplacée par celle du §12.2 (panneaux `#2E2552`,
+contours `#1F1730`).
 
 ### 2.6 Règles d'usage des couleurs
 1. **Le décor est froid et sourd** (bleu-gris, violet sombre), **les objets de jeu sont chauds**
@@ -776,7 +788,8 @@ pièce géante, tour).
 Les prompts sont écrits dans `art/prompts/<lot>.md` (`lot1.md` : concept, 1res icônes, logo,
 ciel ; `lot2.md` : icônes des boîtes, boîtes, ciels des paliers ; `lot3.md` : skins du cheval,
 ciels du jour à la nuit, coffres de rareté, améliorations, icônes des panneaux, masque de héros
-v3). Le **premier prompt de chaque
+v3 ; `lot4.md` : icône Classement, roue dentée, médailles du podium, icônes Musique et Effets).
+Le **premier prompt de chaque
 conversation Gemini** commence par le **bloc de style commun** ci-dessous, recopié mot pour mot.
 On ne le modifie pas d'un lot à l'autre sans mettre à jour cette section.
 
@@ -982,3 +995,952 @@ passe est réservé au bouton « Jouer » (jamais sur un achat).
 - Les **icônes** de la colonne (64 × 64) sont des images détourées du lot 3, posées sur le fond
   sombre `#2A2A3A` : elles doivent donc rester lisibles sur du sombre (pas d'objet noir, d'où la
   malle en bois clair et l'album coloré).
+
+> **v4** : le §11 reste valable pour l'idée (un bouton = un jouet posé sur son socle), mais sa
+> réalisation est remplacée par le §12.4 (contour épais, socle séparé, police arrondie).
+
+---
+
+## 12. Interface v4 « jouet de fête foraine » (dans l'esprit des jeux Roblox)
+
+> **À quoi sert cette section ?** C'est le guide **directement recopiable en USS** pour refaire
+> toute l'interface en v4. Chaque élément a : sa structure (les éléments UXML imbriqués), ses
+> valeurs exactes et un extrait USS. Les tailles sont en **pixels de référence 1920 × 1080**
+> (comme `HudPanelSettings` : Unity agrandit ou réduit tout seul sur les autres écrans).
+>
+> **Ce qu'on garde** : les icônes détourées Boutique / Inventaire / Index / Améliorations, les
+> couleurs de rareté (§2.7, §10), les familles de boutons (§11.3), le logo, toutes les règles de
+> jeu. **Ce qui change** : la forme des boutons, des panneaux (qui deviennent des **pop-ups
+> centrées**), la police, la barre de défilement, l'étiquette d'étage, les compteurs, et deux
+> nouveaux boutons (**Paramètres** et **Classement**).
+
+### 12.1 L'esprit « Roblox »… sans copier Roblox
+
+Ce qui donne cet air « jeu Roblox » et qu'on **reprend** (ce sont des idées de mise en forme,
+pas des éléments protégés) :
+1. **Un contour sombre épais autour de tout** (boutons, cadres, textes des titres) : c'est LE
+   trait de style. Chez nous, ce contour est le **violet nuit `#1F1730`** (la couleur du ciel de
+   nuit, §2.1), jamais du noir pur.
+2. **Des couleurs franches et saturées** sur les boutons, des fonds de panneaux sombres et calmes.
+3. **Une police ronde et épaisse**, du texte blanc cerclé de sombre.
+4. **Des icônes qui « débordent »** de leur cadre (elles dépassent par le haut) : ça donne du relief.
+5. **Des animations qui rebondissent** (tout grossit un peu trop puis revient).
+
+Ce qu'on **n'utilise jamais** : le logo Roblox ni son carré penché, le nom « Roblox », la
+monnaie hexagonale de Roblox ou tout symbole qui la rappelle, ses polices (Builder Sans,
+Gotham), sa barre du haut grise transparente et ses icônes de menu, de chat ou de sac, ses
+personnages (avatars « blocs »). Notre jeu doit pouvoir être pris pour **un** jeu de ce genre,
+jamais pour un produit de cette marque.
+
+**Ce qui ne va pas sur les captures v3** (`docs/captures/v3_images_jour.png`,
+`v3_panneau_ameliorations_achat.png`, `v3_titre.png`) et que la v4 corrige :
+- le **reflet gris** des boutons de la colonne est dessiné **par-dessus** l'icône et la salit
+  (rectangle gris sur le cadeau, la malle, l'album) → en v4, le reflet est dans la face du
+  bouton, **derrière** l'icône (§12.5) ;
+- le panneau collé à gauche coupe la scène en deux → **pop-up centrée** sur fond assombri (§12.6) ;
+- la **barre de défilement blanche** par défaut de Unity → piste et curseur stylés (§12.9) ;
+- les boutons « Musique : oui / Effets : oui » encombrent le haut → **bouton Paramètres** (§12.5) ;
+- « Étage 12 » est un simple texte → **badge** (§12.10) ;
+- la police fine par défaut manque de caractère → **Fredoka** (§12.3).
+
+### 12.2 Palette de l'interface v4
+
+**Couleurs de structure** (les panneaux restent dans le violet nuit du jeu, un peu plus clairs et
+plus bleus qu'en v3 pour que les contours `#1F1730` se voient) :
+
+| Rôle | Hex | Où |
+|---|---|---|
+| **Encre** (contour universel) | `#1F1730` | tous les contours épais, ombre des textes de titre, contour des textes |
+| Voile derrière une pop-up | `#120D20` à **60 %** → `rgba(18, 13, 32, 0.6)` | fond plein écran assombri |
+| Corps d'une pop-up | `#2E2552` | grand fond des pop-ups |
+| Puits (zone creusée) | `#221A3D` | piste des onglets, tableaux, piste de défilement, intérieur des compteurs |
+| Carte | `#3D3270` | cartes d'objets, de boîtes, d'améliorations, lignes du classement |
+| Carte survolée | `#4A3E85` | survol d'une carte |
+| Filet clair (biseau des cartes) | `#5A4E96` | bord haut des cartes, séparateurs |
+| Face des boutons d'icône | `#3B2F66` | disque intérieur des boutons ronds |
+| Texte principal | `#FFFFFF` | titres, boutons, noms (petites surfaces : autorisé, §2.6) |
+| Texte secondaire | `#D9D2F0` | descriptions, libellés |
+| Texte discret | `#A79FC8` | notes, en-têtes de tableaux, onglet inactif |
+| Or « argent du jeu » | `#FFD54A` (contour `#3A2200`) | montants, cagnotte, sélection, barres de progression (inchangé) |
+| Alerte | `#FF6B6B` | « Il te manque 400 pièces » (plus clair que `#D64545`, lisible sur `#2E2552`) |
+
+**Familles de couleurs des boutons** (celles du §11.3, plus trois nouvelles). Chaque famille a
+4 tons : **face**, **clair** (biseau et survol), **mi** (bas de la face : faux dégradé),
+**sombre** (socle et ombre du texte).
+
+| Famille | Face | Clair | Mi | Sombre | Texte | Utilisée pour |
+|---|---|---|---|---|---|---|
+| Vert « sûr » | `#2E9E5B` | `#4CC27A` | `#278A4F` | `#1E6E3E` | blanc | Encaisser, Ouvrir, Améliorer, Acheter ; en-tête « Améliorations » |
+| Violet neutre | `#5B5BD6` | `#7E7EEA` | `#4E4EC0` | `#3B3BA0` | blanc | Rejouer, OK ; en-tête « Boutique » |
+| Or | `#FFD54A` | `#FFE27A` | `#F0C030` | `#C99A1E` | `#3A2200` | Jouer, onglet actif ; en-tête « Classement » |
+| Bleu | `#3B7DD8` | `#64A0EE` | `#3270C4` | `#2858A0` | blanc | Équiper ; en-tête « Inventaire » |
+| **Turquoise** (nouveau) | `#1E9EB0` | `#45C3D2` | `#1A8A9A` | `#136B78` | blanc | en-tête « Index » |
+| **Ardoise** (remplace « sombre ») | `#4A4470` | `#625C8C` | `#3F3A62` | `#2A2545` | blanc | Vendre, boutons secondaires ; en-tête « Paramètres » |
+| **Rouge « fermer »** (nouveau) | `#D64545` | `#F07070` | `#C03A3A` | `#962A2A` | blanc | **uniquement** la croix de fermeture |
+| Désactivé | `#6E6A84` | `#8A86A0` | `#5E5A74` | `#45425A` | `#C9C5D8` | tout bouton inactif |
+
+Règles :
+- **Un en-tête de pop-up = une famille**, la même que l'anneau de son bouton d'ouverture
+  (§12.5) : l'œil associe le bouton violet à la fenêtre violette.
+- **Rouge « fermer »** : petite surface ronde, toujours au même endroit (coin haut droit). C'est
+  un code universel qu'un enfant reconnaît ; il n'apparaît jamais dans la scène 3D, où le rouge
+  reste réservé au piège `#D91A1A` (§2.6).
+- **Les couleurs de rareté restent réservées** aux liserés, pastilles, halos et noms de rareté
+  (§10.1). Le turquoise `#1E9EB0` est assez loin du bleu Rare `#3B8BEB` et n'est qu'un en-tête.
+- Le texte blanc sur une face colorée a **toujours** un contour de la couleur « sombre » de sa
+  famille : c'est ce qui le rend lisible même sur le turquoise ou le vert clair du survol.
+
+Pour éviter de recopier les couleurs partout, on utilise les **variables USS** (elles s'écrivent
+`--nom` et se lisent avec `var(--nom)` ; elles se transmettent aux éléments enfants) :
+
+```css
+/* Theme.uss — à importer en premier dans chaque écran (ou dans HudTheme.tss). */
+:root {
+    --encre: #1F1730;
+    --voile: rgba(18, 13, 32, 0.6);
+    --corps: #2E2552;
+    --puits: #221A3D;
+    --carte: #3D3270;
+    --carte-survol: #4A3E85;
+    --filet: #5A4E96;
+    --face-icone: #3B2F66;
+    --texte: #FFFFFF;
+    --texte-2: #D9D2F0;
+    --texte-3: #A79FC8;
+    --or: #FFD54A;
+    --or-contour: #3A2200;
+}
+```
+
+### 12.3 Typographie : Fredoka
+
+**Police choisie : Fredoka** (Google Fonts), graisses **SemiBold** (texte courant) et **Bold**
+(titres, boutons, chiffres).
+- Page : <https://fonts.google.com/specimen/Fredoka> → « Get font » → « Download all ». Dans le
+  zip, prendre les fichiers **statiques** du dossier `static/` : `Fredoka-SemiBold.ttf` et
+  `Fredoka-Bold.ttf` (pas le fichier « variable » `Fredoka[wdth,wght].ttf` : Unity ne sait pas
+  choisir une graisse dans un fichier variable).
+- Sources officielles : <https://github.com/google/fonts/tree/main/ofl/fredoka>.
+- **Licence : SIL Open Font License 1.1** (OFL) : utilisation gratuite, y compris dans un jeu
+  distribué, et on a le droit de l'intégrer au jeu. Seules obligations : ne pas vendre la police
+  seule et **garder le texte de la licence** à côté → copier `OFL.txt` du zip dans
+  `Assets/UI/Fonts/OFL.txt`.
+- Pourquoi Fredoka : ronde, épaisse, très lisible pour un enfant, accents français complets
+  (é è ê à ù ç œ « »), et elle ressemble à nos formes « jouet » biseautées. Alternatives
+  (même licence OFL) si on veut plus de caractère : **Lilita One** (une seule graisse, très
+  grasse, bien pour les titres seulement) ou **Baloo 2** (plus étroite).
+
+**Installation dans Unity (une fois)**
+1. Mettre les deux `.ttf` dans `Assets/UI/Fonts/`.
+2. Clic droit sur chaque `.ttf` → *Create → Text → Font Asset* (atlas « SDF », qui garde des
+   bords nets à toutes les tailles). Réglages : *Sampling Point Size* 90, *Padding* **9**
+   (nécessaire pour les contours épais de 3-4 px), *Atlas* 1024 × 1024, *Render Mode*
+   SDFAA, *Atlas Population Mode* **Dynamic** (les lettres sont ajoutées quand le jeu en a
+   besoin). Noms : `Fredoka-SemiBold_SDF.asset`, `Fredoka-Bold_SDF.asset`.
+3. Dans `Fredoka-SemiBold_SDF`, section *Font Weights*, mettre `Fredoka-Bold_SDF` dans la case
+   **Bold** : ainsi tous les `-unity-font-style: bold;` déjà écrits utiliseront la vraie graisse
+   grasse au lieu d'un faux gras « étalé ».
+4. Dans *Fallback Font Assets* de chaque police, ajouter la police utilisée aujourd'hui par le jeu :
+   Fredoka n'a pas forcément les symboles `★ → · ● ×` que le jeu affiche ; la police de secours
+   les dessinera. Vérifier dans le jeu : « ★ Nouveau record ! ★ », « ×1,2 → ×1,4 ».
+
+**Échelle des tailles** (1920 × 1080)
+
+| Style | Taille | Graisse | Couleur | Contour (`-unity-text-outline`) | Ombre (`text-shadow`) |
+|---|---|---|---|---|---|
+| Bannière « Étage 12 » | 88 px | Bold | `#FFD54A` | 4 px `#3A2200` | `0 6px 0 #1F1730` |
+| Titre de pop-up | 52 px | Bold | blanc | 4 px `#1F1730` | `0 4px 0 #1F1730` |
+| Bouton L (Jouer, Encaisser) | 40 px | Bold | blanc / `#3A2200` | 3 px « sombre » de la famille | `0 3px 0` « sombre » |
+| Bouton M (Ouvrir, Équiper…) | 30 px | Bold | idem | 3 px | `0 3px 0` |
+| Bouton S, onglet | 24 px | Bold | idem | 2 px | `0 2px 0` |
+| Titre de carte | 30 px | Bold | blanc | — | `0 2px 0 #1F1730` |
+| Texte courant | 24 px | SemiBold | `#D9D2F0` | — | — |
+| Petit texte, notes | 20 px | SemiBold | `#A79FC8` | — | — |
+| Libellé sous bouton d'icône | 22 px | Bold | blanc | 3 px `#1F1730` | `0 2px 0 #1F1730` |
+| Nom de rareté | 16 px (min.) | Bold | couleur « texte » §2.7 | 2 px `#1F1730` | — |
+| Montant de pièces | 34 px | Bold | blanc / `#FFD54A` | 3 px `#1F1730` | `0 3px 0 #1F1730` |
+
+```css
+/* Theme.uss (suite) */
+:root {
+    -unity-font-definition: url("Fonts/Fredoka-SemiBold_SDF.asset");
+    color: var(--texte-2);
+    font-size: 24px;
+}
+.titre-popup {
+    font-size: 52px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #1F1730;
+    text-shadow: 0 4px 0 #1F1730;
+}
+```
+
+### 12.4 Les boutons v4
+
+**Structure** : un bouton = **deux couches**. Le `Button` lui-même est le **socle** (couleur
+« sombre », contour d'encre) ; à l'intérieur, la **face** colorée, qui contient le reflet et le
+texte. La face est 8 px plus courte que le socle : la bande sombre qu'on voit dessous, c'est
+**l'épaisseur** du jouet. Quand on appuie, la face descend dans le socle.
+
+```xml
+<ui:Button class="bouton bouton--vert bouton--m">
+    <ui:VisualElement class="bouton__face" picking-mode="Ignore">
+        <ui:VisualElement class="bouton__reflet" picking-mode="Ignore" />
+        <ui:Label class="bouton__texte" text="Ouvrir — 250" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:Button>
+```
+(Le `text` du `Button` reste vide : c'est le `Label` qui écrit. `picking-mode="Ignore"` dit aux
+couches décoratives de laisser passer le clic jusqu'au bouton. Le script `ButtonStyler` peut
+fabriquer ces couches automatiquement pour tous les `.bouton`.)
+
+| Partie | Valeur |
+|---|---|
+| Contour (socle) | **4 px** `#1F1730` sur les 4 côtés |
+| Épaisseur visible (socle sous la face) | **8 px** (L : 10 px ; S : 6 px) = `padding-bottom` du socle |
+| Coins | socle L 26 px, M 22 px, S 18 px ; face = coin du socle − 4 px |
+| Faux dégradé de la face | haut : bordure haute **3 px** « clair » ; bas : bordure basse **5 px** « mi » ; au milieu : « face » |
+| Reflet | dans la face, en haut : `top 3px`, `left/right 10px`, hauteur **40 %**, blanc **22 %**, coins 12 px |
+| Hauteurs totales | L **104 px** (min. 300 px de large) ; M **80 px** (min. 240) ; S **60 px** (min. 140) |
+| Marges du texte | 0 28 px (L), 0 22 px (M), 0 16 px (S) |
+
+**États**
+
+| État | Changement | Durée, courbe |
+|---|---|---|
+| Normal | — | — |
+| Survol | socle `scale 1.06` ; face en « clair » ; reflet 32 % | 0,15 s, `ease-out-back` (petit rebond) |
+| Appui | face `translate 0 6px` (elle s'enfonce, l'épaisseur passe de 8 à 2 px) ; socle `scale 0.97` | 0,06 s, `ease-out` |
+| Relâché | retour à l'état survol | 0,18 s, `ease-out-back` |
+| Désactivé | famille « Désactivé », pas de reflet, `opacity 0.8`, pas d'agrandissement | immédiat |
+
+```css
+/* Buttons.uss (v4) */
+.bouton {
+    --face: #5B5BD6; --clair: #7E7EEA; --mi: #4E4EC0; --sombre: #3B3BA0; --ecrit: #FFFFFF;
+    height: 80px;
+    min-width: 240px;
+    margin: 0;
+    padding: 0 0 8px 0;               /* l'épaisseur visible sous la face */
+    border-width: 4px;
+    border-color: #1F1730;            /* le contour d'encre */
+    border-radius: 22px;
+    background-color: var(--sombre);  /* le socle */
+    transition-property: scale;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out-back;
+}
+.bouton__face {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 0 22px;
+    border-radius: 18px;
+    background-color: var(--face);
+    border-top-width: 3px;    border-top-color: var(--clair);
+    border-bottom-width: 5px; border-bottom-color: var(--mi);
+    transition-property: translate, background-color;
+    transition-duration: 0.15s, 0.15s;
+    transition-timing-function: ease-out-back, ease-out;
+}
+.bouton__reflet {
+    position: absolute;
+    top: 3px; left: 10px; right: 10px;
+    height: 40%;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.22);
+}
+.bouton__texte {
+    font-size: 30px;
+    color: var(--ecrit);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: var(--sombre);
+    text-shadow: 0 3px 0 var(--sombre);
+    margin: 0; padding: 0;
+}
+
+.bouton:hover { scale: 1.06 1.06; }
+.bouton:hover .bouton__face { background-color: var(--clair); }
+.bouton:hover .bouton__reflet { background-color: rgba(255, 255, 255, 0.32); }
+
+.bouton:active { scale: 0.97 0.97; transition-duration: 0.06s; transition-timing-function: ease-out; }
+.bouton:active .bouton__face { translate: 0 6px; transition-duration: 0.06s, 0.06s; }
+
+.bouton:disabled {
+    --face: #6E6A84; --clair: #8A86A0; --mi: #5E5A74; --sombre: #45425A; --ecrit: #C9C5D8;
+    opacity: 0.8;
+    scale: 1 1;
+}
+.bouton:disabled .bouton__reflet { display: none; }
+
+/* Tailles */
+.bouton--l { height: 104px; min-width: 300px; padding-bottom: 10px; border-radius: 26px; }
+.bouton--l .bouton__face { border-radius: 22px; padding: 0 28px; }
+.bouton--l .bouton__texte { font-size: 40px; }
+.bouton--s { height: 60px; min-width: 140px; padding-bottom: 6px; border-radius: 18px; }
+.bouton--s .bouton__face { border-radius: 14px; padding: 0 16px; border-bottom-width: 4px; }
+.bouton--s .bouton__texte { font-size: 24px; -unity-text-outline-width: 2px; text-shadow: 0 2px 0 var(--sombre); }
+
+/* Familles : on ne change que les variables. */
+.bouton--vert      { --face: #2E9E5B; --clair: #4CC27A; --mi: #278A4F; --sombre: #1E6E3E; }
+.bouton--violet    { --face: #5B5BD6; --clair: #7E7EEA; --mi: #4E4EC0; --sombre: #3B3BA0; }
+.bouton--or        { --face: #FFD54A; --clair: #FFE27A; --mi: #F0C030; --sombre: #C99A1E; --ecrit: #3A2200; }
+.bouton--or .bouton__texte { -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(255, 255, 255, 0.45); }
+.bouton--bleu      { --face: #3B7DD8; --clair: #64A0EE; --mi: #3270C4; --sombre: #2858A0; }
+.bouton--turquoise { --face: #1E9EB0; --clair: #45C3D2; --mi: #1A8A9A; --sombre: #136B78; }
+.bouton--ardoise   { --face: #4A4470; --clair: #625C8C; --mi: #3F3A62; --sombre: #2A2545; }
+```
+(La règle `:disabled` est écrite **après** les familles dans le fichier, ou rendue plus précise
+— `.bouton.bouton--vert:disabled` — pour qu'elle gagne toujours.)
+
+**Un bouton avec une pièce** (« Ouvrir — 250 ● », « Encaisser 120 ● ») : dans la face, une
+rangée `Label` + `VisualElement.coin` (34 px, `margin-left: 8px`) ; la face est en
+`flex-direction: row`.
+
+**L'éclat qui passe** reste réservé au bouton « Jouer » (§11.2), placé dans la face
+(`overflow: hidden` sur `.bouton__face`).
+
+### 12.5 Les boutons ronds d'icône
+
+Quatre usages, une seule construction : un **socle rond** (couleur « sombre » de la famille,
+contour d'encre), une **face ronde** sombre `#3B2F66` cerclée d'un **anneau** de la couleur de
+la famille, l'**icône** qui dépasse par le haut, et un **libellé** à cheval sur le bas.
+
+```xml
+<ui:Button class="rond rond--violet">            <!-- Boutique -->
+    <ui:VisualElement class="rond__face" picking-mode="Ignore">
+        <ui:VisualElement class="rond__reflet" picking-mode="Ignore" />
+    </ui:VisualElement>
+    <ui:VisualElement class="rond__icone" picking-mode="Ignore" />   <!-- APRÈS la face : dessinée par-dessus le reflet -->
+    <ui:Label class="rond__libelle" text="Boutique" picking-mode="Ignore" />
+</ui:Button>
+```
+**L'ordre compte** : un élément est dessiné par-dessus ceux qui le précèdent. Le reflet est dans
+la face, l'icône vient après : le reflet ne salit plus jamais l'icône (défaut de la v3).
+
+| Usage | Ø socle | Ø icône | Dépassement de l'icône | Famille (anneau + socle) | Libellé |
+|---|---|---|---|---|---|
+| Colonne gauche : Boutique | **112 px** | 92 px | 18 px vers le haut | violet | « Boutique » |
+| Colonne gauche : Inventaire | 112 | 92 | 18 | bleu | « Inventaire » |
+| Colonne gauche : Index | 112 | 92 | 18 | turquoise | « Index » |
+| Colonne gauche : Améliorations | 112 | 92 | 18 | vert | « Améliorations » (20 px) |
+| **Colonne droite : Classement** | 112 | 92 | 18 | **or** | « Classement » |
+| **Paramètres** (roue dentée) | **72 px** | 52 px | 0 (centrée) | ardoise | aucun |
+| **Fermer** (croix) | **72 px** | — (croix en USS) | — | rouge « fermer » | aucun |
+
+**Placement** (1920 × 1080) :
+- colonne gauche : `left: 36px; top: 250px;` un bouton tous les **150 px** (112 + libellé 22 +
+  marge) ; colonne droite : `right: 36px; top: 250px;` (sous les compteurs) ;
+- Paramètres : à droite du badge d'étage, `margin-left: 16px`, centré verticalement sur lui ;
+- Fermer : coin haut droit de la pop-up, `top: -26px; right: -26px` (il mord sur le cadre).
+
+**États** : survol `scale 1.08` + icône `scale 1.1` et `rotate -6deg` (petit coup de tête
+joyeux), 0,15 s `ease-out-back` ; appui `scale 0.94`, 0,06 s ; **panneau ouvert** = anneau or
+`#FFD54A` de 6 px ; interdit (suspense) = `opacity 0.4` (règle de la v3 conservée).
+La roue dentée, elle, **tourne de 90°** au survol (`rotate: 90deg`, 0,3 s `ease-out-back`).
+
+```css
+/* Panels.uss (v4) — boutons ronds */
+.rond {
+    --anneau: #5B5BD6; --sombre: #3B3BA0;
+    width: 112px; height: 112px;
+    margin: 0 0 38px 0;                /* laisse la place du libellé */
+    padding: 0 0 7px 0;                /* épaisseur du socle */
+    border-width: 4px; border-color: #1F1730;
+    border-radius: 56px;
+    background-color: var(--sombre);
+    overflow: visible;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.rond__face {
+    flex-grow: 1;
+    border-radius: 50px;
+    border-width: 5px; border-color: var(--anneau);
+    background-color: #3B2F66;
+    overflow: hidden;
+}
+.rond__reflet {
+    position: absolute; top: 4px; left: 16px; right: 16px; height: 36%;
+    border-radius: 20px;
+    background-color: rgba(255, 255, 255, 0.14);
+}
+.rond__icone {
+    position: absolute;
+    width: 92px; height: 92px;
+    left: 6px; top: -18px;             /* l'icône dépasse par le haut */
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale, rotate; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.rond__libelle {
+    position: absolute;
+    bottom: -30px; left: -30px; right: -30px;   /* plus large que le bouton : « Améliorations » tient */
+    font-size: 22px; color: #FFFFFF;
+    -unity-font-style: bold; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1F1730;
+    text-shadow: 0 2px 0 #1F1730;
+    margin: 0; padding: 0;
+}
+.rond:hover { scale: 1.08 1.08; }
+.rond:hover .rond__icone { scale: 1.1 1.1; rotate: -6deg; }
+.rond:active { scale: 0.94 0.94; transition-duration: 0.06s; }
+.rond--ouvert .rond__face { border-width: 6px; border-color: #FFD54A; }
+.rond:disabled { opacity: 0.4; scale: 1 1; }
+
+.rond--violet    { --anneau: #5B5BD6; --sombre: #3B3BA0; }
+.rond--bleu      { --anneau: #3B7DD8; --sombre: #2858A0; }
+.rond--turquoise { --anneau: #1E9EB0; --sombre: #136B78; }
+.rond--vert      { --anneau: #2E9E5B; --sombre: #1E6E3E; }
+.rond--or        { --anneau: #FFD54A; --sombre: #C99A1E; }
+
+/* Paramètres : plus petit, icône centrée qui tourne. */
+.rond--param { --anneau: #625C8C; --sombre: #2A2545; width: 72px; height: 72px; border-radius: 36px; margin: 0; padding-bottom: 5px; }
+.rond--param .rond__face { border-radius: 32px; border-width: 4px; }
+.rond--param .rond__icone { width: 52px; height: 52px; left: 6px; top: 4px; background-image: url("../Art/icones_detourees/icone_parametres.png"); }
+.rond--param:hover .rond__icone { rotate: 90deg; scale: 1.05 1.05; transition-duration: 0.3s; }
+
+/* Fermer : face rouge pleine et croix dessinée par deux barres (pas d'image). */
+.rond--fermer { --sombre: #962A2A; width: 72px; height: 72px; border-radius: 36px; margin: 0; padding-bottom: 6px; }
+.rond--fermer .rond__face { border-radius: 32px; border-width: 0; border-top-width: 3px; border-top-color: #F07070; background-color: #D64545; align-items: center; justify-content: center; }
+.rond--fermer:hover .rond__face { background-color: #F07070; }
+.croix-barre {
+    position: absolute;
+    width: 34px; height: 9px; border-radius: 5px;
+    background-color: #FFFFFF;
+    border-width: 2px; border-color: #962A2A;
+}
+.croix-barre--a { rotate: 45deg; }
+.croix-barre--b { rotate: -45deg; }
+/* Les deux barres sont dans un conteneur .croix (40 × 40, centré dans la face) qui tourne au survol. */
+.croix { width: 40px; height: 40px; align-items: center; justify-content: center; transition-property: rotate; transition-duration: 0.2s; transition-timing-function: ease-out-back; }
+.rond--fermer:hover .croix { rotate: 90deg; }
+```
+Structure de la croix : `rond__face` › `croix` › deux `croix-barre` (`--a` et `--b`), tous en
+`picking-mode="Ignore"`.
+
+### 12.6 Les pop-ups centrées
+
+Toutes les fenêtres (Boutique, Inventaire, Index, Améliorations, Classement, Paramètres,
+confirmations) sont des **pop-ups au centre de l'écran**, sur un voile qui assombrit la scène.
+**Une seule ouverte à la fois.** Un clic sur le voile (hors de la pop-up) la ferme, comme la
+croix et la touche Échap. Les règles de la v3 sur les moments où l'on peut ouvrir un panneau
+(pas pendant le suspense) ne changent pas.
+
+```xml
+<ui:VisualElement name="voile" class="voile">
+    <ui:VisualElement class="popup popup--m popup--violet">
+        <ui:VisualElement class="popup__entete">
+            <ui:VisualElement class="popup__entete-reflet" picking-mode="Ignore" />
+            <ui:VisualElement class="popup__icone" />
+            <ui:Label class="titre-popup" text="Boutique" />
+        </ui:VisualElement>
+        <ui:VisualElement class="popup__corps"> … onglets, ScrollView … </ui:VisualElement>
+        <ui:Button class="rond rond--fermer popup__fermer"> … </ui:Button>
+    </ui:VisualElement>
+</ui:VisualElement>
+```
+
+| Partie | Valeur |
+|---|---|
+| Voile | plein écran, `rgba(18, 13, 32, 0.6)` |
+| Tailles | **S** 680 px de large (Paramètres, confirmations), hauteur selon le contenu ; **M** 1080 × 800 (Boutique, Améliorations, Classement) ; **L** 1360 × 860 (Inventaire, Index : 7 cartes par ligne) ; jamais plus haut que **920 px** |
+| Cadre | contour **6 px** `#1F1730`, bas **14 px** (l'épaisseur du « plateau »), coins **32 px**, fond `#2E2552` |
+| En-tête | hauteur **96 px**, fond = face de la famille, bordure basse 6 px « sombre » de la famille, coins hauts 26 px ; reflet blanc 16 % sur 45 % de la hauteur |
+| Icône d'en-tête | **120 px**, déborde en haut à gauche (`left: -24px; top: -40px`), c'est l'icône du bouton qui a ouvert la pop-up |
+| Titre | 52 px, blanc, contour 4 px `#1F1730` (§12.3), `padding-left: 112px` (laisse la place à l'icône) |
+| Corps | `padding: 20px 28px 24px 28px` |
+| Fermer | bouton rond rouge 72 px, `top: -26px; right: -26px` |
+| Apparition | voile : `opacity` 0 → 1 en **0,2 s** ; pop-up : `scale 0.85 → 1` et `translate 0 40px → 0` en **0,28 s `ease-out-back`** |
+| Fermeture | pop-up : `scale 1 → 0.9`, `opacity 1 → 0` en **0,15 s `ease-in`** ; voile 0,2 s ; puis `display: none` |
+
+```css
+.voile {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(18, 13, 32, 0.6);
+    align-items: center; justify-content: center;
+    opacity: 0;
+    transition-property: opacity; transition-duration: 0.2s;
+}
+.popup {
+    --entete: #5B5BD6; --entete-sombre: #3B3BA0;
+    max-height: 920px;
+    background-color: #2E2552;
+    border-width: 6px; border-bottom-width: 14px; border-color: #1F1730;
+    border-radius: 32px;
+    scale: 0.85 0.85; translate: 0 40px; opacity: 0;
+    transition-property: scale, translate, opacity;
+    transition-duration: 0.15s, 0.15s, 0.15s;
+    transition-timing-function: ease-in, ease-in, ease-in;
+}
+.popup--s { width: 680px; }
+.popup--m { width: 1080px; height: 800px; }
+.popup--l { width: 1360px; height: 860px; }
+
+/* La classe « --ouvert » est ajoutée par le code UNE image après l'affichage (voir plus bas). */
+.voile--ouvert { opacity: 1; }
+.voile--ouvert .popup {
+    scale: 1 1; translate: 0 0; opacity: 1;
+    transition-duration: 0.28s, 0.28s, 0.15s;
+    transition-timing-function: ease-out-back, ease-out-back, ease-out;
+}
+
+.popup__entete {
+    height: 96px; flex-shrink: 0;
+    flex-direction: row; align-items: center;
+    padding-left: 112px;
+    background-color: var(--entete);
+    border-bottom-width: 6px; border-bottom-color: var(--entete-sombre);
+    border-top-left-radius: 26px; border-top-right-radius: 26px;
+}
+.popup__entete-reflet {
+    position: absolute; top: 4px; left: 16px; right: 16px; height: 45%;
+    border-radius: 18px; background-color: rgba(255, 255, 255, 0.16);
+}
+.popup__icone {
+    position: absolute; left: -24px; top: -40px;
+    width: 120px; height: 120px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.popup__corps { flex-grow: 1; flex-shrink: 1; padding: 20px 28px 24px 28px; }
+.popup__fermer { position: absolute; top: -26px; right: -26px; }
+
+.popup--violet    { --entete: #5B5BD6; --entete-sombre: #3B3BA0; }  /* Boutique */
+.popup--bleu      { --entete: #3B7DD8; --entete-sombre: #2858A0; }  /* Inventaire */
+.popup--turquoise { --entete: #1E9EB0; --entete-sombre: #136B78; }  /* Index */
+.popup--vert      { --entete: #2E9E5B; --entete-sombre: #1E6E3E; }  /* Améliorations */
+.popup--or        { --entete: #FFD54A; --entete-sombre: #C99A1E; }  /* Classement */
+.popup--ardoise   { --entete: #4A4470; --entete-sombre: #2A2545; }  /* Paramètres */
+```
+Sur l'en-tête **or** (Classement), le titre reste blanc avec son contour d'encre de 4 px : il se
+lit sur le jaune grâce au contour (c'est le style « titre de jeu » voulu).
+
+**Pourquoi une image d'attente avant d'ajouter `--ouvert` ?** Une transition USS anime un
+*changement* de valeur. Si on affiche la pop-up (`display: flex`) et qu'on ajoute la classe dans
+la même image, Unity n'a jamais vu l'état « petit et transparent » : pas d'animation. Côté code
+(rappel pour le programmeur, la logique ne change pas) :
+
+```csharp
+// Ouvrir : afficher, puis ajouter la classe à l'image suivante.
+voile.style.display = DisplayStyle.Flex;
+voile.schedule.Execute(() => voile.AddToClassList("voile--ouvert")).StartingIn(16);
+// Fermer : retirer la classe, puis cacher quand l'animation est finie (0,2 s).
+voile.RemoveFromClassList("voile--ouvert");
+voile.schedule.Execute(() => voile.style.display = DisplayStyle.None).StartingIn(200);
+```
+
+Le **porte-monnaie** de la pop-up (Boutique, Améliorations) se met dans le corps, en haut à
+droite, avec le style des compteurs (§12.11) ; la note « Ta cagnotte en jeu… » juste dessous en
+petit texte `#A79FC8`.
+
+### 12.7 Les onglets
+
+Des **pilules** dans un puits (Inventaire : Skins / Accessoires ; Index ; Classement si besoin).
+
+| Partie | Valeur |
+|---|---|
+| Piste | fond `#221A3D`, coins 22 px, `padding: 6px`, contour 3 px `#1F1730` |
+| Onglet | hauteur 56 px, coins 16 px, texte 24 px Bold, `flex-grow: 1`, marge 0 4 px |
+| Inactif | fond transparent, texte `#A79FC8` ; survol : fond `#3D3270`, texte blanc |
+| Actif | famille **or** : fond `#FFD54A`, bordure haute 3 px `#FFE27A`, bordure basse **6 px** `#C99A1E`, texte `#3A2200` ; il « saute » (`scale 1.04`) en 0,15 s `ease-out-back` |
+
+```css
+.onglets {
+    flex-direction: row; flex-shrink: 0;
+    background-color: #221A3D;
+    border-width: 3px; border-color: #1F1730; border-radius: 22px;
+    padding: 6px; margin-bottom: 14px;
+}
+.onglet {
+    flex-grow: 1; height: 56px; margin: 0 4px;
+    border-radius: 16px; border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+    font-size: 24px; color: #A79FC8; -unity-font-style: bold;
+    transition-property: scale, background-color; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.onglet:hover { background-color: #3D3270; color: #FFFFFF; }
+.onglet--actif {
+    background-color: #FFD54A; color: #3A2200;
+    border-top-width: 3px; border-top-color: #FFE27A;
+    border-bottom-width: 6px; border-bottom-color: #C99A1E;
+    scale: 1.04 1.04;
+}
+.onglet--actif:hover { background-color: #FFE27A; color: #3A2200; }
+```
+
+### 12.8 Les cartes d'objets (liseré de rareté)
+
+| Partie | Valeur |
+|---|---|
+| Carte | **168 × 216 px**, fond `#3D3270`, coins 18 px, marge 0 12 px 12 px 0 |
+| Liseré de rareté | **4 px** de la couleur de base §2.7 sur les 4 côtés (v4 : remplace les 3 px du §10.1) |
+| Biseau | bordure haute **6 px** de la même couleur de rareté : la carte a l'air d'un jeton bombé |
+| Halo de rareté (facultatif) | élément `.carte__halo` en haut de la carte, hauteur 60 %, couleur de base à **18 %** : autorisé, c'est un « halo » au sens du §10.1 ; **jamais** pour Commun (gris : inutile) |
+| Icône | 112 × 112, centrée, en haut |
+| Nom | 18 px Bold blanc, 2 lignes max |
+| Rareté | 16 px Bold, couleur « texte » §2.7, contour 2 px `#1F1730` |
+| Survol | fond `#4A3E85`, `scale 1.04`, icône `scale 1.08`, 0,15 s `ease-out-back` |
+| Sélection | cadre extérieur **5 px** `#FFD54A` (coins 22 px), carte `scale 1.04` |
+| Badge « ×3 » | pilule en haut à droite : fond `#FFFFFF`, contour 3 px `#1F1730`, texte 18 px Bold `#1F1730`, coins 14 px, `top: -8px; right: -8px` (il déborde) |
+| Badge « Équipé » | pilule en haut à gauche : famille verte (fond `#2E9E5B`, contour 3 px `#1F1730`), texte 15 px Bold blanc |
+| Non obtenu | icône teintée `#15121F` à 0,9 (§10.2 règle 6), fond `#221A3D` ; le liseré reste visible |
+
+```css
+.carte-cadre { padding: 0; margin: 0 12px 12px 0; border-width: 5px; border-color: rgba(0, 0, 0, 0); border-radius: 22px; }
+.carte-cadre--choisie { border-color: #FFD54A; }
+.carte {
+    width: 168px; height: 216px;
+    align-items: center; padding: 8px 6px;
+    background-color: #3D3270;
+    border-radius: 18px;
+    border-width: 4px; border-top-width: 6px;
+    border-color: #9AA0B0;                /* remplacé par la classe de rareté */
+    overflow: hidden;
+    transition-property: scale, background-color; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.carte-cadre:hover .carte, .carte-cadre--choisie .carte { scale: 1.04 1.04; }
+.carte-cadre:hover .carte { background-color: #4A3E85; }
+.carte__halo { position: absolute; left: 0; right: 0; top: 0; height: 60%; opacity: 0.18; }
+.carte__icone { width: 112px; height: 112px; -unity-background-scale-mode: scale-to-fit; transition-property: scale; transition-duration: 0.15s; }
+.carte-cadre:hover .carte__icone { scale: 1.08 1.08; }
+.carte__nom { font-size: 18px; color: #FFFFFF; -unity-font-style: bold; -unity-text-align: middle-center; white-space: normal; margin: 4px 0 0 0; }
+.carte__rarete { font-size: 16px; -unity-font-style: bold; -unity-text-outline-width: 2px; -unity-text-outline-color: #1F1730; }
+
+/* Une classe par rareté, même identifiant que le catalogue (§10.2 règle 2). */
+.rarete-commun      { border-color: #9AA0B0; }
+.rarete-peu-commun  { border-color: #4CC26A; }
+.rarete-rare        { border-color: #3B8BEB; }
+.rarete-super-rare  { border-color: #A35CE0; }
+.rarete-legendaire  { border-color: #FF9F1C; }
+.rarete-secret      { border-color: #FF4FD8; }
+.rarete-commun .carte__rarete     { color: #9AA0B0; }
+.rarete-peu-commun .carte__rarete { color: #4CC26A; }
+.rarete-rare .carte__rarete       { color: #5FA2F0; }
+.rarete-super-rare .carte__rarete { color: #B57DE8; }
+.rarete-legendaire .carte__rarete { color: #FF9F1C; }
+.rarete-secret .carte__rarete     { color: #FF4FD8; }
+.rarete-peu-commun .carte__halo { background-color: #4CC26A; }
+.rarete-rare .carte__halo       { background-color: #3B8BEB; }
+.rarete-super-rare .carte__halo { background-color: #A35CE0; }
+.rarete-legendaire .carte__halo { background-color: #FF9F1C; }
+.rarete-secret .carte__halo     { background-color: #FF4FD8; }
+
+.badge-nombre {
+    position: absolute; top: -8px; right: -8px;
+    font-size: 18px; color: #1F1730; -unity-font-style: bold;
+    background-color: #FFFFFF; border-width: 3px; border-color: #1F1730; border-radius: 14px;
+    padding: 0 8px;
+}
+```
+**Cartes larges** (boîtes de la Boutique, améliorations, lignes du classement) : même fond
+`#3D3270`, coins 22 px, bordure haute 4 px `#5A4E96` (biseau clair, **pas** de couleur de
+rareté), `padding: 18px`, `margin-bottom: 16px`. Tableaux (taux de drop, chances de coffres) :
+fond puits `#221A3D`, coins 14 px, lignes de 36 px, en-têtes 18 px `#A79FC8`.
+
+### 12.9 La barre de défilement intégrée
+
+Plus de barre blanche : une **piste creusée** (puits) et un **curseur lavande bombé** qui devient
+**or quand on le tient**. Pas de flèches haut/bas (on fait défiler avec la molette, le doigt ou le
+curseur). On ajoute la classe `defil` à **chaque** `ScrollView`, et
+`horizontal-scroller-visibility="Hidden"` dans l'UXML (jamais de barre horizontale).
+
+**Comment Unity construit une barre** (les noms à viser en USS) :
+```
+ScrollView
+└── .unity-scroller.unity-scroller--vertical            la barre entière
+    ├── .unity-scroller__low-button                      flèche du haut   → cachée
+    ├── .unity-scroller__slider (.unity-base-slider--vertical)
+    │   └── .unity-base-slider__drag-container
+    │       ├── .unity-base-slider__tracker              la PISTE
+    │       ├── .unity-base-slider__dragger-border       cadre de focus   → caché
+    │       └── .unity-base-slider__dragger              le CURSEUR
+    └── .unity-scroller__high-button                     flèche du bas    → cachée
+```
+Le préfixe `.defil` rend nos règles **plus précises** que celles du thème par défaut de Unity :
+c'est ce qui leur permet de gagner.
+
+| Partie | Valeur |
+|---|---|
+| Largeur totale | **26 px**, à 10 px du contenu |
+| Piste | fond `#221A3D`, contour 3 px `#1F1730`, coins 13 px, toute la hauteur |
+| Curseur | **18 px** de large (4 px de jeu de chaque côté), hauteur min. **64 px**, coins 9 px, fond `#B9AEE6`, biseau haut 2 px `#DCD5F7`, épaisseur basse 4 px `#7A6FB0` |
+| Survol | fond `#D9D2F5` |
+| Tenu | famille or : fond `#FFD54A`, haut `#FFE27A`, bas `#C99A1E` |
+
+```css
+.defil .unity-scroller--vertical {
+    width: 26px;
+    margin-left: 10px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+.defil .unity-scroller--vertical .unity-scroller__low-button,
+.defil .unity-scroller--vertical .unity-scroller__high-button {
+    display: none;
+}
+.defil .unity-scroller--vertical .unity-scroller__slider {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+}
+.defil .unity-scroller--vertical .unity-base-slider__drag-container {
+    margin: 4px 0;                 /* le curseur ne touche pas les bouts de la piste */
+}
+.defil .unity-scroller--vertical .unity-base-slider__tracker {
+    position: absolute;
+    left: 0; right: 0; top: -4px; bottom: -4px;   /* la piste rattrape les 4 px de marge */
+    width: auto; margin: 0;
+    background-color: #221A3D;
+    border-width: 3px; border-color: #1F1730;
+    border-radius: 13px;
+}
+.defil .unity-scroller--vertical .unity-base-slider__dragger-border {
+    display: none;
+}
+.defil .unity-scroller--vertical .unity-base-slider__dragger {
+    left: 4px; width: 18px;
+    min-height: 64px;
+    margin: 0;
+    background-color: #B9AEE6;
+    border-width: 0;
+    border-top-width: 2px;    border-top-color: #DCD5F7;
+    border-bottom-width: 4px; border-bottom-color: #7A6FB0;
+    border-radius: 9px;
+}
+.defil .unity-scroller--vertical .unity-base-slider__dragger:hover {
+    background-color: #D9D2F5;
+}
+.defil .unity-scroller--vertical .unity-base-slider__dragger:active {
+    background-color: #FFD54A;
+    border-top-color: #FFE27A;
+    border-bottom-color: #C99A1E;
+}
+/* Un peu d'air entre les cartes et la barre. */
+.defil .unity-scroll-view__content-container { padding-right: 4px; }
+```
+Vérification : la piste couvre toute la hauteur de la zone défilante ; le curseur ne déborde ni
+en haut ni en bas ; si la liste est courte, Unity cache la barre tout seul
+(`vertical-scroller-visibility="Auto"`, valeur par défaut). Si l'état « tenu » ne s'affiche pas
+sur cette version de Unity, ce n'est pas bloquant : le survol suffit.
+
+### 12.10 Le badge d'étage
+
+« Étage 12 » devient un **badge** : une grosse **médaille or** qui porte le numéro, accrochée à
+gauche d'une **plaque** sombre qui écrit « ÉTAGE » et le nom du palier. À droite du badge, le
+bouton Paramètres.
+
+```xml
+<ui:VisualElement class="haut-gauche">
+    <ui:VisualElement class="badge-etage">
+        <ui:VisualElement class="badge-etage__plaque">
+            <ui:Label class="badge-etage__mot" text="ÉTAGE" />
+            <ui:Label class="badge-etage__palier" text="Dans les nuages !" />
+        </ui:VisualElement>
+        <ui:VisualElement class="badge-etage__medaille">
+            <ui:VisualElement class="badge-etage__reflet" picking-mode="Ignore" />
+            <ui:Label class="badge-etage__numero" text="12" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:Button class="rond rond--param"> … </ui:Button>
+</ui:VisualElement>
+```
+
+| Partie | Valeur |
+|---|---|
+| Position | `left: 32px; top: 28px` |
+| Médaille | hauteur **112 px**, largeur min. 112 px (elle s'allonge en pilule pour « 100 »), coins 56 px, fond `#FFD54A`, contour 5 px `#1F1730`, bas **11 px** `#C99A1E`, reflet blanc 30 % sur 40 % de la hauteur |
+| Numéro | **60 px** Bold `#3A2200`, ombre `0 3px 0 rgba(255,255,255,0.5)` (lettre « gravée ») |
+| Plaque | hauteur 84 px, fond `#2E2552` à 92 %, contour 5 px `#1F1730`, coins 42 px ; elle passe **sous** la médaille (`margin-left: -40px`, `padding-left: 56px`, `padding-right: 28px`) |
+| « ÉTAGE » | 20 px Bold `#D9D2F0`, `letter-spacing: 3px` |
+| Nom du palier | 26 px Bold blanc, contour 3 px `#1F1730` (« En plein jour », « Dans les nuages ! »…) |
+| Changement d'étage | la médaille fait `scale 1 → 1.25 → 1` (classe `--saut` 0,12 s `ease-out`, retirée après 0,12 s, retour 0,25 s `ease-out-back`) |
+
+Lisibilité sur les ciels clairs (§5.1) : le contour d'encre de 5 px et le fond sombre de la plaque
+remplacent l'ancien contour de texte ; rien d'autre à faire.
+
+```css
+.haut-gauche { position: absolute; left: 32px; top: 28px; flex-direction: row; align-items: center; }
+.badge-etage { flex-direction: row-reverse; align-items: center; margin-right: 16px; }  /* la médaille est à gauche */
+.badge-etage__medaille {
+    height: 112px; min-width: 112px;
+    padding: 0 22px 6px 22px;
+    align-items: center; justify-content: center;
+    background-color: #FFD54A;
+    border-width: 5px; border-bottom-width: 11px; border-color: #1F1730; border-bottom-color: #C99A1E;
+    border-radius: 56px;
+    transition-property: scale; transition-duration: 0.25s; transition-timing-function: ease-out-back;
+}
+.badge-etage__reflet {
+    position: absolute; top: 4px; left: 14px; right: 14px; height: 40%;
+    border-radius: 30px; background-color: rgba(255, 255, 255, 0.3);
+}
+.badge-etage__numero {
+    font-size: 60px; color: #3A2200; -unity-font-style: bold;
+    text-shadow: 0 3px 0 rgba(255, 255, 255, 0.5);
+    margin: 0; padding: 0;
+}
+.badge-etage__plaque {
+    height: 84px; justify-content: center;
+    margin-left: -40px; padding: 0 28px 0 56px;
+    background-color: rgba(46, 37, 82, 0.92);
+    border-width: 5px; border-color: #1F1730; border-radius: 42px;
+}
+.badge-etage__mot { font-size: 20px; color: #D9D2F0; -unity-font-style: bold; letter-spacing: 3px; margin: 0; padding: 0; }
+.badge-etage__palier {
+    font-size: 26px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1F1730;
+    margin: 0; padding: 0;
+}
+.badge-etage__medaille.badge-etage--saut { scale: 1.25 1.25; transition-duration: 0.12s; transition-timing-function: ease-out; }
+```
+Note : avec `row-reverse`, la médaille (2e enfant) s'affiche à gauche **et** par-dessus la
+plaque (elle est dessinée après elle) : c'est voulu.
+
+**La bannière centrale « Étage N »** (montée) prend le même langage : texte 88 px or contour
+4 px `#3A2200` + ombre `0 6px 0 #1F1730`, nom du palier dans une plaque `#2E2552` à 92 % avec
+contour 5 px `#1F1730`, coins 36 px ; apparition `scale 0.6 → 1` en 0,3 s `ease-out-back`.
+
+### 12.11 Les compteurs de pièces
+
+Une **pilule** avec la pièce qui **dépasse à gauche**, un petit libellé et un gros chiffre.
+
+| Partie | Valeur |
+|---|---|
+| Position | `right: 32px; top: 28px`, empilés avec 14 px d'écart (Cagnotte au-dessus) |
+| Pilule | hauteur **76 px**, largeur min. 260 px, fond `#221A3D` à 90 %, contour 5 px `#1F1730`, coins 38 px, `padding: 0 26px 0 52px` |
+| Pièce | **72 px**, `position: absolute; left: -26px`, centrée verticalement (`top: -3px`) |
+| Libellé | 17 px Bold `#A79FC8` (« CAGNOTTE », « PORTE-MONNAIE », `letter-spacing: 2px`) |
+| Chiffre | 34 px Bold, contour 3 px `#1F1730` ; Cagnotte en or `#FFD54A`, Porte-monnaie en blanc |
+| Gain | classe `--saut` : pilule `scale 1.12` en 0,1 s puis retour 0,2 s `ease-out-back` (déjà fait par le code pour le texte : on l'applique à la pilule) |
+
+```css
+.compteur {
+    height: 76px; min-width: 260px;
+    margin-bottom: 14px; padding: 0 26px 0 52px;
+    justify-content: center; align-items: flex-end;
+    background-color: rgba(34, 26, 61, 0.9);
+    border-width: 5px; border-color: #1F1730; border-radius: 38px;
+    transition-property: scale; transition-duration: 0.2s; transition-timing-function: ease-out-back;
+}
+.compteur__piece {
+    position: absolute; left: -26px; top: -3px;
+    width: 72px; height: 72px;
+    background-image: url("../Art/icones_detourees/piece.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+.compteur__libelle { font-size: 17px; color: #A79FC8; -unity-font-style: bold; letter-spacing: 2px; margin: 0; padding: 0; }
+.compteur__chiffre {
+    font-size: 34px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1F1730;
+    margin: 0; padding: 0;
+}
+.compteur--cagnotte .compteur__chiffre { color: #FFD54A; }
+.compteur--saut { scale: 1.12 1.12; transition-duration: 0.1s; transition-timing-function: ease-out; }
+```
+Les **pastilles de l'étage** (« Trésor : +12 », « 3 coffres · 1 piège ») et la **boîte du
+message** prennent le même style de pilule (fond `#221A3D` à 90 %, contour 4 px `#1F1730`,
+coins 30 px, texte 26 px Bold blanc ; message : 34 px, contour de texte 3 px `#1F1730`).
+
+### 12.12 Les toasts (petits messages)
+
+« Accessoire équipé ! », « Amélioration achetée ! », « Il te manque 50 pièces »…
+
+| Partie | Valeur |
+|---|---|
+| Position | centré en haut, `top: 150px` ; 3 au plus, empilés vers le bas, 12 px d'écart |
+| Pilule | hauteur min. 72 px, fond `#2E2552`, contour 4 px `#1F1730`, bas 8 px `#1F1730`, coins 36 px, `padding: 10px 30px 10px 14px` |
+| Pastille de type | disque 48 px à gauche, contour 3 px `#1F1730`, couleur de la famille : vert `#2E9E5B` (réussite), or `#FFD54A` (pièces), ardoise `#4A4470` (info), alerte `#FF6B6B` (impossible) ; une icône détourée ou un symbole dedans |
+| Texte | 26 px Bold blanc |
+| Animation | entrée : `translate 0 -40px → 0`, `opacity 0 → 1`, 0,25 s `ease-out-back` ; reste **2,5 s** ; sortie : `opacity → 0`, `translate → 0 -20px`, 0,2 s `ease-in` |
+
+```css
+.toasts { position: absolute; top: 150px; left: 0; right: 0; align-items: center; }
+.toast {
+    flex-direction: row; align-items: center;
+    min-height: 72px; margin-bottom: 12px; padding: 10px 30px 10px 14px;
+    background-color: #2E2552;
+    border-width: 4px; border-bottom-width: 8px; border-color: #1F1730; border-radius: 36px;
+    translate: 0 -40px; opacity: 0;
+    transition-property: translate, opacity; transition-duration: 0.25s, 0.25s;
+    transition-timing-function: ease-out-back, ease-out;
+}
+.toast--visible { translate: 0 0; opacity: 1; }
+.toast--sortie { translate: 0 -20px; opacity: 0; transition-duration: 0.2s, 0.2s; transition-timing-function: ease-in, ease-in; }
+.toast__pastille { width: 48px; height: 48px; border-radius: 24px; border-width: 3px; border-color: #1F1730; margin-right: 14px; -unity-background-scale-mode: scale-to-fit; }
+.toast__texte { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0; }
+.toast--reussite .toast__pastille { background-color: #2E9E5B; }
+.toast--pieces   .toast__pastille { background-color: #FFD54A; }
+.toast--info     .toast__pastille { background-color: #4A4470; }
+.toast--alerte   .toast__pastille { background-color: #FF6B6B; }
+```
+
+### 12.13 La pop-up Paramètres (Musique / Effets)
+
+Pop-up **S** (680 px), en-tête **ardoise**, icône `icone_parametres.png`. Deux lignes (cartes
+larges §12.8) : icône 64 px (`icone_musique.png`, `icone_effets.png`), libellé 30 px Bold blanc
+(« Musique », « Effets »), et à droite un **interrupteur**.
+
+| Interrupteur | Valeur |
+|---|---|
+| Piste | 112 × 56 px, coins 28 px, contour 4 px `#1F1730` ; **non** : `#45425A` ; **oui** : `#2E9E5B` |
+| Bouton rond | 40 px, `#FFFFFF`, bas 4 px `#C9C5D8`, coins 20 px ; à gauche (non) → `translate: 56px 0` (oui), 0,18 s `ease-out-back` |
+| Texte | « Oui » / « Non » écrit à côté (20 px `#D9D2F0`) : jamais la couleur seule |
+
+```css
+.inter { width: 112px; height: 56px; border-width: 4px; border-color: #1F1730; border-radius: 28px; background-color: #45425A; padding: 4px; transition-property: background-color; transition-duration: 0.18s; }
+.inter__bouton { width: 40px; height: 40px; border-radius: 20px; background-color: #FFFFFF; border-bottom-width: 4px; border-bottom-color: #C9C5D8; transition-property: translate; transition-duration: 0.18s; transition-timing-function: ease-out-back; }
+.inter--oui { background-color: #2E9E5B; }
+.inter--oui .inter__bouton { translate: 56px 0; }
+```
+L'écran titre perd lui aussi ses deux boutons de son : il reçoit le même bouton Paramètres en
+haut à gauche, la colonne d'icônes à gauche, le Classement à droite, et le bouton « Jouer » en
+`bouton--or bouton--l` (texte 48 px, hauteur 120 px).
+
+### 12.14 La pop-up Classement (aspect visuel)
+
+> Le **contenu** du classement (qui est classé, sur quel critère, record d'étage ou de pièces)
+> n'existe pas encore dans le GDD : c'est au **game-designer** de l'écrire (spec v4) avant le
+> code. Rappel du projet : sauvegarde en `PlayerPrefs`, pas de cloud. Ce qui suit ne décrit que
+> l'apparence.
+
+Pop-up **M**, en-tête **or**, icône `icone_classement.png`.
+- **Podium** en haut : les 3 premiers sur trois marches en USS (cartes `#3D3270`, contour 4 px
+  `#1F1730`, coins hauts 18 px), hauteurs **180 / 140 / 110 px** (1er au centre, 2e à gauche,
+  3e à droite), chacun avec sa **médaille** 88 px (`medaille_or.png`, `medaille_argent.png`,
+  `medaille_bronze.png`) posée au-dessus de la marche. Le **rang est écrit en chiffres par
+  l'interface** (« 1 », « 2 », « 3 », 44 px Bold blanc, contour 4 px `#1F1730`) : les médailles
+  n'ont aucun chiffre.
+- **Liste** dessous (ScrollView `defil`) : lignes de 72 px (cartes larges), rang 30 px Bold
+  `#A79FC8`, nom 26 px blanc, score 30 px or `#FFD54A` aligné à droite.
+- **La ligne du joueur** : fond `#4A3E85`, contour 4 px `#FFD54A` (la couleur de la sélection),
+  étiquette « Toi » en pilule or.
+- Couleurs des 3 premiers : or `#FFC83A`, argent `#C9CED8`, bronze `#B0703A` (les métaux des
+  coffres §2.10) : ce **ne sont pas** des couleurs de rareté.
+
+### 12.15 Placement général (HUD, 1920 × 1080)
+
+| Zone | Contenu | Position |
+|---|---|---|
+| Haut gauche | badge d'étage + bouton Paramètres | `left 32, top 28` |
+| Haut droite | compteurs Cagnotte puis Porte-monnaie | `right 32, top 28` |
+| Bord gauche | Boutique, Inventaire, Index, Améliorations | `left 36, top 250`, pas de 150 px |
+| Bord droit | Classement (place prévue pour d'autres boutons plus tard) | `right 36, top 250` |
+| Haut centre | toasts | `top 150` |
+| Bas centre | pastilles de l'étage, message, boutons d'action (L) | comme en v3 |
+| Centre | pop-ups (une à la fois) sur le voile | centrées |
+
+Les deux colonnes laissent le **centre libre** pour le cheval et les coffres, comme le demandent
+les fonds de ciel (§5.1 : côté gauche calme, centre vide).
+
+### 12.16 À éviter en v4
+- Le noir pur `#000000` pour les contours : toujours l'encre `#1F1730`.
+- Les contours fins (< 3 px) sur les boutons et cadres : le style vient de leur épaisseur.
+- Le texte blanc sans contour sur une face colorée.
+- Un reflet ou un décor dessiné **par-dessus** une icône.
+- Les couleurs de rareté en fond de bouton, de pop-up ou d'onglet (§10.1, toujours valable).
+- Plusieurs pop-ups empilées ; un panneau collé au bord de l'écran.
+- Les animations de plus de 0,3 s sur un bouton (le jeu doit rester vif) ; le rebond sur les
+  boutons d'achat est permis, l'éclat qui passe ne l'est pas (§11.2).
+- Tout élément de la marque Roblox (§12.1).

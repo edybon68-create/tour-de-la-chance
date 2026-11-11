@@ -1,0 +1,541 @@
+/* Les POP-UPS v4 (spec v4 §5.5 à §5.7, §6.3, §12.6, §12.7) : fond assombri, fenêtre centrée,
+   bandeau de titre, bouton fermer, colonnes de boutons, barre de défilement intégrée,
+   tuiles d'objets, Réglages, Classement et Pseudo. Référence 1920 × 1080.
+   Ce fichier est chargé APRÈS Shop.uss et Panels.uss : à précision égale, ses règles gagnent. */
+
+/* ---------- Le fond assombri (tout l'écran, #0E0A1A à 65 % ; opacité animée par le code) ---------- */
+.popup-dim {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(14, 10, 26, 0.65);
+    opacity: 0;
+    display: none;
+}
+
+.popup-layer {
+    position: absolute;
+    left: 0; top: 0; right: 0; bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Le cadre de la pop-up : sa taille est posée par le code (tableau §5.6). Il contient
+   l'ombre (avant la fenêtre : dessinée derrière), la fenêtre, l'icône et le bouton fermer. */
+.popup-frame {
+    width: 1000px;
+    height: 840px;
+    display: none;
+}
+
+.popup-shadow {
+    position: absolute;
+    left: 0; right: 0; top: 12px; bottom: -12px;
+    border-radius: 32px;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.popup-window {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    border-width: 6px;
+    border-color: #110D1F;
+    border-radius: 32px;
+    background-color: #2A2440;
+    background-image: url("Degrades/popup_corps.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+/* Le bandeau de titre (96 px) : sa couleur dépend de la pop-up (classe posée par le code). */
+.popup-header {
+    height: 96px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    background-color: #5A4F88;
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
+    border-bottom-width: 4px;
+    border-bottom-color: #110D1F;
+}
+.popup-header--boutique { background-color: #C2477A; }
+.popup-header--inventaire { background-color: #3B7DD8; }
+.popup-header--index { background-color: #2E9E8E; }
+.popup-header--ameliorations { background-color: #D99A1A; }
+.popup-header--classement { background-color: #6C4FE0; }
+.popup-header--reglages, .popup-header--pseudo { background-color: #5A4F88; }
+
+.popup-title {
+    font-size: 48px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #110D1F;
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 0;
+}
+
+/* L'icône de la pop-up (96 px) : elle déborde de 24 px au-dessus du bandeau, à gauche. */
+.popup-icon {
+    position: absolute;
+    left: 28px;
+    top: -24px;
+    width: 96px;
+    height: 96px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Le bouton fermer : rond Ø 72, rouge, à cheval sur le coin haut droit. */
+.popup-close {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+}
+
+.popup-body {
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: 16px 32px 28px 32px;
+}
+
+.panel-wallet-row { margin: 0 0 4px 0; }
+.coin--wallet { width: 40px; height: 40px; }
+.shop-wallet { font-size: 30px; -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; }
+
+/* ---------- Les colonnes de boutons (§5.5) ---------- */
+.col {
+    position: absolute;
+    top: 170px;
+    width: 128px;
+}
+.col--gauche { left: 32px; }
+.col--droite { right: 32px; }
+
+.btn.col-btn {
+    width: 128px;
+    height: 128px;
+    margin: 0 0 16px 0;
+    padding: 0;
+    border-radius: 28px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* L'icône (84 × 84) déborde de 8 px au-dessus du bouton, comme un autocollant. */
+.col-btn-icon {
+    position: absolute;
+    left: 18px;
+    top: -12px;
+    width: 84px;
+    height: 84px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.15s;
+}
+
+.col-btn-text {
+    font-size: 20px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: #110D1F;
+    margin: 0 0 4px 0;
+    padding: 0;
+}
+.col-btn-text--small { font-size: 17px; }
+
+/* Bouton de la pop-up ouverte : contour or de 5 px, fond #5A4F88, icône à 1,1. */
+.btn.col-btn.col-btn--active {
+    background-image: none;
+    background-color: #5A4F88;
+    border-left-width: 5px;
+    border-right-width: 5px;
+    border-top-width: 5px;
+    border-left-color: #FFD54A;
+    border-right-color: #FFD54A;
+    border-top-color: #FFD54A;
+    border-bottom-color: #FFD54A;
+}
+.btn.col-btn--active > .col-btn-icon { scale: 1.1 1.1; }
+
+/* Interdit (suspense, transition…) : les boutons restent visibles, grisés. */
+.btn.col-btn:disabled { opacity: 0.45; }
+.btn.col-btn:disabled > .col-btn-text { color: #D0CCE0; -unity-text-outline-width: 3px; -unity-text-outline-color: #2A2838; }
+
+/* ---------- La roue dentée ---------- */
+.gear-holder {
+    position: absolute;
+    left: 32px;
+    top: 32px;
+}
+
+/* ---------- La barre de défilement intégrée (§5.7) ---------- */
+.popup-window .unity-scroller--vertical {
+    width: 20px;
+    margin-right: 8px;
+    margin-left: 6px;
+    border-width: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+.popup-window .unity-scroller--vertical .unity-scroller__low-button,
+.popup-window .unity-scroller--vertical .unity-scroller__high-button {
+    display: none;
+}
+.popup-window .unity-scroller--vertical .unity-scroller__slider {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__drag-container {
+    margin: 0;
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__tracker {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    width: auto;
+    margin: 0;
+    background-color: rgba(21, 17, 31, 0.7);
+    border-width: 2px;
+    border-color: #110D1F;
+    border-radius: 10px;
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__dragger-border {
+    display: none;
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__dragger {
+    left: 2px;
+    width: 16px;
+    min-height: 60px;
+    margin: 0;
+    background-color: #FFD54A;
+    border-width: 3px;
+    border-color: #C99A1E;
+    border-radius: 10px;
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__dragger:hover { background-color: #FFE27A; }
+.popup-window .unity-scroller--vertical .unity-base-slider__dragger:active { background-color: #E8B830; }
+/* Jamais de barre horizontale. */
+.popup-window .unity-scroller--horizontal { display: none; }
+
+/* Les petits dégradés « il y a encore du contenu » (pur affichage, ajoutés par le code). */
+.scroll-fade {
+    position: absolute;
+    left: 0;
+    right: 34px;
+    height: 24px;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+.scroll-fade--haut { top: 0; background-image: url("Degrades/fondu_haut.png"); }
+.scroll-fade--bas { bottom: 0; background-image: url("Degrades/fondu_bas.png"); }
+
+/* ---------- Onglets (sous-onglets) : sombres, l'actif est violet ---------- */
+.btn.subtab {
+    font-size: 24px;
+    height: 64px;
+    flex-grow: 1;
+    margin: 0 8px 0 0;
+    border-radius: 18px;
+    color: #FFFFFF;
+}
+.btn.subtab.subtab--active {
+    --contour: #21155E;
+    --epaisseur: #4530A8;
+    background-color: #6C4FE0;
+    background-image: url("Degrades/bouton_violet.png");
+    color: #FFFFFF;
+}
+
+/* ---------- Pages à vitrine (Inventaire, Index) ---------- */
+.page-split { flex-direction: row; }
+.page-split.shop-page--active { display: flex; }
+.page-split-main { flex-grow: 1; flex-shrink: 1; margin-left: 24px; }
+
+/* La vitrine : la caméra « CameraVitrine » filme le cheval dans une image posée ici. */
+.showcase {
+    width: 380px;
+    height: 475px;
+    flex-shrink: 0;
+    border-radius: 24px;
+    border-width: 4px;
+    border-color: #110D1F;
+    background-color: #1F1A33;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.bonus-line {
+    font-size: 22px;
+    color: #E6E1EE;
+    white-space: normal;
+    margin: 0 0 8px 0;
+    flex-shrink: 0;
+}
+
+/* ---------- Tuiles d'objets (§5.6) : coins 20, contour 4 de la rareté, fond #2A2440 ---------- */
+.item-card {
+    border-radius: 20px;
+    border-width: 4px;
+    background-color: #2A2440;
+    padding-bottom: 26px;   /* la place du badge « +X % » en bas */
+}
+.item-frame { border-radius: 24px; }
+.item-frame:hover .item-card { background-color: #3A3358; }
+.item-name {
+    font-size: 20px;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #110D1F;
+}
+
+/* Badge « +4 % » (bonus de tenue) : coin bas gauche, fond #1F1A33, texte or. */
+.bonus-badge {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    font-size: 15px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    background-color: #1F1A33;
+    border-radius: 8px;
+    padding: 0 6px;
+    margin: 0;
+}
+
+/* ---------- Réglages (§6.3) ---------- */
+.settings-page { justify-content: center; }
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 10px 0;
+}
+.settings-icon {
+    width: 64px;
+    height: 64px;
+    margin-right: 16px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.settings-icon--musique { background-image: url("../Art/icones_detourees/icone_musique.png"); }
+.settings-icon--effets { background-image: url("../Art/icones_detourees/icone_effets.png"); }
+.settings-label {
+    flex-grow: 1;
+    font-size: 30px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: #110D1F;
+}
+
+/* L'interrupteur 120 × 56 : vert « OUI » (rond à droite), gris « NON » (rond à gauche). */
+.switch {
+    width: 120px;
+    height: 56px;
+    margin: 0;
+    padding: 0;
+    border-width: 4px;
+    border-color: #110D1F;
+    border-radius: 28px;
+    background-color: #2E9E5B;
+    justify-content: center;
+}
+.switch:hover { background-color: #3BB56C; }
+.switch--off { background-color: #6E6A80; }
+.switch--off:hover { background-color: #7C7890; }
+.switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background-color: #FFFFFF;
+    translate: 64px 0;
+    transition-property: translate;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out-back;
+}
+.switch--off .switch-knob { translate: 0 0; }
+.switch-text {
+    font-size: 20px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #110D1F;
+    -unity-text-align: middle-left;
+    margin: 0 0 0 14px;
+    padding: 0;
+}
+.switch--off .switch-text { -unity-text-align: middle-right; margin: 0 14px 0 0; }
+.settings-footer {
+    font-size: 16px;
+    color: #B8B4C8;
+    -unity-text-align: middle-center;
+    margin-top: 18px;
+}
+
+/* ---------- Classement (§12.6) ---------- */
+.lb-info {
+    font-size: 18px;
+    color: #B8B4C8;
+    background-color: #1F1A33;
+    border-radius: 14px;
+    padding: 8px 14px;
+    margin: 4px 0 8px 0;
+    white-space: normal;
+    flex-shrink: 0;
+}
+.lb-header {
+    font-size: 36px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: #3A2200;
+    -unity-text-align: middle-center;
+    margin: 2px 0 8px 0;
+    flex-shrink: 0;
+}
+.lb-banner {
+    font-size: 22px;
+    color: #3A2200;
+    background-color: #FFD54A;
+    border-radius: 14px;
+    padding: 6px 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+    display: none;
+    flex-shrink: 0;
+}
+.lb-row {
+    flex-direction: row;
+    align-items: center;
+    height: 72px;
+    margin-bottom: 8px;
+    padding: 0 18px 0 12px;
+    border-radius: 18px;
+    background-color: #2A2440;
+    border-width: 2px;
+    border-color: #110D1F;
+    flex-shrink: 0;
+}
+.lb-row--me {
+    background-color: #3A3358;
+    border-width: 4px;
+    border-color: #FFD54A;
+}
+.lb-row--ghost {
+    background-color: #4A4466;
+    border-width: 0;
+}
+.lb-rank {
+    width: 60px;
+    height: 52px;
+    margin-right: 12px;
+    font-size: 26px;
+    color: #B8B4C8;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+/* Médailles 1, 2, 3 : image (or, argent, bronze) + rond de couleur dessous, chiffre par-dessus. */
+.lb-medal {
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    border-width: 3px;
+    color: #3A2200;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #FFFFFF;
+}
+.lb-medal--1 { background-color: #FFD54A; border-color: #B08A1E; background-image: url("../Art/icones_detourees/medaille_or.png"); }
+.lb-medal--2 { background-color: #C9CED8; border-color: #7E8494; background-image: url("../Art/icones_detourees/medaille_argent.png"); }
+.lb-medal--3 { background-color: #B0703A; border-color: #6E4220; background-image: url("../Art/icones_detourees/medaille_bronze.png"); }
+.lb-names { flex-grow: 1; flex-shrink: 1; }
+.lb-name {
+    font-size: 26px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    margin: 0;
+    padding: 0;
+}
+.lb-detail { font-size: 17px; color: #B8B4C8; margin: 0; padding: 0; }
+.lb-score {
+    font-size: 30px;
+    color: #FFD54A;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 2px;
+    -unity-text-outline-color: #3A2200;
+}
+.lb-empty {
+    font-size: 22px;
+    color: #B8B4C8;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-top: 20px;
+}
+.lb-bottom {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+.lb-mode { flex-grow: 1; font-size: 18px; color: #B8B4C8; }
+.btn.lb-btn {
+    font-size: 24px;
+    height: 68px;
+    min-width: 170px;
+    margin: 0 0 0 12px;
+    padding: 0 18px;
+    border-radius: 18px;
+}
+.lb-leave { align-self: flex-end; font-size: 18px; margin-top: 4px; flex-shrink: 0; }
+.lb-confirm {
+    position: absolute;
+    left: -32px; right: -32px; top: -16px; bottom: -28px;
+    background-color: rgba(14, 10, 26, 0.75);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+.lb-confirm-box {
+    width: 620px;
+    padding: 28px;
+    background-color: #3A3358;
+    border-width: 5px;
+    border-color: #110D1F;
+    border-radius: 26px;
+    align-items: center;
+}
+.lb-confirm-text {
+    font-size: 24px;
+    color: #FFFFFF;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 18px;
+}
+.lb-confirm-buttons { flex-direction: row; }
+
+/* ---------- Choisis ton pseudo (§12.7) ---------- */
+.name-page { justify-content: center; }
+.name-hint { font-size: 22px; color: #E6E1EE; -unity-text-align: middle-center; margin-bottom: 12px; }
+.name-field { margin: 0 0 8px 0; }
+.name-field > .unity-base-text-field__input {
+    font-size: 32px;
+    height: 72px;
+    padding: 0 18px;
+    color: #FFFFFF;
+    background-color: #15111F;
+    border-width: 4px;
+    border-color: #110D1F;
+    border-radius: 18px;
+    -unity-font-style: bold;
+}
+.name-field:focus > .unity-base-text-field__input { border-color: #FFD54A; }
+.name-message {
+    font-size: 20px;
+    color: #FF6B6B;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    min-height: 30px;
+    margin-bottom: 8px;
+}
+.name-buttons { flex-direction: row; justify-content: center; }

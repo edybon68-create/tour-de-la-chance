@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// Le panneau « Améliorations » (spec v3 §5.7) : une carte par amélioration, avec son
-    /// niveau (5 pastilles), l'effet actuel → l'effet suivant, et le bouton « Améliorer ».
+    /// Le panneau « Améliorations » (spec v3 §5.7, v4 §10.6) : une carte par amélioration, avec
+    /// son niveau (10 pastilles), l'effet actuel → l'effet suivant, et le bouton « Améliorer ».
     /// Ce n'est pas un MonoBehaviour : un simple objet créé et piloté par PanelsController.
     ///
     /// Il AFFICHE et TRANSMET : l'achat est décidé par Upgrades.TryBuy, et TOUS les chiffres
@@ -76,7 +76,7 @@ namespace TourDeLaChance
             top.Add(titles);
             card.Add(top);
 
-            // 2. Niveau : « Niveau 2 / 5 » + 5 pastilles
+            // 2. Niveau : « Niveau 7 / 10 » + 10 pastilles
             var levelRow = new VisualElement { pickingMode = PickingMode.Ignore };
             levelRow.AddToClassList("up-level-row");
             levelRow.Add(ShopUi.NewLabel($"Niveau {level} / {Upgrades_.MaxLevel}", "up-level"));
@@ -184,7 +184,7 @@ namespace TourDeLaChance
                                   : $"{baseCount + i} coffres : {a} % → {b} % des étages";
                 card.Add(ShopUi.NewLabel(text, "up-effect"));
             }
-            string risk = $"Risque moyen par étage : {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level))} %";
+            string risk = $"Risque moyen : {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level))} %";
             if (!max) risk += $" → {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level + 1))} %";
             var label = ShopUi.NewLabel(risk, "up-effect");
             label.AddToClassList("up-effect--strong");

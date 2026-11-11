@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: matiere_arc_en_ciel
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: matiere_arc_en_ciel
-  displayName: "Arc-en-ciel n\xE9on"
+  displayName: Arc-en-ciel
   category: 0
   slot: 0
   rarity: legendaire
@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.6
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1

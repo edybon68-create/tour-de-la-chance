@@ -26,7 +26,7 @@
     min-width: 340px;
     height: 112px;
     margin: 0;
-    border-radius: 20px;
+    border-radius: 22px;
     overflow: hidden;
 }
 
@@ -34,27 +34,4 @@
 .title-play-wrap {
     margin: 24px 0 48px 0;
     align-items: center;
-}
-
-/* Les boutons du son, posés en haut à gauche par-dessus l'écran titre.
-   Même style que dans le HUD (classe .sound-toggle, recopiée ici car chaque
-   écran a sa propre feuille de style). */
-.title-sound-toggles {
-    position: absolute;
-    left: 32px;
-    top: 32px;
-    flex-direction: row;
-}
-
-/* v3 (B4, §10.5) : texte 24 px, hauteur mini 48 px, marge 8 × 16, famille « sombre ». */
-.sound-toggle {
-    font-size: 24px;
-    min-height: 48px;
-    padding: 8px 16px;
-    margin: 0 8px 0 0;
-    border-radius: 14px;
-}
-
-.sound-toggle--off {
-    opacity: 0.5;
 }

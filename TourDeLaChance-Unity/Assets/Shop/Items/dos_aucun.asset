@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: dos_aucun
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: dos_aucun
-  displayName: Rien dans le dos
+  displayName: Rien
   category: 1
   slot: 3
   rarity: 
@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.3
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1

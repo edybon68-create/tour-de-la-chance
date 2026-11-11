@@ -6,9 +6,9 @@ using UnityEngine.InputSystem;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// L'épreuve des coffres : 3, 4 ou 5 coffres (amélioration « Coffre en plus »), et
-    /// TOUJOURS un seul piégé, tiré au hasard parmi les coffres présents à chaque étage.
-    /// Le joueur clique sur un coffre (ou appuie sur 1 à 5, de gauche à droite).
+    /// L'épreuve des coffres : 3 à 6 coffres (amélioration « Coffre en plus », v4 : jusqu'à 6),
+    /// et TOUJOURS un seul piégé, tiré au hasard parmi les coffres présents à chaque étage.
+    /// Le joueur clique sur un coffre (ou appuie sur 1 à 6, de gauche à droite).
     ///
     /// Elle déroule aussi la chronologie de l'ouverture (suspense, ouverture, révélation),
     /// toujours IDENTIQUE pour un trésor et pour un piège de la même rareté de coffre
@@ -19,8 +19,8 @@ namespace TourDeLaChance
     /// </summary>
     public class ChestTrial : MonoBehaviour
     {
-        /// La scène contient 5 coffres ; ceux en trop sont désactivés à chaque étage.
-        public const int MaxChests = 5;
+        /// La scène contient 6 coffres (v4 §10.4) ; ceux en trop sont désactivés à chaque étage.
+        public const int MaxChests = 6;
 
         [SerializeField] Chest[] chests;
 
@@ -50,7 +50,7 @@ namespace TourDeLaChance
         /// Peut-on choisir un coffre en ce moment ? (pour l'affichage : invitation au clic)
         public bool AcceptsChoice => waitingForChoice && !InputLocked;
 
-        /// Le nombre de coffres PRÉSENTS à cet étage (3, 4 ou 5).
+        /// Le nombre de coffres PRÉSENTS à cet étage (3 à 6).
         public int ChestCount => activeCount;
         public Chest GetChest(int index) => chests[index];
         /// La rareté des coffres de l'étage (0 = Bois … 4 = Diamant).
@@ -81,15 +81,17 @@ namespace TourDeLaChance
             }
         }
 
-        /// Placement des coffres selon leur nombre (spec v3 §5.4) : positions x et échelle.
+        /// Placement des coffres selon leur nombre (spec v3 §5.4, v4 §10.4) : positions x et
+        /// échelle. 6 coffres : écartés de 1,5 m, échelle 0,75 (1,125 m de large, 0,375 m d'écart).
         static readonly float[][] Positions =
         {
             new[] { -2.6f, 0f, 2.6f },
             new[] { -3.3f, -1.1f, 1.1f, 3.3f },
-            new[] { -3.6f, -1.8f, 0f, 1.8f, 3.6f }
+            new[] { -3.6f, -1.8f, 0f, 1.8f, 3.6f },
+            new[] { -3.75f, -2.25f, -0.75f, 0.75f, 2.25f, 3.75f }
         };
         public static float[] PositionsFor(int count) => Positions[Mathf.Clamp(count, 3, MaxChests) - 3];
-        public static float ScaleFor(int count) => count >= 5 ? 0.85f : 1f;
+        public static float ScaleFor(int count) => count >= 6 ? 0.75f : count >= 5 ? 0.85f : 1f;
 
         /// Durée du suspense (§3.3 et v3 §5.3.2) : 0,6 s + 0,08 s par étage au-dessus du 1er
         /// (au plus 1 s), plus 0,1 s par rang de rareté de coffre ; le tout plafonné à 1,4 s.
@@ -208,11 +210,11 @@ namespace TourDeLaChance
                 return;
             }
 
-            // Raccourcis clavier 1 à 5, seulement pour les coffres présents.
+            // Raccourcis clavier 1 à 6, seulement pour les coffres présents.
             var kb = Keyboard.current;
             if (kb != null)
             {
-                Key[] keys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5 };
+                Key[] keys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6 };
                 for (int i = 0; i < activeCount && i < keys.Length; i++)
                     if (kb[keys[i]].wasPressedThisFrame) { Choose(i); return; }
             }

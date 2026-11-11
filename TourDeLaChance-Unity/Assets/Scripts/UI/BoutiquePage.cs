@@ -77,6 +77,7 @@ namespace TourDeLaChance
             // 3. Tableau des taux : TOUT est lu dans le catalogue (aucun chiffre en dur).
             card.Add(RatesTable(box));
             card.Add(ShopUi.NewLabel("Chaque ouverture donne 1 objet. Les chances sont toujours les mêmes, à chaque ouverture.", "rates-note"));
+            card.Add(ShopUi.NewLabel(OutfitBonusLine(), "rates-note"));
 
             // Collection complète : la boîte reste ouvrable.
             if (Shop.IsComplete(box))
@@ -100,6 +101,16 @@ namespace TourDeLaChance
             link.AddToClassList("link-btn");
             card.Add(link);
             return card;
+        }
+
+        /// v4 §9.4 : le bonus de tenue de chaque rareté, LU DANS LE CATALOGUE (aucun chiffre en
+        /// dur), sans incitation.
+        static string OutfitBonusLine()
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            foreach (var r in Shop.Catalog.Rarities) parts.Add($"{r.displayName} +{r.coinBonusPercent} %");
+            return "Chaque objet équipé donne un bonus de pièces sur les trésors : " + string.Join(", ", parts) +
+                   $" (au total {Shop.OutfitBonusCap} % maximum).";
         }
 
         VisualElement RatesTable(LootBox box)

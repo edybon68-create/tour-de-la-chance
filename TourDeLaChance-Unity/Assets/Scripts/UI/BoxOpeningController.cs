@@ -592,6 +592,9 @@ namespace TourDeLaChance
             nameLabel.text = item.DisplayName;
             rarityLabel.text = current.Rarity != null ? current.Rarity.displayName : "";
             rarityLabel.style.color = current.Rarity != null ? current.Rarity.textColor : Color.white;
+            // v4 §9.4 : sous la rareté, le bonus de tenue que donne l'objet une fois équipé.
+            int bonus = Shop.BonusPercent(item);
+            if (bonus > 0) rarityLabel.text += $"\nÉquipé, il donne +{bonus} % de pièces";
             boxLine.text = $"{current.Box.displayName} · n°{Shop.NumberOf(item):00}";
             badge.RemoveFromClassList("ov-badge--new");
             badge.RemoveFromClassList("ov-badge--dup");

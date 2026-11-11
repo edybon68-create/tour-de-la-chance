@@ -1,0 +1,24 @@
+/* Le THÈME commun de toute l'interface v4, importé une seule fois par HudTheme.tss (le
+   thème posé sur HudPanelSettings) : il vaut donc pour TOUS les écrans.
+
+   ============================  LA POLICE DU JEU  ============================
+   Elle est définie ICI et nulle part ailleurs (aucun autre fichier USS ne choisit de police).
+   Fredoka (licence libre SIL OFL 1.1, texte dans Fonts/OFL.txt — à garder avec la police) :
+     - Fonts/Fredoka-SemiBold_SDF.asset : le texte courant ;
+     - Fonts/Fredoka-Bold_SDF.asset : reliée dans la case « Bold » de la SemiBold, donc tous
+       les « -unity-font-style: bold » utilisent la vraie graisse grasse ;
+     - Fonts/PoliceSecours_SDF.asset : l'ancienne police du jeu, en SECOURS pour les
+       symboles que Fredoka n'a pas (★ → ●).
+   Pour changer de police : remplacer le fichier de la ligne ci-dessous. Rien d'autre.
+   ============================================================================ */
+
+:root {
+    -unity-font-definition: url("Fonts/Fredoka-SemiBold_SDF.asset");
+
+    /* Couleurs de structure partagées (spec v4 §5.6, art-bible §12.2). */
+    --encre: #110D1F;          /* contour universel des cadres v4 */
+    --corps-popup: #2A2440;
+    --tuile: #2A2440;
+    --texte-discret: #B8B4C8;
+    --or: #FFD54A;
+}

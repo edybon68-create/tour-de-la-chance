@@ -1,1 +1,3 @@
 @import url("unity-theme://default");
+/* v4 : le thème commun (police unique, couleurs partagées) pour tous les écrans. */
+@import url("Theme.uss");

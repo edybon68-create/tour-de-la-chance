@@ -20,6 +20,15 @@
 > - les identifiants inconnus sont **conservés** dans la sauvegarde (§4.6, correctif B6) ;
 > - le personnage est un **cheval** : positions et échelles des points d'accroche dans `v3.md` §7.
 > Dans les exemples et critères ci-dessous, lire « 250 » partout où il est écrit « Ouvrir — 100 ».
+>
+> **Mise à jour v4 (`docs/specs/v4.md`) — ce qui change ici :**
+> - **noms affichés simplifiés** (§5.3, §5.4, §5.5) : liste complète ancien → nouveau dans
+>   `v4.md` §8 (ex. « Rouge tomate » → « Rouge », « Arc-en-ciel néon » → « Arc-en-ciel »,
+>   « Couronne royale » → « Couronne ») ; identifiants inchangés ;
+> - règle d'or n°2 (§2) : les cosmétiques équipés donnent un **bonus de pièces sur les
+>   trésors** (bonus de tenue, `v4.md` §9), jamais sur les chances ;
+> - **Galaxie** (§5.3 n°16) : nébuleuse animée calculée par le code, `v4.md` §7 ;
+> - les panneaux deviennent des **pop-ups centrées** (`v4.md` §5.6).
 
 ---
 
@@ -36,7 +45,8 @@ entre encaisser maintenant ou risquer un étage de plus.
 
 1. **Pièces virtuelles uniquement**, gagnées en jouant. Aucun achat en argent réel, aucune
    pièce à acheter, aucun bouton qui mène vers un paiement.
-2. **Les cosmétiques ne changent jamais les chances**, ni les gains, ni le piège.
+2. **Les cosmétiques ne changent jamais les chances**, ni le piège. (v4 : équipés, ils
+   donnent un bonus de pièces sur les trésors, plafonné à +50 % ; `v4.md` §2 et §9.)
 3. **Les taux affichés sont exactement ceux du code** : l'interface ne contient aucun
    pourcentage écrit « en dur » ; elle lit les chiffres dans le catalogue, là où le tirage
    les lit aussi (une seule source de vérité).

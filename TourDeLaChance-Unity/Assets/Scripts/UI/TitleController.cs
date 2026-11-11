@@ -5,17 +5,18 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// L'écran titre (Title.uxml) : le logo, le bouton « Jouer » et les boutons du son.
+    /// L'écran titre (Title.uxml) : le logo et le bouton « Jouer » (v4 : la roue dentée des
+    /// Réglages est dessinée par PanelsController, au-dessus de tout).
     /// Il ne décide de rien : il est visible tant que le GameManager est dans l'état Title,
     /// et le bouton demande simplement au GameManager de lancer la partie (StartGame).
     ///
     /// Animations (spec §3.12) : le logo apparaît (échelle 0,8 → 1,05 → 1) puis flotte ;
     /// « Jouer » apparaît 0,4 s après et « respire » ; au clic, l'écran s'efface en 0,4 s.
     ///
-    /// v3 §4.2 : un panneau peut s'ouvrir dès l'écran titre. L'écran titre s'efface alors
-    /// (0,2 s) pour laisser voir le cheval, et « Jouer » n'est ni cliquable ni activable au
-    /// clavier (on lui retire le focus, correctif B2). À la fermeture, il revient (0,2 s),
-    /// sans rejouer l'animation du logo. « Jouer » reçoit l'éclat qui passe (§10.4).
+    /// v4 §4.4 : sur l'écran titre, seule la pop-up Réglages peut s'ouvrir. Le titre reste
+    /// affiché sous le fond assombri, mais « Jouer » n'est ni cliquable ni activable au clavier
+    /// (on lui retire le focus, correctif B2). À la fermeture, « Jouer » refonctionne.
+    /// « Jouer » reçoit l'éclat qui passe (le seul bouton qui l'a).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class TitleController : MonoBehaviour
@@ -24,11 +25,10 @@ namespace TourDeLaChance
 
         VisualElement root, logo, playWrap;
         Button playButton;
-        SoundToggleButtons soundButtons;
         bool visible;
-        bool hiddenByPanel;   // un panneau est ouvert par-dessus l'écran titre
+        bool coveredByPopup;  // la pop-up Réglages est ouverte par-dessus l'écran titre
         float logoTime, playTime, shineTime;
-        Coroutine fade, panelFade;
+        Coroutine fade;
         VisualElement shine;
 
         void OnEnable()
@@ -38,7 +38,6 @@ namespace TourDeLaChance
             logo = doc.Q<VisualElement>("logo");
             playWrap = doc.Q<VisualElement>("play-wrap");
             playButton = doc.Q<Button>("play");
-            soundButtons = new SoundToggleButtons(doc.Q<Button>("music-toggle"), doc.Q<Button>("effects-toggle"));
             UiSounds.Register(root);
             // « Jouer » joue son propre son (ui_jouer) au lieu du ui_clic habituel, et GARDE
             // le focus clavier (Entrée / Espace lancent la partie depuis l'écran titre).
@@ -57,7 +56,6 @@ namespace TourDeLaChance
         {
             playButton.clicked -= OnPlayClicked;
             game.Changed -= Refresh;
-            soundButtons?.Dispose();
             UiSounds.Unregister(root);
         }
 
@@ -93,45 +91,30 @@ namespace TourDeLaChance
             }
         }
 
-        /// Un panneau s'ouvre (ou se ferme) par-dessus l'écran titre : on l'efface (0,2 s) ou
-        /// on le ramène (0,2 s). Pendant ce temps, « Jouer » ne réagit ni au clic ni au clavier.
+        /// La pop-up Réglages s'ouvre (ou se ferme) par-dessus l'écran titre : le titre reste
+        /// visible, mais « Jouer » ne réagit plus ni au clic ni au clavier (focus retiré, B2).
         void UpdatePanelCover()
         {
             bool cover = game.IsPanelOpen;
-            if (cover == hiddenByPanel) return;
-            hiddenByPanel = cover;
-            if (panelFade != null) StopCoroutine(panelFade);
+            if (cover == coveredByPopup) return;
+            coveredByPopup = cover;
             if (cover)
             {
                 playButton.Blur();
                 playButton.focusable = false;
-                root.pickingMode = PickingMode.Ignore;
-                panelFade = StartCoroutine(PanelFade(root.resolvedStyle.opacity, 0f, hideAtEnd: true));
+                playButton.pickingMode = PickingMode.Ignore;
             }
             else
             {
-                root.style.display = DisplayStyle.Flex;
-                root.pickingMode = PickingMode.Position;
                 playButton.focusable = true;
-                panelFade = StartCoroutine(PanelFade(0f, 1f, hideAtEnd: false));
                 playButton.Focus();
             }
         }
 
-        IEnumerator PanelFade(float from, float to, bool hideAtEnd)
-        {
-            for (float t = 0f; t < 0.2f; t += Time.deltaTime)
-            {
-                root.style.opacity = Mathf.Lerp(from, to, t / 0.2f);
-                yield return null;
-            }
-            root.style.opacity = to;
-            if (hideAtEnd) root.style.display = DisplayStyle.None;
-            panelFade = null;
-        }
-
-        /// Pour les tests : l'écran titre est-il caché par un panneau ?
-        public bool HiddenByPanel => hiddenByPanel;
+        /// Pour les tests : la pop-up Réglages couvre-t-elle l'écran titre ?
+        public bool CoveredByPopup => coveredByPopup;
+        /// Pour les tests : « Jouer » peut-il recevoir Entrée / Espace en ce moment ?
+        public bool PlayFocusable => playButton.focusable;
 
         IEnumerator FadeOut()
         {
@@ -152,8 +135,8 @@ namespace TourDeLaChance
             float dt = Time.deltaTime;
             shineTime += dt;
             ButtonStyler.TickShine(shine, playButton, shineTime);
-            // Panneau ouvert : le logo ne continue pas son apparition (il ne la rejoue pas).
-            if (hiddenByPanel) { playButton.pickingMode = PickingMode.Ignore; return; }
+            // Réglages ouverts : « Jouer » ne se laisse pas cliquer (le reste continue).
+            if (coveredByPopup) playButton.pickingMode = PickingMode.Ignore;
 
             // Logo : apparition en 0,6 s (opacité 0 → 1, échelle 0,8 → 1,05 → 1),
             // puis il flotte : ±6 px, période 3 s.
@@ -185,7 +168,7 @@ namespace TourDeLaChance
                 float b = 1f + 0.025f * (1f - Mathf.Cos(2f * Mathf.PI * playTime / 1.6f));
                 playWrap.style.opacity = 1f;
                 playWrap.style.scale = new Scale(new Vector3(b, b, 1f));
-                playButton.pickingMode = PickingMode.Position;
+                if (!coveredByPopup) playButton.pickingMode = PickingMode.Position;
             }
         }
     }

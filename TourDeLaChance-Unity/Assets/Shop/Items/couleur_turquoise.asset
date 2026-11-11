@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: couleur_turquoise
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: couleur_turquoise
-  displayName: Turquoise lagon
+  displayName: Turquoise
   category: 0
   slot: 0
   rarity: peu_commun
@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.6
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1

@@ -1,6 +1,6 @@
-/* La colonne de boutons et le cadre des 4 panneaux (spec v3 §4.3, §4.4), et les cartes du
-   panneau Améliorations (§5.7). Référence 1920 × 1080. Les cartes d'objets et de boîtes
-   gardent leur style dans Shop.uss ; les boutons « bonbons » sont dans Buttons.uss. */
+/* Le rappel du porte-monnaie et les cartes du panneau Améliorations (spec v3 §5.7, v4 §10.6).
+   Référence 1920 × 1080. v4 : le cadre des pop-ups et les colonnes sont dans Popups.uss ; les
+   cartes d'objets et de boîtes dans Shop.uss ; les boutons dans Buttons.uss. */
 
 .panels-root {
     position: absolute;
@@ -10,123 +10,7 @@
     bottom: 0;
 }
 
-/* ---------- La colonne (bord gauche, à 32 px, de y = 230 px) ---------- */
-.panel-column {
-    position: absolute;
-    left: 32px;
-    top: 230px;
-    width: 120px;
-}
-
-.col-btn {
-    width: 120px;
-    height: 120px;
-    margin: 0 0 16px 0;
-    padding: 6px 2px 4px 2px;
-    border-radius: 20px;
-    align-items: center;
-    justify-content: flex-start;
-    background-color: rgba(42, 42, 58, 0.9); /* #2A2A3A à 90 % */
-    border-left-width: 0;
-    border-right-width: 0;
-}
-
-.col-btn-icon {
-    width: 64px;
-    height: 64px;
-    -unity-background-scale-mode: scale-to-fit;
-    transition-property: scale;
-    transition-duration: 0.15s;
-}
-
-.col-btn-text {
-    font-size: 20px;
-    color: #F4EEE6;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    text-shadow: 0 2px 0 #15121F;
-    padding: 0;
-    margin: 2px 0 0 0;
-}
-
-/* « Améliorations » en taille 17 pour tenir sur une ligne. */
-.col-btn-text--small {
-    font-size: 17px;
-}
-
-/* Le bouton du panneau ouvert : bordure or de 4 px, fond #3A3A50, icône agrandie à 1,1. */
-.btn.col-btn--active {
-    background-color: #3A3A50;
-    border-left-width: 4px;
-    border-right-width: 4px;
-    border-top-width: 4px;
-    border-bottom-width: 4px;
-    border-left-color: #FFD54A;
-    border-right-color: #FFD54A;
-    border-top-color: #FFD54A;
-    border-bottom-color: #FFD54A;
-}
-
-.btn.col-btn--active > .col-btn-icon {
-    scale: 1.1 1.1;
-}
-
-/* Interdit (suspense, transition…) : les boutons restent visibles, opacité 0,4, inertes. */
-.btn.col-btn:disabled {
-    opacity: 0.4;
-    background-color: rgba(42, 42, 58, 0.9);
-    border-top-color: #3A3A50;
-    border-bottom-color: #15121F;
-}
-
-.btn.col-btn:disabled > .col-btn-text {
-    color: #F4EEE6;
-}
-
-/* ---------- Le cadre commun ---------- */
-.panel-frame {
-    position: absolute;
-    left: 168px;
-    top: 176px;
-    bottom: 0;
-    width: 660px;
-    background-color: rgba(42, 42, 58, 0.92);
-    border-top-right-radius: 24px;
-    border-bottom-right-radius: 24px;
-    padding: 14px 18px 14px 18px;
-}
-
-.panel-header {
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.panel-header-icon {
-    width: 48px;
-    height: 48px;
-    margin-right: 12px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.panel-title {
-    flex-grow: 1;
-    font-size: 40px;
-    color: #FFD54A;
-    -unity-font-style: bold;
-    -unity-text-outline-width: 1px;
-    -unity-text-outline-color: #3A2200;
-    padding: 0;
-    margin: 0;
-}
-
-.panel-close {
-    width: 64px;
-    height: 64px;
-    font-size: 36px;
-    margin: 0;
-    padding: 0;
-}
+/* v4 : la colonne, le cadre et l'en-tête sont dans Popups.uss (pop-ups centrées). */
 
 .panel-wallet-row {
     flex-direction: row;
@@ -148,8 +32,10 @@
 
 /* ---------- Panneau Améliorations ---------- */
 .up-card {
-    background-color: #3A3A50;
-    border-radius: 16px;
+    background-color: #3A3358;
+    border-width: 4px;
+    border-color: #110D1F;
+    border-radius: 22px;
     padding: 16px;
     margin-bottom: 16px;
 }
@@ -202,12 +88,12 @@
     padding: 0;
 }
 
-/* Les 5 pastilles : pleines or = acheté, vides contour #6A6A80. */
+/* Les 10 pastilles (v4 §10.6) : Ø 20 px, 6 px d'écart ; pleines or = acheté. */
 .up-dot {
-    width: 22px;
-    height: 22px;
-    border-radius: 11px;
-    margin-right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin-right: 6px;
     border-width: 3px;
     border-color: #6A6A80;
     background-color: rgba(0, 0, 0, 0);
@@ -281,7 +167,7 @@
 
 .up-buy {
     font-size: 30px;
-    height: 76px;
+    height: 84px;
     min-width: 300px;
     margin: 0;
 }
@@ -294,10 +180,12 @@
 }
 
 .up-max {
-    font-size: 26px;
+    font-size: 30px;
     color: #3A2200;
     background-color: #FFD54A;
-    border-radius: 12px;
+    border-width: 4px;
+    border-color: #6B4300;
+    border-radius: 18px;
     padding: 8px 20px;
     -unity-font-style: bold;
 }

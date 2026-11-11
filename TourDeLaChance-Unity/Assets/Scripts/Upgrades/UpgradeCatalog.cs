@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// Le catalogue des améliorations (spec v3 §18) : LA source unique des prix, des effets,
+    /// Le catalogue des améliorations (spec v3 §18, v4 §10.5) : LA source unique des prix, des effets,
     /// des chances de rareté et de nombre de coffres. Le tirage ET le panneau Améliorations
     /// lisent ces mêmes nombres : impossible d'afficher un pourcentage différent de celui du
     /// code (règle d'or n°3). Rangé dans Assets/Resources/ pour être chargé par son nom.
@@ -39,8 +39,9 @@ namespace TourDeLaChance
 
             foreach (var u in upgrades)
             {
-                if (u.levels.Count < Upgrades_.MaxLevel + 1)
-                    Error($"« {u.displayName} » a {u.levels.Count} niveaux au lieu de {Upgrades_.MaxLevel + 1} (0 à 5).");
+                // v4 : 11 niveaux (0 = pas achetée, puis 1 à 10).
+                if (u.levels.Count != Upgrades_.MaxLevel + 1)
+                    Error($"« {u.displayName} » a {u.levels.Count} niveaux au lieu de {Upgrades_.MaxLevel + 1} (0 à {Upgrades_.MaxLevel}).");
                 for (int i = 1; i < u.levels.Count; i++)
                 {
                     // Prix strictement croissants : chaque niveau coûte plus que le précédent.
@@ -48,7 +49,9 @@ namespace TourDeLaChance
                         Error($"« {u.displayName} » : le prix du niveau {i} ({u.levels[i].price}) n'est pas plus grand que celui du niveau {i - 1}.");
                 }
                 if (u.id == Upgrades_.Gains) continue; // la Bourse n'a pas de poids
-                int columns = u.id == Upgrades_.Chests ? chestRarities.Count : 3;
+                // Coffres précieux : une colonne par rareté (5). Coffre en plus : 4 colonnes
+                // (3, 4, 5 et 6 coffres, v4 §10.4).
+                int columns = u.id == Upgrades_.Chests ? chestRarities.Count : Upgrades_.ChestCountColumns;
                 for (int i = 0; i < u.levels.Count; i++)
                 {
                     var w = u.levels[i].weights;
@@ -68,6 +71,9 @@ namespace TourDeLaChance
         public const string Gains = "gains";
         public const string Chests = "coffres";
         public const string Traps = "pieges";
-        public const int MaxLevel = 5;
+        /// v4 §10.1 : les améliorations vont jusqu'au niveau 10 (5 en v3).
+        public const int MaxLevel = 10;
+        /// v4 §10.4 : « Coffre en plus » a 4 colonnes de poids (3, 4, 5 ou 6 coffres).
+        public const int ChestCountColumns = 4;
     }
 }

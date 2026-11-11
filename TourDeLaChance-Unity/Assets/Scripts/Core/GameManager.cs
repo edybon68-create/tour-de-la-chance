@@ -16,8 +16,10 @@ namespace TourDeLaChance
         CashedOut   // encaissé : la cagnotte va dans le porte-monnaie
     }
 
-    /// Les 4 panneaux latéraux (spec v3 §4.1). None = aucun panneau ouvert.
-    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations }
+    /// Les pop-ups (spec v3 §4.1, v4 §5.6). None = aucune pop-up ouverte.
+    /// v4 : + Classement (colonne de droite) et Reglages (roue dentée). AJOUTÉS À LA FIN :
+    /// les outils de test utilisent les numéros (Boutique = 1 … Ameliorations = 4).
+    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations, Classement, Reglages }
 
     /// <summary>
     /// Le chef d'orchestre : il connaît l'étage, la cagnotte, l'état de la partie,
@@ -97,13 +99,26 @@ namespace TourDeLaChance
         /// partie (et que l'ancien record valait au moins 3) : la bannière l'annonce.
         public bool NewRecordThisFloor { get; private set; }
 
-        /// Peut-on ouvrir un panneau ? (spec v3 §4.2) Dès l'écran titre, et à tous les moments
-        /// calmes : choix d'un coffre (verrou retiré), écrans Perdu / Encaissé. Jamais pendant
-        /// une épreuve, une transition ou une ouverture de boîte.
+        /// Peut-on ouvrir une pop-up (Boutique, Inventaire, Index, Améliorations, Classement) ?
+        /// (spec v4 §4.4, remplace v3 §4.2) À tous les moments calmes : choix d'un coffre
+        /// (verrou retiré), écrans Perdu / Encaissé. PLUS sur l'écran titre (v4 : il reste
+        /// propre). Jamais pendant une épreuve, une transition ou une ouverture de boîte.
         public bool CanOpenPanel =>
             !TransitionLocked && !BoxOpeningActive &&
-            (State == GameState.Title || State == GameState.Choosing ||
-             State == GameState.Lost || State == GameState.CashedOut);
+            (State == GameState.Choosing || State == GameState.Lost || State == GameState.CashedOut);
+
+        /// Peut-on ouvrir les Réglages (roue dentée) ? Comme les autres pop-ups, ET sur l'écran
+        /// titre (pour couper la musique avant de jouer). Jamais pendant une ouverture de boîte.
+        public bool CanOpenSettings =>
+            !BoxOpeningActive && ((State == GameState.Title && !TransitionLocked) || CanOpenPanel);
+
+        /// Le record d'étage au début de la partie en cours (pour le badge « RECORD »).
+        public int RecordAtRunStart => recordAtRunStart;
+
+        /// Vrai pendant toute la partie dès que l'étage a dépassé le record de départ (et que
+        /// ce record valait au moins 3, comme la bannière « Nouveau record ! ») : le badge
+        /// d'étage passe en or avec l'étiquette « RECORD » (spec v4 §6.1).
+        public bool RecordBeatenThisRun => recordAnnounced;
 
         /// Peut-on encaisser ? Pendant le choix, à partir de l'étage 2 (avant, la cagnotte
         /// vaut 0), panneau fermé, hors verrou de transition.
@@ -124,6 +139,9 @@ namespace TourDeLaChance
         /// Le nouvel étage se montre : fin de la montée / de la redescente / du remélange
         /// (le message et l'étiquette d'étage apparaissent, les coffres précieux sautent).
         public event Action FloorShown;
+        /// v4 §12 : une partie vient de se terminer (Perdu ou Encaissé). Le GameManager
+        /// prévient seulement : les statistiques et le classement s'en occupent.
+        public event Action<RunResult> RunEnded;
 
         Coroutine transition;
         // Le générateur des RÈGLES (nombre de coffres, rareté, piège) : créé une fois, séparé
@@ -150,7 +168,7 @@ namespace TourDeLaChance
         }
 
         // Au lancement, on reste sur l'écran titre : aucun coffre n'est préparé, donc ils ne
-        // sont pas cliquables. Les panneaux, eux, sont permis (spec v3 §4.2).
+        // sont pas cliquables. v4 : seule la pop-up Réglages est permise sur l'écran titre.
         void Start() => SetState(GameState.Title);
 
         /// Le palier de décor d'un étage : 1-3 → 1, 4-6 → 2, 7-9 → 3, 10 et plus → 4.
@@ -195,11 +213,15 @@ namespace TourDeLaChance
             Wallet.Add(Pot);
             Pot = 0;
             SetState(GameState.CashedOut);
+            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false });
         }
 
         // =====================================================================
         // Les panneaux (spec v3 §4.2)
         // =====================================================================
+
+        /// Peut-on ouvrir CETTE pop-up maintenant ? (Réglages a sa propre règle, §4.4.)
+        public bool CanOpen(PanelId panel) => panel == PanelId.Reglages ? CanOpenSettings : CanOpenPanel;
 
         /// Ouvre un panneau (s'il est permis) ; s'il y en avait un autre, il est remplacé.
         /// Les coffres sont bloqués tant qu'un panneau est ouvert. On n'appelle JAMAIS
@@ -207,7 +229,7 @@ namespace TourDeLaChance
         public void OpenPanel(PanelId panel)
         {
             if (panel == PanelId.None) { ClosePanel(); return; }
-            if (panel == PanelOpen || !CanOpenPanel) return;
+            if (panel == PanelOpen || !CanOpen(panel)) return;
             bool wasOpen = IsPanelOpen;
             PanelOpen = panel;
             ApplyInputLock();
@@ -247,14 +269,18 @@ namespace TourDeLaChance
         // Préparer un étage (spec v3 §5.5)
         // =====================================================================
 
-        /// Dans cet ordre : 1. lire les niveaux d'amélioration MAINTENANT ; 2. tirer le nombre
-        /// de coffres ; 3. tirer la rareté ; 4. calculer le gain ; 5. préparer les coffres (qui
-        /// tirent le piège). Tout est figé pour l'étage.
+        /// Dans cet ordre : 1. lire les niveaux d'amélioration ET le bonus de tenue MAINTENANT ;
+        /// 2. tirer le nombre de coffres ; 3. tirer la rareté ; 4. calculer le gain ; 5. préparer
+        /// les coffres (qui tirent le piège). Tout est figé pour l'étage (v4 §9.3 : équiper un
+        /// objet pendant le choix ne change pas l'étage affiché).
+        /// RÈGLE D'OR : le bonus de tenue n'entre QUE dans le calcul du gain (étape 4) ; les
+        /// tirages des étapes 2, 3 et 5 ne le connaissent pas.
         void PrepareFloor()
         {
             int gainsLevel = Upgrades.Level(Upgrades_.Gains);
             int chestsLevel = Upgrades.Level(Upgrades_.Chests);
             int trapsLevel = Upgrades.Level(Upgrades_.Traps);
+            int outfitBonus = Shop.OutfitBonusPercent;
 
             int count = forcedCount > 0 ? forcedCount : Upgrades.DrawChestCount(trapsLevel, rulesRandom);
             int rank = forcedRarity >= 0 ? forcedRarity : Upgrades.DrawChestRarity(chestsLevel, rulesRandom);
@@ -266,7 +292,8 @@ namespace TourDeLaChance
                 ChestCount = count,
                 RarityRank = rank,
                 Rarity = Upgrades.Rarity(rank),
-                Gain = Upgrades.FloorGain(coinsPerFloor, Floor, gainsLevel, rank)
+                Gain = Upgrades.FloorGain(coinsPerFloor, Floor, gainsLevel, rank, outfitBonus),
+                OutfitBonusPercent = outfitBonus
             };
             chestTrial.Begin(Floor, count, rank, rulesRandom);
             UpdateRecord();
@@ -314,7 +341,7 @@ namespace TourDeLaChance
             RunTransition(ClimbRoutine());
         }
 
-        /// OUTIL DE TEST : force le nombre de coffres (3 à 5, 0 = tirage normal) et la rareté
+        /// OUTIL DE TEST : force le nombre de coffres (3 à 6, 0 = tirage normal) et la rareté
         /// (0 à 4, −1 = tirage normal) du PROCHAIN étage préparé seulement.
         public void DebugForceNextFloor(int count, int rarityRank)
         {
@@ -344,6 +371,7 @@ namespace TourDeLaChance
                 LastLoss = Pot;
                 Pot = 0;
                 SetState(GameState.Lost);
+                RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true });
             }
         }
 

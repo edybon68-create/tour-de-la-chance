@@ -46,13 +46,21 @@ namespace TourDeLaChance
         static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
         static readonly int EmissionMapId = Shader.PropertyToID("_EmissionMap");
 
-        // Couleur de l'étoile de la galaxie (#FFF1D6), multipliée par l'intensité qui scintille.
-        static readonly Color StarColor = new Color(1f, 0.945f, 0.839f);
+        // v4 §7.5 : la Galaxie (vernis brillant, lumière propre ×1,4 : sous le plafond de 1,5
+        // de l'art bible puisque les texels de la carte d'émission ne dépassent jamais 1).
+        const float GalaxyEmission = 1.4f;
+        const float GalaxySmoothness = 0.85f;
+        const float GalaxyMetallic = 0.1f;
+        const float GalaxyStep = 0.05f;                 // recalcul 20 fois par seconde
+        static readonly Vector2 GalaxyTiling = new Vector2(2f, 1.5f);
+        static readonly Color GalaxySparkleColor = new Color(0.812f, 0.878f, 1f); // #CFE0FF
 
         // Une copie de chaque matériau de départ, propre à ce personnage.
         Material opaqueMat, transparentMat, emissiveMat;
         ShopItem shownSkin;
         float skinTime;
+        GalaxyTexture galaxy;     // créée au premier affichage de la Galaxie
+        float galaxyTimer;        // temps accumulé depuis le dernier recalcul
 
         // Un accessoire affiché par emplacement (index = AccessorySlot).
         readonly ShopItem[] shownAccessories = new ShopItem[4];
@@ -88,7 +96,11 @@ namespace TourDeLaChance
             if (opaqueMat != null) Destroy(opaqueMat);
             if (transparentMat != null) Destroy(transparentMat);
             if (emissiveMat != null) Destroy(emissiveMat);
+            galaxy?.Dispose();
         }
+
+        /// La texture animée de la Galaxie (null tant qu'elle n'a jamais été affichée), pour les tests.
+        public GalaxyTexture Galaxy => galaxy;
 
         /// Affiche les objets équipés (ceux de la sauvegarde) : le skin et les 4 emplacements.
         public void ShowEquipped()
@@ -165,8 +177,17 @@ namespace TourDeLaChance
                     mat.SetColor(BaseColorId, c);
                     break;
                 case SkinStyle.Galaxie:
-                    mat.SetTexture(EmissionMapId, SkinTextures.GalaxyStars());
-                    mat.SetTextureScale(BaseMapId, new Vector2(4f, 3f)); // URP applique ce tiling à toutes les cartes
+                    // v4 §7 : nébuleuse animée calculée par le code (couleur ET émission), vernis
+                    // très brillant. La couleur de base reste blanche (tout est dans la texture).
+                    if (galaxy == null) galaxy = new GalaxyTexture();
+                    galaxyTimer = 0f;
+                    mat.SetColor(BaseColorId, Color.white);
+                    mat.SetFloat(SmoothnessId, GalaxySmoothness);
+                    mat.SetFloat(MetallicId, GalaxyMetallic);
+                    mat.SetTexture(BaseMapId, galaxy.BaseMap);
+                    mat.SetTexture(EmissionMapId, galaxy.EmissionMap);
+                    mat.SetColor(EmissionColorId, Color.white * GalaxyEmission);
+                    mat.SetTextureScale(BaseMapId, GalaxyTiling); // URP applique ce tiling à toutes les cartes
                     break;
                 case SkinStyle.ArcEnCiel:
                     // v3 §8.1 : un dégradé qui fait un tour complet des couleurs, utilisé comme
@@ -180,7 +201,14 @@ namespace TourDeLaChance
             }
 
             body.sharedMaterial = mat;
-            if (sparkles != null) sparkles.SetActive(item.SkinStyle == SkinStyle.ArcEnCiel);
+            // Paillettes : arc-en-ciel (couleur du moment, toutes les 0,25 s) ou Galaxie
+            // (petites étoiles #CFE0FF, toutes les 0,4 s). Coupées pour tout autre skin.
+            if (sparkles != null)
+            {
+                if (item.SkinStyle == SkinStyle.ArcEnCiel) sparkles.Configure(null, 0.25f, 1.2f);
+                else if (item.SkinStyle == SkinStyle.Galaxie) sparkles.Configure(GalaxySparkleColor, 0.4f, 1.2f);
+                sparkles.SetActive(item.SkinStyle == SkinStyle.ArcEnCiel || item.SkinStyle == SkinStyle.Galaxie);
+            }
             UpdateAnimatedSkin(0f);
         }
 
@@ -200,9 +228,9 @@ namespace TourDeLaChance
         /// La couleur de l'arc-en-ciel « du moment » (pour teinter les paillettes).
         public Color RainbowColorNow => Color.HSVToRGB(Mathf.Repeat(-rainbowOffset + 0.5f, 1f), 0.75f, 1f);
 
-        /// Couleurs animées : arc-en-ciel qui défile et scintillement des étoiles de la
-        /// galaxie (intensité 0,6 ↔ 1,2, période 2 s). Pur affichage : cela continue pendant
-        /// les épreuves.
+        /// Couleurs animées : arc-en-ciel qui défile, et nébuleuse de la Galaxie recalculée
+        /// toutes les 0,05 s (v4 §7.4). Pur affichage : cela continue pendant les épreuves.
+        /// Le recalcul ne tourne QUE si la Galaxie est affichée.
         void UpdateAnimatedSkin(float t)
         {
             var mat = body.sharedMaterial;
@@ -215,8 +243,14 @@ namespace TourDeLaChance
                     mat.SetTextureOffset(BaseMapId, new Vector2(0f, -rainbowOffset));
                     break;
                 case SkinStyle.Galaxie:
-                    float intensity = 0.9f + 0.3f * Mathf.Sin(2f * Mathf.PI * t / 2f);
-                    mat.SetColor(EmissionColorId, StarColor * intensity);
+                    galaxyTimer += Time.deltaTime;
+                    if (galaxy != null && galaxyTimer >= GalaxyStep)
+                    {
+                        // Pendant le saut de joie, la nébuleuse va 3 fois plus vite (comme l'arc-en-ciel).
+                        bool joy = playerAnimator != null && playerAnimator.IsJoyJumping;
+                        galaxy.Step(galaxyTimer, joy ? 3f : 1f);
+                        galaxyTimer = 0f;
+                    }
                     break;
             }
         }
@@ -246,9 +280,18 @@ namespace TourDeLaChance
             instance.transform.localRotation = Quaternion.identity;
             instance.transform.localScale = Vector3.one * item.AttachScale;
             foreach (var c in instance.GetComponentsInChildren<Collider>()) Destroy(c); // aucun collider
+            // v4 §5.6 : l'accessoire prend le calque du corps (« Cheval ») pour être filmé par
+            // la caméra de la vitrine des pop-ups Inventaire et Index.
+            SetLayer(instance.transform, body != null ? body.gameObject.layer : gameObject.layer);
             if (item.Animation != AccessoryAnimation.Aucune)
                 instance.AddComponent<AccessoryMotion>().Setup(item.Animation);
             accessoryInstances[index] = instance;
+        }
+
+        static void SetLayer(Transform t, int layer)
+        {
+            t.gameObject.layer = layer;
+            foreach (Transform child in t) SetLayer(child, layer);
         }
 
         Transform PointFor(AccessorySlot slot) => slot switch

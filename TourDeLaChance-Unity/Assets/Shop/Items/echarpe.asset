@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: echarpe
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: echarpe
-  displayName: "\xC9charpe ray\xE9e"
+  displayName: "\xC9charpe"
   category: 1
   slot: 2
   rarity: peu_commun

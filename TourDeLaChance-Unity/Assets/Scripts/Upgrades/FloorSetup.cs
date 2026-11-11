@@ -8,9 +8,12 @@ namespace TourDeLaChance
     /// </summary>
     public struct FloorSetup
     {
-        public int ChestCount;        // 3, 4 ou 5
+        public int ChestCount;        // 3, 4, 5 ou 6 (v4)
         public int RarityRank;        // 0 = Bois … 4 = Diamant
         public ChestRarityDef Rarity; // la fiche de la rareté (nom, multiplicateur, couleurs)
         public int Gain;              // pièces ajoutées à la cagnotte en cas de trésor
+        /// v4 §9.3 : le bonus de tenue (en %, déjà plafonné) lu à la préparation de l'étage.
+        /// Il est compris dans Gain. Équiper un objet pendant le choix ne le change pas.
+        public int OutfitBonusPercent;
     }
 }

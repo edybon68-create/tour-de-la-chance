@@ -24,10 +24,9 @@ namespace TourDeLaChance
         [SerializeField] GameTexts texts; // les phrases (Assets/Data/Textes.asset)
 
         VisualElement hudRoot, fxLayer, potCounter, walletCounter, potCoin, walletCoin;
-        Label floorLabel, potLabel, walletLabel, messageLabel, messageSub, cashOutText;
+        Label potLabel, walletLabel, messageLabel, messageSub, cashOutText;
         Button cashOutButton, replayButton;
         VisualElement messageBox;
-        SoundToggleButtons soundButtons;
 
         // Les compteurs affichés, qui courent après les vraies valeurs.
         readonly RollingCounter pot = new RollingCounter();
@@ -64,7 +63,6 @@ namespace TourDeLaChance
             walletCounter = root.Q<VisualElement>("wallet-counter");
             potCoin = root.Q<VisualElement>("pot-coin");
             walletCoin = root.Q<VisualElement>("wallet-coin");
-            floorLabel = root.Q<Label>("floor");
             potLabel = root.Q<Label>("pot");
             walletLabel = root.Q<Label>("wallet");
             messageLabel = root.Q<Label>("message");
@@ -73,7 +71,6 @@ namespace TourDeLaChance
             cashOutText = root.Q<Label>("cashout-text");
             cashOutButton = root.Q<Button>("cashout");
             replayButton = root.Q<Button>("replay");
-            soundButtons = new SoundToggleButtons(root.Q<Button>("music-toggle"), root.Q<Button>("effects-toggle"));
             UiSounds.Register(hudRoot);
             ButtonStyler.Register(hudRoot);
             TextPicker.Use(texts);
@@ -103,7 +100,6 @@ namespace TourDeLaChance
             game.ReshuffleStarted -= OnClimbStarted;
             Shop.Changed -= Refresh;
             Upgrades.Changed -= Refresh;
-            soundButtons?.Dispose();
             UiSounds.Unregister(hudRoot);
         }
 
@@ -124,7 +120,7 @@ namespace TourDeLaChance
                 return;
             }
 
-            floorLabel.text = $"Étage {game.Floor}";
+            // v4 : le numéro d'étage est dans le badge (FloorBadgeView).
             UpdateCounters(state, stateChanged);
             UpdateButtons(state, stateChanged);
             UpdateMessage(state, stateChanged);

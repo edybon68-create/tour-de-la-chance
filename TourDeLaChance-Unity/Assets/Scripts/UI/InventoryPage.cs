@@ -15,7 +15,7 @@ namespace TourDeLaChance
     {
         readonly ScrollView list;
         readonly Button skinsTab, accessoriesTab, equipButton, sellButton, sellAllButton;
-        readonly Label selectedLabel;
+        readonly Label selectedLabel, bonusLabel;
 
         /// Prévient le ShopController qu'il faut montrer un objet sur le personnage (aperçu).
         public event Action<ShopItem> PreviewRequested;
@@ -36,6 +36,7 @@ namespace TourDeLaChance
             sellButton = page.Q<Button>("inv-sell");
             sellAllButton = page.Q<Button>("inv-sellall");
             selectedLabel = page.Q<Label>("inv-selected");
+            bonusLabel = page.Q<Label>("inv-bonus");
 
             skinsTab.clicked += OnSkinsTab;
             accessoriesTab.clicked += OnAccessoriesTab;
@@ -132,6 +133,9 @@ namespace TourDeLaChance
             var card = ShopUi.ItemCard(item, ShopUi.Look.Normal, item == selected, () => Select(item), out var inner);
             int count = Shop.CountOf(item);
             if (count >= 2) inner.Add(ShopUi.NewLabel("×" + count, "item-badge"));
+            // v4 §9.4 : le bonus que donne cet objet une fois équipé (rien pour un gratuit).
+            int bonus = Shop.BonusPercent(item);
+            if (bonus > 0) inner.Add(ShopUi.NewLabel($"+{bonus} %", "bonus-badge"));
             if (Shop.IsEquipped(item))
             {
                 var equipped = ShopUi.NewLabel("Équipé ✓", "item-extra");
@@ -144,6 +148,14 @@ namespace TourDeLaChance
         /// La zone d'action suit le tableau de la spec (§7.4).
         void RefreshActions()
         {
+            // v4 §9.4 : le bonus de la tenue SAUVEGARDÉE ; en aperçu, ce qu'il deviendrait
+            // (calcul seulement, rien n'est sauvegardé).
+            int now = Shop.OutfitBonusPercent;
+            string line = $"Bonus de ta tenue : +{now} % sur les trésors (maximum {Shop.OutfitBonusCap} %)";
+            if (selected != null && !Shop.IsEquipped(selected))
+                line += $"\nAvec cet objet : +{Shop.OutfitBonusPercentWith(selected)} %";
+            bonusLabel.text = line;
+
             if (selected == null)
             {
                 selectedLabel.text = "";
@@ -191,6 +203,11 @@ namespace TourDeLaChance
             grid.AddToClassList("grid");
             return grid;
         }
+
+        /// Pour les tests : la ligne du bonus de tenue.
+        public string BonusText => bonusLabel.text;
+        /// OUTIL DE TEST : sélectionne une carte (comme un clic).
+        public void DebugSelect(ShopItem item) { if (item.Category != category) ShowCategory(item.Category, item); else Select(item); }
 
         public static string SlotName(AccessorySlot slot) => slot switch
         {

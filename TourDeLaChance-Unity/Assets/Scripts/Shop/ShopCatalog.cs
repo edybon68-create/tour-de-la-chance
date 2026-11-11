@@ -20,10 +20,14 @@ namespace TourDeLaChance
         [SerializeField] List<LootBox> boxes = new List<LootBox>();
         [Tooltip("Objets gratuits, possédés d'office : 1 skin par défaut + 1 « Aucun » par emplacement.")]
         [SerializeField] List<ShopItem> freeItems = new List<ShopItem>();
+        [Tooltip("v4 §9.1 : plafond du bonus de tenue (somme des 5 objets équipés), en %. " +
+                 "Garde-fou pour les futures boîtes.")]
+        [SerializeField, Min(0)] int outfitBonusCap = 50;
 
         public IReadOnlyList<RarityDef> Rarities => rarities;
         public IReadOnlyList<LootBox> Boxes => boxes;
         public IReadOnlyList<ShopItem> FreeItems => freeItems;
+        public int OutfitBonusCap => outfitBonusCap;
 
         /// Tous les objets : gratuits, puis ceux des boîtes.
         public IEnumerable<ShopItem> AllItems =>

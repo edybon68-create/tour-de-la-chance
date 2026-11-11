@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: chapeau_couronne
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: chapeau_couronne
-  displayName: Couronne royale
+  displayName: Couronne
   category: 1
   slot: 0
   rarity: super_rare

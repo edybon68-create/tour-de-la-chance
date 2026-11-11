@@ -13,7 +13,8 @@ namespace TourDeLaChance
     /// rien à décider. Tous les chiffres viennent du catalogue (UpgradeCatalog).
     ///
     /// Sauvegarde (PlayerPrefs) : amelioration_gains, amelioration_coffres, amelioration_pieges
-    /// (niveau 0 à 5, 0 par défaut). Une valeur illisible ou hors limites est ramenée entre 0 et 5.
+    /// (niveau 0 à 10 depuis la v4, 0 par défaut). Une valeur illisible ou hors limites est
+    /// ramenée entre 0 et 10 (une sauvegarde à 7 reste à 7 ; à 14, elle redevient 10).
     ///
     /// RÈGLE D'OR : il y a TOUJOURS exactement 1 coffre piégé par étage ; les améliorations ne
     /// changent que le gain, la rareté et le nombre de coffres. Elles ne s'appliquent qu'au
@@ -51,7 +52,7 @@ namespace TourDeLaChance
         // Niveaux et achat
         // =====================================================================
 
-        /// Niveau actuel (0 à 5) : toujours ramené dans les limites, même si la sauvegarde est abîmée.
+        /// Niveau actuel (0 à 10) : toujours ramené dans les limites, même si la sauvegarde est abîmée.
         public static int Level(string id) => Mathf.Clamp(PlayerPrefs.GetInt(SaveKey(id), 0), 0, Upgrades_.MaxLevel);
 
         public static bool IsMax(string id) => Level(id) >= Upgrades_.MaxLevel;
@@ -108,8 +109,8 @@ namespace TourDeLaChance
         /// Poids (sur 100) des 5 raretés de coffre à un niveau de Coffres précieux.
         public static int[] ChestWeights(int level) => LevelData(Upgrades_.Chests, level)?.weights ?? new[] { 100, 0, 0, 0, 0 };
 
-        /// Poids (sur 100) de 3, 4 et 5 coffres à un niveau de Coffre en plus.
-        public static int[] CountWeights(int level) => LevelData(Upgrades_.Traps, level)?.weights ?? new[] { 100, 0, 0 };
+        /// Poids (sur 100) de 3, 4, 5 et 6 coffres à un niveau de Coffre en plus (v4 : 4 colonnes).
+        public static int[] CountWeights(int level) => LevelData(Upgrades_.Traps, level)?.weights ?? new[] { 100, 0, 0, 0 };
 
         public static int RarityCount => Catalog != null ? Catalog.ChestRarities.Count : 0;
 
@@ -143,7 +144,7 @@ namespace TourDeLaChance
         // Tirages (spec §5.5) : ils ne touchent à rien, on peut les appeler 100 000 fois
         // =====================================================================
 
-        /// Tire un nombre de coffres (3, 4 ou 5) selon le niveau de Coffre en plus.
+        /// Tire un nombre de coffres (3, 4, 5 ou 6) selon le niveau de Coffre en plus.
         public static int DrawChestCount(int level, System.Random random) => BaseCount + DrawIndex(CountWeights(level), random);
 
         /// Tire une rareté de coffre (0 = Bois … 4 = Diamant) selon le niveau de Coffres précieux.
@@ -162,13 +163,20 @@ namespace TourDeLaChance
             return 0; // poids incomplets (erreur signalée par Validate) : on retombe sur le premier
         }
 
-        /// Gain d'un trésor (spec §5.5) : arrondi(base × étage × Bourse × rareté du coffre).
-        /// Exemple : étage 3, Bourse niveau 1, bronze → 10 × 3 × 1,2 × 1,5 = 54.
-        public static int FloorGain(int coinsPerFloor, int floor, int gainsLevel, int rarityRank)
+        /// Gain d'un trésor (spec v4 §9.3, remplace v3 §5.5) :
+        ///   arrondi( base × étage × (1 + bonus Bourse + bonus de tenue) × rareté du coffre )
+        /// Le bonus de tenue s'AJOUTE au bonus de la Bourse (les deux sont des « + % du gain de
+        /// base ») : il compte surtout au début et peu à la fin. Il est déjà plafonné (50 %).
+        /// Exemples : étage 3, Bourse 1, bronze, tenue +12 % → 10 × 3 × 1,32 × 1,5 = 59,4 → 59 ;
+        ///            étage 5, Bourse 10, diamant, tenue +46 % → 10 × 5 × 3,46 × 5 = 865.
+        /// Arrondi au plus proche avec Mathf.RoundToInt, comme en v3 (mêmes gains sans tenue).
+        public static int FloorGain(int coinsPerFloor, int floor, int gainsLevel, int rarityRank, int outfitBonusPercent = 0)
         {
             var rarity = Rarity(rarityRank);
-            float m = GainMultiplier(gainsLevel) * (rarity != null ? rarity.multiplier : 1f);
-            return Mathf.RoundToInt(coinsPerFloor * floor * m);
+            double bourseBonus = GainMultiplier(gainsLevel) - 1.0;   // niveau 1 : 0,2 ; niveau 10 : 2,0
+            double outfitBonus = Mathf.Max(0, outfitBonusPercent) / 100.0;
+            double m = (1.0 + bourseBonus + outfitBonus) * (rarity != null ? rarity.multiplier : 1.0);
+            return Mathf.RoundToInt((float)(coinsPerFloor * floor * m));
         }
 
         // =====================================================================
@@ -185,17 +193,17 @@ namespace TourDeLaChance
             Changed?.Invoke();
         }
 
-        /// OUTIL DE TEST (critères 12 et 13) : simule n étages préparés avec un générateur à
+        /// OUTIL DE TEST (v3 critères 12-13, v4 critères 19 et 24) : simule n étages préparés avec un générateur à
         /// part, SANS toucher à la sauvegarde ni à la partie. Renvoie, pour chaque nombre de
-        /// coffres (3, 4, 5), combien d'étages l'ont eu ; pour chaque rareté, combien de fois
+        /// coffres (3 à 6), combien d'étages l'ont eu ; pour chaque rareté, combien de fois
         /// elle est sortie ; et pour chaque place, combien de fois elle était piégée (par nombre
         /// de coffres). Le piège est tiré par la MÊME fonction que le jeu (ChestTrial.DrawTrap).
         public static string DebugSimulate(int floors, int chestsLevel, int trapsLevel, int seed)
         {
             var random = new System.Random(seed);
-            var counts = new int[6];
+            var counts = new int[ChestTrial.MaxChests + 1];          // index = nombre de coffres
             var rarities = new int[RarityCount];
-            var traps = new int[6, 5];
+            var traps = new int[ChestTrial.MaxChests + 1, ChestTrial.MaxChests];
             int wrongTrapCount = 0;
             for (int i = 0; i < floors; i++)
             {
@@ -209,9 +217,9 @@ namespace TourDeLaChance
             }
             var sb = new System.Text.StringBuilder();
             sb.Append($"{floors} étages (Coffres précieux {chestsLevel}, Coffre en plus {trapsLevel}) : ");
-            for (int n = 3; n <= 5; n++) sb.Append($"{n} coffres {100.0 * counts[n] / floors:0.00} % ; ");
+            for (int n = 3; n <= ChestTrial.MaxChests; n++) sb.Append($"{n} coffres {100.0 * counts[n] / floors:0.00} % ; ");
             for (int r = 0; r < rarities.Length; r++) sb.Append($"{Rarity(r).shortName} {100.0 * rarities[r] / floors:0.00} % ; ");
-            for (int n = 3; n <= 5; n++)
+            for (int n = 3; n <= ChestTrial.MaxChests; n++)
             {
                 if (counts[n] == 0) continue;
                 sb.Append($"| piège sur {n} coffres :");

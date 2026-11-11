@@ -20,7 +20,8 @@ namespace TourDeLaChance
     ///   shop_equipped_chapeau  = accessoire Tête   (nom de clé v1 conservé)
     ///   shop_equipped_visage / shop_equipped_cou / shop_equipped_dos
     ///
-    /// RÈGLE D'OR : rien ici ne touche aux coffres, au piège ni aux gains.
+    /// RÈGLE D'OR : rien ici ne touche aux coffres ni au piège. v4 : la tenue équipée donne un
+    /// bonus sur le MONTANT des trésors (OutfitBonusPercent), jamais sur les chances.
     /// </summary>
     public static class Shop
     {
@@ -202,6 +203,9 @@ namespace TourDeLaChance
             }
 
             Collection.Add(item.Id, +1);
+            // v4 §12.3 : les statistiques du classement (boîtes ouvertes, Secrets obtenus) sont
+            // comptées APRÈS l'ajout à la collection, et sauvegardées avec elle juste en dessous.
+            PlayerStats.OnBoxOpened(item, RarityOf(item));
             PlayerPrefs.Save(); // tout est écrit sur le disque AVANT l'animation
 
             int count = CountOf(item);
@@ -244,6 +248,46 @@ namespace TourDeLaChance
             Wallet.Add(total);
             Changed?.Invoke();
             return total;
+        }
+
+        // =====================================================================
+        // Bonus de tenue (spec v4 §9)
+        // =====================================================================
+
+        /// Le bonus (en %) que donne CET objet quand il est équipé : celui de sa rareté
+        /// (Commun 1 … Secret 15). 0 pour un objet gratuit (Bleu, Rien). Les doublons ne
+        /// comptent pas : c'est l'objet équipé qui compte, une fois.
+        public static int BonusPercent(ShopItem item)
+        {
+            if (item == null || item.IsFree) return 0;
+            var rarity = RarityOf(item);
+            return rarity != null ? Mathf.Max(0, rarity.coinBonusPercent) : 0;
+        }
+
+        /// Le plafond du bonus de tenue (50 %), lu dans le catalogue (une seule source).
+        public static int OutfitBonusCap => Catalog != null ? Catalog.OutfitBonusCap : 50;
+
+        /// Le bonus de la tenue SAUVEGARDÉE : somme des 5 emplacements (skin + 4 accessoires),
+        /// plafonnée. L'aperçu ne compte pas. RÈGLE D'OR : ce nombre ne touche que le montant
+        /// des trésors, jamais le piège, le nombre de coffres, leur rareté ni les boîtes.
+        public static int OutfitBonusPercent => OutfitBonusPercentWith(null);
+
+        /// Le bonus qu'aurait la tenue si on équipait « tryItem » à sa place (calcul seulement,
+        /// rien n'est sauvegardé) : sert à l'Inventaire, « Avec cet objet : +16 % ».
+        public static int OutfitBonusPercentWith(ShopItem tryItem)
+        {
+            int total = 0;
+            var skin = GetEquippedSkin();
+            if (tryItem != null && tryItem.Category == ShopCategory.Skin) skin = tryItem;
+            total += BonusPercent(skin);
+            for (int s = 0; s < 4; s++)
+            {
+                var slot = (AccessorySlot)s;
+                var acc = GetEquippedAccessory(slot);
+                if (tryItem != null && tryItem.Category == ShopCategory.Accessoire && tryItem.Slot == slot) acc = tryItem;
+                total += BonusPercent(acc);
+            }
+            return Mathf.Clamp(total, 0, OutfitBonusCap);
         }
 
         // =====================================================================

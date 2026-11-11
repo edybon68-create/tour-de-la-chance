@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ailes_ange
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: ailes_ange
-  displayName: Petites ailes d'ange
+  displayName: Ailes d'ange
   category: 1
   slot: 3
   rarity: rare

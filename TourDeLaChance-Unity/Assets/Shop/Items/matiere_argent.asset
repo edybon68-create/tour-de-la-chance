@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: matiere_argent
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: matiere_argent
-  displayName: Argent poli
+  displayName: Argent
   category: 0
   slot: 0
   rarity: rare
@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.85
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1

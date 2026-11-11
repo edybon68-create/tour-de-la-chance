@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: chapeau_fete
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: chapeau_fete
-  displayName: "Chapeau de f\xEAte"
+  displayName: Cotillon
   category: 1
   slot: 0
   rarity: commun

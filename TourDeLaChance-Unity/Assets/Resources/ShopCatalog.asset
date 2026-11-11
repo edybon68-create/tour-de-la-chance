@@ -19,36 +19,42 @@ MonoBehaviour:
     textColor: {r: 0.6039216, g: 0.627451, b: 0.6901961, a: 1}
     weight: 500
     sellValue: 25
+    coinBonusPercent: 1
   - id: peu_commun
     displayName: Peu commun
     color: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
     textColor: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
     weight: 250
     sellValue: 40
+    coinBonusPercent: 2
   - id: rare
     displayName: Rare
     color: {r: 0.23137255, g: 0.54509807, b: 0.92156863, a: 1}
     textColor: {r: 0.37254903, g: 0.63529414, b: 0.9411765, a: 1}
     weight: 140
     sellValue: 60
+    coinBonusPercent: 4
   - id: super_rare
     displayName: Super rare
     color: {r: 0.6392157, g: 0.36078432, b: 0.8784314, a: 1}
     textColor: {r: 0.70980394, g: 0.49019608, b: 0.9098039, a: 1}
     weight: 70
     sellValue: 100
+    coinBonusPercent: 6
   - id: legendaire
     displayName: "L\xE9gendaire"
     color: {r: 1, g: 0.62352943, b: 0.10980392, a: 1}
     textColor: {r: 1, g: 0.62352943, b: 0.10980392, a: 1}
     weight: 30
     sellValue: 150
+    coinBonusPercent: 10
   - id: secret
     displayName: Secret
     color: {r: 1, g: 0.30980393, b: 0.84705883, a: 1}
     textColor: {r: 1, g: 0.30980393, b: 0.84705883, a: 1}
     weight: 10
     sellValue: 200
+    coinBonusPercent: 15
   boxes:
   - id: boite_skins_1
     displayName: "Bo\xEEte de skins n\xB01"
@@ -98,3 +104,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a2941624ef29d4b8381031d27a7512b5, type: 2}
   - {fileID: 11400000, guid: 2864d9d48a2f04fe584df239a3fe965b, type: 2}
   - {fileID: 11400000, guid: 6f77b7de27490489a87294a7bb74c0cd, type: 2}
+  outfitBonusCap: 50

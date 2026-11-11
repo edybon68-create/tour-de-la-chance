@@ -98,6 +98,10 @@ namespace TourDeLaChance
                                        "n°" + number.ToString("00"));
             // Chance par objet, calculée par la logique à partir du catalogue.
             inner.Add(ShopUi.NewLabel(ShopUi.Percent(Shop.ItemChance(item)), "item-extra"));
+            // v4 §9.4 : le bonus de tenue de l'objet (même non obtenu : c'est une information
+            // sur la rareté, déjà affichée ; un Secret non obtenu montre aussi « +15 % »).
+            int bonus = Shop.BonusPercent(item);
+            if (bonus > 0) inner.Add(ShopUi.NewLabel($"+{bonus} %", "bonus-badge"));
             return card;
         }
 

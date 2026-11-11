@@ -33,6 +33,16 @@ namespace TourDeLaChance
             return 1f - u * u * u / 2f;
         }
 
+        /// « ease-out-back » : arrive vite, dépasse un peu la cible, puis revient (v4 : arrivée
+        /// des colonnes). c = 1,70158 est la valeur habituelle (≈ 10 % de dépassement).
+        public static float OutBack(float t)
+        {
+            t = Mathf.Clamp01(t);
+            const float c1 = 1.70158f, c3 = c1 + 1f;
+            float u = t - 1f;
+            return 1f + c3 * u * u * u + c1 * u * u;
+        }
+
         /// Monte puis redescend (0 → 1 → 0) : idéal pour un « pop » ou un saut.
         public static float Sine(float t) => Mathf.Sin(Mathf.Clamp01(t) * Mathf.PI);
 

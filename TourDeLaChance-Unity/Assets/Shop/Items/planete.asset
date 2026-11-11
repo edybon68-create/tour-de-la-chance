@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: planete
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: planete
-  displayName: "Petite plan\xE8te"
+  displayName: "Plan\xE8te"
   category: 1
   slot: 3
   rarity: secret

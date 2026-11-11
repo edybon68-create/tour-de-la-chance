@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: visage_aucun
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
   id: visage_aucun
-  displayName: Rien sur le visage
+  displayName: Rien
   category: 1
   slot: 1
   rarity: 
@@ -26,3 +26,5 @@ MonoBehaviour:
   smoothness: 0.3
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1
