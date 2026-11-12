@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 0
   rarity: legendaire
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 4fe138a8b109444b29f16e40a50a10c5, type: 3}
   skinStyle: 0
   color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
   secondaryColor: {r: 0.23529412, g: 1, b: 0.6039216, a: 1}
@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "Ne le d\xE9pense surtout pas\u2026"
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
+  skinFx: 1
   skinExtrasPrefab: {fileID: 0}
+  pattern: 19
+  accentColor: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
+  glowColor: {r: 0.23529412, g: 1, b: 0.6039216, a: 1}
+  patternCount: 0
+  emissionStrength: 1

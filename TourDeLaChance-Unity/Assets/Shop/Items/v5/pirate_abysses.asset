@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 0
   rarity: secret
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9b1916f60ee424648a10557d2adbd970, type: 3}
   skinStyle: 0
   color: {r: 0.039215688, g: 0.078431375, b: 0.1882353, a: 1}
   secondaryColor: {r: 0.23921569, g: 0.60784316, b: 1, a: 1}
@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "L\xE0 o\xF9 la lumi\xE8re n'arrive jamais."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
-  skinExtrasPrefab: {fileID: 0}
+  skinFx: 5
+  skinExtrasPrefab: {fileID: 919132149155446097, guid: bffcde86b949e4a8eb77484b6c235d1d, type: 3}
+  pattern: 17
+  accentColor: {r: 0.8784314, g: 0.29411766, b: 0.84705883, a: 1}
+  glowColor: {r: 0.7490196, g: 1, b: 0.9607843, a: 1}
+  patternCount: 0
+  emissionStrength: 1.2

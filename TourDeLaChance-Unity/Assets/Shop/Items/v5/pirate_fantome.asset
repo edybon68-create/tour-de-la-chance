@@ -18,9 +18,9 @@ MonoBehaviour:
   slot: 0
   rarity: legendaire
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 19031eda0bccd4ec7826b75480e84613, type: 3}
   skinStyle: 3
-  color: {r: 0.6039216, g: 0.9607843, b: 0.8784314, a: 0.55}
+  color: {r: 0.6039216, g: 0.9607843, b: 0.8784314, a: 0.5}
   secondaryColor: {r: 0.6039216, g: 0.9607843, b: 0.8784314, a: 1}
   metallic: 0
   smoothness: 0.8
@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "On le voit\u2026 et puis on ne le voit plus."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
+  skinFx: 9
   skinExtrasPrefab: {fileID: 0}
+  pattern: 0
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 0.6039216, g: 0.9607843, b: 0.8784314, a: 1}
+  patternCount: 0
+  emissionStrength: 0.6

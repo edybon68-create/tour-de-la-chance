@@ -20,8 +20,8 @@ MonoBehaviour:
   free: 0
   icon: {fileID: 0}
   skinStyle: 0
-  color: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
-  secondaryColor: {r: 0.16862746, g: 0.72156864, b: 0.76862746, a: 1}
+  color: {r: 0.9490196, g: 0.9490196, b: 0.9490196, a: 1}
+  secondaryColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
   metallic: 0
   smoothness: 0.6
   accessoryPrefab: {fileID: 0}
@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: Tu le vois ? Et maintenant ?
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
+  skinFx: 6
   skinExtrasPrefab: {fileID: 0}
+  pattern: 8
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0

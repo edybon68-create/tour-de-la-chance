@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 0
   rarity: legendaire
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 95b98dd1f83784db1a64c5e7fb7bb0be, type: 3}
   skinStyle: 0
   color: {r: 0.16862746, g: 0.76862746, b: 0.76862746, a: 1}
   secondaryColor: {r: 0.12156863, g: 0.37254903, b: 0.65882355, a: 1}
@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "Un morceau de mer des Cara\xEFbes."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
+  skinFx: 3
   skinExtrasPrefab: {fileID: 0}
+  pattern: 14
+  accentColor: {r: 0.8784314, g: 1, b: 1, a: 1}
+  glowColor: {r: 0.8784314, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0.5

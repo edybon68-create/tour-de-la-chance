@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "Il fait la roue \xE0 chaque tr\xE9sor."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
-  skinExtrasPrefab: {fileID: 0}
+  skinFx: 7
+  skinExtrasPrefab: {fileID: 919132149155446097, guid: ab647ea79fea24c8f81b51deb07682cf, type: 3}
+  pattern: 15
+  accentColor: {r: 0.49803922, g: 0.8784314, b: 0.9411765, a: 1}
+  glowColor: {r: 0.49803922, g: 0.8784314, b: 0.9411765, a: 1}
+  patternCount: 0
+  emissionStrength: 0.4

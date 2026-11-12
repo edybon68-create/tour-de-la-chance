@@ -14,6 +14,7 @@ namespace TourDeLaChance
         ChangementCouleur, // Caméléon
         Irisation,         // Paon
         Chaleur,           // Lion solaire
-        BandeLumineuse     // Fantôme
+        BandeLumineuse,    // Fantôme
+        Pulsation          // Méduse : la couleur « bat » doucement (0,9 ↔ 1,1)
     }
 }

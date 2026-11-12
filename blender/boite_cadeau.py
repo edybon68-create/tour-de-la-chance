@@ -213,6 +213,13 @@ EMBLEMES = {
     "haut_de_forme": embleme_haut_de_forme,
     "etoile": embleme_etoile,
     "patte": embleme_patte,
+    # Boîtes Animaux : l'os doré est dessiné dans commun_animaux.py (pour ne pas toucher au
+    # reste de ce fichier, partagé avec les boîtes Pirates).
+    "os": lambda bm, couleurs: __import__("commun_animaux").embleme_os(bm, couleurs),
+    # Boîtes Pirates : l'ancre et le gouvernail sont dessinés dans commun_pirates.py (même
+    # raison : on n'ajoute ici qu'une entrée par emblème).
+    "ancre": lambda bm, couleurs: __import__("commun_pirates").embleme_ancre(bm, couleurs),
+    "gouvernail": lambda bm, couleurs: __import__("commun_pirates").embleme_gouvernail(bm, couleurs),
 }
 
 
@@ -473,6 +480,32 @@ BOITES = {
     "boite_accessoires_1": {
         "corps": ("#2BB8C4", 0.0, 0.45), "bord": ("#1F8A94", 0.0, 0.45),
         "ruban": LAITON, "embleme": "haut_de_forme", "forme": "cadeau",
+    },
+    # Boîtes Animaux (v5.md §17.1) : « panier » d'osier à ruban vert feuille et patte rose
+    # (skins) ; boîte vert sapin à ruban et nœud dorés, os doré (accessoires).
+    "boite_skins_animaux": {
+        "corps": ("#C99A6A", 0.0, 0.70), "bord": ("#A8784A", 0.0, 0.70),
+        "ruban": ("#4CC26A", 0.0, 0.50), "medaillon": ("#E8B830", 1.0, 0.20),
+        "embleme": "patte", "couleurs_embleme": [("#FF8FB0", 0.0, 0.30)], "forme": "cadeau",
+    },
+    "boite_accessoires_animaux": {
+        "corps": ("#2E6B4A", 0.0, 0.45), "bord": ("#1F4E36", 0.0, 0.45),
+        "ruban": ("#E8B830", 1.0, 0.25), "medaillon": ("#F4EEE6", 0.0, 0.30),
+        "embleme": "os", "forme": "cadeau",
+    },
+    # Boîtes Pirates (v5.md §17.1) : caisse-coffre en bois sombre ; skins = sangles de
+    # laiton, cadenas doré, ancre gravée ; accessoires = même caisse, sangles et bord du
+    # couvercle bleu marine (le bleu des foulards du catalogue), gouvernail gravé.
+    "boite_skins_pirates": {
+        "corps": ("#5A3A28", 0.0, 0.65), "bord": ("#3A2416", 0.0, 0.70),
+        "ruban": LAITON, "medaillon": ("#E8B830", 1.0, 0.20),
+        "embleme": "ancre", "forme": "coffre",
+    },
+    "boite_accessoires_pirates": {
+        "corps": ("#5A3A28", 0.0, 0.65), "bord": ("#1F3A6E", 0.0, 0.50),
+        "interieur": ("#3A2416", 0.0, 0.70),
+        "ruban": ("#1F3A6E", 0.0, 0.50), "medaillon": ("#E8B830", 1.0, 0.20),
+        "embleme": "gouvernail", "forme": "coffre",
     },
 }
 # Démonstrations (rendu seulement, pas d'export) : prouvent que le script sait faire un

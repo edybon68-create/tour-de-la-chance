@@ -61,6 +61,16 @@ namespace TourDeLaChance
         [SerializeField] SkinFx skinFx = SkinFx.Aucun;
         [Tooltip("Pièces 3D ajoutées au cheval tant que le skin est équipé (tentacules…).")]
         [SerializeField] GameObject skinExtrasPrefab;
+        [Tooltip("Motif calculé par le code (si baseTexture est vide). Couleurs : couleur, 2e couleur, accent, lueur.")]
+        [SerializeField] SkinPattern pattern = SkinPattern.Aucun;
+        [Tooltip("3e couleur du motif (liseré, ventouses, coquillages…).")]
+        [SerializeField] Color accentColor = Color.white;
+        [Tooltip("Couleur de ce qui brille (veines, taches lumineuses, plancton…).")]
+        [SerializeField] Color glowColor = Color.white;
+        [Tooltip("Nombre de bandes / de points du motif (0 = valeur par défaut).")]
+        [SerializeField, Min(0)] int patternCount;
+        [Tooltip("Intensité de la lumière propre (émission), 0 = aucune. Plafond 1,5 (art bible §4.1).")]
+        [SerializeField, Range(0f, 1.5f)] float emissionStrength;
 
         // Propriétés en lecture seule : le reste du code peut lire, mais pas modifier.
         public string Id => id;
@@ -84,6 +94,11 @@ namespace TourDeLaChance
         public Vector2 TextureTiling => textureTiling;
         public SkinFx SkinFx => skinFx;
         public GameObject SkinExtrasPrefab => skinExtrasPrefab;
+        public SkinPattern Pattern => pattern;
+        public Color AccentColor => accentColor;
+        public Color GlowColor => glowColor;
+        public int PatternCount => patternCount;
+        public float EmissionStrength => emissionStrength;
 
         /// v5 §8.5 : fabrique en mémoire (jamais sauvegardé, jamais dans une boîte) un skin uni,
         /// par exemple la couleur « plâtre » du cheval vierge de l'Index.

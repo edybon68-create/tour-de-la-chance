@@ -135,6 +135,7 @@ namespace TourDeLaChance
             if (transparentMat != null) Destroy(transparentMat);
             if (emissiveMat != null) Destroy(emissiveMat);
             galaxy?.Dispose();
+            skinFx?.Dispose();
         }
 
         /// La texture animée de la Galaxie (null tant qu'elle n'a jamais été affichée), pour les tests.
@@ -174,13 +175,19 @@ namespace TourDeLaChance
             shownSkin = item;
             skinTime = 0f;
 
+            // v5 : l'effet animé du skin précédent est arrêté (et le corps remis en place).
+            skinFx?.Dispose();
+            skinFx = null;
+            var pattern = item.BaseTexture == null ? SkinPatterns.For(item) : null;
+            bool glows = item.EmissionStrength > 0f;
+
             // 1. On choisit le matériau de départ selon le style…
             Material mat = item.SkinStyle switch
             {
                 SkinStyle.Transparent => transparentMat ?? opaqueMat,
                 SkinStyle.ArcEnCiel => emissiveMat ?? opaqueMat,
                 SkinStyle.Galaxie => emissiveMat ?? opaqueMat,
-                _ => opaqueMat
+                _ => glows ? emissiveMat ?? opaqueMat : opaqueMat   // v5 : un skin qui brille
             };
 
             // 2. …et on remet TOUS ses réglages à zéro avant d'appliquer le skin
@@ -239,7 +246,25 @@ namespace TourDeLaChance
                     break;
             }
 
+            // v5 (catalogue §0.3) : texture du DA (« T »), ou motif calculé (« C »), lumière propre
+            // (« E ») et effet animé (« A »).
+            if (item.BaseTexture != null || pattern != null)
+            {
+                if (item.SkinStyle != SkinStyle.Transparent) mat.SetColor(BaseColorId, Color.white); // les couleurs sont dans l'image
+                mat.SetTexture(BaseMapId, item.BaseTexture != null ? item.BaseTexture : pattern.baseMap);
+                mat.SetTextureScale(BaseMapId, item.TextureTiling == Vector2.zero ? Vector2.one : item.TextureTiling);
+            }
+            if (glows)
+            {
+                mat.EnableKeyword("_EMISSION");
+                if (pattern != null && pattern.emissionMap != null) mat.SetTexture(EmissionMapId, pattern.emissionMap);
+                mat.SetColor(EmissionColorId, (pattern != null && pattern.emissionMap != null ? Color.white : item.Color) * item.EmissionStrength);
+            }
+            if (SkinFxPlayer.Needs(item))
+                skinFx = new SkinFxPlayer(item, mat, pattern, body != null ? body.transform : null, allowSound: !showcaseMode);
+
             body.sharedMaterial = mat;
+            ApplySkinExtras(item);
             // Paillettes : arc-en-ciel (couleur du moment, toutes les 0,25 s) ou Galaxie
             // (petites étoiles #CFE0FF, toutes les 0,4 s). Coupées pour tout autre skin.
             if (sparkles != null)
@@ -251,11 +276,40 @@ namespace TourDeLaChance
             UpdateAnimatedSkin(0f);
         }
 
+        // =====================================================================
+        // v5 (catalogue §0.4) : les « extras » d'un skin (tentacules du Kraken…)
+        // =====================================================================
+
+        GameObject skinExtras;
+        SkinFxPlayer skinFx; // l'effet animé du skin affiché (null s'il n'en a pas)
+
+        /// Les pièces 3D ajoutées au cheval tant que le skin est porté : enfant DIRECT de ce
+        /// personnage (« Joueur »), position et rotation nulles, échelle 1, même calque que le
+        /// corps, sans collider. Retirées dès qu'on change de skin.
+        void ApplySkinExtras(ShopItem item)
+        {
+            if (skinExtras != null) Destroy(skinExtras);
+            skinExtras = null;
+            if (item == null || item.SkinExtrasPrefab == null) return;
+            skinExtras = Instantiate(item.SkinExtrasPrefab, transform, false);
+            skinExtras.name = item.SkinExtrasPrefab.name;
+            skinExtras.transform.localPosition = Vector3.zero;
+            skinExtras.transform.localRotation = Quaternion.identity;
+            skinExtras.transform.localScale = Vector3.one;
+            foreach (var c in skinExtras.GetComponentsInChildren<Collider>()) Destroy(c);
+            SetLayer(skinExtras.transform, body != null ? body.gameObject.layer : gameObject.layer);
+            skinExtras.AddComponent<AccessoryRig>(); // tentacules, flammes, roue, lanterne…
+        }
+
+        /// Les extras affichés en ce moment (pour les tests).
+        public GameObject SkinExtras => skinExtras;
+
         void Update()
         {
             if (shownSkin == null) return;
             skinTime += Time.deltaTime;
             UpdateAnimatedSkin(skinTime);
+            skinFx?.Tick(Time.deltaTime, playerAnimator != null && playerAnimator.IsJoyJumping);
         }
 
         /// Arc-en-ciel v3 : le dégradé monte de 0,25 par seconde (un tour en 4 s), trois fois

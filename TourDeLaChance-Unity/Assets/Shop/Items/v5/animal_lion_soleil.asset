@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "Le roi des animaux\u2026 et du soleil."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
-  skinExtrasPrefab: {fileID: 0}
+  skinFx: 8
+  skinExtrasPrefab: {fileID: 919132149155446097, guid: c2eee85837d7d4840b0751f7592df06c, type: 3}
+  pattern: 14
+  accentColor: {r: 1, g: 0.8980392, b: 0.5411765, a: 1}
+  glowColor: {r: 1, g: 0.8980392, b: 0.5411765, a: 1}
+  patternCount: 0
+  emissionStrength: 0.5

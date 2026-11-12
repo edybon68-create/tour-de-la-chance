@@ -31,5 +31,10 @@ MonoBehaviour:
   flavorText: "L\xE9g\xE8re comme une bulle."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
-  skinFx: 0
+  skinFx: 10
   skinExtrasPrefab: {fileID: 0}
+  pattern: 0
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0

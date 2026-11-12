@@ -24,7 +24,7 @@ MonoBehaviour:
   secondaryColor: {r: 1, g: 1, b: 1, a: 1}
   metallic: 0
   smoothness: 0.3
-  accessoryPrefab: {fileID: 0}
+  accessoryPrefab: {fileID: 919132149155446097, guid: 23a87a82886be420fa7137825ba75cd9, type: 3}
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1

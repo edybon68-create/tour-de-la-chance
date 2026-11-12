@@ -134,8 +134,8 @@ MonoBehaviour:
     currency: 0
     requiresRebirth: 1
     rarityWeights: 
-    openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
-    openingTint: {r: 0.7882353, g: 0.6039216, b: 0.41568628, a: 1}
+    openingPrefab: {fileID: 919132149155446097, guid: 52f7966fd883d4a7fb86ac25478d7cf9, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 2
   - id: boite_animaux_accessoires
     displayName: 'Animaux : accessoires'
@@ -161,8 +161,8 @@ MonoBehaviour:
     currency: 0
     requiresRebirth: 1
     rarityWeights: 
-    openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
-    openingTint: {r: 0.18039216, g: 0.41960785, b: 0.2901961, a: 1}
+    openingPrefab: {fileID: 919132149155446097, guid: 5735d37bafdf0422d9d1980cdbc6bbca, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 2
   - id: boite_pirates_skins
     displayName: 'Pirates : skins'
@@ -184,8 +184,8 @@ MonoBehaviour:
     currency: 1
     requiresRebirth: 0
     rarityWeights: 000000000000000000000000580200002c01000064000000
-    openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
-    openingTint: {r: 0.41960785, g: 0.2901961, b: 0.20784314, a: 1}
+    openingPrefab: {fileID: 919132149155446097, guid: aefa3324a140344a48d7061aaee2967b, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 1
   - id: boite_pirates_accessoires
     displayName: 'Pirates : accessoires'
@@ -207,8 +207,8 @@ MonoBehaviour:
     currency: 1
     requiresRebirth: 0
     rarityWeights: 000000000000000000000000580200002c01000064000000
-    openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
-    openingTint: {r: 0.16470589, g: 0.22745098, b: 0.43137255, a: 1}
+    openingPrefab: {fileID: 919132149155446097, guid: 03b909662146d429eabb931378fe7a09, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 1
   freeItems:
   - {fileID: 11400000, guid: 7d07bbf06ddd2484eab96d87021d63db, type: 2}
