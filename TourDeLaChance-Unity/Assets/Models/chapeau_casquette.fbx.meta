@@ -7,18 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Blanc
-    second: {fileID: 2100000, guid: 15fac39a58f8d47079d37e32ca9c02b6, type: 2}
+      name: M5_BlancVerni
+    second: {fileID: 2100000, guid: 52e5278c23b63448ca0516b5a085a9bf, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_TissuRouge
-    second: {fileID: 2100000, guid: f115d790ab7a646e793770d10cf94692, type: 2}
+      name: M5_CasquetteRouge
+    second: {fileID: 2100000, guid: 289048a2f519542028a51a7dd0ff0a9a, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_TissuRougeFonce
-    second: {fileID: 2100000, guid: e29f53e60fc2846c4a33094d3f845903, type: 2}
+      name: M5_CasquetteVisiere
+    second: {fileID: 2100000, guid: a1cd1e9e918744e9a92323d7fc27bd77, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

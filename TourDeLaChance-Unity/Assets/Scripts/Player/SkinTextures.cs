@@ -103,7 +103,9 @@ namespace TourDeLaChance
         /// </summary>
         public static Mesh AddCylindricalUVs(Mesh source)
         {
-            if (source == null || (source.uv != null && source.uv.Length == source.vertexCount)) return source;
+            // Un maillage non lisible (Read/Write désactivé) garde ses propres UV : le cheval livré
+            // en a déjà (v5 : les chevaux vierges partagent ce maillage).
+            if (source == null || !source.isReadable || (source.uv != null && source.uv.Length == source.vertexCount)) return source;
 
             var mesh = Object.Instantiate(source);
             mesh.name = source.name + " (UV cylindriques)";

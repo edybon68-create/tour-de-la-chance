@@ -23,6 +23,8 @@ namespace TourDeLaChance
         [SerializeField] CoinBurst coinBurst;
         [SerializeField] TrapCloud trapCloud;
         [SerializeField] MusicPlayer music;
+        [Tooltip("v5 §10.5 : les diamants 3D d'un trésor en diamants.")]
+        [SerializeField] DiamondBurst diamondBurst;
 
         // Pour repérer les changements (avant / après) à chaque événement Changed.
         GameState lastState;
@@ -42,6 +44,7 @@ namespace TourDeLaChance
             game.ReshuffleStarted += OnReshuffleStarted;
             game.FloorPrepared += OnFloorPrepared;
             game.FloorShown += OnFloorShown;
+            game.ReviveStarted += OnReviveStarted;
             chestTrial.HoverChanged += OnHoverChanged;
             chestTrial.SuspenseStarted += OnSuspenseStarted;
             chestTrial.PickedLidOpening += OnPickedLidOpening;
@@ -59,6 +62,7 @@ namespace TourDeLaChance
             game.ReshuffleStarted -= OnReshuffleStarted;
             game.FloorPrepared -= OnFloorPrepared;
             game.FloorShown -= OnFloorShown;
+            game.ReviveStarted -= OnReviveStarted;
             chestTrial.HoverChanged -= OnHoverChanged;
             chestTrial.SuspenseStarted -= OnSuspenseStarted;
             chestTrial.PickedLidOpening -= OnPickedLidOpening;
@@ -149,6 +153,19 @@ namespace TourDeLaChance
             SetTension(0f);
         }
 
+        /// v5 §11.2 : reprise acceptée : son « rembobinage », les couvercles se referment, le
+        /// cheval relève la tête, les coffres font « pouf » puis réapparaissent (remélange).
+        /// (La spirale bleutée est dessinée par l'interface, ReviveOfferView.)
+        void OnReviveStarted()
+        {
+            reshuffling = true;
+            Play(Sfx.RepriseOk);
+            chestTrial.CloseAllLids(animated: true, silent: true);
+            if (player != null) player.ReturnToRest(0.3f);
+            StartCoroutine(ShrinkChestsLater(0.3f, 0.12f));
+            SetTension(MusicPlayer.TensionLevelFor(game.Floor));
+        }
+
         IEnumerator ShrinkChestsLater(float delay, float duration)
         {
             yield return new WaitForSeconds(delay);
@@ -160,33 +177,32 @@ namespace TourDeLaChance
         {
             if (reshuffling)
             {
-                // Les coffres réapparaissent : 0 → 1,08 → 1 (0,2 s), de gauche à droite (0,05 s).
-                for (int i = 0; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).PopIn(0.05f * i, 0.2f);
+                // Les coffres réapparaissent TOUS ENSEMBLE : 0 → 1,08 → 1 (0,2 s) (v5 §5.2).
+                for (int i = 0; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).PopIn(0f, 0.2f);
                 return;
             }
             if (player != null) player.SnapToRest();
-            // Coffres en plus (4e, 5e) : cachés, ils « pousseront » à la fin de la montée.
-            for (int i = 3; i < chestTrial.ChestCount; i++) chestTrial.GetChest(i).HideForPop();
+            // v5 §5.2 : plus de coffres en plus cachés pendant la montée (ils « poussaient »
+            // après) : tous les coffres sont visibles dès le noir de la montée.
         }
 
         /// Fin de la montée (ou du remélange, de la redescente, de « Jouer ») : le nouvel étage
-        /// se montre. Coffres en plus : ils poussent (0 → 1,08 → 1 en 0,25 s), son coffre_en_plus.
-        /// Coffres précieux : chacun fait un petit saut (0,1 m, 0,25 s, 0,08 s de décalage) et
-        /// le son coffres_precieux, plus aigu selon le rang. Pur affichage.
+        /// se montre. v5 §5.2 : TOUS les coffres font en même temps la même petite arrivée
+        /// (0,9 → 1,05 → 1 en 0,2 s) ; le son coffre_en_plus joue une fois s'il y a plus de 3
+        /// coffres (sans retard visuel). Coffres précieux : chacun fait ensuite un petit saut
+        /// (0,1 m, 0,25 s, 0,08 s de décalage) et le son coffres_precieux. Pur affichage.
         void OnFloorShown()
         {
             bool afterReshuffle = reshuffling;
             reshuffling = false;
             int count = chestTrial.ChestCount;
-            if (!afterReshuffle && count > 3)
-            {
-                for (int i = 3; i < count; i++) chestTrial.GetChest(i).PopIn(0f, 0.25f);
-                Play(Sfx.CoffreEnPlus);
-            }
+            if (!afterReshuffle)
+                for (int i = 0; i < count; i++) chestTrial.GetChest(i).Arrive(0.2f);
+            if (count > 3) Play(Sfx.CoffreEnPlus);
             int rank = chestTrial.RarityRank;
             if (rank >= 1)
             {
-                float start = afterReshuffle ? 0.25f : (count > 3 ? 0.25f : 0f); // après les « pop »
+                float start = 0.2f; // après l'arrivée commune (ou le « pouf » du remélange)
                 for (int i = 0; i < count; i++) chestTrial.GetChest(i).Hop(0.1f, 0.25f, start + 0.08f * i);
                 float[] pitches = { 1f, 1.06f, 1.12f, 1.19f };
                 Play(Sfx.CoffresPrecieux, 1f, pitches[Mathf.Clamp(rank - 1, 0, 3)]);
@@ -244,11 +260,22 @@ namespace TourDeLaChance
             }
             else
             {
-                // v3 §5.3 : 4 pièces de plus par rang de rareté de coffre, au plus 40.
-                int coins = Mathf.Min(CoinBurst.MaxCoins, CoinBurst.CountForFloor(game.Floor) + 4 * chestTrial.RarityRank);
-                if (coinBurst != null) coinBurst.Burst(position, coins);
                 Play(Sfx.ResultatTresor);
-                Play(Sfx.PiecesJaillissement);
+                var setup = game.Setup;
+                if (setup.DiamondTreasure && setup.DiamondAmount > 0)
+                {
+                    // v5 §10.5 : des diamants à la place des pièces (révélés APRÈS l'ouverture,
+                    // comme les pièces). Le son dépend du palier d'étage (1-5, 6-9, 10+).
+                    if (diamondBurst != null) diamondBurst.Burst(position, setup.DiamondAmount);
+                    Play(game.Floor >= 10 ? Sfx.DiamantGain3 : game.Floor >= 6 ? Sfx.DiamantGain2 : Sfx.DiamantGain1);
+                }
+                else
+                {
+                    // v3 §5.3 : 4 pièces de plus par rang de rareté de coffre, au plus 40.
+                    int coins = Mathf.Min(CoinBurst.MaxCoins, CoinBurst.CountForFloor(game.Floor) + 4 * chestTrial.RarityRank);
+                    if (coinBurst != null) coinBurst.Burst(position, coins);
+                    Play(Sfx.PiecesJaillissement);
+                }
                 if (player != null) player.JumpOfJoy();
             }
         }

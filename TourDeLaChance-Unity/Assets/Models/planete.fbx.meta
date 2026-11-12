@@ -3,7 +3,27 @@ guid: 287594c0e2607471c80894ecd2c2d32a
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_BandePlanete
+    second: {fileID: 2100000, guid: 58c10d6a7e75e4f738459695b38e815a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_LuneMat
+    second: {fileID: 2100000, guid: 7a97a8f2c7cdd41048e586a287a458b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Planete
+    second: {fileID: 2100000, guid: bd3599307cb48483db6bfb54c7ffc504, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_AnneauPlanete
+    second: {fileID: 2100000, guid: 7bc4aec86a41943ca8649e1384587056, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -22,6 +22,12 @@ namespace TourDeLaChance
     ///
     /// RÈGLE D'OR : rien ici ne touche aux coffres ni au piège. v4 : la tenue équipée donne un
     /// bonus sur le MONTANT des trésors (OutfitBonusPercent), jamais sur les chances.
+    ///
+    /// v5 : une boîte peut avoir ses PROPRES taux (Boîtes Pirates), se payer en diamants, être
+    /// verrouillée jusqu'à la renaissance (Boîtes Animaux) ; on porte AU PLUS 2 accessoires,
+    /// sur deux emplacements différents (§4.4) ; le bonus de tenue compte 3 objets, sans
+    /// plafond (§4.5). Clés de sauvegarde inchangées ; migration_v5_tenue = 1 quand la règle
+    /// « 2 accessoires » a été appliquée une première fois à une sauvegarde v4.
     /// </summary>
     public static class Shop
     {
@@ -93,22 +99,40 @@ namespace TourDeLaChance
         public static List<ShopItem> ItemsOfRarity(LootBox box, string rarityId) =>
             box.items.Where(i => i != null && i.RarityId == rarityId).ToList();
 
-        /// Chance (en %) de tirer une rareté à chaque ouverture : poids ÷ total × 100.
-        public static double RarityChance(RarityDef rarity)
+        /// Le poids d'une rareté DANS CETTE BOÎTE (ses taux propres, ou les habituels).
+        public static int WeightOf(LootBox box, RarityDef rarity)
         {
-            int total = Catalog != null ? Catalog.TotalWeight : 0;
-            return total > 0 ? 100.0 * rarity.weight / total : 0.0;
+            if (Catalog == null || rarity == null) return 0;
+            int index = Catalog.RarityRank(rarity.id);
+            var weights = Catalog.WeightsOf(box);
+            return index >= 0 && index < weights.Length ? weights[index] : 0;
         }
 
-        /// Chance (en %) de tirer CET objet : chance de sa rareté ÷ nombre d'objets de cette
-        /// rareté dans sa boîte (spec §5.1).
+        /// La somme des poids d'une boîte (1000 si les données sont justes).
+        public static int TotalWeightOf(LootBox box) => Catalog == null ? 0 : Catalog.WeightsOf(box).Sum();
+
+        /// Chance (en %) de tirer une rareté à chaque ouverture DE CETTE BOÎTE :
+        /// poids ÷ total × 100 (v5 §12.2 : les poids de la boîte).
+        public static double RarityChance(LootBox box, RarityDef rarity)
+        {
+            int total = TotalWeightOf(box);
+            return total > 0 ? 100.0 * WeightOf(box, rarity) / total : 0.0;
+        }
+
+        /// Les raretés qu'on peut obtenir dans cette boîte (poids > 0), de la plus courante à
+        /// la plus rare : le tableau des taux n'affiche qu'elles (Pirates : 3 lignes).
+        public static List<RarityDef> RaritiesIn(LootBox box) =>
+            Catalog == null ? new List<RarityDef>() : Catalog.Rarities.Where(r => WeightOf(box, r) > 0).ToList();
+
+        /// Chance (en %) de tirer CET objet : chance de sa rareté dans sa boîte ÷ nombre
+        /// d'objets de cette rareté dans sa boîte (spec §5.1).
         public static double ItemChance(ShopItem item)
         {
             var box = BoxOf(item);
             var rarity = RarityOf(item);
             if (box == null || rarity == null) return 0.0;
             int sameRarity = ItemsOfRarity(box, rarity.id).Count;
-            return sameRarity > 0 ? RarityChance(rarity) / sameRarity : 0.0;
+            return sameRarity > 0 ? RarityChance(box, rarity) / sameRarity : 0.0;
         }
 
         // =====================================================================
@@ -152,10 +176,30 @@ namespace TourDeLaChance
         // Ouvrir une boîte
         // =====================================================================
 
-        /// Combien de pièces manquent pour ouvrir cette boîte (0 si on peut).
-        public static int MissingCoins(LootBox box) => box == null ? 0 : Mathf.Max(0, box.price - Wallet.Coins);
+        /// v5 §14.2 : la boîte est-elle encore verrouillée (Boîtes Animaux avant la renaissance) ?
+        public static bool IsLocked(LootBox box) => box != null && box.requiresRebirth && !Rebirth.IsDone;
 
-        public static bool CanOpen(LootBox box) => box != null && Wallet.Coins >= box.price;
+        /// Le solde dans la monnaie de la boîte (pièces ou diamants).
+        public static int BalanceFor(LootBox box) =>
+            box != null && box.currency == BoxCurrency.Diamants ? Diamonds.Count : Wallet.Coins;
+
+        /// Combien manquent pour ouvrir cette boîte, dans SA monnaie (0 si on peut).
+        public static int MissingAmount(LootBox box) => box == null ? 0 : Mathf.Max(0, box.price - BalanceFor(box));
+
+        /// Ancien nom (v4) : combien de pièces / diamants manquent.
+        public static int MissingCoins(LootBox box) => MissingAmount(box);
+
+        /// Peut-on ouvrir cette boîte maintenant ? Débloquée ET solde suffisant.
+        public static bool CanOpen(LootBox box) => box != null && !IsLocked(box) && BalanceFor(box) >= box.price;
+
+        static bool Spend(LootBox box) =>
+            box.currency == BoxCurrency.Diamants ? Diamonds.TrySpend(box.price) : Wallet.TrySpend(box.price);
+
+        static void Refund(LootBox box)
+        {
+            if (box.currency == BoxCurrency.Diamants) Diamonds.Add(box.price, fromTreasure: false);
+            else Wallet.Add(box.price);
+        }
 
         /// LA fonction de tirage du jeu (spec §4.2, étapes 3 et 4). Elle ne touche à rien :
         /// ni au porte-monnaie, ni à la sauvegarde. On peut donc l'appeler 100 000 fois pour
@@ -166,14 +210,18 @@ namespace TourDeLaChance
         public static ShopItem Draw(LootBox box, System.Random random)
         {
             if (box == null || Catalog == null) return null;
-            int roll = random.Next(0, Catalog.TotalWeight); // 0 à 999 compris
+            // v5 §12.2 : on lit les poids DE LA BOÎTE (Pirates : 0 / 0 / 0 / 600 / 300 / 100).
+            var weights = Catalog.WeightsOf(box);
+            int total = weights.Sum();
+            if (total <= 0) return null;
+            int roll = random.Next(0, total); // 0 à 999 compris
             int cumulative = 0;
-            foreach (var rarity in Catalog.Rarities)
+            for (int i = 0; i < weights.Length && i < Catalog.Rarities.Count; i++)
             {
-                cumulative += rarity.weight;
+                cumulative += weights[i];
                 if (roll < cumulative)
                 {
-                    var candidates = ItemsOfRarity(box, rarity.id);
+                    var candidates = ItemsOfRarity(box, Catalog.Rarities[i].id);
                     if (candidates.Count == 0) return null; // erreur de données (signalée par Validate)
                     return candidates[random.Next(candidates.Count)];
                 }
@@ -181,7 +229,7 @@ namespace TourDeLaChance
             return null;
         }
 
-        /// Ouvre une boîte, en une fois et dans cet ordre (spec §4.2) : vérifier le solde,
+        /// Ouvre une boîte, en une fois et dans cet ordre (spec §4.2) : vérifier le déblocage et le solde,
         /// payer, tirer, ajouter l'exemplaire, SAUVEGARDER, puis renvoyer le résultat.
         /// L'animation ne commence qu'après : si le jeu est quitté pendant l'animation,
         /// l'objet est déjà dans la collection. Refuse (et ne change rien) si le solde ne
@@ -191,14 +239,14 @@ namespace TourDeLaChance
             result = default;
             if (box == null || !CanOpen(box)) return false;
 
-            // Wallet.TrySpend refuse si le solde est insuffisant : jamais sous zéro.
-            if (!Wallet.TrySpend(box.price)) return false;
+            // TrySpend (pièces ou diamants) refuse si le solde est insuffisant : jamais sous zéro.
+            if (!Spend(box)) return false;
 
             var item = Draw(box, boxRandom);
             if (item == null)
             {
-                // Erreur de données (déjà signalée par Validate) : on rend les pièces.
-                Wallet.Add(box.price);
+                // Erreur de données (déjà signalée par Validate) : on rend le prix.
+                Refund(box);
                 return false;
             }
 
@@ -251,7 +299,7 @@ namespace TourDeLaChance
         }
 
         // =====================================================================
-        // Bonus de tenue (spec v4 §9)
+        // Bonus de tenue (spec v4 §9, v5 §4.5)
         // =====================================================================
 
         /// Le bonus (en %) que donne CET objet quand il est équipé : celui de sa rareté
@@ -264,35 +312,58 @@ namespace TourDeLaChance
             return rarity != null ? Mathf.Max(0, rarity.coinBonusPercent) : 0;
         }
 
-        /// Le plafond du bonus de tenue (50 %), lu dans le catalogue (une seule source).
-        public static int OutfitBonusCap => Catalog != null ? Catalog.OutfitBonusCap : 50;
-
-        /// Le bonus de la tenue SAUVEGARDÉE : somme des 5 emplacements (skin + 4 accessoires),
-        /// plafonnée. L'aperçu ne compte pas. RÈGLE D'OR : ce nombre ne touche que le montant
-        /// des trésors, jamais le piège, le nombre de coffres, leur rareté ni les boîtes.
+        /// Le bonus de la tenue SAUVEGARDÉE : skin + 2 accessoires au plus, SANS plafond (v5 :
+        /// au plus 3 × 15 = 45 %). L'aperçu ne compte pas. RÈGLE D'OR : ce nombre ne touche que
+        /// le montant des trésors, jamais le piège, le nombre de coffres, leur rareté ni les boîtes.
         public static int OutfitBonusPercent => OutfitBonusPercentWith(null);
 
-        /// Le bonus qu'aurait la tenue si on équipait « tryItem » à sa place (calcul seulement,
-        /// rien n'est sauvegardé) : sert à l'Inventaire, « Avec cet objet : +16 % ».
-        public static int OutfitBonusPercentWith(ShopItem tryItem)
+        /// Le bonus qu'aurait la tenue si on équipait « tryItem » (calcul seulement, rien n'est
+        /// sauvegardé) : sert à l'Inventaire, « Avec cet objet : +16 % ». Si 2 accessoires sont
+        /// déjà portés sur d'autres emplacements, on suppose qu'il remplace « replace » (ou, à
+        /// défaut, le moins rare, comme l'aperçu).
+        public static int OutfitBonusPercentWith(ShopItem tryItem, ShopItem replace = null)
         {
-            int total = 0;
             var skin = GetEquippedSkin();
-            if (tryItem != null && tryItem.Category == ShopCategory.Skin) skin = tryItem;
-            total += BonusPercent(skin);
-            for (int s = 0; s < 4; s++)
-            {
-                var slot = (AccessorySlot)s;
-                var acc = GetEquippedAccessory(slot);
-                if (tryItem != null && tryItem.Category == ShopCategory.Accessoire && tryItem.Slot == slot) acc = tryItem;
-                total += BonusPercent(acc);
-            }
-            return Mathf.Clamp(total, 0, OutfitBonusCap);
+            var accessories = OutfitAfter(tryItem, replace, out var newSkin);
+            if (newSkin != null) skin = newSkin;
+            int total = BonusPercent(skin);
+            foreach (var acc in accessories) total += BonusPercent(acc);
+            return Mathf.Max(0, total);
+        }
+
+        /// Les accessoires portés après l'équipement (simulé) de tryItem. Pour un skin, les
+        /// accessoires ne changent pas et newSkin = tryItem.
+        public static List<ShopItem> OutfitAfter(ShopItem tryItem, ShopItem replace, out ShopItem newSkin)
+        {
+            newSkin = null;
+            var worn = EquippedAccessories();
+            if (tryItem == null) return worn;
+            if (tryItem.Category == ShopCategory.Skin) { newSkin = tryItem; return worn; }
+            if (tryItem.IsFree) { worn.RemoveAll(a => a.Slot == tryItem.Slot); return worn; }
+            if (worn.Contains(tryItem)) return worn;
+            int sameSlot = worn.FindIndex(a => a.Slot == tryItem.Slot);
+            if (sameSlot >= 0) { worn[sameSlot] = tryItem; return worn; }
+            if (worn.Count < MaxAccessories) { worn.Add(tryItem); return worn; }
+            var removed = replace != null && worn.Contains(replace) ? replace : LeastRare(worn);
+            worn.Remove(removed);
+            worn.Add(tryItem);
+            return worn;
         }
 
         // =====================================================================
-        // Équiper
+        // Équiper (v5 §4.4 : un skin et AU PLUS 2 accessoires, emplacements différents)
         // =====================================================================
+
+        /// v5 §4.4 : nombre maximal d'accessoires portés en même temps.
+        public const int MaxAccessories = 2;
+        public const string MigrationKey = "migration_v5_tenue";
+
+        /// Vrai si la migration « 2 accessoires » vient d'enlever des objets pendant cette
+        /// session : l'Inventaire affiche alors une fois le petit message (toast).
+        public static bool MigrationToastPending { get; set; }
+
+        /// L'ordre de priorité à rareté égale (§4.4) : Tête, Dos, Visage, Cou.
+        static readonly AccessorySlot[] SlotPriority = { AccessorySlot.Tete, AccessorySlot.Dos, AccessorySlot.Visage, AccessorySlot.Cou };
 
         /// L'objet gratuit d'une catégorie / d'un emplacement (couleur_bleu, chapeau_aucun…).
         public static ShopItem DefaultSkin() =>
@@ -307,22 +378,125 @@ namespace TourDeLaChance
         public static ShopItem GetEquippedAccessory(AccessorySlot slot) => ReadEquipped(AccessoryKey(slot),
             DefaultAccessory(slot), item => item.Category == ShopCategory.Accessoire && item.Slot == slot);
 
+        /// Les accessoires VRAIMENT portés (sans les « Rien »), dans l'ordre Tête, Visage, Cou, Dos.
+        public static List<ShopItem> EquippedAccessories()
+        {
+            var list = new List<ShopItem>();
+            for (int s = 0; s < 4; s++)
+            {
+                var acc = GetEquippedAccessory((AccessorySlot)s);
+                if (acc != null && !acc.IsFree) list.Add(acc);
+            }
+            return list;
+        }
+
         /// L'objet équipé de la même place que cet objet (même catégorie, même emplacement).
         public static ShopItem GetEquippedLike(ShopItem item) =>
             item.Category == ShopCategory.Skin ? GetEquippedSkin() : GetEquippedAccessory(item.Slot);
 
         public static bool IsEquipped(ShopItem item) => item != null && GetEquippedLike(item) == item;
 
-        /// Équipe un objet possédé : il remplace celui de la même catégorie (skin) ou du même
-        /// emplacement (accessoire) seulement. Gratuit, illimité, sauvegardé tout de suite.
-        public static bool TryEquip(ShopItem item)
+        /// Faut-il demander « lequel remplacer » pour équiper cet accessoire ? Oui si son
+        /// emplacement est libre et que 2 accessoires sont déjà portés.
+        public static bool NeedsReplaceChoice(ShopItem item)
+        {
+            if (item == null || item.Category != ShopCategory.Accessoire || item.IsFree || IsEquipped(item)) return false;
+            var worn = EquippedAccessories();
+            return worn.Count >= MaxAccessories && !worn.Any(a => a.Slot == item.Slot);
+        }
+
+        /// L'accessoire déjà porté que cet objet remplacerait automatiquement (même
+        /// emplacement), sinon null. Sert à la mention « Remplace : Couronne ».
+        public static ShopItem ReplacedBySameSlot(ShopItem item)
+        {
+            if (item == null || item.Category != ShopCategory.Accessoire || item.IsFree) return null;
+            var current = GetEquippedAccessory(item.Slot);
+            return current != null && !current.IsFree && current != item ? current : null;
+        }
+
+        /// Le moins rare d'une liste (à rareté égale : celui qui vient en DERNIER dans l'ordre
+        /// Tête, Dos, Visage, Cou). Sert à l'aperçu et au bouton « Équiper » de l'ouverture.
+        public static ShopItem LeastRare(List<ShopItem> items)
+        {
+            if (items == null || items.Count == 0) return null;
+            return items.OrderBy(RarityRank).ThenByDescending(i => Array.IndexOf(SlotPriority, i.Slot)).First();
+        }
+
+        /// Équipe un objet possédé (§4.4). Skin : remplace le skin. Accessoire :
+        ///   - son emplacement est occupé → il REMPLACE l'objet de cet emplacement ;
+        ///   - emplacement libre et moins de 2 accessoires portés → il est AJOUTÉ ;
+        ///   - emplacement libre et 2 portés → il remplace « replace » (un des 2 portés) ;
+        ///     sans « replace » valide, on REFUSE sans rien changer (l'Inventaire demande lequel).
+        /// Gratuit, illimité, sauvegardé tout de suite. Un objet « Rien » vide son emplacement.
+        public static bool TryEquip(ShopItem item, ShopItem replace = null)
         {
             if (item == null || !IsOwned(item)) return false;
-            string key = item.Category == ShopCategory.Skin ? SkinKey : AccessoryKey(item.Slot);
-            PlayerPrefs.SetString(key, item.Id);
+            if (item.Category == ShopCategory.Skin)
+            {
+                PlayerPrefs.SetString(SkinKey, item.Id);
+            }
+            else if (item.IsFree)
+            {
+                PlayerPrefs.SetString(AccessoryKey(item.Slot), item.Id);
+            }
+            else if (!IsEquipped(item))
+            {
+                var worn = EquippedAccessories();
+                bool slotTaken = worn.Any(a => a.Slot == item.Slot);
+                if (!slotTaken && worn.Count >= MaxAccessories)
+                {
+                    // Il faut libérer une place : « replace » doit être un des accessoires portés.
+                    if (replace == null || !worn.Contains(replace)) return false;
+                    var empty = DefaultAccessory(replace.Slot);
+                    PlayerPrefs.SetString(AccessoryKey(replace.Slot), empty != null ? empty.Id : "");
+                }
+                PlayerPrefs.SetString(AccessoryKey(item.Slot), item.Id);
+            }
             PlayerPrefs.Save();
             Changed?.Invoke();
             return true;
+        }
+
+        /// « Retirer » un accessoire porté : son emplacement redevient vide (objet « Rien »).
+        public static bool Unequip(AccessorySlot slot)
+        {
+            var current = GetEquippedAccessory(slot);
+            if (current == null || current.IsFree) return false;
+            var empty = DefaultAccessory(slot);
+            PlayerPrefs.SetString(AccessoryKey(slot), empty != null ? empty.Id : "");
+            PlayerPrefs.Save();
+            Changed?.Invoke();
+            return true;
+        }
+
+        /// v5 §4.4 : la règle « au plus 2 accessoires » est vérifiée à la lecture. Si la
+        /// sauvegarde en porte plus (sauvegarde v4), on garde les 2 PLUS RARES (à rareté égale :
+        /// Tête, Dos, Visage, Cou) et on remet les autres emplacements à « Rien ». Les objets
+        /// restent possédés. Appelée au démarrage (PanelsController) ; renvoie true si elle a
+        /// changé quelque chose.
+        public static bool EnforceMaxAccessories()
+        {
+            if (Catalog == null) return false;
+            var worn = EquippedAccessories();
+            bool changed = false;
+            if (worn.Count > MaxAccessories)
+            {
+                var keep = worn.OrderByDescending(RarityRank)
+                               .ThenBy(i => Array.IndexOf(SlotPriority, i.Slot))
+                               .Take(MaxAccessories).ToList();
+                foreach (var acc in worn)
+                {
+                    if (keep.Contains(acc)) continue;
+                    var empty = DefaultAccessory(acc.Slot);
+                    PlayerPrefs.SetString(AccessoryKey(acc.Slot), empty != null ? empty.Id : "");
+                }
+                MigrationToastPending = true;
+                changed = true;
+                Debug.Log($"Tenue v5 : {worn.Count} accessoires équipés → on garde {string.Join(" et ", keep.Select(k => k.DisplayName))}.");
+            }
+            if (PlayerPrefs.GetInt(MigrationKey, 0) != 1) { PlayerPrefs.SetInt(MigrationKey, 1); changed = true; }
+            if (changed) PlayerPrefs.Save();
+            return changed;
         }
 
         /// Clé de sauvegarde d'un emplacement. Tête garde le nom de clé v1 (« chapeau »).
@@ -348,7 +522,7 @@ namespace TourDeLaChance
         public static readonly string[] AllSaveKeys =
         {
             "wallet_coins", Collection.CountsKey, OldOwnedKey, SkinKey,
-            "shop_equipped_chapeau", "shop_equipped_visage", "shop_equipped_cou", "shop_equipped_dos"
+            "shop_equipped_chapeau", "shop_equipped_visage", "shop_equipped_cou", "shop_equipped_dos", MigrationKey
         };
 
         /// Prévient l'interface que la sauvegarde a changé « de l'extérieur » (tests).

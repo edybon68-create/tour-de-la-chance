@@ -20,6 +20,9 @@ namespace TourDeLaChance
         public string shortName = "Bois";
         [Tooltip("Le gain de l'étage est multiplié par ce nombre (×1, ×1,5, ×2, ×3, ×5).")]
         [Min(0f)] public float multiplier = 1f;
+        [Tooltip("v5 §10.2 : chance (pour mille) qu'un trésor de ces coffres soit en diamants " +
+                 "à la place des pièces (Bois 10, Bronze 15, Argent 20, Or 30, Cristal 50).")]
+        [Range(0, 1000)] public int diamondChancePermille;
 
         [Header("Affichage seulement")]
         [Tooltip("Couleur du Corps fermé (le code la remet à chaque nouvel étage).")]

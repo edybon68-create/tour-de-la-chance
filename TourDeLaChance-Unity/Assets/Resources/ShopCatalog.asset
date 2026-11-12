@@ -77,6 +77,12 @@ MonoBehaviour:
     - {fileID: 11400000, guid: e4f68f22613a04a98a09c09ec8d8fde4, type: 2}
     - {fileID: 11400000, guid: 458870826e99447d1a4d1b90d2e9d16c, type: 2}
     - {fileID: 11400000, guid: 42652c4d2aa684507ad0affcb1514498, type: 2}
+    currency: 0
+    requiresRebirth: 0
+    rarityWeights: 
+    openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
+    family: 0
   - id: boite_accessoires_1
     displayName: "Bo\xEEte d'accessoires n\xB01"
     price: 250
@@ -98,10 +104,115 @@ MonoBehaviour:
     - {fileID: 11400000, guid: d888359e1235e45e7a777474fcd8b199, type: 2}
     - {fileID: 11400000, guid: 3153e678ce3d74f378af4db24454fb87, type: 2}
     - {fileID: 11400000, guid: 9401f7cb80e9c40b2aa371a38adcf153, type: 2}
+    currency: 0
+    requiresRebirth: 0
+    rarityWeights: 
+    openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
+    openingTint: {r: 1, g: 1, b: 1, a: 1}
+    family: 0
+  - id: boite_animaux_skins
+    displayName: 'Animaux : skins'
+    price: 500
+    icon: {fileID: 0}
+    items:
+    - {fileID: 11400000, guid: 042ef3d44aa1d4858818bcaac677dc7b, type: 2}
+    - {fileID: 11400000, guid: ac856654349fc4faab795e57c7a06792, type: 2}
+    - {fileID: 11400000, guid: 69a32221adc11476d97c701550b56878, type: 2}
+    - {fileID: 11400000, guid: 7005daae3f5324451a44a1793f44fe21, type: 2}
+    - {fileID: 11400000, guid: c507d5d4f5476436a87cb58472f2031a, type: 2}
+    - {fileID: 11400000, guid: 422f8385f588d4fb3b152272326cf2d5, type: 2}
+    - {fileID: 11400000, guid: a606ffd299c52414280449825a4f3aee, type: 2}
+    - {fileID: 11400000, guid: fec05cf235a50417493512e5dc2e22bf, type: 2}
+    - {fileID: 11400000, guid: 154151f61cd614c38b420eda9b9f0bd9, type: 2}
+    - {fileID: 11400000, guid: 80091d834ec3d4dbeb15bd42ba4d8aaf, type: 2}
+    - {fileID: 11400000, guid: 8df053afe3b1747099ccf99cd6faadab, type: 2}
+    - {fileID: 11400000, guid: c460d17b1849b49bc9988f82652517df, type: 2}
+    - {fileID: 11400000, guid: 2acb1d792c8644dec9d85e801be01dbf, type: 2}
+    - {fileID: 11400000, guid: 37a498f154b91400188bbe84b2adda2d, type: 2}
+    - {fileID: 11400000, guid: 1f64b242a3b7a48369187a36a4533f30, type: 2}
+    - {fileID: 11400000, guid: b4a693639e89e4302838ac872d808e09, type: 2}
+    currency: 0
+    requiresRebirth: 1
+    rarityWeights: 
+    openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
+    openingTint: {r: 0.7882353, g: 0.6039216, b: 0.41568628, a: 1}
+    family: 2
+  - id: boite_animaux_accessoires
+    displayName: 'Animaux : accessoires'
+    price: 500
+    icon: {fileID: 0}
+    items:
+    - {fileID: 11400000, guid: f6f5dc70a2e664e98961ee008deebe6d, type: 2}
+    - {fileID: 11400000, guid: 76fe699c2132440ed99e42b532b5a6e2, type: 2}
+    - {fileID: 11400000, guid: b6a6cfa768ab7448f8852ed9571f827c, type: 2}
+    - {fileID: 11400000, guid: c13db6cf31ced4f8a86a4ed087a7c85a, type: 2}
+    - {fileID: 11400000, guid: 9d99969ffd1074f9886cf7068c02ee02, type: 2}
+    - {fileID: 11400000, guid: 641f5f50af7b4480d8516cae4d0344dd, type: 2}
+    - {fileID: 11400000, guid: 45ceec2303bdd4819ba918fcd1f7e04d, type: 2}
+    - {fileID: 11400000, guid: 1e62bf821994c441a84ba4ec43f5e7b4, type: 2}
+    - {fileID: 11400000, guid: 15e93a1ccd4fe43dca2f6551864cdd77, type: 2}
+    - {fileID: 11400000, guid: 958a2a214e61a4e0dbbbef10dd258557, type: 2}
+    - {fileID: 11400000, guid: ca564504b879c48ecaccc20b57aafc6e, type: 2}
+    - {fileID: 11400000, guid: 403e598085b66493081cd3508859b2cc, type: 2}
+    - {fileID: 11400000, guid: 44d529ca04fdd419c902c7f4af2f268d, type: 2}
+    - {fileID: 11400000, guid: 433cc1b657bac46e698a933c31e2db12, type: 2}
+    - {fileID: 11400000, guid: dd1b8dc514ef942ed89476f6dd6a595d, type: 2}
+    - {fileID: 11400000, guid: 1b2ca4006c68549e590526ef4df317d9, type: 2}
+    currency: 0
+    requiresRebirth: 1
+    rarityWeights: 
+    openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
+    openingTint: {r: 0.18039216, g: 0.41960785, b: 0.2901961, a: 1}
+    family: 2
+  - id: boite_pirates_skins
+    displayName: 'Pirates : skins'
+    price: 5
+    icon: {fileID: 0}
+    items:
+    - {fileID: 11400000, guid: 8c4576f3325b64377882629eaaeec782, type: 2}
+    - {fileID: 11400000, guid: d2d9a2203096845078f17095cb4f8876, type: 2}
+    - {fileID: 11400000, guid: 02cc1c5c54d61463b8e2402ed9ecb0bc, type: 2}
+    - {fileID: 11400000, guid: 7ae336cef781b49fa9f0c9dd7b3cb26f, type: 2}
+    - {fileID: 11400000, guid: b4d23d1b421cc499bbac3532b5542b34, type: 2}
+    - {fileID: 11400000, guid: af48010bf9e984967b4d78d5ec87c6f5, type: 2}
+    - {fileID: 11400000, guid: 277e7aaf14db84936893a5c8a4050020, type: 2}
+    - {fileID: 11400000, guid: 95005a43e56574e00bf42df5ea0d84ea, type: 2}
+    - {fileID: 11400000, guid: 2c03192ba3ba445189728819d55414a7, type: 2}
+    - {fileID: 11400000, guid: a978df77a0782445b810e7807c70fb9a, type: 2}
+    - {fileID: 11400000, guid: c9af8c003160840d492cd5f015056ebf, type: 2}
+    - {fileID: 11400000, guid: 21fa3ae3012364303b59d5a89f3fcbf1, type: 2}
+    currency: 1
+    requiresRebirth: 0
+    rarityWeights: 000000000000000000000000580200002c01000064000000
+    openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
+    openingTint: {r: 0.41960785, g: 0.2901961, b: 0.20784314, a: 1}
+    family: 1
+  - id: boite_pirates_accessoires
+    displayName: 'Pirates : accessoires'
+    price: 5
+    icon: {fileID: 0}
+    items:
+    - {fileID: 11400000, guid: 1bb9365b004284f6ab9b0263bb861e55, type: 2}
+    - {fileID: 11400000, guid: de4f2752ae79c4d9da16a8de9d4a1639, type: 2}
+    - {fileID: 11400000, guid: 69cbf02be6b804d6cbf3a910da5928bd, type: 2}
+    - {fileID: 11400000, guid: 2355c21e82f174a6cb4aa0ad5a3d115a, type: 2}
+    - {fileID: 11400000, guid: 335de1d83e48d4d3ebd1b419b8cceb06, type: 2}
+    - {fileID: 11400000, guid: 92434d5219cc24d659e3615cb4ca0bef, type: 2}
+    - {fileID: 11400000, guid: 8a0cda4f8bff9465c9e29d102db187d0, type: 2}
+    - {fileID: 11400000, guid: 0d7cb2090369b420db7beacc619540aa, type: 2}
+    - {fileID: 11400000, guid: eb1117e78e3524cfcbcb8add9a9813a0, type: 2}
+    - {fileID: 11400000, guid: 3f7caebf1d7f34e64a5bec58a1ba5e34, type: 2}
+    - {fileID: 11400000, guid: d9fec6007d4d0445ebbe9d83035249cb, type: 2}
+    - {fileID: 11400000, guid: 87ecfe073e0aa4f5bba91e3555fdde27, type: 2}
+    currency: 1
+    requiresRebirth: 0
+    rarityWeights: 000000000000000000000000580200002c01000064000000
+    openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
+    openingTint: {r: 0.16470589, g: 0.22745098, b: 0.43137255, a: 1}
+    family: 1
   freeItems:
   - {fileID: 11400000, guid: 7d07bbf06ddd2484eab96d87021d63db, type: 2}
   - {fileID: 11400000, guid: 53e29cef8643e45248339583c76c42cc, type: 2}
   - {fileID: 11400000, guid: a2941624ef29d4b8381031d27a7512b5, type: 2}
   - {fileID: 11400000, guid: 2864d9d48a2f04fe584df239a3fe965b, type: 2}
   - {fileID: 11400000, guid: 6f77b7de27490489a87294a7bb74c0cd, type: 2}
-  outfitBonusCap: 50

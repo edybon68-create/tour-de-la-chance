@@ -1,0 +1,333 @@
+/* Les styles de la v5 (spec v5 §7 à §15). Chargé APRÈS les autres feuilles (Hud.uxml,
+   Panels.uxml, BoxOpening.uxml) : à précision égale, ses règles gagnent.
+   Référence 1920 × 1080. Couleurs : art bible §12.2 et §12.17. */
+
+/* ---------- Le diamant de l'interface : l'image diamant.png (lot 5) ---------- */
+.diamant {
+    width: 34px;
+    height: 34px;
+    background-image: url("../Art/icones_detourees/diamant.png");
+    -unity-background-scale-mode: scale-to-fit;
+    margin: 0 6px;
+    flex-shrink: 0;
+}
+.diamant--compteur { width: 40px; height: 40px; margin: 0 0 0 8px; }
+.diamant--petit { width: 26px; height: 26px; margin: 0 4px; }
+.diamant--prix { width: 30px; height: 30px; margin: 0 2px 0 8px; }
+.diamant--grand { width: 100px; height: 100px; }
+.diamant-image { width: 40px; height: 40px; margin-left: 8px; -unity-background-scale-mode: scale-to-fit; }
+
+/* ---------- HUD : compteur de diamants, badge ×2 ---------- */
+.diamond-text { color: #9FE3FF; }
+.rebirth-badge {
+    font-size: 22px;
+    color: #6B4300;
+    -unity-font-style: bold;
+    background-color: #FFD54A;
+    border-width: 3px;
+    border-color: #110D1F;
+    border-radius: 14px;
+    padding: 0 8px;
+    margin: 0 10px 0 0;
+    display: none;
+}
+.float-text--diamants { color: #4FC3FF; -unity-text-outline-color: #0E2D6B; }
+
+/* ---------- La carte d'étage (§9) ---------- */
+.floor-recap {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center;
+}
+.recap-card {
+    margin-top: 108px;   /* y ≈ 140 avec la marge du HUD */
+    width: 720px;
+    max-height: 320px;
+    padding: 14px 24px 16px 24px;
+    border-width: 5px;
+    border-color: #1F1730;
+    border-radius: 28px;
+    background-color: #3B7DD8;
+    align-items: center;
+    display: none;
+}
+.recap-card--palier1 { background-color: #3B7DD8; background-image: url("Degrades/badge_palier1.png"); -unity-background-scale-mode: stretch-to-fill; }
+.recap-card--palier2 { background-color: #E0705A; background-image: url("Degrades/badge_palier2.png"); -unity-background-scale-mode: stretch-to-fill; }
+.recap-card--palier3 { background-color: #6C4FE0; background-image: url("Degrades/badge_palier3.png"); -unity-background-scale-mode: stretch-to-fill; }
+.recap-card--palier4 { background-color: #2E2366; background-image: url("Degrades/badge_palier4.png"); -unity-background-scale-mode: stretch-to-fill; }
+.recap-title { font-size: 46px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
+.recap-phrase { font-size: 22px; color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; white-space: normal; -unity-text-align: middle-center; margin: 0 0 4px 0; }
+.recap-won { font-size: 28px; color: #FFD54A; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; margin: 2px 0; }
+.recap-won--diamants { color: #9FE3FF; -unity-text-outline-color: #0E2D6B; }
+.recap-banner { font-size: 22px; color: #3A2200; background-color: #FFD54A; border-radius: 12px; padding: 2px 14px; -unity-font-style: bold; margin: 4px 0; }
+.recap-pills { flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+.recap-pill { background-color: rgba(31, 23, 48, 0.8); border-radius: 14px; padding: 4px 14px; margin: 3px 5px; }
+.recap-pill--gain { background-color: rgba(58, 34, 0, 0.85); border-width: 2px; border-color: #FFD54A; }
+.recap-pill-text { font-size: 24px; color: #F4EEE6; -unity-font-style: bold; margin: 0; padding: 0; }
+.recap-pill--gain .recap-pill-text { font-size: 30px; color: #FFD54A; }
+.recap-mentions { font-size: 19px; color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; margin-top: 6px; }
+.recap-bar {
+    position: absolute;
+    top: -8px;          /* y ≈ 24 avec la marge du HUD */
+    height: 64px;
+    padding: 0 26px;
+    justify-content: center;
+    border-width: 4px;
+    border-color: #1F1730;
+    border-radius: 22px;
+    background-color: rgba(31, 23, 48, 0.88);
+    display: none;
+}
+.recap-bar:hover { background-color: rgba(58, 51, 88, 0.95); }
+.recap-bar-text { font-size: 24px; color: #FFD54A; -unity-font-style: bold; margin: 0; padding: 0; }
+
+/* ---------- Petits messages (toasts) ---------- */
+.toast-layer { position: absolute; left: 0; right: 0; top: 40px; align-items: center; }
+.toast { background-color: #2A2440; border-width: 4px; border-color: #110D1F; border-top-color: #FFD54A; border-radius: 18px; padding: 10px 24px; margin-bottom: 8px; }
+.toast__texte { font-size: 24px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0; }
+
+/* ---------- Onglets « pilules » v5 (Boutique, Index) ---------- */
+.v5-tabs { flex-direction: row; flex-shrink: 0; }
+.btn.v5-tab {
+    font-size: 24px;
+    height: 60px;
+    min-width: 170px;
+    padding: 0 22px;
+    margin: 0 10px 0 0;
+    border-radius: 30px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.btn.v5-tab.subtab--active { --contour: #21155E; --epaisseur: #4530A8; background-color: #6C4FE0; background-image: url("Degrades/bouton_violet.png"); }
+.v5-tab__texte { font-size: 24px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
+
+/* ---------- Boutique (§15) ---------- */
+.boutique-page.shop-page--active { display: flex; }
+.btq-top { flex-direction: row; justify-content: space-between; align-items: center; flex-shrink: 0; margin-bottom: 10px; }
+.btq-balance { flex-direction: row; align-items: center; }
+.btq-balance__texte { font-size: 28px; color: #FFD54A; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; margin: 0 0 0 14px; }
+.btq-balance__texte--diamants { color: #9FE3FF; -unity-text-outline-color: #0E2D6B; }
+.btq-body { flex-grow: 1; flex-shrink: 1; }
+.btq-grid { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+.btq-card {
+    width: 492px;
+    height: 296px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    background-color: #2A2440;
+    border-width: 4px;
+    border-color: #110D1F;
+    border-radius: 22px;
+}
+.btq-card-top { flex-direction: row; }
+.btq-card-image { width: 118px; height: 118px; flex-shrink: 0; margin-right: 14px; -unity-background-scale-mode: scale-to-fit; align-items: center; justify-content: center; }
+.btq-card-titles { flex-grow: 1; flex-shrink: 1; }
+.btq-card-name { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; white-space: normal; }
+.btq-card-buttons { flex-direction: row; align-items: center; margin-top: 8px; }
+.btn.btq-open { font-size: 24px; height: 62px; min-width: 200px; padding: 0 16px; margin: 0 10px 0 0; border-radius: 18px; }
+.btn.btq-content-btn { font-size: 20px; height: 56px; padding: 0 14px; margin: 0; border-radius: 16px; }
+.btq-missing { font-size: 18px; margin-top: 2px; }
+.btq-complete { position: absolute; top: 8px; right: 10px; font-size: 16px; }
+.btq-lock {
+    position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    border-radius: 18px;
+    background-color: rgba(14, 10, 26, 0.72);
+    align-items: center;
+    justify-content: center;
+}
+.btq-lock__texte { font-size: 22px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin-top: 8px; margin-bottom: 40px; }
+.btq-note { background-color: #1F1A33; border-radius: 18px; padding: 14px 18px; margin-top: 4px; }
+.btq-note__titre { font-size: 24px; color: #9FE3FF; -unity-font-style: bold; margin: 0 0 4px 0; }
+.btq-note__texte { font-size: 20px; color: #E6E1EE; white-space: normal; margin: 0; }
+.btn.btq-back { font-size: 20px; height: 52px; padding: 0 18px; align-self: flex-start; border-radius: 16px; margin: 0 0 8px 0; }
+.btq-content { flex-direction: row; flex-grow: 1; flex-shrink: 1; }
+.btq-content-left { width: 380px; flex-shrink: 0; margin-right: 16px; }
+.btq-content-image { width: 150px; height: 150px; align-self: center; -unity-background-scale-mode: scale-to-fit; align-items: center; justify-content: center; }
+.btq-content-right { flex-grow: 1; flex-shrink: 1; }
+.btq-packs-intro { font-size: 22px; color: #E6E1EE; white-space: normal; margin-bottom: 12px; }
+.btq-packs { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+.btq-pack {
+    width: 236px;
+    padding: 14px;
+    margin-bottom: 12px;
+    background-color: #2A2440;
+    border-width: 4px;
+    border-color: #110D1F;
+    border-radius: 20px;
+    align-items: center;
+    opacity: 0.6;
+}
+.btq-pack-image { width: 120px; height: 120px; align-items: center; justify-content: center; -unity-background-scale-mode: scale-to-fit; }
+.btq-pack-name { font-size: 20px; color: #FFFFFF; -unity-font-style: bold; white-space: normal; -unity-text-align: middle-center; margin: 6px 0 0 0; }
+.btq-pack-amount { font-size: 26px; color: #9FE3FF; -unity-font-style: bold; margin: 2px 0 8px 0; }
+.btn.btq-pack-btn { font-size: 18px; height: 52px; padding: 0 10px; border-radius: 16px; }
+
+/* La barre segmentée des taux (360 × 18) et la ligne des pourcentages. */
+.rates-bar-wrap { margin-top: 10px; }
+.rates-bar { flex-direction: row; width: 360px; height: 18px; border-radius: 9px; overflow: hidden; border-width: 2px; border-color: #110D1F; }
+.rates-seg { height: 100%; }
+.rates-line { flex-direction: row; align-items: center; margin-top: 4px; }
+.rates-line__pct { font-size: 18px; -unity-font-style: bold; margin: 0; padding: 0; }
+.rates-line__sep { font-size: 18px; color: #8A84A0; margin: 0 6px; padding: 0; }
+
+/* Une boîte dessinée (images des boîtes Pirates / Animaux pas encore là). */
+.boite-dessin { width: 84px; height: 66px; margin-top: 20px; border-radius: 10px; border-width: 4px; border-color: #110D1F; align-items: center; }
+.boite-dessin__ruban { position: absolute; top: 0; bottom: 0; width: 16px; background-color: #E8B830; }
+.boite-dessin__couvercle { position: absolute; left: -8px; right: -8px; top: -20px; height: 22px; border-radius: 8px; border-width: 4px; border-color: #110D1F; }
+
+/* Le cadenas dessiné (anse + corps). */
+.cadenas { width: 56px; height: 66px; align-items: center; }
+.cadenas__anse { width: 36px; height: 34px; border-width: 7px; border-color: #E6E1EE; border-bottom-width: 0; border-top-left-radius: 18px; border-top-right-radius: 18px; }
+.cadenas__corps { width: 56px; height: 36px; margin-top: -4px; border-radius: 8px; background-color: #FFD54A; border-width: 3px; border-color: #6B4300; }
+
+/* ---------- Cartes de collection (Index, Contenu et taux) §8.3 ---------- */
+.item-frame.tile-frame { width: 160px; margin: 0 8px 10px 0; }
+.item-card.tile-card { min-height: 200px; background-color: #2A2440; }
+.item-card.tile-card--absent { background-color: #221A3D; }
+.tile-box { position: absolute; left: 4px; top: 4px; width: 22px; height: 22px; -unity-background-scale-mode: scale-to-fit; }
+.tile-box--vide { border-radius: 5px; border-width: 2px; border-color: #110D1F; }
+.tile-check { position: absolute; right: 4px; bottom: 4px; width: 24px; height: 24px; border-radius: 12px; background-color: #2E9E5B; color: #FFFFFF; font-size: 16px; -unity-font-style: bold; -unity-text-align: middle-center; margin: 0; padding: 0; }
+.tile-ribbon { position: absolute; left: 30px; right: 30px; bottom: 30px; background-color: #6E6A80; border-radius: 8px; color: #F4EEE6; font-size: 14px; -unity-font-style: bold; -unity-text-align: middle-center; margin: 0; padding: 1px 0; }
+.item-placeholder { width: 78px; height: 78px; border-radius: 39px; border-width: 5px; align-items: center; justify-content: center; }
+.item-placeholder__lettre { font-size: 40px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
+.item-extra--remplace { color: #FFC64D; font-size: 14px; }
+
+/* ---------- Index (§8) ---------- */
+.index-page.shop-page--active { display: flex; }
+.idx-top { flex-direction: row; justify-content: space-between; align-items: center; flex-shrink: 0; margin-bottom: 8px; }
+.idx-progress { width: 360px; }
+.idx-scroll { flex-grow: 1; }
+.idx-section-head { flex-direction: row; align-items: flex-end; margin: 10px 0 6px 0; }
+.idx-section-title { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0 12px 0 0; padding: 0; }
+.idx-section-count { font-size: 20px; color: #B8B4C8; margin: 0; padding: 0; }
+
+/* ---------- La fiche agrandie (§8.4) ---------- */
+.detail-overlay { position: absolute; left: -32px; right: -32px; top: -60px; bottom: -28px; align-items: center; justify-content: center; background-color: rgba(14, 10, 26, 0.5); }
+.detail-sheet {
+    width: 960px;
+    height: 620px;
+    flex-shrink: 0;
+    flex-direction: row;
+    padding: 24px;
+    background-color: #2A2440;
+    border-width: 6px;
+    border-color: #FFD54A;
+    border-radius: 30px;
+}
+.detail-visual {
+    width: 420px;
+    height: 560px;
+    flex-shrink: 0;
+    flex-shrink: 0;
+    border-radius: 22px;
+    border-width: 4px;
+    border-color: #110D1F;
+    background-color: #1F1A33;
+    -unity-background-scale-mode: scale-and-crop;
+    align-items: center;
+    justify-content: center;
+}
+.detail-question { font-size: 220px; color: #FF4FD8; -unity-font-style: bold; -unity-text-outline-width: 6px; -unity-text-outline-color: #110D1F; display: none; }
+.detail-placeholder { align-items: center; justify-content: center; }
+.detail-placeholder-visual { width: 260px; height: 260px; align-items: center; justify-content: center; }
+.detail-placeholder-visual .item-placeholder { width: 220px; height: 220px; border-radius: 110px; border-width: 10px; }
+.detail-placeholder-visual .item-placeholder__lettre { font-size: 120px; -unity-text-outline-width: 6px; }
+.detail-placeholder-visual .item-swatch { width: 220px; height: 220px; border-radius: 40px; }
+.detail-info { flex-grow: 1; flex-shrink: 1; margin-left: 28px; }
+.detail-name { font-size: 44px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; white-space: normal; margin: 0; padding: 0; }
+.detail-rarity { font-size: 28px; -unity-font-style: bold; margin: 0 0 10px 0; padding: 0; }
+.detail-line { font-size: 22px; color: #E6E1EE; white-space: normal; margin: 3px 0; padding: 0; }
+.detail-flavor { font-size: 22px; color: #FFE7A0; -unity-font-style: italic; white-space: normal; margin: 12px 0; }
+.detail-buttons { flex-direction: row; margin-top: 18px; }
+.btn.detail-btn { font-size: 22px; height: 62px; padding: 0 18px; margin: 0 12px 0 0; border-radius: 18px; }
+.btn.detail-arrow { position: absolute; top: 284px; font-size: 26px; color: #FFFFFF; }
+.btn.detail-arrow--gauche { left: -40px; }
+.btn.detail-arrow--droite { right: -40px; }
+.btn.detail-close { position: absolute; top: -24px; right: -24px; }
+
+/* ---------- Inventaire : les 2 cases d'accessoires (§4.4) ---------- */
+.inv-slots { flex-direction: row; margin-bottom: 6px; }
+.inv-slot {
+    flex-grow: 1;
+    height: 112px;
+    margin: 0 10px 0 0;
+    padding: 6px 12px;
+    border-radius: 18px;
+    border-width: 4px;
+    border-color: #5A4F88;
+    background-color: #1F1A33;
+}
+.inv-slot--libre { border-color: #6E6A80; align-items: center; justify-content: center; }
+.inv-slot__titre { position: absolute; left: 12px; top: 4px; font-size: 16px; color: #B8B4C8; margin: 0; padding: 0; }
+.inv-slot__libre { font-size: 26px; color: #8A84A0; -unity-font-style: bold; margin: 0; padding: 0; }
+.inv-slot__contenu { flex-direction: row; align-items: center; margin-top: 18px; }
+.inv-slot__visuel { width: 64px; height: 64px; align-items: center; justify-content: center; margin-right: 10px; }
+.inv-slot__visuel .item-placeholder { width: 58px; height: 58px; }
+.inv-slot__nom { font-size: 22px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0; }
+.inv-slot__detail { font-size: 16px; color: #C9C3D6; margin: 0; padding: 0; }
+.btn.inv-slot__retirer { position: absolute; right: 10px; bottom: 10px; font-size: 18px; height: 46px; padding: 0 14px; border-radius: 14px; }
+.inv-empty { font-size: 18px; color: #8A84A0; margin: 4px 0 10px 4px; }
+
+/* ---------- Confirmations / fenêtre « Lequel enlever ? » ---------- */
+.v5-confirm { position: absolute; left: -32px; right: -32px; top: -16px; bottom: -28px; background-color: rgba(14, 10, 26, 0.75); align-items: center; justify-content: center; }
+.v5-confirm-box { width: 660px; padding: 28px; background-color: #3A3358; border-width: 5px; border-color: #110D1F; border-radius: 26px; align-items: center; }
+.v5-confirm-text { font-size: 26px; color: #FFFFFF; white-space: normal; -unity-text-align: middle-center; margin-bottom: 18px; -unity-font-style: bold; }
+.v5-confirm-buttons { flex-direction: row; }
+.btn.v5-confirm-btn { font-size: 24px; height: 66px; min-width: 190px; padding: 0 18px; margin: 0 8px; border-radius: 18px; }
+.v5-replace-cards { flex-direction: row; margin-bottom: 14px; }
+
+/* ---------- Renaissance (§13.3) ---------- */
+.rebirth-page.shop-page--active { display: flex; }
+.rebirth-columns { flex-direction: row; justify-content: space-between; }
+.rebirth-col { width: 318px; min-height: 330px; padding: 14px; border-width: 5px; border-radius: 22px; background-color: #1F1A33; }
+.rebirth-col__titre { font-size: 30px; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0 0 10px 0; }
+.rebirth-col__ligne { font-size: 21px; color: #F4EEE6; white-space: normal; margin: 6px 0; }
+.rebirth-tip { font-size: 19px; color: #B8B4C8; white-space: normal; margin: 14px 0; -unity-text-align: middle-center; }
+.rebirth-row { flex-direction: row; align-items: center; justify-content: center; }
+.btn.rebirth-btn { font-size: 30px; height: 80px; min-width: 330px; padding: 0 24px; border-radius: 22px; margin-right: 16px; }
+.rebirth-done { flex-grow: 1; align-items: center; justify-content: center; }
+.rebirth-done__titre { font-size: 52px; color: #FFD54A; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #3A2200; }
+.rebirth-done__texte { font-size: 28px; color: #FFFFFF; margin-top: 10px; }
+.rebirth-done__petit { font-size: 20px; color: #B8B4C8; margin-top: 18px; }
+
+/* L'animation (HUD) */
+.rebirth-fx { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; }
+.rebirth-fx__noir { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: #0E0A1A; opacity: 0; }
+.rebirth-fx__flash { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: #FFFFFF; opacity: 0; }
+.rebirth-fx__mot { flex-direction: row; margin-bottom: 160px; }
+.rebirth-fx__lettre { font-size: 96px; color: #FFD54A; -unity-font-style: bold; -unity-text-outline-width: 6px; -unity-text-outline-color: #6B2A10; margin: 0; padding: 0; opacity: 0; }
+.rebirth-fx__etincelle { position: absolute; width: 28px; height: 28px; display: none; }
+
+/* ---------- La fenêtre de reprise (§11.2), sans fond assombri ---------- */
+.revive-layer { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; }
+.revive-spiral { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none; }
+.revive-window {
+    width: 640px;
+    padding: 0 0 24px 0;
+    background-color: #2A2440;
+    border-width: 6px;
+    border-color: #110D1F;
+    border-radius: 32px;
+    align-items: center;
+    display: none;
+}
+.revive-header { align-self: stretch; height: 84px; justify-content: center; align-items: center; background-color: #3B7DD8; border-top-left-radius: 26px; border-top-right-radius: 26px; border-bottom-width: 4px; border-bottom-color: #110D1F; }
+.revive-title { font-size: 40px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; margin: 0; }
+.revive-text { font-size: 26px; color: #FFFFFF; white-space: normal; -unity-text-align: middle-center; margin: 18px 28px 8px 28px; }
+.revive-reminder { font-size: 20px; color: #9FE3FF; margin-bottom: 16px; }
+.revive-buttons { flex-direction: row; }
+.btn.revive-btn { font-size: 26px; height: 72px; min-width: 230px; padding: 0 18px; margin: 0 10px; border-radius: 20px; }
+
+/* ---------- Écran de résultat de l'ouverture 3D (§6.5) : les textes sur un cartouche sombre,
+   sous l'objet qui flotte, pour rester lisibles devant la boîte. ---------- */
+.ov-result {
+    top: 68%;
+    left: 22%;
+    right: 22%;
+    padding: 10px 16px 14px 16px;
+    border-radius: 24px;
+    background-color: rgba(31, 23, 48, 0.82);
+    border-width: 4px;
+    border-color: #110D1F;
+}

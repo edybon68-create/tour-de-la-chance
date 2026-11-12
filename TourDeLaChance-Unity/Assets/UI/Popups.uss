@@ -63,6 +63,8 @@
 .popup-header--ameliorations { background-color: #D99A1A; }
 .popup-header--classement { background-color: #6C4FE0; }
 .popup-header--reglages, .popup-header--pseudo { background-color: #5A4F88; }
+.popup-header--renaissance { background-color: #EF6A32; }  /* v5 : « flamme » de la Renaissance */
+.popup-header--confirmation { background-color: #5A4F88; }
 
 .popup-title {
     font-size: 48px;
@@ -75,15 +77,7 @@
     padding: 0;
 }
 
-/* L'icône de la pop-up (96 px) : elle déborde de 24 px au-dessus du bandeau, à gauche. */
-.popup-icon {
-    position: absolute;
-    left: 28px;
-    top: -24px;
-    width: 96px;
-    height: 96px;
-    -unity-background-scale-mode: scale-to-fit;
-}
+/* v5 §7.2 : plus d'icône dans le bandeau (.popup-icon supprimée), le titre est centré. */
 
 /* Le bouton fermer : rond Ø 72, rouge, à cheval sur le coin haut droit. */
 .popup-close {
@@ -102,66 +96,106 @@
 .coin--wallet { width: 40px; height: 40px; }
 .shop-wallet { font-size: 30px; -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; }
 
-/* ---------- Les colonnes de boutons (§5.5) ---------- */
+/* ---------- Les colonnes v5 : boutons ronds, icône seule (spec v5 §7.1, art bible §12.17) ----------
+   Socle rond Ø 112, anneau de la couleur de la famille (= bandeau de la pop-up), face sombre,
+   reflet SOUS l'icône, icône Ø 88 centrée (elle ne déborde plus), aucun libellé.
+   Espacement : 136 px d'un bouton à l'autre (112 + 24). */
 .col {
     position: absolute;
     top: 170px;
-    width: 128px;
+    width: 112px;
 }
 .col--gauche { left: 32px; }
-.col--droite { right: 32px; }
+/* v5 : la colonne de droite commence un peu plus bas, sous le compteur de diamants. */
+.col--droite { right: 32px; top: 200px; }
+.btn-holder { width: 112px; height: 112px; margin: 0 0 24px 0; }
 
 .btn.col-btn {
-    width: 128px;
-    height: 128px;
-    margin: 0 0 16px 0;
+    --anneau: #6C4FE0;
+    --anneau-clair: #A08CFF;
+    width: 112px;
+    height: 112px;
+    margin: 0;
     padding: 0;
-    border-radius: 28px;
+    border-radius: 56px;          /* un cercle : la moitié de 112 */
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
+    overflow: visible;
 }
-
-/* L'icône (84 × 84) déborde de 8 px au-dessus du bouton, comme un autocollant. */
+/* L'anneau de couleur, collé à l'intérieur du contour d'encre. */
+.col-btn-anneau {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    border-radius: 52px;
+    border-width: 6px;
+    border-color: var(--anneau);
+    transition-property: border-color; transition-duration: 0.15s;
+}
+.col-btn-reflet {
+    position: absolute; top: 8px; left: 20px; right: 20px; height: 32%;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.18);
+}
 .col-btn-icon {
     position: absolute;
-    left: 18px;
-    top: -12px;
-    width: 84px;
-    height: 84px;
+    left: 8px; top: 6px;
+    width: 88px; height: 88px;
     -unity-background-scale-mode: scale-to-fit;
-    transition-property: scale;
-    transition-duration: 0.15s;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
 }
+/* Icône de secours dessinée en texte (Renaissance, tant que icone_rebirth.png n'existe pas). */
+.col-btn-icon-texte {
+    font-size: 52px; color: #FFD54A; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #6B2A10;
+    -unity-text-align: middle-center; margin: 0; padding: 0;
+    width: 88px; height: 88px;
+}
+.btn.col-btn:hover .col-btn-anneau { border-color: var(--anneau-clair); }
+.btn.col-btn:hover > .col-btn-icon { scale: 1.1 1.1; }
+.btn.col-btn:active > .col-btn-icon { scale: 1 1; }
 
-.col-btn-text {
-    font-size: 20px;
-    color: #FFFFFF;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    -unity-text-outline-width: 3px;
-    -unity-text-outline-color: #110D1F;
-    margin: 0 0 4px 0;
-    padding: 0;
-}
-.col-btn-text--small { font-size: 17px; }
+/* Une couleur par fonction. Deux classes (.btn.col-btn--x) pour gagner sur .btn--sombre. */
+.btn.col-btn--boutique      { --anneau: #C2477A; --anneau-clair: #E57AA5; --epaisseur: #8A2E55; }
+.btn.col-btn--inventaire    { --anneau: #3B7DD8; --anneau-clair: #7DB5FF; --epaisseur: #2858A0; }
+.btn.col-btn--index         { --anneau: #2E9E8E; --anneau-clair: #5CCBBB; --epaisseur: #1F6E63; }
+.btn.col-btn--ameliorations { --anneau: #D99A1A; --anneau-clair: #FFC64D; --epaisseur: #9A6A0E; }
+.btn.col-btn--classement    { --anneau: #6C4FE0; --anneau-clair: #A08CFF; --epaisseur: #4530A8; }
+.btn.col-btn--rebirth       { --anneau: #EF6A32; --anneau-clair: #FF9A66; --epaisseur: #B4461C; }
 
-/* Bouton de la pop-up ouverte : contour or de 5 px, fond #5A4F88, icône à 1,1. */
-.btn.col-btn.col-btn--active {
-    background-image: none;
-    background-color: #5A4F88;
-    border-left-width: 5px;
-    border-right-width: 5px;
-    border-top-width: 5px;
-    border-left-color: #FFD54A;
-    border-right-color: #FFD54A;
-    border-top-color: #FFD54A;
-    border-bottom-color: #FFD54A;
-}
+/* Pop-up ouverte : anneau or, face plus claire, icône à 1,1. */
+.btn.col-btn.col-btn--active { background-image: none; background-color: #5A4F88; }
+.btn.col-btn.col-btn--active .col-btn-anneau { border-color: #FFD54A; }
 .btn.col-btn--active > .col-btn-icon { scale: 1.1 1.1; }
 
-/* Interdit (suspense, transition…) : les boutons restent visibles, grisés. */
-.btn.col-btn:disabled { opacity: 0.45; }
-.btn.col-btn:disabled > .col-btn-text { color: #D0CCE0; -unity-text-outline-width: 3px; -unity-text-outline-color: #2A2838; }
+/* Interdit (suspense, transition…) : grisé et icône désaturée. */
+.btn.col-btn:disabled { opacity: 0.4; }
+.btn.col-btn:disabled > .col-btn-icon { -unity-background-image-tint-color: #B8B4C8; }
+
+/* Pastille dessinée par le code (badge « ×2 » de la Renaissance faite), cachée par défaut. */
+.col-btn-badge {
+    display: none;
+    position: absolute; top: -8px; right: -10px;
+    height: 36px; min-width: 44px; border-radius: 18px; padding: 0 6px;
+    background-color: #FFD54A;
+    border-width: 4px; border-color: #110D1F;
+    align-items: center; justify-content: center;
+}
+.col-btn-badge--visible { display: flex; }
+.col-btn-badge__texte { font-size: 20px; color: #6B4300; -unity-font-style: bold; margin: 0; padding: 0; }
+
+/* L'info-bulle maison (un seul élément pour tout l'écran, placé par le code). */
+.info-bulle {
+    position: absolute;
+    left: 0; top: 0;
+    height: 52px; padding: 0 22px;
+    justify-content: center;
+    background-color: rgba(31, 23, 48, 0.9);
+    border-width: 4px; border-bottom-width: 7px; border-color: #110D1F;
+    border-radius: 14px;
+    opacity: 0;
+    transition-property: opacity, translate; transition-duration: 0.08s, 0.08s;
+}
+.info-bulle--visible { opacity: 1; transition-duration: 0.15s, 0.15s; transition-timing-function: ease-out-back, ease-out-back; }
+.info-bulle__texte { font-size: 22px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
 
 /* ---------- La roue dentée ---------- */
 .gear-holder {

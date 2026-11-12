@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cfbc46aca18b438b9c35bd5c4c908b3, type: 3}
+  m_Name: ruche
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
+  id: ruche
+  displayName: Abeilles
+  category: 1
+  slot: 0
+  rarity: super_rare
+  free: 0
+  icon: {fileID: 0}
+  skinStyle: 0
+  color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
+  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
+  metallic: 0
+  smoothness: 0.3
+  accessoryPrefab: {fileID: 0}
+  animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1
+  flavorText: Bzz bzz, tout le monde au travail.
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}

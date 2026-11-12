@@ -218,5 +218,175 @@ MonoBehaviour:
     volume: 0.6
     varyPitch: 0
     ducksMusic: 1
+  - id: 41
+    clip: {fileID: 8300000, guid: 5ca31ba28f43b466a979fbfc1769d6d4, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 42
+    clip: {fileID: 8300000, guid: 3f157d3f86d124505b46a4f0ecc0e29a, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 43
+    clip: {fileID: 8300000, guid: a5ca961d36a8b432386ef79eb2fe0cf5, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 44
+    clip: {fileID: 8300000, guid: c1745c8f93a76405fbc3ebd421685260, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 45
+    clip: {fileID: 8300000, guid: ea5fed6b32c3545029a29cf7628f6719, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 46
+    clip: {fileID: 8300000, guid: f425e86b933c3469d9252896520c72c0, type: 3}
+    volume: 0.9
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 47
+    clip: {fileID: 8300000, guid: 66b97b7eb49514dfcbe401d5776a97d1, type: 3}
+    volume: 0.8
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 48
+    clip: {fileID: 8300000, guid: cc0697e0c12164e5790cd205d9881442, type: 3}
+    volume: 0.25
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 49
+    clip: {fileID: 8300000, guid: 342ef998e17d74502a27d70d1ffae757, type: 3}
+    volume: 0.3
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 50
+    clip: {fileID: 8300000, guid: 21a43502b21c548ef9142292e30b3e01, type: 3}
+    volume: 0.3
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 51
+    clip: {fileID: 8300000, guid: 61fc8914c100a4ecc97a0f0203d85871, type: 3}
+    volume: 0.3
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 52
+    clip: {fileID: 8300000, guid: abd409a62d98e44faac96ddfe517f6a6, type: 3}
+    volume: 0.35
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 53
+    clip: {fileID: 8300000, guid: 90dd7570c410243ddad7c79704d88f1b, type: 3}
+    volume: 0.4
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 54
+    clip: {fileID: 8300000, guid: 6cc4c07901b264514bd6ecf66cce1779, type: 3}
+    volume: 0.25
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 55
+    clip: {fileID: 8300000, guid: dcd0a6d82ec7a4da48fa428a1c7e5040, type: 3}
+    volume: 0.25
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 56
+    clip: {fileID: 8300000, guid: 7e4accfa52fc24ce78b400bcdd4ef82a, type: 3}
+    volume: 0.35
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 57
+    clip: {fileID: 8300000, guid: 9c561e4a8b65443938ef5fbbdd66d677, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 58
+    clip: {fileID: 8300000, guid: 1d926bd60d1724fc198962c8bcee6fb5, type: 3}
+    volume: 0.4
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 59
+    clip: {fileID: 8300000, guid: 484e88ad2784346b8854fca9ad6aa739, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 60
+    clip: {fileID: 8300000, guid: 3d64d7afd86b44202a72b349d18b9833, type: 3}
+    volume: 0.3
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 61
+    clip: {fileID: 8300000, guid: 144d22c99741946ee90041ebbef6e2e1, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 62
+    clip: {fileID: 8300000, guid: b8161762d1db948069226ae583f42622, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 69
+    clip: {fileID: 8300000, guid: c2ff066823b5c4450876958a77fbe48f, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 70
+    clip: {fileID: 8300000, guid: 27826b80e3dc34ef39798972fbd0d315, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 71
+    clip: {fileID: 8300000, guid: f8ec44e4d5306455b9670b37a27416f8, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 72
+    clip: {fileID: 8300000, guid: c44e833743d7c4e4f8a7657196d36334, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 73
+    clip: {fileID: 8300000, guid: d40ed5160bb06420594c97135fd31f19, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 74
+    clip: {fileID: 8300000, guid: b7941f3b8554f44648b620decf068771, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 1
+  - id: 63
+    clip: {fileID: 8300000, guid: 38d4fff7ee677475e96779bfb47b265d, type: 3}
+    volume: 0.7
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 64
+    clip: {fileID: 8300000, guid: bea3013bd8f904a0fa7e0e7cd6144469, type: 3}
+    volume: 0.5
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 65
+    clip: {fileID: 8300000, guid: 4c97314a941a441809e428b2f61a612c, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 66
+    clip: {fileID: 8300000, guid: e0428fe59b58d48f6bb022b14f8b09ac, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 67
+    clip: {fileID: 8300000, guid: ce376d9088e4a4a5c93534538337b2e1, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
+  - id: 68
+    clip: {fileID: 8300000, guid: ac87fbde996bb4bfca7042e732efcabb, type: 3}
+    volume: 0.6
+    varyPitch: 0
+    ducksMusic: 0
   ambientMusic: {fileID: 8300000, guid: 58e40e343f5cd43519388ca3e196e9be, type: 3}
   tensionMusic: {fileID: 8300000, guid: 8b5333f591c154b4d966b3a03221b8d6, type: 3}

@@ -40,6 +40,19 @@
 > §2.5. Nouvelles images (icône Classement, roue dentée, médailles, icônes de son) :
 > `art/prompts/lot4.md`.
 
+>
+> **Mise à jour « lot 5 » (v5, trois chantiers de style)** :
+> - **§13 « Accessoires v5 »** : pourquoi les 16 accessoires ont l'air « vieillots », les règles
+>   chiffrées du nouveau style (3 niveaux de formes, gros biseaux + normales pondérées, contraste
+>   de matières, animations, effets par rareté, budgets revus) et une fiche de refonte par
+>   accessoire. Elle modifie légèrement §4.1 (émission discrète permise au Super rare) et §7.
+> - **§12.17 « Boutons d'icône v5 »** : boutons ronds sans texte, icône seule en grand, nouveau
+>   bouton **Rebirth** sous le Classement, info-bulle au survol, plus d'icône en haut à gauche
+>   des pop-ups. Remplace la partie « libellé » du §12.5 et l'icône d'en-tête du §12.6.
+> - **§14 « Ouverture des boîtes en 3D »** : la boîte 3D, sa fiche de modèle, la chronologie
+>   chiffrée et les règles d'équité.
+> - Nouvelles images : `art/prompts/lot5.md` (icône Diamant, icône Rebirth, packs de diamants).
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -426,7 +439,13 @@ Règles :
 **Remise à zéro** : au changement de skin, le code éteint tout ce que le skin précédent avait
 activé (émission, texture, transparence), comme le demande `boites.md` §5.3.
 
-**Ce qui reste interdit** : l'émission pour un objet Commun à Super rare ou « pour faire joli »,
+**v5 (§13.6)** : un accessoire **Super rare** a droit à une émission **discrète** (intensité
+**≤ 0,5**) sur de **petits détails** (au plus 10 % de sa surface visible : une pierre, des taches
+d'ailes). Les objets Légendaires et Secrets gardent le plafond de 1,5. Les **effets de
+l'ouverture des boîtes** (faisceau, lueur intérieure, étincelles 3D, §14) ont aussi droit à
+l'émission (≤ 1,5) : ce sont des effets de victoire, pas des matières d'objets.
+
+**Ce qui reste interdit** : l'émission pour un objet Commun à Rare ou « pour faire joli »,
 les images dessinées ou générées plaquées sur un modèle, la transparence ailleurs que sur le
 Cristal, les couleurs de sommets.
 
@@ -440,7 +459,7 @@ Objectif : une lumière **chaude de fête foraine** sur les objets, une **nuit v
 |---|---|
 | Lumière principale (Directional Light) | Couleur `#FFF1D6` (blanc chaud, déjà proche de l'actuelle), intensité **1,2**, venant d'en haut à gauche et de devant (rotation actuelle conservée, ~50° de hauteur). Ombres douces (*Soft Shadows*). |
 | Lumière d'ambiance (Lighting → Environment) | Mode **Gradient** : ciel `#8C7AB8`, horizon `#5A4A70`, sol `#2A2030`. Elle teinte légèrement les ombres en violet et évite les ombres noires. |
-| Contre-jour (facultatif) | Une Point Light `#B48CFF`, intensité 0,6, derrière et au-dessus du personnage (≈ (0 ; 3,5 ; 4)) : un liseré violet détache le personnage et les chapeaux du fond. |
+| Contre-jour (**obligatoire depuis la v5**, §13.4) | Une Point Light `#B48CFF`, intensité 0,6, derrière et au-dessus du personnage (≈ (0 ; 3,5 ; 4)) : un liseré violet détache le personnage et les chapeaux du fond. |
 | Reflets | Une **Reflection Probe** au centre de l'étage (ou le ciel en Gradient comme source). **Indispensable** : sans elle, les matériaux metallic 1 (or, laiton, couronne) paraissent ternes ou noirs. |
 | Fond de caméra | *Solid Color* `#1F1730`. |
 | Post-traitement (Volume global) | Tonemapping **Neutral** (respecte nos codes hex) ; Bloom léger (seuil 1,0, intensité 0,3) pour faire briller l'or ; Vignette 0,25 pour concentrer le regard au centre. |
@@ -728,6 +747,8 @@ y = 0** (origine au centre du dessus). 32 côtés (on voyait les facettes du dis
 | Coffre (×3 dans la scène) | 800 – 1 200 | BoisCorps, BoisCouvercle, (BoisClair), Interieur, MetalSombre, Laiton, TrouSerrure |
 | Personnage (cheval, v3) | 900 – 1 400 | PersoCorps, Yeux (yeux + narines), Reflet |
 | Coffres de rareté (Bronze, Argent, Or, Diamant) | 800 – 1 400 chacun | mêmes rôles que le coffre + matériaux du §2.10 |
+| **Accessoires v5** (remplace les lignes ci-dessous) | 600 – 3 000 selon la rareté (§13.7) | §13.4 |
+| Boîte 3D d'ouverture (v5) | 1 500 – 2 200 | §14.3 |
 | Casquette | 250 – 400 | TissuRouge, TissuRougeFonce, Blanc |
 | Chapeau de fête | 200 – 350 | CartonRose, CartonJaune, Blanc |
 | Haut-de-forme | 250 – 400 | Feutre, Satin |
@@ -736,6 +757,11 @@ y = 0** (origine au centre du dessus). 32 côtés (on voyait les facettes du dis
 
 Total de la scène visible : moins de 10 000 triangles. Large marge pour la suite (dé, roue,
 pièce géante, tour).
+
+> **v5** : les budgets des accessoires sont **relevés** par rareté (§13.7 : de 600 – 1 000 pour
+> un Commun à 1 500 – 3 000 pour le Secret) et les 6 coffres de rareté sont déjà dans la scène.
+> Nouveau plafond de la scène visible : **25 000 triangles** (cheval + 4 accessoires au maximum +
+> jusqu'à 6 coffres + sol + nuages). C'est encore très peu pour n'importe quel ordinateur.
 
 ---
 
@@ -760,7 +786,8 @@ pièce géante, tour).
 - Les images dessinées ou générées plaquées sur les modèles, et les couleurs de sommets (pas
   affichées par URP Lit). Seule exception : les motifs de skins fabriqués par le code (§4.1).
 - L'émission « pour faire joli » : réservée aux objets Légendaires et Secrets (§4.1, plafond
-  1,5) et aux futurs effets de victoire. Jamais sur le décor ni sur les coffres.
+  1,5), aux petits détails des Super rares (v5 : ≤ 0,5, §13.6) et aux effets de victoire
+  (ouverture des boîtes, §14). Jamais sur le décor ni sur les coffres.
 - La transparence, sauf le skin Cristal (opacité ≥ 0,55).
 - Les couleurs de rareté utilisées comme décoration (§10).
 
@@ -788,7 +815,9 @@ pièce géante, tour).
 Les prompts sont écrits dans `art/prompts/<lot>.md` (`lot1.md` : concept, 1res icônes, logo,
 ciel ; `lot2.md` : icônes des boîtes, boîtes, ciels des paliers ; `lot3.md` : skins du cheval,
 ciels du jour à la nuit, coffres de rareté, améliorations, icônes des panneaux, masque de héros
-v3 ; `lot4.md` : icône Classement, roue dentée, médailles du podium, icônes Musique et Effets).
+v3 ; `lot4.md` : icône Classement, roue dentée, médailles du podium, icônes Musique et Effets ;
+`lot5.md` : icône Diamant, icône Rebirth, packs de diamants ; `lot6.md` : icônes des 56 objets
+des boîtes Pirates et Animaux et images des 4 boîtes, prompts autonomes sans image jointe).
 Le **premier prompt de chaque
 conversation Gemini** commence par le **bloc de style commun** ci-dessous, recopié mot pour mot.
 On ne le modifie pas d'un lot à l'autre sans mettre à jour cette section.
@@ -1306,6 +1335,10 @@ rangée `Label` + `VisualElement.coin` (34 px, `margin-left: 8px`) ; la face est
 
 ### 12.5 Les boutons ronds d'icône
 
+> **v5** : les boutons des colonnes gauche et droite **perdent leur libellé** et deviennent de
+> grands boutons ronds à icône centrée, plus un bouton **Rebirth** : valeurs au **§12.17**, qui
+> remplace ce tableau pour les colonnes. Paramètres et Fermer ne changent pas.
+
 Quatre usages, une seule construction : un **socle rond** (couleur « sombre » de la famille,
 contour d'encre), une **face ronde** sombre `#3B2F66` cerclée d'un **anneau** de la couleur de
 la famille, l'**icône** qui dépasse par le haut, et un **libellé** à cheval sur le bas.
@@ -1449,8 +1482,8 @@ croix et la touche Échap. Les règles de la v3 sur les moments où l'on peut ou
 | Tailles | **S** 680 px de large (Paramètres, confirmations), hauteur selon le contenu ; **M** 1080 × 800 (Boutique, Améliorations, Classement) ; **L** 1360 × 860 (Inventaire, Index : 7 cartes par ligne) ; jamais plus haut que **920 px** |
 | Cadre | contour **6 px** `#1F1730`, bas **14 px** (l'épaisseur du « plateau »), coins **32 px**, fond `#2E2552` |
 | En-tête | hauteur **96 px**, fond = face de la famille, bordure basse 6 px « sombre » de la famille, coins hauts 26 px ; reflet blanc 16 % sur 45 % de la hauteur |
-| Icône d'en-tête | **120 px**, déborde en haut à gauche (`left: -24px; top: -40px`), c'est l'icône du bouton qui a ouvert la pop-up |
-| Titre | 52 px, blanc, contour 4 px `#1F1730` (§12.3), `padding-left: 112px` (laisse la place à l'icône) |
+| Icône d'en-tête | ~~120 px en haut à gauche~~ — **supprimée en v5** (§12.17.6) : l'en-tête ne porte plus que le titre, centré |
+| Titre | 52 px, blanc, contour 4 px `#1F1730` (§12.3) ; v5 : centré, plus de `padding-left` |
 | Corps | `padding: 20px 28px 24px 28px` |
 | Fermer | bouton rond rouge 72 px, `top: -26px; right: -26px` |
 | Apparition | voile : `opacity` 0 → 1 en **0,2 s** ; pop-up : `scale 0.85 → 1` et `translate 0 40px → 0` en **0,28 s `ease-out-back`** |
@@ -1944,3 +1977,848 @@ les fonds de ciel (§5.1 : côté gauche calme, centre vide).
 - Les animations de plus de 0,3 s sur un bouton (le jeu doit rester vif) ; le rebond sur les
   boutons d'achat est permis, l'éclat qui passe ne l'est pas (§11.2).
 - Tout élément de la marque Roblox (§12.1).
+
+### 12.17 Boutons d'icône v5 : l'icône seule, en grand, dans un bouton rond
+
+> **Point de départ réel.** Le jeu v4 a été codé d'après `docs/specs/v4.md` §5.3 à §5.6 (classes
+> `.btn`, `.btn--sombre`, `.col-btn`, `.col-btn-icon`, `.col-btn-text`, `.popup-icon` dans
+> `Assets/UI/Buttons.uss` et `Popups.uss`, contours `#110D1F`). Les valeurs ci-dessous **partent
+> de ce code** (et non des §12.4 – 12.6, restés en partie théoriques) pour que le programmeur
+> n'ait que des retouches à faire. Capture de référence : `docs/captures/v4_popup_boutique.png`.
+
+**Ce qui change et pourquoi.** Aujourd'hui, chaque bouton de colonne est un carré sombre de
+128 px avec une icône de 84 px et un mot dessous : l'icône n'occupe que la moitié du bouton et
+le texte fait « menu de logiciel ». Les jeux de ce genre misent sur **une grosse icône
+colorée dans un bouton rond**, reconnue d'un coup d'œil, et sur **une couleur par fonction**.
+Sans texte, c'est l'icône **et la couleur de l'anneau** qui disent à quoi sert le bouton ; le
+nom apparaît dans une **info-bulle** au survol (accessibilité).
+
+#### 12.17.1 Anatomie (1920 × 1080)
+
+```xml
+<ui:VisualElement class="btn-holder">
+    <ui:VisualElement class="btn-shadow btn-shadow--rond" picking-mode="Ignore" />   <!-- l'ombre, AVANT le bouton -->
+    <ui:Button class="btn btn--sombre col-btn col-btn--boutique" name="BoutonBoutique">
+        <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+        <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+        <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />            <!-- APRÈS le reflet : jamais sali -->
+        <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">             <!-- facultatif, caché par défaut -->
+            <ui:Label class="col-btn-badge__texte" text="!" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:Button>
+</ui:VisualElement>
+```
+Le `Label` `.col-btn-text` **disparaît** de l'UXML (et `.col-btn-text--small` du USS).
+
+| Partie | Valeur | Pourquoi |
+|---|---|---|
+| Bouton (colonnes gauche et droite) | **Ø 120 px** (`width/height 120`, `border-radius 60`) | assez gros pour un doigt et pour l'œil ; un peu plus petit que le carré de 128 px, mais le cercle paraît plus grand que le carré qu'il remplace car l'icône le remplit |
+| Contour | **4 px** `#110D1F` (gauche, droite, haut) — inchangé (`.btn`) | le trait d'encre du style |
+| Épaisseur 3D | bordure basse **10 px**, couleur « épaisseur » **de la fonction** (tableau 12.17.2) | le bouton est un jeton posé ; la couleur de la fonction se voit aussi dessous |
+| Face | dégradé sombre actuel (`Degrades/bouton_sombre.png`, base `#3A3358`) | les icônes ont été dessinées pour un fond sombre (§11.3, remarque) : une face colorée salirait le cadeau violet ou l'album |
+| **Anneau** de couleur | élément `.col-btn-anneau` collé au contour (`inset 0`), **6 px**, couleur « anneau » de la fonction, coins 56 px | c'est le code couleur qui remplace le mot |
+| Reflet | ovale blanc **18 %**, `top 8px`, `left/right 20px`, hauteur **34 %**, coins 30 px, **sous** l'icône | le vernis du jouet, sans salir l'icône (défaut v3) |
+| **Icône** | image de **112 × 112 px**, centrée sur la face (`left 0; top -3px`) ; l'objet dessiné y occupe ~70 % (marges des images Gemini), soit **~80 px visibles**, les **deux tiers du bouton** | « l'icône seule, en grand » ; elle peut **déborder** légèrement de l'anneau au survol (effet autocollant) |
+| Ombre portée | disque Ø 120 px, `rgba(17, 13, 31, 0.45)`, décalé de **0 / +8 px**, frère placé **avant** le bouton (système `btn-shadow` de la v4) | le bouton flotte au-dessus du ciel, même sur le bleu clair du palier 1 |
+| Espacement | **20 px** entre deux boutons (pas de **140 px**) | sans libellé, les boutons peuvent se rapprocher |
+
+**Placement**
+- Colonne gauche : `left: 32px; top: 170px` → Boutique (y = 170), Inventaire (310), Index (450),
+  Améliorations (590) ; la colonne finit à y = 710.
+- Colonne droite : `right: 32px; top: 170px` → **Classement** (170), **Rebirth** (310). La place
+  dessous reste libre pour de futurs boutons (même pas de 140 px).
+- Le bouton **Paramètres** (roue dentée, Ø 72 px, à côté du badge d'étage) **ne change pas** : il
+  est volontairement plus petit (fonction secondaire), mais il est déjà rond, sans texte, avec
+  l'icône qui remplit le bouton : c'est le modèle que l'on généralise.
+
+#### 12.17.2 Une couleur par fonction (anneau = bandeau de la pop-up)
+
+L'anneau reprend la couleur du **bandeau de titre** de la pop-up qu'il ouvre (`v4.md` §5.6, déjà
+codée dans `.popup-header--*`) : l'enfant associe le bouton rose à la fenêtre rose.
+
+| Bouton | Anneau | Anneau « clair » (survol) | Épaisseur (bas) | Icône |
+|---|---|---|---|---|
+| Boutique | `#C2477A` | `#E57AA5` | `#8A2E55` | `icone_boutique.png` |
+| Inventaire | `#3B7DD8` | `#7DB5FF` | `#2858A0` | `icone_inventaire.png` |
+| Index | `#2E9E8E` | `#5CCBBB` | `#1F6E63` | `icone_index.png` |
+| Améliorations | `#D99A1A` | `#FFC64D` | `#9A6A0E` | `icone_ameliorations.png` |
+| Classement | `#6C4FE0` | `#A08CFF` | `#4530A8` | `icone_classement.png` |
+| **Rebirth** (nouveau) | **`#EF6A32`** « flamme » | `#FF9A66` | `#B4461C` | `icone_rebirth.png` (lot 5) |
+
+- **Le « flamme » de Rebirth** : orange-rouge (teinte ≈ 18°), choisi pour l'idée de phénix et de
+  renaissance. Il reste distinct de l'orange Légendaire `#FF9F1C` (teinte ≈ 35°, réservé aux
+  raretés et jamais en fond de bouton) et du rouge « fermer » `#F0484E`. La future pop-up Rebirth
+  prend ce même `#EF6A32` comme bandeau (`.popup-header--rebirth`).
+- Contenu et règles du Rebirth : **au game designer** (spec v5). Ici, seulement l'apparence.
+
+#### 12.17.3 États
+
+| État | Changement | Durée, courbe |
+|---|---|---|
+| Repos | — | — |
+| Survol | bouton `scale 1.08` (`.btn`, inchangé) ; anneau → « clair » ; icône `scale 1.15` et **dandinement** −8° → +8° → 0° (code, comme en v4 mais 8° au lieu de 6°) ; info-bulle après 0,3 s (12.17.4) | 0,18 s `ease-out-back` ; dandinement 0,35 s |
+| Appui | `scale 0.92`, descend de 6 px, épaisseur 10 → 4 px (`.btn`, inchangé) ; icône `scale 1.0` | 0,06 s `ease-out` |
+| Relâché | rebond par 1,12 (`.btn--rebond`, inchangé) | 0,25 s |
+| Pop-up ouverte (`.col-btn--active`) | anneau **or `#FFD54A` 6 px**, contour or 5 px (v4, inchangé), face `#5A4F88`, icône `scale 1.1` | 0,15 s |
+| Interdit (suspense) | `opacity 0.45` (v4) **et** icône désaturée : `-unity-background-image-tint-color: #B8B4C8` ; pas de dandinement ; l'info-bulle s'affiche quand même (on doit pouvoir savoir ce qu'est le bouton) | 0,15 s |
+| Pastille « ! » (facultatif) | disque **Ø 36 px** `#F0484E`, contour 4 px `#110D1F`, « ! » 24 px Bold blanc contour 2 px `#5E1013`, en haut à droite (`top -6px; right -6px`), pulsation `scale 1 → 1.15 → 1` toutes les 1,2 s | **quand** l'afficher (nouvel objet, Rebirth possible…) = logique de jeu, décidée par le game designer ; l'interface ne fait que l'afficher |
+
+#### 12.17.4 L'info-bulle (accessibilité)
+
+Sans mot sous l'icône, un nouveau joueur doit quand même pouvoir lire le nom. **Attention** :
+la propriété `tooltip` de UI Toolkit ne marche que dans l'éditeur, pas dans le jeu. Il faut donc
+un **petit élément maison**, unique, posé dans le HUD et déplacé par le code à côté du bouton
+survolé (`InfoBulle`, un seul `VisualElement` + un `Label`, `picking-mode="Ignore"`).
+
+| Partie | Valeur |
+|---|---|
+| Texte | le nom du bouton : « Boutique », « Inventaire », « Index », « Améliorations », « Classement », « Rebirth » ; **26 px** Bold blanc, contour 3 px `#110D1F` |
+| Pilule | hauteur **52 px**, `padding: 0 22px`, fond `#2A2440`, contour **4 px** `#110D1F`, bas **7 px** `#110D1F`, coins 26 px ; **bordure haute 4 px de la couleur « anneau »** du bouton (rappel du code couleur) |
+| Position | colonne gauche : **à droite** du bouton, à 14 px de son bord, centrée sur lui en hauteur ; colonne droite : **à gauche** du bouton ; roue dentée : **en dessous** (texte « Réglages ») |
+| Apparition | après **0,3 s** de survol (pas de clignotement quand la souris passe vite) : `opacity 0 → 1`, `translate 10px → 0` (vers le bouton), **0,15 s `ease-out-back`** |
+| Disparition | dès que la souris sort ou au clic : `opacity → 0` en **0,08 s** |
+| Clavier / manette | s'affiche quand le bouton a le **focus** |
+| Écran tactile | **appui long 0,4 s** = info-bulle (le bouton ne s'ouvre pas au relâché) ; appui court = ouvre |
+| Première fois (proposition au game designer) | au premier lancement de la v5, les 6 info-bulles s'affichent **ensemble 3 s** puis s'effacent (une clé `PlayerPrefs` à prévoir dans la spec) |
+
+#### 12.17.5 Extrait USS (à ajouter dans `Popups.uss`, remplace le bloc « colonnes » v4)
+
+```css
+/* ---------- Les colonnes v5 : boutons ronds, icône seule (art bible §12.17) ---------- */
+.col { position: absolute; top: 170px; width: 120px; }
+.col--gauche { left: 32px; }
+.col--droite { right: 32px; }
+
+.btn.col-btn {
+    --anneau: #6C4FE0;
+    --anneau-clair: #A08CFF;
+    width: 120px;
+    height: 120px;
+    margin: 0 0 20px 0;
+    padding: 0;
+    border-radius: 60px;          /* un cercle : la moitié de 120 */
+    align-items: center;
+    justify-content: center;
+    overflow: visible;            /* l'icône a le droit de déborder au survol */
+}
+/* L'anneau de couleur, collé à l'intérieur du contour d'encre. */
+.col-btn-anneau {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    border-radius: 56px;
+    border-width: 6px;
+    border-color: var(--anneau);
+    transition-property: border-color; transition-duration: 0.15s;
+}
+/* Le reflet est AVANT l'icône dans l'UXML : il est dessiné dessous. */
+.col-btn-reflet {
+    position: absolute; top: 8px; left: 20px; right: 20px; height: 34%;
+    border-radius: 30px;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+.col-btn-icon {
+    position: absolute;
+    left: 0; top: -3px;
+    width: 112px; height: 112px;  /* l'objet dessiné y occupe ~80 px */
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale, rotate; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.btn.col-btn:hover .col-btn-anneau { border-color: var(--anneau-clair); }
+.btn.col-btn:hover > .col-btn-icon { scale: 1.15 1.15; }
+.btn.col-btn:active > .col-btn-icon { scale: 1 1; }
+
+/* Une couleur par fonction. Deux classes (.btn.col-btn--x) pour gagner sur .btn--sombre. */
+.btn.col-btn--boutique      { --anneau: #C2477A; --anneau-clair: #E57AA5; --epaisseur: #8A2E55; }
+.btn.col-btn--inventaire    { --anneau: #3B7DD8; --anneau-clair: #7DB5FF; --epaisseur: #2858A0; }
+.btn.col-btn--index         { --anneau: #2E9E8E; --anneau-clair: #5CCBBB; --epaisseur: #1F6E63; }
+.btn.col-btn--ameliorations { --anneau: #D99A1A; --anneau-clair: #FFC64D; --epaisseur: #9A6A0E; }
+.btn.col-btn--classement    { --anneau: #6C4FE0; --anneau-clair: #A08CFF; --epaisseur: #4530A8; }
+.btn.col-btn--rebirth       { --anneau: #EF6A32; --anneau-clair: #FF9A66; --epaisseur: #B4461C; }
+
+/* Pop-up ouverte : on garde le contour or de la v4 et on passe l'anneau en or. */
+.btn.col-btn.col-btn--active .col-btn-anneau { border-color: #FFD54A; }
+
+/* Interdit : grisé ET icône désaturée. */
+.btn.col-btn:disabled > .col-btn-icon { -unity-background-image-tint-color: #B8B4C8; }
+
+/* Pastille « ! » (cachée par défaut ; le code ajoute .col-btn-badge--visible). */
+.col-btn-badge {
+    display: none;
+    position: absolute; top: -6px; right: -6px;
+    width: 36px; height: 36px; border-radius: 18px;
+    background-color: #F0484E;
+    border-width: 4px; border-color: #110D1F;
+    align-items: center; justify-content: center;
+}
+.col-btn-badge--visible { display: flex; }
+.col-btn-badge__texte { font-size: 24px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 2px; -unity-text-outline-color: #5E1013; margin: 0; padding: 0; }
+
+/* L'ombre ronde (frère placé avant le bouton). */
+.btn-shadow--rond { width: 120px; height: 120px; border-radius: 60px; background-color: rgba(17, 13, 31, 0.45); translate: 0 8px; }
+
+/* L'info-bulle (un seul élément pour tout le HUD, placé par le code). */
+.info-bulle {
+    position: absolute;
+    height: 52px; padding: 0 22px;
+    justify-content: center;
+    background-color: #2A2440;
+    border-width: 4px; border-bottom-width: 7px; border-color: #110D1F;
+    border-top-color: var(--anneau);   /* le code recopie la couleur du bouton survolé */
+    border-radius: 26px;
+    opacity: 0; translate: 10px 0;
+    transition-property: opacity, translate; transition-duration: 0.08s, 0.08s;
+}
+.info-bulle--visible { opacity: 1; translate: 0 0; transition-duration: 0.15s, 0.15s; transition-timing-function: ease-out-back, ease-out-back; }
+.info-bulle__texte { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
+```
+(Pour la colonne droite, le code met `translate: -10px 0` au départ, l'info-bulle arrivant par la
+gauche. Si les variables USS ne passent pas dans `border-top-color` sur cette version de Unity,
+le code écrit la couleur directement dans `style.borderTopColor`.)
+
+#### 12.17.6 Les pop-ups n'ont plus d'icône en haut à gauche
+
+- L'élément `.popup-icon` est **retiré** de toutes les pop-ups (Boutique, Inventaire, Index,
+  Améliorations, Classement, Réglages, Pseudo, et la future Rebirth).
+- Le bandeau garde sa **hauteur de 96 px**, sa couleur et son contour bas ; le titre (48 px,
+  blanc, contour 4 px `#110D1F`) reste **centré** : sans icône, il n'y a plus rien à décaler.
+- Pourquoi : l'icône était déjà dans le bouton de la colonne, juste à côté (et entourée d'or quand
+  la pop-up est ouverte) ; en double, elle encombrait le coin du bandeau et se cognait au bouton
+  de fermeture sur les petites pop-ups. La couleur du bandeau suffit à faire le lien.
+- Les icônes **à l'intérieur** des pop-ups (cartes de boîtes, améliorations, lignes Musique /
+  Effets, médailles du podium) **restent**.
+
+#### 12.17.7 À vérifier en capture
+- À 1920 × 1080 et à 1280 × 720 : chaque icône se reconnaît sans texte ; la colonne gauche ne
+  touche pas le badge d'étage (le badge finit vers y = 120, la colonne commence à 170).
+- Sur le ciel clair du palier 1 : l'ombre et le contour suffisent à détacher les boutons.
+- Survol : l'info-bulle ne passe jamais sous une pop-up ouverte (elle est dans la couche la plus
+  haute du HUD) et ne sort pas de l'écran.
+
+---
+
+## 13. Accessoires v5 : « plus jeu moderne »
+
+> **À quoi sert cette section ?** L'auteur trouve les 16 accessoires « vieillots » : il leur
+> « manque quelque chose dans la conception 3D ». Cette section explique **pourquoi**, puis donne
+> à l'artiste 3D des **règles chiffrées** et une **fiche de refonte** par accessoire. Elle
+> complète §3 (formes), §4 (matériaux) et §6.3 à 6.7 (fiches v1), qui restent valables pour les
+> dimensions, les points d'accroche et les couleurs de base.
+> Référence de l'état actuel : `docs/captures/cheval_planche.png`.
+
+### 13.1 Le diagnostic : pourquoi ils font « vieux »
+
+En regardant la planche des 16 accessoires sur le cheval :
+
+1. **Une seule forme par objet.** La casquette est une demi-sphère + une plaque, le nœud deux
+   triangles, l'écharpe un anneau, l'auréole un tore. Il n'y a que la **forme principale**. Les
+   jeux 3D stylisés récents construisent chaque objet en **trois niveaux** : une grosse forme
+   (la silhouette), quelques formes secondaires (bords, rubans, revers, montures) et des petits
+   détails tertiaires (rivets, pois, coutures, perles, étoiles). C'est ce troisième niveau qui
+   donne l'impression d'un objet « fini » et riche, même de loin.
+2. **Trop petits.** À l'échelle des points d'accroche (0,65 au cou, 0,7 au visage), le nœud
+   papillon fait ~12 cm de large à l'écran, le collier n'est qu'une ligne de points, les ailes
+   d'ange dépassent à peine. Les jeux modernes **exagèrent** les accessoires (souvent 1,5 à 2 fois
+   la taille « logique ») : ce sont des récompenses, elles doivent se voir.
+3. **Une seule matière, une seule valeur.** Presque chaque objet est une couleur unie avec un seul
+   réglage de brillance. Il manque le **contraste de matières** (mat contre verni, tissu contre
+   métal) et le **contraste de valeurs** (clair contre foncé) entre la pièce principale et ses
+   bords. Le haut-de-forme et les lunettes deviennent des taches sombres.
+4. **Le métal a l'air marron.** La couronne paraît en bronze terne : un métal (metallic 1) ne
+   montre que ce qu'il reflète. Sans environnement (monde de Blender noir pour la planche, ou pas
+   de Reflection Probe dans Unity), l'or devient brun.
+5. **Des arêtes trop dures ou trop molles.** Biseaux de 2 cm à 1 segment : à cette distance, ils
+   ne se voient plus. Les objets modernes ont des **biseaux larges et ronds** qui attrapent un
+   reflet doux sur chaque bord (l'aspect « jouet en vinyle »).
+6. **Rien ne bouge (ou tout bouge pareil).** À part les ailes et l'auréole, les objets sont
+   figés, collés à la tête. Il manque le **mouvement secondaire** : un pompon qui rebondit après
+   un saut, un pan d'écharpe qui balance, une pointe de chapeau qui suit avec un temps de retard.
+7. **Pas de « récompense » visuelle selon la rareté.** Un Super rare (couronne) n'a pas l'air plus
+   précieux qu'un Commun. Il manque l'**échelle d'effets** : éclats, lueurs, petites particules,
+   qui grandit avec la rareté.
+
+### 13.2 Formes : trois niveaux, silhouette exagérée
+
+| Niveau | Part du volume | Nombre | Rôle | Exemple (bonnet) |
+|---|---|---|---|---|
+| **Primaire** | **60 – 70 %** | 1 (2 pour les paires) | la silhouette, lisible en noir à 64 px | le dôme du bonnet |
+| **Secondaire** | **25 – 35 %** | 2 à 4 | casse la forme, donne le « style », change de couleur ou de matière | le revers côtelé, le pompon |
+| **Tertiaire** | **≤ 10 %** | 3 à 12 | le « fini » : petits reliefs répétés, reflets peints | les bosses du pompon, une étiquette en relief |
+
+Règles chiffrées :
+- **Taille de lecture à l'écran** (taille du modèle × échelle du point d'accroche, §6.2) :
+  - **Tête** : largeur ≥ **0,75 m** (1,2 × le crâne de 0,62 m) ;
+  - **Visage** : couvre toute la zone des yeux (≥ **0,58 m** de large) ;
+  - **Cou** : ≥ **0,45 m** de large vu de face ;
+  - **Dos** : dépasse d'au moins **0,35 m de chaque côté** de la silhouette du cou (on ne voit
+    jamais le dos du cheval).
+- **Le détail-signature exagéré à 150 – 200 %** : visière, pompon, pointe du sorcier, cœurs,
+  pierres, nœud. Un seul par objet, le plus reconnaissable.
+- **Épaisseur minimale dans le modèle : 6 cm** (au lieu de 4) : une fois réduit à 0,65 au cou,
+  il reste 4 cm à l'écran (§3.1). Les détails tertiaires font au moins **6 cm** dans le modèle.
+- **Silhouette « poire »** pour les objets de tête : plus large en bas ou en haut qu'au milieu,
+  jamais un cylindre droit. Lignes courbes ou en S (pointe du sorcier, pans d'écharpe), pas de
+  segments rigides.
+- **Asymétrie de vie** permise sur **un** élément (pompon décalé, pan plus long d'un côté, nœud de
+  côté) ; le reste symétrique.
+- **Écart entre les pièces** : les formes secondaires **se posent sur** la primaire (relief
+  ≥ **2 cm** dans le modèle) au lieu d'être peintes à plat : l'ombre de contact dessine le détail.
+
+### 13.3 Biseaux et lissage « jouet en vinyle »
+
+| Réglage Blender | Valeur v5 | Avant (§3.1) |
+|---|---|---|
+| Modificateur *Bevel* — Amount | **4 à 6 cm** sur les grandes arêtes, **2 cm** sur les tertiaires | 2 à 4 cm |
+| *Bevel* — Segments | **2** (3 pour l'or et les pierres) | 1 |
+| *Bevel* — Shape (profil) | **0,5** (arrondi régulier) | — |
+| *Bevel* — Limit Method | **Angle 30°** | — |
+| *Bevel* — Harden Normals | **coché** | — |
+| Modificateur *Weighted Normal* | après le Bevel : Weight **50**, **Keep Sharp** coché, mode *Face Area* | — |
+| Lissage | *Shade Auto Smooth* 30° pour les objets durs ; *Shade Smooth* complet pour les objets mous | inchangé |
+
+- **Pourquoi les normales pondérées ?** Elles gardent les grandes faces bien plates (reflet net)
+  et font tourner la lumière uniquement dans le biseau : c'est le « coup de lumière » sur chaque
+  bord des objets stylisés modernes, pour quelques triangles seulement.
+- **Export et import** : à l'export `.glb`, cocher *Normals* (Data → Mesh). Dans Unity, sur le
+  modèle importé : **Normals = Import** (pas *Calculate*), sinon Unity recalcule et efface le
+  travail.
+
+### 13.4 Matières : toujours au moins deux, bien contrastées
+
+**Règle de contraste** (chaque accessoire) :
+1. **Au moins 2 matières** dont la smoothness diffère d'au moins **0,3** (ex. laine 0,15 et
+   verni 0,85).
+2. **Contraste de valeur ≥ 25 %** de luminosité entre la pièce principale et une pièce secondaire
+   (ex. turquoise `#2BB8C4` et blanc cassé `#F4EEE6`). Un objet sombre reçoit un **liseré
+   clair** (bord, ruban, monture) ; un objet clair reçoit un **creux ou un bord foncé**.
+3. **Couleurs** : 3 couleurs au plus (§2.6, règle 4), **plus** au besoin un métal « doré déco »
+   `#E8B830` et des reflets peints blancs `#FFFFFF`, qui ne comptent pas.
+
+**Préréglages URP Lit des accessoires** (Unity : *Specular Highlights* et *Environment
+Reflections* **cochés** sur tous) :
+
+| Préréglage | Metallic | Smoothness | Roughness (Blender) | Pour |
+|---|---|---|---|---|
+| Mat doux | 0 | **0,15** | 0,85 | laine, feutre, pompons, plumes |
+| Tissu satiné | 0 | **0,50** | 0,50 | rubans, bandeau, nœud, satin |
+| Carton / plastique brillant | 0 | **0,65** | 0,35 | chapeau de fête, ailes de papillon |
+| Verni « bonbon » | 0 | **0,85** | 0,15 | verres, cœurs, étoiles, boutons |
+| Nacre (perles) | **0,2** | **0,85** | 0,15 | perles `#F4EEE6` |
+| Pierre précieuse | 0 | **0,95** | 0,05 | rubis, gemmes |
+| Doré déco `M_DoreDeco` (nouveau) | **1** | **0,80** | 0,20 | liserés, charnières, attaches : `#E8B830` (le doré des coffres Or, §2.10) |
+| Or trésor `M_Or` | 1 | 0,80 | 0,20 | **la couronne seulement** (§2.3) |
+| Reflet peint `M_Reflet` | 0 | 0,90 | 0,10 | petites formes blanches (voir ci-dessous) |
+
+- **Reflets peints** : de petites formes blanches en relief de 1 cm (une barre en diagonale et un
+  point, comme sur les lunettes de soleil), posées **en haut à gauche** (côté de la lumière) des
+  surfaces vernies. **2 au plus par pièce.** C'est un code fort du jouet stylisé : l'objet « brille »
+  sous toutes les lumières, même sans reflet réel.
+- **Les objets sombres** (haut-de-forme, lunettes de soleil) : smoothness **≥ 0,35**, sinon le
+  contre-jour ne dessine pas leur bord et ils deviennent des trous noirs.
+- **Le contre-jour devient obligatoire** (§5, ligne « facultatif ») : Point Light `#B48CFF`,
+  intensité 0,6, derrière et au-dessus du cheval. C'est lui qui fait le liseré lavande sur tous
+  les bords, que URP Lit ne sait pas dessiner seul.
+- **Métal** : Reflection Probe obligatoire dans Unity (§5) ; et pour les **rendus de planche dans
+  Blender**, un monde en dégradé (ciel `#8C7AB8`, sol `#2A2030`) au lieu du noir, sinon l'or
+  ressort marron sur les captures et on juge mal.
+- **Dégradé de couleur calculé par le code (facultatif)** : comme pour les skins (§4.1), une
+  petite texture verticale 1 × 32 pixels fabriquée au démarrage peut assombrir doucement le bas
+  d'une pièce (ailes, cône du sorcier) : **2 couleurs de la palette de l'objet, écart ≤ 25 %**,
+  sur une UV verticale simple. Jamais d'image dessinée ou générée.
+
+### 13.5 Ce qui bouge : quatre sortes d'animations (faites par le code)
+
+Toutes sont **purement visuelles**, faites par script sur la position, la rotation ou l'échelle
+(pas d'Animator nécessaire), et continuent pendant les épreuves (`boites.md` §5.6).
+
+| Type | Ce que c'est | Réglages | Qui y a droit |
+|---|---|---|---|
+| **A. Ressort** (mouvement secondaire) | une pièce molle suit son point d'accroche avec du retard et rebondit (après un saut, un atterrissage, l'écrasement du cheval) | raideur **180**, amortissement **14** (stable en ~0,35 s) ; décalage max **0,06 m** ou **10°** | pompons, pans, pointes, antennes, plumes, perles : **toutes raretés** |
+| **B. Boucle douce** (idle) | un mouvement qui se répète (balancement, battement, rotation) | sinus ; période **≥ 0,8 s** (sauf papillon 0,9 s déjà) ; parties symétriques **en miroir** ; parties en couches **décalées de 0,06 à 0,1 s** (chevauchement) | dès **Peu commun** |
+| **C. Éclat** | une étoile à 4 branches (même forme que les scintillements du ciel, 8 cm dans le modèle) apparaît sur un bord brillant : échelle 0 → 1 → 0 en **0,35 s**, en tournant de 45° | un point au hasard parmi les objets vides `Eclat_1`, `Eclat_2`, `Eclat_3` posés par l'artiste ; matériau `M_Reflet` (Rare) ou émissif (≥ Super rare) | dès **Rare** |
+| **D. Particules 3D** | petites formes (étoile 4 branches 6 cm, losange, point) qui naissent sur l'objet, montent ou tombent et s'effacent | réserve d'objets réutilisés, sans ombre ni collider, matériau URP Lit émissif ; vie **0,6 à 1,2 s** ; naissance sur l'objet vide `Fx_Emetteur` | dès **Super rare** |
+
+- **Pourquoi pas le système de particules de Unity ?** Il demande le shader « URP Particles »,
+  alors que la règle du projet est URP Lit pour tous les matériaux. On fait comme pour les
+  paillettes de l'Arc-en-ciel (`v3.md` §8.1) : de petits objets réutilisés, déplacés par un script.
+  Si le chef de projet accepte un jour une exception pour les particules, on pourra changer.
+- **Le « pop » d'équipement** (toutes raretés) : quand on équipe un accessoire, il apparaît en
+  `scale 0 → 1.15 → 1` en **0,3 s `ease-out-back`**, et lâche une gerbe d'éclats 3D : Commun 0,
+  Peu commun 0, Rare **4**, Super rare **6**, Légendaire **10**, Secret **16**.
+- **Convention de noms dans Blender** (le code les cherche) : `Anim_<Nom>` pour une pièce animée,
+  **origine sur sa charnière** (ex. `Anim_Pompon` à la base du pompon, `Anim_PanGauche` au nœud
+  de l'écharpe) ; `Eclat_1…3` (objets vides) ; `Fx_Emetteur` (objet vide).
+- **Limites** : jamais d'animation qui cache les yeux plus de 0,2 s ; aucune animation plus rapide
+  que 0,8 s de période sauf le battement du papillon ; tout reste dans une sphère de **1,1 m** de
+  rayon autour du point d'accroche (sauf l'orbite de la planète, déjà prévue).
+
+### 13.6 Effets autorisés par rareté (plus c'est rare, plus il y en a)
+
+Le tableau est **cumulatif** : chaque rareté a aussi tout ce qu'ont les précédentes.
+
+| | Commun | Peu commun | Rare | Super rare | Légendaire | Secret |
+|---|---|---|---|---|---|---|
+| Niveaux de forme | primaire + secondaire (+ 1 à 3 tertiaires) | + tertiaires (3 à 6) | tertiaires riches (6 à 12) | + 1 matière précieuse (pierre, nacre, doré) | + une pièce « magique » (flotte, ne touche rien) | + une pièce en orbite ou qui change |
+| Matières | 2 | 2 – 3 | 3, dont 1 verni ou doré | 3 + pierre/nacre | idem + émissif | idem + émissif animé |
+| A. Ressort | oui (pièces molles) | oui | oui | oui | oui | oui |
+| B. Boucle douce | non | **1** | 1 | **2** | 2 – 3 | 3 et + |
+| C. Éclat | non | non | **1 toutes les 4 s** (sans émission) | **1 toutes les 2,5 s** (émission 0,5) | **1 toutes les 1,5 s** (émission 1,2) | **1 toutes les 1 s**, couleurs de l'arc-en-ciel |
+| Émission | 0 | 0 | 0 | **≤ 0,5** sur ≤ 10 % de la surface | **≤ 1,5** | **≤ 1,5**, intensité qui oscille |
+| D. Particules 3D (visibles en même temps) | 0 | 0 | 0 | **≤ 4** | **≤ 10** | **≤ 16** |
+| Traînée (quand la tête bouge) | non | non | non | non | courte (0,25 s) | oui (0,4 s) |
+| Gerbe au « pop » d'équipement | 0 | 0 | 4 | 6 | 10 | 16 |
+
+- **Traînée** : `TrailRenderer` avec un matériau URP Lit transparent émissif (largeur 6 cm →
+  0, couleur de l'objet). À valider en capture ; si le rendu est laid avec URP Lit, on s'en passe
+  (ce n'est qu'un bonus).
+- **Plafond de Bloom** inchangé (§4.1) : rien au-dessus de 1,5. L'accessoire ne doit jamais briller
+  plus que le coffre au trésor ouvert.
+- **Règle d'or** : ces effets sont **décoratifs**. Ils ne changent rien aux chances ; l'interface
+  n'y associe jamais un bonus caché (le bonus de pièces par rareté, s'il existe, est déjà écrit
+  dans la Boutique).
+
+### 13.7 Budgets de triangles revus (par accessoire, avec ses pièces animées)
+
+| Rareté | Triangles | Matériaux max | Pièces animées max |
+|---|---|---|---|
+| Commun | **600 – 1 000** | 3 (+ reflet) | 2 |
+| Peu commun | **800 – 1 400** | 3 (+ reflet, + doré) | 3 |
+| Rare | **1 000 – 1 800** | 4 | 4 |
+| Super rare | **1 200 – 2 200** | 5 | 6 |
+| Légendaire | **1 500 – 2 500** | 5 | 8 |
+| Secret | **1 500 – 3 000** | 5 | 10 |
+
+Les petites formes des particules (≈ 8 à 20 triangles chacune) ne comptent pas dans ces budgets.
+
+### 13.8 Fiches de refonte des 16 accessoires
+
+> Lecture : **Garder** = ce qui marche déjà (dimensions et couleurs de `boites.md` §5.6 et §6.4 à
+> 6.7, sauf mention) ; **Ajouter** = la refonte. Les tailles sont **dans le modèle** (avant
+> l'échelle du point d'accroche). Couleurs nouvelles : uniquement des couleurs déjà dans la
+> palette (§2.4, §2.8, §2.10) ou `#E8B830` (doré déco).
+
+#### 1. `chapeau_casquette` — Casquette (Commun, Tête) — 600 – 900 tris
+- **Problème vu** : de face, la visière est cachée : on lit un béret rouge.
+- **Garder** : calotte rouge `#E04040`, visière `#A02828`, bouton blanc.
+- **Ajouter** :
+  - visière **plus longue (0,55)** et **inclinée de 12° vers le bas** pour qu'elle se voie de face,
+    courbée (bords 5 cm plus bas que le centre) ;
+  - secondaire : **6 panneaux** séparés par des rainures de 2 cm ; un **bourrelet** blanc cassé
+    `#F4EEE6` (tube Ø 6 cm) tout autour de la base de la calotte ;
+  - tertiaire : bouton **Ø 0,14** bombé ; **2 œillets** en creux (Ø 6 cm, `#A02828`) sur les
+    panneaux avant ; une **couture** en relief (2 cm) sur le bord de la visière ;
+  - matières : calotte mat doux 0,20, visière **satinée 0,50**, bouton verni 0,85.
+- **Animation** : A. ressort sur toute la casquette (petit sursaut de 0,03 m à l'atterrissage).
+
+#### 2. `chapeau_fete` — Chapeau de fête (Commun, Tête) — 600 – 900 tris
+- **Garder** : cône rayé rose `#FF6FB5` / jaune `#FFD54A`, pompon, penché de 10°.
+- **Ajouter** :
+  - les bandes jaunes **en relief de 1,5 cm** (secondaire : chaque rayure se lit par son ombre) ;
+  - une **collerette de papier** à la base : 12 festons arrondis blanc cassé `#F4EEE6`, 6 cm
+    d'épaisseur ;
+  - pompon **Ø 0,26** fait de **7 boules** groupées (tertiaire, aspect « duvet ») ;
+  - matières : carton **brillant 0,65**, pompon et collerette **mat 0,15** (contraste).
+- **Animation** : A. ressort sur `Anim_Pompon` (il rebondit après chaque saut).
+
+#### 3. `chapeau_bonnet` — Bonnet de laine (Commun, Tête) — 600 – 1 000 tris
+- **Garder** : dôme turquoise `#2BB8C4`, revers et pompon blanc cassé.
+- **Ajouter** :
+  - silhouette « bonnet mou » : le haut **retombe légèrement vers l'arrière gauche** (asymétrie de vie) ;
+  - revers **côtelé** : 16 côtes verticales en relief de 2 cm ;
+  - une **bande** blanc cassé de 6 cm à mi-hauteur du dôme (contraste de valeur) ;
+  - pompon **Ø 0,30**, 9 bosses (tertiaire) ;
+  - matières : laine mat 0,15 partout, sauf une **petite étiquette** carrée (8 × 8 cm, en relief,
+    verni 0,85 turquoise) cousue sur le revers, à gauche : le seul point brillant.
+- **Animation** : A. ressort sur `Anim_Pompon`.
+
+#### 4. `lunettes_soleil` — Lunettes de soleil (Commun, Visage) — 600 – 900 tris
+- **Problème vu** : une barre noire uniforme sur le visage.
+- **Garder** : forme rectangle arrondi, reflets blancs.
+- **Ajouter** :
+  - **monture épaisse** (6 cm) qui déborde des verres de 3 cm, avec un **haut plus épais**
+    (« sourcil ») ; monture `#2A2A3A` **satinée 0,50** ;
+  - **verres séparés** de la monture, en violet nuit très sombre `#34286A`, **verni 0,95**
+    (contraste matière monture / verre : on voit que ce sont des verres) ;
+  - tertiaire : 2 reflets peints par verre (barre diagonale + point) ; **charnières** dorées
+    `#E8B830` (cubes biseautés 6 cm) aux deux coins extérieurs ;
+  - matières : 3 (monture, verres, doré) + reflet.
+- **Animation** : A. ressort très léger (0,02 m) : elles « sautillent » sur le museau au saut.
+
+#### 5. `noeud_papillon` — Nœud papillon (Commun, Cou) — 600 – 900 tris
+- **Problème vu** : beaucoup trop petit, plat.
+- **Garder** : rouge satiné `#C0392B`, nœud central `#8E2A20`.
+- **Ajouter** :
+  - taille **× 1,6** : ailes 0,30 × 0,26, épaisseur 10 cm au bord, **bombées** (forme de coussin),
+    **pincées** vers le centre ;
+  - secondaire : **3 plis** par aile (rainures qui rayonnent depuis le nœud) ;
+  - tertiaire : **5 pois** blanc cassé `#F4EEE6` en relief (Ø 6 cm) par aile ; le nœud central
+    avec 2 rainures horizontales ;
+  - matières : ailes satin 0,55, nœud mat 0,30, pois verni 0,85.
+- **Animation** : A. ressort : les ailes pivotent de ±6° au saut.
+
+#### 6. `chapeau_haut_de_forme` — Haut-de-forme (Peu commun, Tête) — 800 – 1 200 tris
+- **Problème vu** : une tache noire, ruban trop fin.
+- **Garder** : feutre `#1E1E1E`, ruban `#C0392B`, bord relevé, tube évasé.
+- **Ajouter** :
+  - feutre de soie **smoothness 0,40** (au lieu de 0,15) : le reflet du dessus et le contre-jour
+    dessinent enfin le chapeau ;
+  - bord **plus relevé** (+10 cm sur les côtés) ;
+  - ruban **plus haut (14 cm)**, satin 0,55, bordé en haut et en bas d'un **liseré doré**
+    `#E8B830` de 4 cm (contraste de valeur sur le noir) ;
+  - **nœud plat à 3 lobes** du même rouge sur le côté gauche (secondaire) ;
+  - tertiaire : une **carte à jouer** stylisée glissée dans le ruban, blanc cassé `#F4EEE6`, avec
+    un cœur rouge `#C0392B` en relief (sans lettre ni chiffre) — la touche « magicien ».
+- **Animations** : A. ressort ; B. léger balancement ±3°, période 3 s.
+
+#### 7. `lunettes_coeur` — Lunettes cœur (Peu commun, Visage) — 800 – 1 200 tris
+- **Garder** : cœurs roses `#FF6FB5`, monture blanc cassé.
+- **Ajouter** :
+  - cœurs **bombés** (10 cm au centre, 6 cm au bord), verni 0,90, 2 reflets peints chacun ;
+  - **monture-cadre** blanc cassé de 6 cm qui entoure chaque cœur (secondaire) ;
+  - tertiaire : un **petit cœur jaune** `#FFD54A` en relief (Ø 8 cm) à chaque coin extérieur,
+    à la place des charnières ;
+  - matières : verni (cœurs), mat 0,30 (monture), verni (petits cœurs).
+- **Animations** : A. ressort ; B. **battement de cœur** : les deux cœurs font `scale 1 → 1,08 → 1
+  → 1,05 → 1` (« boum-boum ») en 0,5 s, puis pause, période **1,6 s**.
+
+#### 8. `echarpe` — Écharpe rayée (Peu commun, Cou) — 900 – 1 400 tris
+- **Problème vu** : un anneau fin, on dirait un collier.
+- **Garder** : rayures vert menthe `#3CC48A` / blanc cassé.
+- **Ajouter** :
+  - **deux tours** épais (tube 0,18 × 0,10), légèrement décalés et inclinés l'un sur l'autre
+    (le tour du haut penche de 8°) ;
+  - un **nœud** devant à gauche et **deux pans** : gauche 0,40 de long, droit 0,28 (asymétrie) ;
+  - tertiaire : **franges** au bout de chaque pan (5 petits cylindres arrondis Ø 6 cm) ; une
+    rainure de tricot à chaque changement de rayure ;
+  - matière : laine mat 0,15 (une seule matière, compensée par le contraste vert / blanc).
+- **Animations** : A. ressort sur `Anim_PanGauche` et `Anim_PanDroit` ; B. balancement des pans
+  ±5°, période 2,2 s, le pan droit décalé de 0,1 s.
+
+#### 9. `collier_fleurs` — Collier de fleurs (Peu commun, Cou) — 1 000 – 1 400 tris
+- **Problème vu** : une ligne de points minuscules.
+- **Garder** : fleurs roses et blanc cassé, cœurs jaunes, collier qui « pend » devant.
+- **Ajouter** :
+  - **8 fleurs Ø 0,22** (au lieu de 10 de 0,14), **tournées de 20° vers l'extérieur et le haut**
+    (elles regardent la caméra) ;
+  - pétales **bombés** (5 par fleur, 6 cm d'épaisseur), cœur en **dôme** verni 0,85 ;
+  - secondaire : entre les fleurs, une **perle** blanc cassé (Ø 8 cm) qui fait le lien ;
+  - matières : pétales mat 0,30, cœurs et perles vernis.
+- **Animations** : A. ressort sur l'ensemble ; B. chaque fleur pivote de ±8° sur elle-même,
+  période 3 s, **décalée de 0,12 s** d'une fleur à l'autre (une vague qui fait le tour).
+
+#### 10. `chapeau_sorcier` — Chapeau de sorcier (Rare, Tête) — 1 000 – 1 600 tris
+- **Garder** : feutre violet nuit `#4B2E83`, ruban et étoile jaune `#FFD54A`, pointe tordue.
+- **Ajouter** :
+  - pointe en **S** (2 plis, le bout retombe vers l'arrière) ; le dernier tiers est une pièce
+    séparée `Anim_Pointe` (origine au 2e pli) ;
+  - bord **ondulé** (6 vagues de 4 cm) ;
+  - **étoile Ø 0,20**, bombée, verni 0,90, avec 1 reflet peint ;
+  - tertiaire : **3 petites étoiles** jaunes en relief (Ø 8 cm) semées sur le cône ; une **pièce
+    rapiécée** carrée (12 cm) en violet `#6A4C9C` avec 4 points de couture en relief (le côté
+    « vieux chapeau aimé », pas « vieux modèle ») ;
+  - matières : feutre mat 0,20, ruban satin 0,50, étoiles vernies.
+- **Animations** : A. ressort sur `Anim_Pointe` ; B. la pointe se balance de ±6°, période 2,5 s ;
+  C. éclat sur la grande étoile (points `Eclat_1` à `Eclat_3` sur ses branches).
+
+#### 11. `masque_heros` — Masque de héros (Rare, Visage) — 1 000 – 1 500 tris
+- **Garder** : bandeau framboise `#D63A6E`, bord jaune `#FFD54A` de 4 cm minimum, trous autour des
+  yeux, aucun emblème (§2.8).
+- **Ajouter** :
+  - coins extérieurs qui **remontent en pointe** (forme dynamique, « vitesse ») ;
+  - le **bord jaune en relief de 2 cm** (au lieu d'être à plat) et **verni 0,80**, bandeau satin
+    0,50 (contraste matière et valeur) ;
+  - une **rainure** au milieu du bandeau, au-dessus du museau ;
+  - deux **pans noués** derrière, plus longs (0,30), qui **dépassent sur les côtés** (visibles de
+    face), pièces `Anim_PanGauche` / `Anim_PanDroit`.
+- **Animations** : A. ressort sur les pans ; B. les pans « flottent au vent » ±10°, période 1,2 s,
+  décalés de 0,08 s ; C. éclat qui court sur le bord jaune.
+
+#### 12. `ailes_ange` — Petites ailes d'ange (Rare, Dos) — 1 200 – 1 800 tris
+- **Problème vu** : deux petites plaques blanches.
+- **Garder** : blanc cassé `#F4EEE6`, ombre des plumes `#D9D2E4`, battement ±8° en 1,6 s.
+- **Ajouter** :
+  - taille **× 1,4** (0,70 × 0,48 par aile) ;
+  - **3 rangées de plumes en couches** décalées de 2 cm : 5 grandes plumes rondes (bas),
+    4 moyennes, 3 petites (haut) ; la rangée du bas en `#D9D2E4` (ombre), les deux autres en
+    blanc cassé (contraste de valeur par couches) ;
+  - tertiaire : une **broche dorée** `#E8B830` ronde (Ø 10 cm) à la racine de chaque aile ;
+  - matières : plumes mat 0,30, broche dorée.
+- **Animations** : B. battement ±8° (1,6 s) **avec chevauchement** : chaque rangée suit la
+  précédente avec **0,08 s** de retard (l'aile « ondule ») ; A. ressort sur les plumes du bas ;
+  C. éclat sur la broche.
+
+#### 13. `chapeau_couronne` — Couronne royale (Super rare, Tête) — 1 400 – 2 200 tris
+- **Problème vu** : paraît en bronze terne ; pointes petites.
+- **Garder** : or `#FFC83A` (le seul objet porté en or trésor), 5 pointes, rubis `#D62839` devant.
+- **Ajouter** :
+  - **biseau 3 segments + normales pondérées** : c'est ce qui fera briller l'or (avec la
+    Reflection Probe) ;
+  - pointes **plus hautes (0,22)**, arrondies, légèrement **évasées vers l'extérieur** (silhouette
+    en couronne de conte, sans copier un modèle connu) ;
+  - secondaire : un **bandeau en relief** autour de l'anneau avec une frise de losanges ;
+  - perles en **nacre** `#F4EEE6` (metallic 0,2, smoothness 0,85) au lieu d'or : contraste blanc
+    sur or ;
+  - rubis avant **Ø 0,16** taillé (3 segments), plus **4 petits rubis** (Ø 7 cm) sur le bandeau ;
+  - matières : or, nacre, pierre.
+- **Animations et effets** : B1. le rubis avant « respire » : émission **0,2 ↔ 0,5** (couleur
+  `#D62839`), période 2 s ; B2. légère rotation de ±2° (elle tient « royalement ») ; C. éclat toutes
+  les 2,5 s sur les pointes ; D. **3 étincelles** 3D dorées qui montent autour de la couronne.
+
+#### 14. `ailes_papillon` — Ailes de papillon (Super rare, Dos) — 1 400 – 2 200 tris
+- **Garder** : lobes turquoise `#2BB8C4`, taches orange `#F28C38`, bord `#34286A`, battement ±20° en 0,9 s.
+- **Ajouter** :
+  - lobes au **bord festonné** (vagues de 5 cm) ; **3 nervures** en relief `#34286A` par lobe
+    (6 cm de large) qui partent de la racine ;
+  - taches **bombées** et **émissives 0,4** (≤ 10 % de la surface : autorisé au Super rare) : elles
+    luisent doucement ;
+  - un petit **corps** central (capsule `#34286A`, 0,25 de haut) avec **2 antennes** terminées par
+    une boule (Ø 7 cm), pièces `Anim_AntenneGauche` / `Anim_AntenneDroite` ;
+  - matières : lobes brillants 0,65, nervures et corps mat 0,30, taches émissives.
+- **Animations et effets** : B1. battement avec **courbe** (descente rapide, remontée lente :
+  `ease-in-out` déséquilibré 40 % / 60 %) ; B2. les taches passent de 0,25 à 0,5 d'émission sur
+  chaque battement ; A. ressort sur les antennes ; D. **4 écailles** (petits losanges turquoise
+  émissifs 0,4) qui tombent des ailes en tournoyant.
+
+#### 15. `aureole` — Auréole lumineuse (Légendaire, Tête) — 1 500 – 2 200 tris
+- **Problème vu** : un anneau blanc plat sans relief (la version v3 aux 8 perles est un bon début).
+- **Garder** : tore Ø 0,70, `#FFF1A8`, flottement ±0,04 m (2 s), rotation 30°/s, retard de ressort,
+  8 perles en chenillard (`v3.md` §8.2).
+- **Ajouter** :
+  - section **plus épaisse (10 cm)** en **deux matières** : un **cœur en doré déco** `#E8B830`
+    (métal, la face du dessous et l'extérieur) et une **bande émissive** `#FFF1A8` (1,2) sur le
+    dessus et l'intérieur : le contraste métal / lumière fait « objet précieux » au lieu de
+    « néon » ;
+  - les 8 perles **posées sur** le cœur doré, Ø 8 cm ;
+  - **4 petits rayons** (losanges plats de 10 cm) qui pointent vers l'extérieur, entre les perles ;
+- **Animations et effets** : B1. flottement + rotation (gardés) ; B2. chenillard (gardé) ; B3. les
+  4 rayons tournent en sens inverse de l'anneau (−20°/s) ; C. éclat toutes les 1,5 s ;
+  D. **pluie de lumière** : jusqu'à **8** petites étoiles qui tombent de l'anneau (0,4 m en 1 s)
+  en s'effaçant ; traînée courte (0,25 s) quand la tête bouge.
+
+#### 16. `planete` — Petite planète (Secret, Dos) — 1 800 – 3 000 tris
+- **Problème vu** : petite bille lointaine, on ne la remarque presque pas sur la planche.
+- **Garder** : boule lavande `#B48CFF`, anneau `#FFD54A` émissif, orbite de rayon 0,9 en 6 s,
+  rotation propre 90°/s.
+- **Ajouter** :
+  - boule **Ø 0,40** (au lieu de 0,30) avec **2 bandes** en relief violet magique `#8E5BD6` et
+    **3 cratères** en creux (tertiaire) ;
+  - anneau **en deux parties** : un anneau principal Ø 0,70 et un fin anneau extérieur Ø 0,82,
+    séparés par un vide de 3 cm (silhouette « planète » immédiate) ;
+  - une **petite lune** (Ø 0,09, blanc cassé, mat) qui tourne autour de la planète (rayon 0,32,
+    un tour en 2 s, plan incliné de 30°) ;
+  - matières : boule satinée 0,60 **sans émission** (le contraste entre une boule éclairée et un
+    anneau qui luit est ce qui la rend précieuse), anneaux émissifs, lune mate.
+- **Animations et effets** : B1. orbite (gardée) ; B2. rotation propre (gardée) ; B3. la lune ;
+  B4. émission des anneaux qui oscille **0,5 ↔ 1,2** (période 2 s, l'anneau extérieur décalé
+  d'une demi-période) ; C. éclat toutes les 1 s, teinte qui fait le tour de l'arc-en-ciel
+  (saturation 0,75) ; D. **traînée de poussière d'étoile** : jusqu'à **16** petites étoiles
+  laissées derrière la planète sur son orbite, qui s'effacent en 0,6 s ; traînée 0,4 s.
+
+### 13.9 Méthode et contrôle (pour l'artiste 3D)
+
+1. **Ordre de travail** : silhouette (primaire) → vérifier en noir à 64 px → secondaires → bevel +
+   normales pondérées → tertiaires → matières → pièces `Anim_*`, `Eclat_*`, `Fx_Emetteur`.
+2. **Mise à jour de `blender/commun.py`** : ajouter les préréglages du §13.4 (`M_DoreDeco`,
+   `M_Nacre`, verni, satin) et une fonction de biseau v5 (Amount, 2 segments, Harden Normals,
+   Weighted Normal) partagée par tous les scripts d'accessoires.
+3. **Planche de contrôle v5** (`docs/captures/cheval_planche_v5.png`, même cadrage que
+   `cheval_planche.png`) rendue avec le **monde en dégradé** (§13.4), plus une planche sur 4 skins
+   difficiles : **bleu ciel, rose bonbon, argent poli, galaxie**. Critères : chaque accessoire se
+   reconnaît en silhouette noire à 64 px ; on distingue au moins 2 matières ; l'or brille ; rien
+   ne cache les yeux (sauf les lunettes de soleil, voulu) ; un accessoire Super rare a l'air plus
+   précieux qu'un Commun **sans** regarder sa couleur de rareté.
+4. **Dans Unity** : capture en mode Play, caméra de jeu, avec les 4 accessoires équipés en même
+   temps (tête + visage + cou + dos) : rien ne se traverse, le cheval reste lisible, le Bloom ne
+   dépasse pas l'éclat du coffre au trésor.
+5. **Icônes** : une fois les modèles refaits, les icônes d'accessoires (lots 2 et 3) ne leur
+   ressembleront plus. Elles seront **régénérées dans un lot suivant** en joignant les rendus
+   Blender v5 comme référence de forme (même méthode que les skins du cheval au lot 3).
+
+### 13.10 À éviter (accessoires v5)
+- Ajouter des détails **plus petits que 6 cm** dans le modèle : ils scintillent et disparaissent.
+- Le réalisme (fils de laine, plumes fines, grain de feutre) : on reste « jouet », §8.
+- Les effets sur un objet Commun ou Peu commun (éclats, émission, particules) : ils doivent se mériter.
+- Plus de 2 reflets peints par pièce ; un reflet peint ailleurs qu'en haut à gauche.
+- Une animation qui fait sortir l'accessoire de sa zone ou qui cache les yeux longtemps.
+- Les contours noirs « dessin animé » (coque inversée) sur les seuls accessoires : le cheval et
+  les coffres n'en ont pas, ils auraient l'air collés. Le liseré vient du contre-jour.
+- Copier un objet reconnaissable d'un autre jeu (couronne, ailes, masque, lunettes de marque).
+
+---
+
+## 14. Ouverture des boîtes en 3D
+
+> **À quoi sert cette section ?** L'ouverture d'une boîte (`boites.md` §7.6, `v3.md` §8.3) se
+> faisait avec une image plate de la boîte. En v5, **une vraie boîte 3D** apparaît au centre,
+> tremble, perd son nœud, son couvercle saute, un faisceau de lumière en sort et l'objet gagné
+> s'élève en tournant. Cette section donne au programmeur le **plateau**, la **fiche du modèle**,
+> la **chronologie chiffrée** et les **règles d'équité**. Les temps des phases communes
+> **restent ceux de `boites.md` §7.6** (0 / 0,3 / 1,5 / 1,75 s) : les sons existants restent calés.
+
+### 14.1 La règle d'équité (à relire avant de coder)
+
+**Jusqu'à l'instant R = 1,75 s, rien ne doit permettre de deviner la rareté.** Concrètement :
+1. **Même boîte** (modèle, couleurs, taille) pour toutes les raretés d'une même boîte. Seul le
+   *type* de boîte change le modèle (skins / accessoires, et plus tard Pirates / Animaux).
+2. **Même chronologie, mêmes amplitudes, mêmes sons** jusqu'à R, quel que soit le tirage.
+3. **Toute la lumière avant R est blanche neutre** (`#FFF6E8`) : la lueur qui fuit sous le
+   couvercle, le faisceau qui jaillit, le flash. **Aucune couleur de rareté avant R.**
+4. Les petites variations « pour faire vivant » (sens des sauts, trajectoire du nœud et du
+   couvercle) viennent d'un **générateur aléatoire séparé** (`new System.Random()`), **jamais** du
+   résultat du tirage ni de la même graine que lui.
+5. L'objet gagné est créé **désactivé** et caché ; il n'existe à l'écran qu'à partir de R. Pas
+   de silhouette dans la boîte, pas d'ombre, pas de lumière qui le trahirait.
+6. La caméra fait **le même mouvement** jusqu'à R ; les différences (poussée, secousse) commencent
+   à R.
+
+### 14.2 Le plateau 3D (où et comment on le filme)
+
+- **Pourquoi pas sur la tour ?** Le décor, les coffres et le cheval gêneraient, et l'interface UI
+  Toolkit se dessine **toujours par-dessus** la 3D : un voile UI cacherait la boîte. On filme donc
+  la boîte sur un **petit plateau à part**, par sa propre caméra, en plein écran.
+- **Emplacement** : un objet `PlateauOuverture` placé **à 500 m sur le côté** de la tour (par ex.
+  (500 ; 0 ; 0)), hors de la vue de la caméra du jeu et loin de ses ombres. Désactivé hors ouverture.
+- **Caméra `CameraOuverture`** : position locale (0 ; 1,9 ; −4,4), regarde (0 ; 1,0 ; 0), champ
+  de vision **34°**, fond *Solid Color* **`#1F1730`**, post-traitement activé, **priorité (Depth)
+  plus haute** que la caméra du jeu. Activée seulement pendant l'ouverture et l'écran de résultat ;
+  le HUD est caché comme aujourd'hui.
+- **Socle** : disque Ø **1,8 m**, 0,25 m de haut, dessus à y = 0, en pierre claire `#8A90B0`
+  (`M_PierreClaire`) avec un filet incrusté `#6A4C9C` (`M_Incrustation`) à 8 cm du bord, biseau 3 cm.
+  Il pose la boîte « quelque part » au lieu de la faire flotter dans le vide.
+- **Lumières** : la lumière principale du jeu éclaire déjà le plateau (même direction, même
+  couleur : cohérent) ; on ajoute une **Spot Light** `#FFF1D6`, intensité 4, portée 8 m, angle 50°,
+  au-dessus et devant à gauche (−1,5 ; 4 ; −2), ombres douces ; une **Point Light** `LumiereInterieure`
+  dans la boîte (0 ; 0,55 ; 0), portée 3 m, éteinte au départ ; une **Reflection Probe** au centre
+  (le ruban et le médaillon sont en métal).
+- **Fond** : le `#1F1730` uni ; la vignette du post-traitement (0,25) suffit à concentrer le regard.
+
+**Ce qui reste en UI Toolkit** (par-dessus la 3D) : le fondu d'entrée, le **flash blanc**, le
+texte de rareté, le nom de l'objet, les étincelles 2D, les confettis et toute la cinématique
+Secret, l'écran de résultat et ses boutons. **Ce qui passe en 3D** : la boîte, le nœud, le
+couvercle, la lueur, le faisceau, le **halo et les rayons** (deux plans derrière l'objet, mêmes
+textures calculées par le code qu'au §10.3, matériau URP Lit transparent avec émission), les
+étincelles 3D et l'objet gagné.
+
+### 14.3 Fiche du modèle : `boite3d` (un modèle, plusieurs jeux de couleurs)
+
+**À quoi elle ressemble** : la boîte-cadeau des images `boite_skins_1` / `boite_accessoires_1`
+(§2.8) en vrai volume : un cube aux arêtes très arrondies, un couvercle qui déborde, un ruban
+en croix, un gros nœud à deux boucles et un médaillon en laiton sur la face avant.
+
+**Dimensions** : corps **1,00 × 0,80 × 1,00** (y de 0 à 0,80) ; couvercle **1,10 × 0,24 × 1,10**
+(il déborde de 5 cm, de y = 0,80 à 1,04) ; nœud jusqu'à y ≈ **1,40**. Biseau **5 cm, 2 segments**
++ normales pondérées (§13.3).
+
+**Hiérarchie et pivots** (le code anime ces objets séparément)
+```
+Boite3D             origine au sol, au centre (0 ; 0 ; 0)
+├── Corps           le cube (M_BoiteCorps)
+├── RubanCorps      bandes verticales avant/arrière/côtés, 16 cm de large, 2 cm de relief (M_Laiton)
+├── Medaillon       disque Ø 0,30, 4 cm, sur le ruban au milieu de la face avant (M_Laiton)
+│   └── Embleme     l'emblème en relief (goutte 3 couleurs / mini haut-de-forme, §2.8)
+├── Interieur       parois de 5 cm et fond à y = 0,15, mat `#2A1E3A` (on voit dedans une fois ouvert)
+├── Lueur           plan sous le couvercle, à y = 0,78, `#FFF6E8`, émission pilotée par le code
+└── Couvercle       origine au CENTRE DU BAS du couvercle (0 ; 0,80 ; 0)
+    ├── RubanCouvercle  la croix du ruban sur le dessus (M_Laiton)
+    └── Noeud           origine à la base du nœud (0 ; 1,04 ; 0) : 2 boucles, 2 pans, nœud central
+```
+- **Couleurs** : celles du §2.8 (skins : corps `#8E5BD6`, bord du couvercle `#6A4C9C` ;
+  accessoires : `#2BB8C4`, `#1F8A94` ; ruban, nœud, médaillon laiton `#C99A1E`). Corps mat 0,30,
+  laiton metallic 1 / smoothness 0,60. Les futures boîtes **Pirates** et **Animaux** réutilisent le
+  même modèle avec leurs couleurs et leur emblème (fournis avec le catalogue du game designer).
+- **Lueur** : c'est une lumière d'effet (§4.1 v5), pas la matière de la boîte : la boîte elle-même
+  n'émet jamais.
+- **Triangles** : **1 500 – 2 200**. Script : `blender/boite_3d.py` → `boite3d_skins_1.glb`,
+  `boite3d_accessoires_1.glb`.
+
+**L'objet gagné en 3D**
+- **Accessoire** : son propre modèle, **avec ses animations** (§13.5), mis à l'échelle pour tenir
+  dans une sphère de **Ø 1,1 m**, sans le cheval. Planète : sans orbite (elle tourne sur elle-même,
+  sa lune autour).
+- **Skin** : un **mini cheval** (le modèle `Joueur`, échelle 0,55, ~1,1 m de haut) portant la
+  matière gagnée **avec tous ses effets** (motif, cristal, arc-en-ciel, galaxie).
+- Une fois sorti, il tourne en plateau tournant (45°/s) et flotte de ±0,05 m (période 2 s).
+
+### 14.4 Chronologie commune (identique pour toutes les raretés)
+
+Temps en secondes depuis le clic sur « Ouvrir ». Échelles notées (x ; y ; z).
+
+| Temps | Durée | Boîte | Nœud / couvercle | Lumière, effets | Caméra | Son |
+|---|---|---|---|---|---|---|
+| **0,00** | 0,10 | — | — | fondu UI : voile `#1F1730` 0 → 1 ; à 0,10 on active le plateau et `CameraOuverture`, on cache le HUD | — | `pieces_achat` |
+| **0,10** | 0,20 | tombe de y = 2,2 à 0 en **0,14 s** (`ease-in`), touche le socle à 0,24 : écrasement (1,18 ; 0,78 ; 1,18) → (0,94 ; 1,08 ; 0,94) → 1 à **0,36** | suivent la boîte | voile UI 1 → 0 en 0,12 s (on découvre le plateau) | fixe | — |
+| **0,30** | **1,20** | **secousse** : rotation Z alternée à **10 allers-retours/s**, amplitude **2° → 10°** (linéaire) ; rotation Y ±4° à 2,5 Hz ; **3 petits sauts** de 0,10 m (0,1 s montée + 0,1 s descente) à **0,55 / 0,95 / 1,35 s**, chacun suivi d'un écrasement (1,08 ; 0,90 ; 1,08) de 0,06 s | à chaque saut, le couvercle se soulève de **0,03 m** avec 0,05 s de retard puis retombe ; le nœud fait ressort (§13.5 A) | `Lueur` : émission 0,3 → 1,0 ; `LumiereInterieure` **blanche** `#FFF6E8` 0 → 0,8 ; elle ne se voit que par la fente du couvercle | **poussée lente** de 0 → 0,4 m vers la boîte (tension) | `boite/boite_secoue` |
+| **1,50** | 0,08 | **anticipation** : la secousse s'arrête, la boîte s'écrase (1,12 ; 0,82 ; 1,12) en `ease-in` | couvercle plaqué | lueur 1,0 → 1,2 | — | `boite/boite_ouverture` |
+| **1,58** | 0,50 | — | **le nœud s'envole** : vitesse vers le haut 5 m/s, de côté ±0,8 m/s (aléatoire neutre), rotation 900°/s autour d'un axe au hasard, gravité 9 m/s² ; échelle 1 → 0 de 1,90 à 2,10, puis désactivé | — | — | — |
+| **1,62** | 0,60 | **détente** : (0,92 ; 1,15 ; 0,92) puis retour à 1 à **1,80** (`ease-out-back`) | **le couvercle saute** : vers le haut 6 m/s, vers l'arrière 1,5 m/s, bascule en arrière à −360°/s (axe X), ±40°/s en Z (aléatoire neutre), gravité 9 m/s² ; sort du cadre derrière, désactivé à 2,30 | **faisceau blanc** : un cône ouvert sort de la boîte, hauteur 0 → **3,5 m** en 0,13 s, rayon bas 0,42 m, rayon haut 0,9 m, `#FFF6E8`, émission 1,2, opacité 0,5 ; **flash blanc UI** 0 → **0,7** (à 1,68) → 0 (à 1,90) | — | — |
+| **1,75 = R** | selon la rareté | voir 14.5 | — | **révélation** (14.5) | voir 14.5 | `boite/revelation_<rarete>` |
+
+Notes :
+- Le flash blanc commence à 1,62 au lieu de 1,50 (il accompagne le couvercle) : c'est le seul
+  temps qui change par rapport à `boites.md` §7.6, et il reste identique pour toutes les raretés.
+- Les mouvements aléatoires (nœud, couvercle) sont tirés **au clic**, par le générateur séparé
+  (14.1 règle 4).
+
+### 14.5 La révélation selon la rareté (à partir de R)
+
+**Commun à toutes** :
+- **R → R + 0,15 s** : le faisceau passe du blanc à la **couleur de base de la rareté** (§2.7) ;
+  `LumiereInterieure` prend la même couleur.
+- **R + 0,05 s** : l'objet gagné apparaît dans la boîte (y = 0,4, échelle 0,3), **monte à y = 1,55
+  en 0,45 s** (`ease-out-back`) en grandissant jusqu'à 1 ; il tourne d'abord vite (**360°/s**) puis
+  ralentit jusqu'à **45°/s** en 0,8 s (il « se présente »).
+- **R + 0,1 s** : halo et rayons 3D derrière l'objet (plans face caméra), gerbe d'étincelles 3D
+  (étoiles 4 branches 8 cm, émissives, couleur de rareté, vitesse 1,5 à 3,5 m/s, gravité 4 m/s²,
+  vie 0,8 à 1,2 s) ; les étincelles 2D, le texte de rareté et le flash coloré de `boites.md` §7.6
+  restent en UI, **sous** l'objet à l'écran (texte à y ≈ 800 px).
+
+| Rareté | Durée (inchangée) | Faisceau : rayon haut / émission | Lumière intérieure | Halo 3D | Rayons 3D | Étincelles 3D | Secousse caméra | Poussée caméra | Objet |
+|---|---|---|---|---|---|---|---|---|---|
+| Commun | 0,5 s | 0,6 m / 0,6 | 0,6 | Ø 1,6 m, opacité 0,5 | — | 0 | — | — | monte à 1,55 |
+| Peu commun | 0,7 s | 0,7 m / 0,8 | 0,9 | Ø 1,8 m, 0,6 | — | 8 | — | — | idem |
+| Rare | 1,0 s | 0,8 m / 1,0 | 1,2 | Ø 2,0 m, 0,7 | 8 rayons, 30°/s | 14 | — | +0,2 m | idem |
+| Super rare | 1,4 s | 0,9 m / 1,2 | 1,5 | Ø 2,2 m, pulse 1 ↔ 1,1 | 12, 45°/s | 22 | ±0,02 m, 0,3 s | +0,3 m | idem |
+| Légendaire | 2,0 s | 1,0 m / **1,5** | 2,0 | Ø 2,6 m, pulse | 16, 60°/s | 36 (orange `#FF9F1C` et or `#FFC83A`) | ±0,035 m, 0,4 s | +0,5 m | monte à **1,75**, échelle **1,3** puis revient à 1 et 1,55 en 0,4 s |
+| Secret | voir 14.6 | — | — | — | — | — | — | — | — |
+
+- Le plafond d'émission **1,5** est respecté partout.
+- **Fin de la révélation** : le faisceau baisse à 60 % de son émission, l'objet continue de
+  tourner et de flotter ; l'écran de résultat apparaît **0,2 s** après (`boites.md` §7.7), ses
+  textes et boutons sous l'objet (à partir de y ≈ 760 px).
+- **« Rouvrir »** : fondu UI `#1F1730` 0 → 1 en 0,15 s, on remet la boîte fermée (nœud et
+  couvercle à leur place), et on reprend à **0,10 s** de la chronologie.
+- **« OK »** : fondu 0,15 s, plateau et `CameraOuverture` désactivés, HUD réaffiché.
+
+### 14.6 Le Secret (garde la cinématique de `v3.md` §8.3)
+
+- À **R**, la coupure noire UI recouvre tout, comme aujourd'hui. Derrière, on **éteint** le faisceau
+  et la lumière intérieure (rien ne se voit pendant le noir).
+- **R + 0,5 → R + 2,2** (battement, fissures) : inchangé, en UI.
+- **R + 2,2 — l'éclat** : quand le noir se brise, on découvre le plateau : faisceau **arc-en-ciel**
+  (teinte qui fait le tour en 2 s, saturation 0,75, émission 1,2), halo 3D arc-en-ciel Ø 2,8 m,
+  20 rayons de couleurs alternées à 60°/s.
+- **R + 2,4 — l'arrivée** : **l'objet 3D remplace la carte** : il tombe de y = 4 à 1,55 en 1,0 s
+  (`ease-out` avec léger dépassement) en faisant **3 demi-tours** sur lui-même qui ralentissent.
+- **R + 3,4 — l'impact** : la boîte s'écrase (1,15 ; 0,85 ; 1,15) en 0,1 s puis revient ; **40
+  étincelles 3D** multicolores ; secousse caméra ±0,05 m pendant 0,5 s ; les confettis UI commencent.
+- **R + 3,7 → R + 5,4** : « SECRET !!! » et « Une chance sur 100 ! » en UI, inchangés ; puis calme.
+
+### 14.7 Passer l'animation
+
+Mêmes règles que `boites.md` §7.6 (à partir de 0,5 s après le clic). **État final directement** :
+boîte ouverte sans couvercle ni nœud, faisceau à la couleur de rareté (60 %), halo et rayons,
+objet en place qui tourne, textes ; **pas** d'étincelles, de confettis ni de secousse.
+
+### 14.8 Résumé pour le programmeur (qui fait quoi)
+- **Logique** : le tirage est fait et sauvegardé **avant** l'animation (inchangé). Le script
+  d'animation reçoit seulement « quelle boîte, quel objet, quelle rareté » et ne décide rien.
+- **Un script par rôle** (un MonoBehaviour par fichier) : par exemple `OuvertureBoite3D`
+  (chronologie), `FaisceauOuverture` (cône, couleur, émission), `EtincellesOuverture` (réserve
+  d'étincelles 3D) ; l'UI existante (`BoxOpening`) garde le flash, les textes et les boutons.
+- **Matériaux** : URP Lit partout. Faisceau, halo, rayons : *Surface Type Transparent*, *Render
+  Face Both* (faisceau), émission ; textures de dégradé calculées par le code (aucune image).
+- **Réserves** : 40 étincelles 3D, réutilisées (pas de création pendant l'animation).
+
+### 14.9 Contrôle d'équité (à faire en capture)
+- Ouvrir **10 fois** la même boîte et filmer jusqu'à R : les images doivent être **indiscernables**
+  d'un tirage à l'autre (à part les trajectoires aléatoires du nœud et du couvercle).
+- Vérifier qu'avant R aucune couleur autre que le blanc neutre n'apparaît (faisceau, lueur, flash).
+- Vérifier que l'objet gagné est invisible (désactivé) avant R, même par la fente du couvercle.

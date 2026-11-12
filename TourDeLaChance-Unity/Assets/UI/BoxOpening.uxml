@@ -6,6 +6,7 @@
          Style : BoxOpening.uss. -->
     <Style src="BoxOpening.uss" />
     <Style src="Buttons.uss" />
+    <Style src="V5.uss" />
     <ui:VisualElement name="ov-root" class="ov-root">
         <ui:VisualElement name="ov-veil" class="ov-full ov-veil" picking-mode="Ignore" />
         <!-- Tout ce qui tremble avec l'écran (secousse de la révélation) -->

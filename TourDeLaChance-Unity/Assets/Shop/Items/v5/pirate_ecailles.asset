@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cfbc46aca18b438b9c35bd5c4c908b3, type: 3}
+  m_Name: pirate_ecailles
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.ShopItem
+  id: pirate_ecailles
+  displayName: "\xC9cailles"
+  category: 0
+  slot: 0
+  rarity: super_rare
+  free: 0
+  icon: {fileID: 0}
+  skinStyle: 0
+  color: {r: 0.16862746, g: 0.72156864, b: 0.76862746, a: 1}
+  secondaryColor: {r: 0.23137255, g: 0.35686275, b: 0.8509804, a: 1}
+  metallic: 0.3
+  smoothness: 0.75
+  accessoryPrefab: {fileID: 0}
+  animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1
+  flavorText: Il nage plus vite que les dauphins.
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}

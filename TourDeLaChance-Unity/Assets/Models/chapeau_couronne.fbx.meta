@@ -7,13 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Or
-    second: {fileID: 2100000, guid: e2e676bd763e64462923984bddbd42c5, type: 2}
+      name: M5_Nacre
+    second: {fileID: 2100000, guid: 1d06eb9c9797941c5a6e00865117d0b3, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Rubis
-    second: {fileID: 2100000, guid: 3a021f29b828d41d888321820e4667e8, type: 2}
+      name: M5_Rubis
+    second: {fileID: 2100000, guid: 8a7e03b952fd64aacb6f8c8aed3dd1f5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Velours
+    second: {fileID: 2100000, guid: 914b984ec45af4f88844265f4f8e35a2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Or
+    second: {fileID: 2100000, guid: e2e676bd763e64462923984bddbd42c5, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

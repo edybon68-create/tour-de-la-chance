@@ -1,15 +1,33 @@
 """
 collier_fleurs.py — Collier de fleurs (boîte d'accessoires n°1 : `collier_fleurs`, Peu commun, Cou).
+VERSION v5 « plus jeu moderne » (docs/art-bible.md §13.8 fiche 9), fait SUR le cheval.
 
-Fiche suivie : docs/specs/boites.md §5.6. Lancer (Blender fermé) :
+Lancer (Blender fermé) :
     /Applications/Blender.app/Contents/MacOS/Blender --background --python blender/collier_fleurs.py
+Sortie : blender/exports/collier_fleurs.fbx et docs/captures/v5_cheval_collier_fleurs.png.
 
-Un seul objet, nommé comme l'identifiant. Origine = point d'accroche Cou = `PointCou`,
-Unity (0 ; 1,3 ; 0) local à Joueur : position et rotation locales à zéro.
-10 fleurs sur un cercle de rayon 0,545 autour du corps, enfilées sur un fin cordon blanc
-cassé. Le collier « pend » : il est incliné, le devant 8 cm plus bas que l'arrière
-(devant à y = −0,04, arrière à y = +0,04). Chaque fleur regarde vers l'extérieur et un peu
-vers le haut (30°) pour bien se montrer à la caméra, qui est au-dessus.
+Défaut corrigé : l'ancien collier était un anneau ROND et fin (fait pour la capsule) qui
+flottait devant le cou et rentrait dans la crinière derrière. Celui-ci est construit comme
+l'écharpe : chaque point du tour est posé sur la VRAIE surface du cou par un rayon « lissé »
+(commun.sur_cheval_lisse), qui passe PAR-DESSUS la crinière au lieu d'y entrer. Le collier
+« pend » : plus bas devant (sur le poitrail, y ≈ 0,94) que derrière (sur la nuque, y ≈ 1,10).
+
+Les trois niveaux de forme (bible §13.2) :
+  - primaire   : 8 grosses fleurs Ø 0,22 sur le devant et les côtés, tournées vers
+                 l'extérieur et le haut (elles regardent la caméra) ;
+  - secondaire : pétales BOMBÉS (5 par fleur, 6 cm d'épaisseur), une perle blanc cassé entre
+                 deux fleurs, un cordon de perles qui passe sur la nuque ;
+  - tertiaire  : le cœur de chaque fleur en dôme jaune verni.
+Matières : pétales mats (0,30), cœurs et perles vernis (0,85).
+
+Hiérarchie (le code Unity retrouve les pièces par leur nom) :
+    collier_fleurs       vide, origine = PointCou (attachScale 1, attachOffset 0)
+    └── Anim_Collier     perles + cordon ; origine = PointCou (ressort sur l'ensemble)
+        └── Anim_Fleur_1 … Anim_Fleur_8   une fleur chacune ; origine = son cœur. Le code
+                         les fait pivoter de ±8° sur elles-mêmes (axe = la normale de la
+                         fleur = leur axe Y local), période 3 s, décalées de 0,12 s d'une
+                         fleur à la suivante (une vague qui fait le tour). Numérotées de la
+                         droite de l'image vers la gauche.
 """
 
 import math
@@ -23,65 +41,76 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import commun as C  # noqa: E402
 
 NOM = "collier_fleurs"
-EMPLACEMENT = "cou"
-MATS = ["M_PetaleRose", "M_PetaleBlanc", "M_CoeurFleur"]  # indices 0, 1, 2
-Y_COU = 1.3
-RAYON_FLEURS = 0.545
-CHUTE = 0.04             # le devant descend de 4 cm, l'arrière monte de 4 cm
-NB_FLEURS = 10
-R_FLEUR = 0.09           # fiche : Ø 0,14 ; grossi à 0,18 (bible §3.1 : détails à 130 %)
-EPAISSEUR = 0.04
-PENTE = math.atan2(CHUTE, RAYON_FLEURS)   # inclinaison du collier (≈ 4°)
+POINT = "PointCou"
+MATS = ["M5_PetaleRose", "M5_PetaleBlanc", "M5_JauneVerni", "M5_BlancVerni"]  # 0..3
+NB = 8
+ETENDUE = 2.0          # les fleurs couvrent ±2,0 rad (≈ ±115°) autour du devant
+R_FLEUR = 0.11
+AXE_Z = 0.02
+ARBRE = None
 
 
-def contour_fleur(n_petales=5, par_petale=4):
-    """Contour 2D d'une fleur à 5 pétales ronds : 4 points par pétale, le rayon est
-    maximal au milieu du pétale et tombe à 45 % dans le creux entre deux pétales."""
+def hauteur(a):
+    """Le collier pend : y = 0,94 devant (a = 0), 1,10 derrière (a = π)."""
+    return 1.02 - 0.08 * math.cos(a)
+
+
+def sur_cou(a, ecart):
+    centre = (0.0, hauteur(a), AXE_Z)
+    return C.sur_cheval_lisse(ARBRE, centre, a, 0.0, ecart, pente=0.6,
+                              fenetre=(0.42, 0.14), pas=0.14)
+
+
+def contour_fleur():
     pts = []
-    for p in range(n_petales):
-        centre = math.pi / 2 + 2 * math.pi * p / n_petales
-        demi = math.pi / n_petales                       # 36° : demi-largeur d'un pétale
-        for f, r in ((-1.0, 0.45), (-0.45, 0.92), (0.0, 1.0), (0.45, 0.92)):
-            a = centre + f * demi
+    for p in range(5):
+        c = math.pi / 2 + 2 * math.pi * p / 5
+        for f, r in ((-0.5, 0.42), (-0.2, 0.97), (0.2, 0.97)):
+            a = c + f * (2 * math.pi / 5)
             pts.append((R_FLEUR * r * math.cos(a), R_FLEUR * r * math.sin(a)))
     return pts
 
 
-def point_cercle(theta, rayon):
-    """Point du cercle incliné. theta = 0 devant (+Y Blender), en tournant vers +X."""
-    x, y = rayon * math.sin(theta), rayon * math.cos(theta)
-    return Vector((x, y, Y_COU - CHUTE * (y / rayon)))
+def fleur(k, a):
+    p, d = sur_cou(a, 0.045)
+    n = (d + Vector((0, 0, 0.42))).normalized()     # ≈ 23° vers le haut
+    m = C.repere(p, n)
+    bm = bmesh.new()
+    C.bm_coussin(bm, contour_fleur(), 0.06, 0.10, m, mat=k % 2, anneaux=1, dos_plat=True)
+    C.bm_coussin(bm, C.contour_ellipse(0.04, 0.04, n=6), 0.05, 0.10,
+                 m @ Matrix.Translation((0, 0.025, 0)), mat=2, anneaux=1, dos_plat=True)
+    return C.piece(f"Anim_Fleur_{k + 1}", bm, MATS, lissage="tout", pivot=p)
 
 
 def construire():
+    global ARBRE
     C.nouvelle_scene()
+    ARBRE = C.arbre_cheval()
+    angles = [-ETENDUE + 2 * ETENDUE * k / (NB - 1) for k in range(NB)]
+    # (angle négatif = droite de l'image : on numérote de droite à gauche)
+    fleurs = [fleur(k, a) for k, a in enumerate(angles)]
     bm = bmesh.new()
-    contour = contour_fleur()
-    for k in range(NB_FLEURS):
-        theta = 2 * math.pi * k / NB_FLEURS
-        p = point_cercle(theta, RAYON_FLEURS)
-        radial = Vector((math.sin(theta), math.cos(theta), 0))
-        avant = (radial * math.cos(math.radians(30)) + Vector((0, 0, math.sin(math.radians(30)))))
-        m = C.repere(p, avant) @ Matrix.Rotation(theta * 0.7, 4, "Y")  # pétales pas tous alignés
-        C.bm_plaque(bm, contour, EPAISSEUR, m, mat=k % 2)               # rose / blanc cassé
-        coeur = m @ Vector((0, EPAISSEUR / 2, 0))
-        v = C.bm_sphere(bm, 1.0, (0, 0, 0), segments=6, anneaux=3, echelle=(0.035, 0.022, 0.035),
-                        mat=2)
-        bmesh.ops.transform(bm, matrix=Matrix.Translation(coeur) @ m.to_3x3().to_4x4(), verts=v)
-    fleurs = C.objet_depuis_bmesh("Fleurs", bm, MATS)
-    C.lisser_angle(fleurs, 40)
-
-    # Cordon : tore fin (Ø 4 cm), même inclinaison que le collier, caché en partie
-    # derrière les fleurs ; il évite les « trous » entre deux fleurs.
-    bm = bmesh.new()
-    m = Matrix.Translation((0, 0, Y_COU)) @ Matrix.Rotation(-PENTE, 4, "X")
-    C.bm_tore(bm, 0.53, 0.02, segments=24, segments_tube=4, mat=1, matrice=m)
-    cordon = C.objet_depuis_bmesh("Cordon", bm, MATS)
-    C.lisser_tout(cordon)
-
-    obj = C.joindre([fleurs, cordon], NOM)
-    return C.vers_accroche(obj, EMPLACEMENT)
+    # perles entre deux fleurs (un peu en retrait)
+    for k in range(NB - 1):
+        a = (angles[k] + angles[k + 1]) / 2
+        p, d = sur_cou(a, 0.04)
+        C.bm_sphere(bm, 0.045, p, segments=6, anneaux=4, mat=3)
+    # cordon de perles sur la nuque : de la dernière fleur à la première, par derrière
+    chemin = []
+    n_dos = 9
+    for i in range(n_dos + 1):
+        a = ETENDUE + (2 * math.pi - 2 * ETENDUE) * i / n_dos
+        p, d = sur_cou(a, 0.025)
+        chemin.append(p)
+    C.bm_tube(bm, chemin, 0.018, cotes=5, mat=3)
+    for i in range(1, n_dos, 2):
+        C.bm_sphere(bm, 0.04, chemin[i], segments=6, anneaux=4, mat=3)
+    collier = C.piece("Anim_Collier", bm, MATS, lissage="tout",
+                      pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))
+    for f in fleurs:
+        C.parenter(f, collier)
+    return C.racine_v5(NOM, POINT, [collier])
 
 
 if __name__ == "__main__":
-    C.finir_accessoire(construire(), NOM, EMPLACEMENT)
+    C.finir_v5(construire(), NOM, POINT, y_min=0.55)

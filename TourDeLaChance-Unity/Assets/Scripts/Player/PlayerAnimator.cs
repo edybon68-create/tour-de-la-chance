@@ -233,6 +233,42 @@ namespace TourDeLaChance
             action = null; // il reste ainsi jusqu'à ReturnToRest()
         }
 
+        /// v5 §13.4 : la RENAISSANCE. À 0,3 s le cheval s'élève de 0,5 m en faisant 2 tours
+        /// (1,2 s), plane, puis atterrit à 2,1 s avec un écrasement. Pur affichage.
+        public void RebirthRise() => StartAction(RebirthRoutine());
+
+        IEnumerator RebirthRoutine()
+        {
+            headDown = false;
+            breathing = false;
+            leanX = 0f;
+            actionScale = Vector3.one;
+            yield return new WaitForSeconds(0.3f);
+            yield return Phase(1.2f, Ease.InOut, k => { offsetY = 0.5f * k; spinY = 720f * k; });
+            spinY = 0f; // 720° = deux tours : on revient pile de face
+            yield return new WaitForSeconds(0.4f);
+            yield return Phase(0.2f, Ease.In, k => offsetY = 0.5f * (1f - k));
+            yield return Phase(0.25f, Linear, k =>
+            {
+                float squash = Ease.Sine(k);
+                actionScale = new Vector3(1f + 0.12f * squash, 1f - 0.15f * squash, 1f + 0.12f * squash);
+            });
+            actionScale = Vector3.one;
+            offsetY = 0f;
+            breathing = true;
+            action = null;
+        }
+
+        /// Remet tout de suite le cheval au repos (animation de renaissance passée).
+        public void StopRebirth()
+        {
+            if (action != null) StopCoroutine(action);
+            action = null;
+            offsetY = 0f; spinY = 0f; leanX = 0f;
+            actionScale = Vector3.one;
+            breathing = true;
+        }
+
         IEnumerator SmallHopRoutine(float height, float duration)
         {
             Vector3 s0 = actionScale;

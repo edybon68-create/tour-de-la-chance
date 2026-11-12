@@ -18,6 +18,8 @@ namespace TourDeLaChance
     ///   classement_local_etage   = "6|2026-11-11;4|2026-11-11"
     ///   classement_local_pieces  = "120|2026-11-11"
     ///   classement_local_secrets = "matiere_galaxie|2026-11-11"
+    /// v5 §19 : un 3e champ facultatif « |r » marque une partie qui a utilisé une reprise
+    /// ("6|2026-11-11|r") ; les anciennes lignes restent lisibles.
     /// Il répond tout de suite (Task.FromResult) : pas d'Internet.
     /// </summary>
     public class LocalLeaderboardService : ILeaderboardService
@@ -26,6 +28,8 @@ namespace TourDeLaChance
         public const string PiecesKey = "classement_local_pieces";
         public const string SecretsKey = "classement_local_secrets";
         public const int MaxRuns = 10;
+        /// v5 : le marqueur ajouté après la date d'une partie qui a utilisé une reprise.
+        public const string ReviveMark = "|r";
 
         static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
 
@@ -42,8 +46,10 @@ namespace TourDeLaChance
             {
                 // Une partie perdue entre au classement Étage (on a bien atteint cet étage)
                 // mais pas au classement Pièces (rien d'encaissé).
-                if (scores.partie.etage >= 1) AddRun(EtageKey, scores.partie.etage, scores.partie.date);
-                if (scores.partie.pieces > 0) AddRun(PiecesKey, scores.partie.pieces, scores.partie.date);
+                // v5 : la date garde le marqueur « |r » d'une partie avec reprise.
+                string date = scores.partie.date + (scores.partie.reprise ? ReviveMark : "");
+                if (scores.partie.etage >= 1) AddRun(EtageKey, scores.partie.etage, date);
+                if (scores.partie.pieces > 0) AddRun(PiecesKey, scores.partie.pieces, date);
             }
             if (!string.IsNullOrEmpty(scores.nouveauSecret))
             {
@@ -161,6 +167,9 @@ namespace TourDeLaChance
         /// « 2026-11-11 » → « 11 nov. » (à la française).
         public static string PrettyDate(string date)
         {
+            // v5 : « 2026-11-11|r » → « 11 nov. · ◆ reprise ».
+            if (date != null && date.EndsWith(ReviveMark))
+                return PrettyDate(date.Substring(0, date.Length - ReviveMark.Length)) + " · ◆ reprise";
             if (DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
                 return d.ToString("d MMM", French);
             return date ?? "";

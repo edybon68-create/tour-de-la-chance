@@ -5,7 +5,8 @@ son téléchargé, aucune imitation d'une musique ou d'un jingle existant. Relan
 redonne **exactement** les mêmes fichiers (les tirages au hasard utilisent des graines fixes).
 
 Références : `docs/specs/sons-animations.md` §5 (liste des sons) et §6 (mixage) ;
-`docs/specs/v3.md` §14 (les 15 sons de la v3) et §13 (correctif B3 : deux sons raccourcis).
+`docs/specs/v3.md` §14 (les 15 sons de la v3) et §13 (correctif B3 : deux sons raccourcis) ;
+`docs/specs/v5.md` §17.4 et `docs/art-bible.md` §14.4 (les 34 sons de la v5, voir « Sons v5 »).
 
 ## Régénérer tous les sons
 
@@ -17,6 +18,7 @@ PY=/Applications/Blender.app/Contents/Resources/4.5/python/bin/python3.11
 $PY audio/generer_tout.py                               # les 43 sons -> Assets/Audio du projet Unity
 $PY audio/generer_tout.py --sortie audio/exports        # les 43 sons -> audio/exports (Unity intact)
 $PY audio/generer_tout.py --v3 --sortie audio/exports   # seulement les 15 nouveaux + 2 corrigés
+$PY audio/generer_tout.py --v5                          # seulement les 34 sons v5 (aucun ancien son touché)
 $PY audio/analyse.py audio/exports                      # re-mesurer un dossier sans rien régénérer
 # avec Blender, les options se placent après « -- » :
 /Applications/Blender.app/Contents/MacOS/Blender --background --python audio/generer_tout.py -- --v3 --sortie audio/exports
@@ -48,9 +50,10 @@ exactement les mêmes fichiers que le mode complet.
 | `sons_boite.py` | Les sons des boîtes à tirage aléatoire (secouer, ouvrir, 6 révélations). |
 | `sons_v3.py` | v3 : `amelioration_achat`, `amelioration_max`, `record` (ui) et les 7 nouveaux sons de coffres. |
 | `sons_secret.py` | v3 : les 5 sons de la cinématique du Secret (`secret_*`, catégorie boite). |
+| `sons_v5.py` | v5 : les 34 nouveaux sons (diamants, reprise, renaissance, interface, couches de l'ouverture 3D, touches Pirates / Animaux, objets animés). Nouveau dossier `jeu/`. |
 | `musique.py` | Les 2 musiques en boucle. |
 | `analyse.py` | Le contrôle par la mesure (on ne peut pas écouter, alors on mesure). |
-| `generer_tout.py` | Lance tout (ou seulement la v3 avec `--v3`), dans le dossier choisi (`--sortie`), puis l'analyse. |
+| `generer_tout.py` | Lance tout (ou seulement la v3 avec `--v3`, ou la v5 avec `--v5`), dans le dossier choisi (`--sortie`), puis l'analyse. |
 | `exports/` | Sons en attente d'être copiés dans `Assets/Audio/` (même arborescence). |
 
 ## Règles appliquées à tous les sons
@@ -238,6 +241,79 @@ tonalité « à part » de `revelation_secret`, pour que tout sonne comme un seu
   absolu pour ne jamais se décaler) ;
 - même technique de boucle. Seule, elle est un peu inquiétante mais jamais effrayante
   (accords majeurs/mineurs simples, aucune dissonance).
+
+---
+
+## Sons v5 (`sons_v5.py`, spec `v5.md` §17.4)
+
+34 nouveaux fichiers, **aucun son existant n'est remplacé** (`--v5` ne recalcule que ceux-ci).
+Tous en fa majeur ; animaux et pirates toujours **mignons** (voix aiguës, glissandos ronds,
+pas de grave menaçant). Colonne « Volume » = `AudioSource.volume` conseillé ; les fichiers sont
+déjà équilibrés entre eux (« oreille » = volume pondéré K mesuré par `analyse.py`).
+
+### Jeu (`jeu/`)
+
+| Son | Durée | Quand il joue | Volume | Fabrication |
+|---|---|---|---|---|
+| `diamant_gain_1` / `_2` / `_3` | 0,9 s | Trésor en diamants (§10.5), à la place de `pieces_jaillissement`. **Choisir selon le palier d'étage** : 1-5 → `_1`, 6-9 → `_2`, 10+ → `_3` (donc 1 ou 2, 2 ou 4, 3 ou 6 diamants). | 0,8 | Arpège montant de « cristal » (partiels ×2 / ×3 / ×5,04, différents de la pièce ×2,7) : 3, 4 puis 5 notes (do6 → la6, do7, fa7), éclat doublé à l'octave grave, souffle très aigu qui brille, 14 à 26 étincelles. Oreille −13,5 / −13 / −12,5. |
+| `diamant_compteur` | 0,12 s | Le compteur de diamants qui défile (§10.4) : une fois par diamant ajouté (≤ 6), pendant les 0,4 s. | 0,5 | Un « tink » de cristal la7 + mi7, chute 90 ms (le pendant de `pieces_tic`). |
+| `reprise_ok` | 0,8 s | « Continuer — 1 ◆ » accepté (§11.2), avec la spirale bleutée. | 0,7 | « Rembobinage » : sifflet tremblotant (vibrato 22 Hz) qui descend 1 400 → 350 Hz puis remonte à 1 100 Hz, souffle qui fait le même aller-retour, puis carillon fa6-la6-do7 (0,46 s). |
+| `renaissance` | 4,0 s | Début de l'animation de renaissance (§13.4, t = 0). | 0,9 | 0 → 1,5 s : 3 glissandos de harpe de plus en plus hauts, nappe de cordes (scies désaccordées) qui s'ouvre, carillons qui accélèrent, souffle montant ; **1,5 s (flash)** : accord de fa majeur cuivres doux + glockenspiel + cymbale légère (sommet du fichier) ; **2,1 s (atterrissage)** : « poum » feutré + 40 étincelles ; puis boîte à musique qui redescend et longue retombée. Oreille −11,5 (le plus grand moment du jeu). |
+| `renaissance_tampon` | 0,4 s | Le tampon « ×2 » s'écrase sur le compteur (§13.4, t = 2,4 s). | 0,8 | « Boum » feutré (sinus 150 → 70 Hz + bruit sourd), « tchac » de papier, clochettes fa6 et do7. |
+| `pirate_eclair` | 0,3 s | Skin Tempête : à chaque éclair (toutes les 2 à 4 s). | 0,25 | Crépitement de bruit aigu (0,15 s) + « zip » 2 400 → 600 Hz. Aucun tonnerre. Oreille −20 (il revient souvent). |
+| `perroquet_cri` | 0,4 s | Perroquet, saut de joie. | 0,3 | « Rouah ! » : voix nasillarde (scie + filtre résonant) 900 → 1 400 → 1 000 Hz, un peu de grain, deux froufrous d'ailes. |
+| `kraken_bebe` | 0,4 s | Petit Kraken, saut de joie. | 0,3 | « Blop-blop » : deux sinus qui montent (400 → 1 000, 550 → 1 400 Hz) + une goutte. |
+| `navire_canon` | 0,5 s | Navire fantôme, salve de confettis. | 0,3 | « Pouf » de cotillon (bruit sourd + sinus 220 → 90 Hz), 14 crépitements de papier, clochette. |
+| `paon_roue` | 0,8 s | Skin Paon, la roue se déploie (saut de joie). | 0,35 | Froufrou de plumes (bruit haché à 28 Hz, filtre qui monte, 0,36 s) puis « ta-da » glockenspiel do6 → fa6 + petite harpe. |
+| `lion_rugit` | 0,6 s | Skin Lion solaire, saut de joie. | 0,4 | Rugissement de lionceau : voix aiguë qui monte et retombe, filtre « a → ou », grain à 38 Hz, étincelles. |
+| `poussin_piou` | 0,3 s | Poussin, saut de joie. | 0,25 | Deux pépiements sinus 2,4 → 3,4-3,7 kHz → 2,1 kHz. |
+| `chaton_miaou` | 0,5 s | Chaton, saut de joie. | 0,25 | « Miaou » : scie douce 600 → 950 → 550 Hz, filtre « i-a-ou », vibrato léger. |
+| `baleine_chant` | 1,2 s | Baleine céleste, saut de joie. | 0,35 | Chant doux do5 → fa5 → ré5 (sinus + octave, vibrato lent), étoiles, grande réverb. |
+
+### Interface (`ui/`)
+
+| Son | Durée | Quand il joue | Volume | Fabrication |
+|---|---|---|---|---|
+| `reprise_offre` | 0,5 s | Ouverture de la fenêtre de reprise (§11.2, 0,8 s après la révélation du piège). | 0,6 | Deux notes de boîte à musique do6 → ré6, la seconde remonte un peu à la fin (intonation de question), grave doux fa4. Rien d'alarmant. |
+| `recap_etage` | 0,3 s | Arrivée de la carte d'étage (§9.3, à `FloorShown`). | 0,4 | « Swoosh » de papier (bruit, filtre 1,5 → 5 → 2,5 kHz), 7 froissements, mini clochette quand elle se pose. |
+| `ui_bouton_rond` | 0,1 s | Clic sur un bouton rond de colonne (§7.1). | 0,5 | « Bop » de bulle : sinus qui monte 500 → 850 Hz + éclat fa6. |
+| `ui_infobulle` | 0,08 s | Apparition d'une info-bulle (après 0,4 s de survol). | 0,3 | « Blip » sinus 1 300 → 1 750 Hz. Le plus discret du jeu (oreille −21). |
+| `ui_onglet` | 0,15 s | Changement d'onglet de la Boutique (§15.2), et « ← Retour » de la sous-page. | 0,5 | « Tic-tic » boîte à musique do6 → fa6 + mini souffle. |
+| `ui_refus` | 0,28 s | Bouton grisé cliqué (pas assez, « Bientôt disponible », cadenas). Cité par la spec, n'existait pas encore. | 0,5 | « Bonk-bonk » : triangle étouffé la4 puis fa4. Gentil, pas une alarme. |
+
+### Ouverture 3D (`boite/`) — couches calées sur `art-bible.md` §14.4
+
+Les temps sont comptés depuis le clic sur « Ouvrir ». Les sons existants restent à leur place
+(`pieces_achat` 0,00 ; `boite_secoue` 0,30 ; `boite_ouverture` 1,50 ; `revelation_<rareté>`
+1,75 = R). Les nouvelles couches **s'ajoutent** ; elles sont **identiques pour toutes les raretés**
+(le faisceau est une quinte à vide fa-do : ni joyeux ni triste, il ne trahit rien).
+
+| Son | Durée | Quand il joue | Volume | Fabrication |
+|---|---|---|---|---|
+| `boite3d_atterrit` | 0,35 s | **0,24** (la boîte touche le socle ; le choc est au début du fichier). | 0,7 | « Bom » de bois sourd (sinus 147 → 105 Hz + modes ×2 / ×3,7 / ×6,3 + bruit étouffé), deux petits rebonds à +0,11 et +0,18 s. |
+| `boite3d_saut` | 0,3 s | **0,55 / 0,95 / 1,35** (début de chacun des 3 petits sauts). | 0,5 | « Tom » de bois à +0,10 s (la boîte retombe), « clac » du couvercle à +0,15 s. |
+| `boite3d_craque` | 0,4 s | **1,20** (spec v5 §6.3). | 0,6 | Craquement de bois (micro-clics dans un filtre résonant 600 → 1 500 Hz, de plus en plus serrés) + la lumière qui grésille (sinus 4 200 / 4 237 Hz qui battent, trémolo 31 Hz, souffle). |
+| `boite3d_noeud` | 0,5 s | **1,58** (le nœud s'envole). | 0,6 | « Pwing » élastique (sinus 300 → 900 Hz, vibrato 18 Hz) + froufrou de ruban haché à 15 Hz qui s'éloigne. |
+| `boite3d_couvercle` | 0,6 s | **1,62** (le couvercle part en arrière en basculant). | 0,6 | Petit « fwoump » de départ + souffle haché au rythme de la bascule (7 → 11 Hz), de plus en plus sourd et faible. Le « pop » reste celui de `boite_ouverture`. |
+| `boite3d_faisceau` | 0,5 s | **1,62** (le faisceau blanc jaillit), en même temps que le couvercle. | 0,6 | « Shwiiing » (souffle 2 → 11 kHz en 0,16 s) puis quinte à vide fa5-do6-fa6 scintillante (trémolo 14 Hz) qui s'éteint vers R + 0,1. |
+
+### Touches thématiques des Secrets (`boite/`, spec §6.6)
+
+Jouées à **R + 3,4 s** (impact de la carte), par-dessus `secret_confettis`. Toutes les boîtes
+Pirates : `pirate_vague` ; toutes les boîtes Animaux : `animal_pattes`. Si l'objet gagné est un
+des 4 Secrets, ajouter **en même temps** sa signature (1,2 s).
+
+| Son | Durée | Quand il joue | Volume | Fabrication |
+|---|---|---|---|---|
+| `pirate_vague` | 1,0 s | Secret d'une boîte Pirates. | 0,7 | Bruit qui gonfle (filtre 300 → 3 000 Hz), se brise à 0,4 s, écume qui pétille, 5 gouttes « plic ». |
+| `animal_pattes` | 1,0 s | Secret d'une boîte Animaux (8 empreintes, 0,1 s d'écart). | 0,7 | 8 « pat » rebondis (sinus + coussinet de bruit doux) qui montent la gamme de fa5 à fa6, une clochette à la fin. |
+| `pirate_secret_kraken` | 1,2 s | Secret = Kraken. | 0,7 | Grondement **doux** (55 Hz + bruit grave, discret) qui gonfle, puis gros « BLOP » rigolo (150 → 700 Hz) et petit « blop », trois bulles. |
+| `pirate_secret_abysses` | 1,2 s | Secret = Abysses. | 0,7 | Chant grave et doux « ouuu » (voix filtrée do3 → fa3 → la3 + quinte), écho ×2, lueur aiguë do6. |
+| `animal_secret_lion` | 1,2 s | Secret = Lion solaire. | 0,7 | Rugissement de lionceau puis accord de cuivres chaud en fa majeur (« lever de soleil »), glockenspiel, étincelles. |
+| `animal_secret_baleine` | 1,2 s | Secret = Baleine céleste. | 0,7 | Chant de baleine la4 → do5 → fa5 → do5, 8 bulles d'étoiles qui montent, réverb « ciel ». |
+
+Ducking de la musique : comme `resultat_*` pour `diamant_gain_*`, `renaissance` (musique à 0,3
+pendant 4 s) et les touches de Secret.
 
 ---
 

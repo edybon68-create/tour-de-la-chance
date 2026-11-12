@@ -81,6 +81,21 @@ namespace TourDeLaChance
             }
         }
 
+        /// v5 §5.2 : PRÉCHARGEMENT. Pendant l'écran titre, les 6 coffres et leurs 5 modèles de
+        /// rareté sont dessinés une fois par une caméra cachée (RenderPreloader), pour que leur
+        /// première apparition (étage à 6 coffres, premier étage d'or ou de cristal) ne saccade
+        /// pas. Ils restent ensuite désactivés comme avant. Pur affichage.
+        void Start()
+        {
+            var objects = new System.Collections.Generic.List<GameObject>();
+            foreach (var chest in chests)
+            {
+                objects.Add(chest.gameObject);
+                objects.AddRange(chest.AllLookObjects());
+            }
+            RenderPreloader.RenderOnce(objects);
+        }
+
         /// Placement des coffres selon leur nombre (spec v3 §5.4, v4 §10.4) : positions x et
         /// échelle. 6 coffres : écartés de 1,5 m, échelle 0,75 (1,125 m de large, 0,375 m d'écart).
         static readonly float[][] Positions =

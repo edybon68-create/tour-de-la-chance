@@ -6,7 +6,7 @@ Lancer depuis n'importe où (python de Blender, qui contient numpy) :
     PY=/Applications/Blender.app/Contents/Resources/4.5/python/bin/python3.11
 
     $PY audio/generer_tout.py
-        -> TOUS les sons (43), écrits dans TourDeLaChance-Unity/Assets/Audio/
+        -> TOUS les sons (43 + 34 de la v5), écrits dans TourDeLaChance-Unity/Assets/Audio/
 
     $PY audio/generer_tout.py --sortie audio/exports
         -> tous les sons, mais dans audio/exports/ (on ne touche pas au projet Unity,
@@ -14,6 +14,10 @@ Lancer depuis n'importe où (python de Blender, qui contient numpy) :
 
     $PY audio/generer_tout.py --v3 --sortie audio/exports
         -> seulement les sons NOUVEAUX ou CORRIGÉS de la v3 (15 + 2), dans audio/exports/
+
+    $PY audio/generer_tout.py --v5
+        -> seulement les 34 sons NOUVEAUX de la v5 (sons_v5.py) ; aucun son existant
+           n'est recalculé ni remplacé
 
 Le dossier de sortie garde toujours la même arborescence que Assets/Audio
 (<categorie>/<nom>.wav) : copier son contenu dans Assets/Audio suffit.
@@ -42,6 +46,8 @@ def main(arguments=None):
                               "ex. audio/exports ; par défaut Assets/Audio du projet Unity")
     parseur.add_argument("--v3", action="store_true",
                          help="ne produire que les 15 nouveaux sons v3 et les 2 sons corrigés")
+    parseur.add_argument("--v5", action="store_true",
+                         help="ne produire que les 34 nouveaux sons v5 (sons_v5.py)")
     parseur.add_argument("--sans-analyse", action="store_true",
                          help="ne pas afficher le tableau de contrôle à la fin")
     # Blender passe ses propres arguments : on ne garde que ceux placés après « -- ».
@@ -64,15 +70,18 @@ def main(arguments=None):
     import sons_secret
     import sons_ui
     import sons_v3
+    import sons_v5
 
-    if options.v3:
+    if options.v5:
+        sons_v5.genere()
+    elif options.v3:
         sons_ui.genere(seulement=CORRECTIFS_V3)
         sons_boite.genere(seulement=CORRECTIFS_V3)
         sons_v3.genere()
         sons_secret.genere()
     else:
         for module in (sons_ui, sons_coffre, sons_resultat_pieces, sons_boite, musique,
-                       sons_v3, sons_secret):
+                       sons_v3, sons_secret, sons_v5):
             module.genere()
     if not options.sans_analyse:
         analyse.main()

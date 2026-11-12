@@ -7,18 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Blanc
-    second: {fileID: 2100000, guid: 15fac39a58f8d47079d37e32ca9c02b6, type: 2}
+      name: M5_BlancMat
+    second: {fileID: 2100000, guid: 2f1f4ac5f062a4166b6036e28c428258, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_CartonJaune
-    second: {fileID: 2100000, guid: c592271bafc004ac8ae364ec52c6e808, type: 2}
+      name: M5_CartonJaune
+    second: {fileID: 2100000, guid: 9a14b2beb4f684208bd2bdf0491ce776, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_CartonRose
-    second: {fileID: 2100000, guid: a2d066a71752f4ba1b02c74a236e3fdd, type: 2}
+      name: M5_CartonRose
+    second: {fileID: 2100000, guid: 607c9ef3a625347ecb214547e48f17d7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

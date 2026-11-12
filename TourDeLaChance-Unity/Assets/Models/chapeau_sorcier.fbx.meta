@@ -3,7 +3,32 @@ guid: 1dd492d7cbb6d48ec9f3b76712cf250d
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_FeutreViolet
+    second: {fileID: 2100000, guid: 7b11814ef2c1c48ddbc107450a9a1dbe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_JauneVerni
+    second: {fileID: 2100000, guid: 79f80655d7836407b8f29b73f31698b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Rapiece
+    second: {fileID: 2100000, guid: c4f71ab09ba32462c9f9a7d00ad9cc61, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Reflet
+    second: {fileID: 2100000, guid: 2641bc82f86d942118c4e8c7849ffcbc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_RubanJaune
+    second: {fileID: 2100000, guid: 2e9172eb1832a497ab380ead74eca999, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

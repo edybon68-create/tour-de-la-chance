@@ -29,6 +29,18 @@
 >   trésors** (bonus de tenue, `v4.md` §9), jamais sur les chances ;
 > - **Galaxie** (§5.3 n°16) : nébuleuse animée calculée par le code, `v4.md` §7 ;
 > - les panneaux deviennent des **pop-ups centrées** (`v4.md` §5.6).
+>
+> **Mise à jour v5 (`docs/specs/v5.md`) — ce qui change ici :**
+> - §4.5 : un skin et **au plus 2 accessoires**, sur deux emplacements différents (`v5.md` §4.4) ;
+>   les objets « Rien » ne sont plus montrés (bouton « Retirer ») ;
+> - §4.3 / §5.1 : une boîte peut avoir ses **propres taux** (Boîtes Pirates : 60 / 30 / 10 %,
+>   `v5.md` §12.2) ; 4 nouvelles boîtes (`v5-catalogue.md`) ; une boîte peut coûter des
+>   **diamants** ou demander la renaissance ;
+> - §7.3 Boutique : onglets, cartes compactes, « Contenu et taux » (`v5.md` §15) ;
+> - §7.5 Index : plus de silhouettes ni d'aperçu sur le cheval du joueur, 3 rangements, fiche
+>   agrandie sur un cheval vierge (`v5.md` §8) ;
+> - §7.6 : l'animation d'ouverture se joue **en 3D** (`v5.md` §6), mêmes règles d'équité ;
+> - §5.6 : écharpe et masque refaits sur le cheval, accessoires modernisés (`v5.md` §4).
 
 ---
 

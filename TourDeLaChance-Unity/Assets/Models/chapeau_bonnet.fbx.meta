@@ -3,7 +3,22 @@ guid: 5ffab9e33060048eba58f0f48d6955ee
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_BlancMat
+    second: {fileID: 2100000, guid: 2f1f4ac5f062a4166b6036e28c428258, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_LaineTurquoise
+    second: {fileID: 2100000, guid: f9369b870d7d848deb4fbd3c4934cdb2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_TurquoiseVerni
+    second: {fileID: 2100000, guid: c09864cbe5c6841a38bdcbc3fa62993e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

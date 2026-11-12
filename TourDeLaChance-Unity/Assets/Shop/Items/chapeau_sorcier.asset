@@ -27,4 +27,9 @@ MonoBehaviour:
   accessoryPrefab: {fileID: 919132149155446097, guid: 1dd492d7cbb6d48ec9f3b76712cf250d, type: 3}
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
-  attachScale: 0.68
+  attachScale: 1
+  flavorText: 
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}

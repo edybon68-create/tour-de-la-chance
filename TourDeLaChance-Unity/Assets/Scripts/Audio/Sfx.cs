@@ -55,6 +55,45 @@ namespace TourDeLaChance
         SecretBattement,
         SecretFissure,
         SecretEclat,
-        SecretConfettis
+        SecretConfettis,
+        // v5 (spec v5 §17.4, audio/README.md « Sons v5 »). Toujours AJOUTÉS À LA FIN.
+        // Jeu
+        DiamantGain1,       // trésor en diamants, étages 1 à 5
+        DiamantGain2,       // étages 6 à 9
+        DiamantGain3,       // étage 10 et plus
+        DiamantCompteur,
+        RepriseOk,
+        Renaissance,
+        RenaissanceTampon,
+        PirateEclair,
+        PerroquetCri,
+        KrakenBebe,
+        NavireCanon,
+        PaonRoue,
+        LionRugit,
+        PoussinPiou,
+        ChatonMiaou,
+        BaleineChant,
+        // Interface
+        RepriseOffre,
+        RecapEtage,
+        UiBoutonRond,
+        UiInfobulle,
+        UiOnglet,
+        UiRefus,
+        // Ouverture 3D (couches calées sur art-bible §14.4, identiques pour toutes les raretés)
+        Boite3dAtterrit,
+        Boite3dSaut,
+        Boite3dCraque,
+        Boite3dNoeud,
+        Boite3dCouvercle,
+        Boite3dFaisceau,
+        // Touches thématiques des Secrets (§6.6)
+        PirateVague,
+        AnimalPattes,
+        PirateSecretKraken,
+        PirateSecretAbysses,
+        AnimalSecretLion,
+        AnimalSecretBaleine
     }
 }

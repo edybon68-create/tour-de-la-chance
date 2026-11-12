@@ -25,6 +25,12 @@ namespace TourDeLaChance
     /// ne prennent jamais le focus et refusent les clics tant qu'ils apparaissent (B2) ; le
     /// voile démarre à 0,6 dès la première image (B1) ; après « OK » sur un Légendaire ou un
     /// Secret, le cheval fait la fête. Il prévient le GameManager qu'une ouverture est en cours.
+    ///
+    /// v5 (§6, art bible §14) : la boîte est une VRAIE boîte 3D filmée dans un studio à part
+    /// (BoxStudio) ; cet écran garde l'horloge, les sons, le flash, les textes, le halo et les
+    /// rayons (centrés sur l'objet 3D), la cinématique du Secret, et ajoute la « touche
+    /// thématique » des Secrets Pirates (vague) et Animaux (empreintes). Chronologie de la
+    /// bible §14.4 : R = 1,75 s. Sans studio, l'ancienne animation 2D reste possible.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class BoxOpeningController : MonoBehaviour
@@ -33,6 +39,8 @@ namespace TourDeLaChance
         [SerializeField] PlayerAnimator avatarAnimator;
         [SerializeField] MusicPlayer music;
         [SerializeField] GameManager game; // prévenu : « une ouverture de boîte est en cours »
+        [Tooltip("v5 : le studio 3D (vide = ancienne animation 2D).")]
+        [SerializeField] BoxStudio studio;
 
         /// Les tailles de la spec sont écrites pour 1280 × 720 ; notre interface est réglée
         /// pour 1920 × 1080 : on multiplie donc les pixels de la spec par 1,5.
@@ -77,7 +85,7 @@ namespace TourDeLaChance
 
         // ---------- Éléments de l'écran ----------
         VisualElement root, veil, content, stage, result, black, flash;
-        VisualElement glow, boxImage, halo, card, cardIcon, word;
+        VisualElement glow, boxImage, halo, card, cardIcon, word, theme;
         RaysElement rays;
         Label nameLabel, rarityLabel, boxLine, badge, chanceLabel;
         SecretCinematic secretFx;
@@ -93,6 +101,10 @@ namespace TourDeLaChance
         float cardStart, revealEnd, resultStart;
         bool busy, skipped, resultShown;
         bool playedShake, playedOpen, playedReveal, sparksDone;
+        // v5 : les couches sonores de l'ouverture 3D (identiques pour toutes les raretés).
+        bool playedLand, playedCrack, playedKnot, playedLid, playedTheme;
+        int hopsPlayed;
+        bool Studio3D => studio != null;
         float rayAngle;
         int closedFrame = -1;
 
@@ -139,6 +151,11 @@ namespace TourDeLaChance
 
             BuildStage();
             secretFx = new SecretCinematic(root, content);
+            // v5 §6.6 : la touche thématique (vague, empreintes), dessinée par le code.
+            theme = new VisualElement { pickingMode = PickingMode.Ignore };
+            theme.AddToClassList("ov-full");
+            theme.generateVisualContent += DrawTheme;
+            root.Add(theme);
             // B2 : aucun bouton de cet écran ne prend le focus (Espace / Entrée ne les activent pas).
             ButtonStyler.Register(root);
 
@@ -228,6 +245,8 @@ namespace TourDeLaChance
             t = 0f;
             skipped = resultShown = false;
             playedShake = playedOpen = playedReveal = sparksDone = false;
+            playedLand = playedCrack = playedKnot = playedLid = playedTheme = false;
+            hopsPlayed = 0;
             busy = true;
             rayAngle = 0f;
             cardStart = RevealStart + (look.black ? SecretBlack : 0f) + (look.secret ? SecretCinematic.CardStart : 0f);
@@ -237,7 +256,7 @@ namespace TourDeLaChance
             chanceLabel.style.display = look.secret ? DisplayStyle.Flex : DisplayStyle.None;
             if (look.secret)
             {
-                double chance = Shop.RarityChance(r.Rarity);
+                double chance = Shop.RarityChance(r.Box, r.Rarity);
                 chanceLabel.text = chance > 0 ? $"Une chance sur {Mathf.RoundToInt((float)(100.0 / chance))} !" : "";
             }
             if (game != null) game.SetBoxOpening(true);
@@ -254,6 +273,10 @@ namespace TourDeLaChance
             Size(boxImage, 300 * Px);
             Size(glow, 300 * Px);
             glow.style.unityBackgroundImageTintColor = Color.white;
+
+            // v5 : la vraie boîte 3D (l'objet gagné y est préparé CACHÉ jusqu'à R).
+            if (Studio3D) studio.Begin(r);
+            cardIcon.style.display = Studio3D ? DisplayStyle.None : DisplayStyle.Flex;
 
             // La carte de l'objet, préparée mais cachée jusqu'à la révélation.
             cardIcon.style.backgroundImage = r.Item.Icon != null ? new StyleBackground(r.Item.Icon) : StyleKeyword.None;
@@ -352,6 +375,12 @@ namespace TourDeLaChance
             // --- Voile : B1, il démarre à 0,6 d'opacité dès la première image, puis 0,85 en
             //     0,2 s (sa couleur a déjà 85 % d'opacité : 0,6 / 0,85 ≈ 0,71 au départ) ---
             veil.style.opacity = Mathf.Lerp(0.6f / 0.85f, 1f, Mathf.Clamp01(t / 0.2f));
+            if (Studio3D)
+            {
+                // v5 (bible §14.4) : voile 0 → 1 en 0,10 s, puis 1 → 0 en 0,12 s : on découvre le studio.
+                veil.style.opacity = t < 0.10f ? t / 0.10f : Mathf.Clamp01(1f - (t - 0.10f) / 0.12f);
+                if (!skipped) PlayStudioSounds();
+            }
 
             // --- Sons des phases communes (identiques pour toutes les raretés) ---
             if (!playedShake && t >= ArriveEnd) { playedShake = true; Play(Sfx.BoiteSecoue); }
@@ -377,7 +406,7 @@ namespace TourDeLaChance
             }
 
             // --- La boîte : arrivée, secousse, ouverture ---
-            bool boxVisible = !skipped && t < RevealStart;
+            bool boxVisible = !Studio3D && !skipped && t < RevealStart;
             boxImage.style.display = boxVisible ? DisplayStyle.Flex : DisplayStyle.None;
             glow.style.display = boxVisible && t >= ArriveEnd ? DisplayStyle.Flex : DisplayStyle.None;
             if (boxVisible)
@@ -415,7 +444,12 @@ namespace TourDeLaChance
             // --- Flash : blanc à l'ouverture (0 → 0,7 → 0), puis coloré à la révélation ---
             float flashAlpha = 0f;
             Color flashColor = Color.white;
-            if (!skipped && t >= ShakeEnd && t < RevealStart)
+            if (Studio3D && !skipped && t >= BoxStudio.LidTime && t < 1.90f)
+            {
+                // v5 (bible §14.4) : le flash blanc accompagne le couvercle : 0 → 0,7 (1,68) → 0 (1,90).
+                flashAlpha = t < 1.68f ? 0.7f * (t - BoxStudio.LidTime) / 0.06f : 0.7f * (1f - (t - 1.68f) / 0.22f);
+            }
+            else if (!Studio3D && !skipped && t >= ShakeEnd && t < RevealStart)
                 flashAlpha = 0.7f * Mathf.Sin(Mathf.PI * (t - ShakeEnd) / (RevealStart - ShakeEnd));
             else if (!skipped && look.flash > 0f && t >= cardStart && t < cardStart + 0.35f)
             {
@@ -506,8 +540,102 @@ namespace TourDeLaChance
             }
             content.style.translate = new Translate(shakeX + secretShake.x, shakeY + secretShake.y);
 
+            // --- v5 : le studio 3D, et les effets de l'interface centrés sur l'objet 3D ---
+            if (Studio3D)
+            {
+                studio.Render(t, cardStart, revealEnd, skipped);
+                PlaceStageOnReward();
+                theme.MarkDirtyRepaint();
+            }
+
             // --- L'écran de résultat, 0,2 s après la fin de la révélation ---
             if (!resultShown && t >= resultStart) ShowResult();
+        }
+
+        /// Les couches sonores de l'ouverture 3D (bible §14.4, audio/README « Sons v5 ») :
+        /// atterrissage 0,24, sauts 0,55 / 0,95 / 1,35, craquement 1,20, nœud 1,58, couvercle et
+        /// faisceau 1,62. Les MÊMES pour toutes les raretés ; elles s'ajoutent aux sons existants.
+        void PlayStudioSounds()
+        {
+            if (!playedLand && t >= BoxStudio.DropLand) { playedLand = true; Play(Sfx.Boite3dAtterrit); }
+            while (hopsPlayed < BoxStudio.HopTimes.Length && t >= BoxStudio.HopTimes[hopsPlayed]) { hopsPlayed++; Play(Sfx.Boite3dSaut); }
+            if (!playedCrack && t >= BoxStudio.CrackTime) { playedCrack = true; Play(Sfx.Boite3dCraque); }
+            if (!playedKnot && t >= BoxStudio.KnotTime) { playedKnot = true; Play(Sfx.Boite3dNoeud); }
+            if (!playedLid && t >= BoxStudio.LidTime) { playedLid = true; Play(Sfx.Boite3dCouvercle); Play(Sfx.Boite3dFaisceau); }
+            // v5 §6.6 : la touche thématique d'un Secret, à l'impact (R + 3,4 s).
+            if (!playedTheme && look.secret && t >= RevealStart + SecretCinematic.ImpactStart)
+            {
+                playedTheme = true;
+                var family = current.Box != null ? current.Box.family : BoxFamily.Classique;
+                if (family == BoxFamily.Pirates) Play(Sfx.PirateVague);
+                if (family == BoxFamily.Animaux) Play(Sfx.AnimalPattes);
+                switch (current.Item != null ? current.Item.Id : "")
+                {
+                    case "pirate_kraken": Play(Sfx.PirateSecretKraken); break;
+                    case "pirate_abysses": Play(Sfx.PirateSecretAbysses); break;
+                    case "animal_lion_soleil": Play(Sfx.AnimalSecretLion); break;
+                    case "baleine_celeste": Play(Sfx.AnimalSecretBaleine); break;
+                }
+            }
+        }
+
+        /// Place le « centre de la scène » de l'interface (halo, rayons, étincelles, mot de
+        /// rareté) sur la position à l'écran de l'objet 3D ; le mot passe sous l'objet.
+        void PlaceStageOnReward()
+        {
+            if (studio.Camera == null || content.panel == null) return;
+            Vector2 panelPos = RuntimePanelUtils.CameraTransformWorldToPanel(content.panel, studio.RewardWorldPosition, studio.Camera);
+            Vector2 local = content.WorldToLocal(panelPos);
+            if (float.IsNaN(local.x)) return;
+            stage.style.left = local.x;
+            stage.style.top = local.y;
+            card.style.top = 120f; // le mot « Rare ! » sous l'objet (la carte 2D est cachée)
+        }
+
+        /// v5 §6.6 : la touche thématique, pendant 1,2 s après l'impact de la carte du Secret.
+        /// Pirates : des bandes bleues semi-transparentes (une vague) traversent l'écran de bas en
+        /// haut. Animaux : 8 empreintes de pattes dorées en diagonale, 0,1 s d'écart.
+        void DrawTheme(MeshGenerationContext ctx)
+        {
+            if (!busy || !look.secret || skipped || current.Box == null) return;
+            float since = t - RevealStart - SecretCinematic.ImpactStart;
+            if (since < 0f || since > 1.2f) return;
+            var r = ctx.visualElement.contentRect;
+            var p = ctx.painter2D;
+            float k = since / 1.2f;
+            if (current.Box.family == BoxFamily.Pirates)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    float y = Mathf.Lerp(r.height * 1.1f, -r.height * 0.3f, Mathf.Clamp01(k * 1.2f - i * 0.12f));
+                    p.fillColor = new Color(0.25f, 0.6f, 0.95f, 0.28f - 0.06f * i);
+                    p.BeginPath();
+                    p.MoveTo(new Vector2(0f, y));
+                    for (int x = 0; x <= 12; x++)
+                        p.LineTo(new Vector2(r.width * x / 12f, y + 30f * Mathf.Sin(x * 0.9f + since * 8f + i)));
+                    p.LineTo(new Vector2(r.width, y + r.height * 0.25f));
+                    p.LineTo(new Vector2(0f, y + r.height * 0.25f));
+                    p.ClosePath();
+                    p.Fill();
+                }
+            }
+            else if (current.Box.family == BoxFamily.Animaux)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    float appear = since - i * 0.1f;
+                    if (appear < 0f) continue;
+                    float alpha = Mathf.Clamp01(1f - (since - 0.8f) / 0.4f) * Mathf.Clamp01(appear / 0.1f);
+                    Vector2 c = new Vector2(r.width * (0.12f + 0.1f * i), r.height * (0.85f - 0.09f * i) + (i % 2 == 0 ? 30f : -30f));
+                    p.fillColor = new Color(1f, 0.79f, 0.24f, 0.85f * alpha);
+                    p.BeginPath(); p.Arc(c, 26f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();
+                    for (int toe = 0; toe < 4; toe++)
+                    {
+                        float a = Mathf.Lerp(-150f, -30f, toe / 3f) * Mathf.Deg2Rad;
+                        p.BeginPath(); p.Arc(c + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * 40f, 11f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();
+                    }
+                }
+            }
         }
 
         /// Échelle de la carte : 0,5 → pic (1,15 ou 1,3) → 1 en 0,3 s (0,6 s pour le Légendaire).
@@ -628,7 +756,7 @@ namespace TourDeLaChance
             sellButton.style.display = canSell ? DisplayStyle.Flex : DisplayStyle.None;
             sellButton.text = $"Vendre (+{Shop.SellValue(item)})";
             // « Rouvrir — 100 » : toujours, grisé si pas assez de pièces.
-            reopenButton.text = $"Rouvrir — {current.Box.price}";
+            reopenButton.text = current.Box.currency == BoxCurrency.Diamants ? $"Rouvrir — {current.Box.price} ◆" : $"Rouvrir — {ShopUi.Thousands(current.Box.price)}";
             reopenButton.SetEnabled(Shop.CanOpen(current.Box));
             // Badge : le nombre d'exemplaires peut changer après une vente.
             if (!current.IsNew) badge.text = $"Doublon — tu en as {Shop.CountOf(item)}";
@@ -667,7 +795,10 @@ namespace TourDeLaChance
         void OnEquip()
         {
             if (!Ready(equipButton)) return;
-            if (!Shop.TryEquip(current.Item)) return;
+            // v5 §4.4 : si 2 accessoires sont portés sur d'autres emplacements, on remplace le
+            // moins rare (comme l'aperçu de l'Inventaire) ; on peut changer ensuite dans l'Inventaire.
+            var replace = Shop.NeedsReplaceChoice(current.Item) ? Shop.LeastRare(Shop.EquippedAccessories()) : null;
+            if (!Shop.TryEquip(current.Item, replace)) return;
             if (avatar != null) avatar.ShowEquipped();
             if (avatarAnimator != null) avatarAnimator.WelcomeHop();
             RefreshButtonLabels();
@@ -700,6 +831,7 @@ namespace TourDeLaChance
             closedFrame = Time.frameCount;
             root.style.display = DisplayStyle.None;
             secretFx.Hide();
+            if (Studio3D) studio.End();
             if (music != null) music.CancelSilence();
             if (game != null) game.SetBoxOpening(false);
             Closed?.Invoke();

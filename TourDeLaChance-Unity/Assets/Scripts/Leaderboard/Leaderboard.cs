@@ -45,7 +45,7 @@ namespace TourDeLaChance
 
         // ---------- Règles chiffrées ----------
         public const int MaxFloor = 300;               // §12.10 : au-delà, c'est invraisemblable
-        public const int MaxCoinsJump = 250000;        // plus que la plus grosse partie imaginable
+        public const int MaxCoinsJump = 500000;        // v5 §18.6 : le ×2 de la renaissance double la plus grosse partie imaginable
         public const float MinSecondsBetweenSends = 30f; // en ligne seulement
         public const int NameMin = 3, NameMax = 16;
         public const string NameRefusedMessage = "Ce pseudo n'est pas autorisé, choisis-en un autre.";
@@ -233,7 +233,8 @@ namespace TourDeLaChance
             {
                 etage = run.Floor,
                 pieces = run.Lost ? 0 : run.CashedOut,
-                date = LocalLeaderboardService.Today()
+                date = LocalLeaderboardService.Today(),
+                reprise = run.UsedRevive
             };
             return SubmitAsync(scores);
         }

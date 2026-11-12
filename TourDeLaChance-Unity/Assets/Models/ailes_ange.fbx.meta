@@ -3,7 +3,22 @@ guid: a382cacae90594c55bff3e60b62e6a4b
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_DoreDeco
+    second: {fileID: 2100000, guid: d912dbb94f2b74eeab4285d001f7d88e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Plume
+    second: {fileID: 2100000, guid: ee4180d8405e0457c9cc8bd9f076b3be, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_PlumeOmbre
+    second: {fileID: 2100000, guid: 6eac302ba88004d929997d1563b7ea35, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

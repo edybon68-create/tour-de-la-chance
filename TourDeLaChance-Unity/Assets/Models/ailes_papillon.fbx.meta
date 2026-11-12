@@ -3,7 +3,22 @@ guid: a660b35db5abe4ebf94cb218895a9cac
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_AilePapillon
+    second: {fileID: 2100000, guid: 367655ee8b0a44193b7048349bd6cac6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_BordPapillon
+    second: {fileID: 2100000, guid: ab997ea5faf614196867a3460d1f8b9a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_TachePapillon
+    second: {fileID: 2100000, guid: 691dbeebca09b46deb0428a840b957dc, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -1,13 +1,25 @@
 """
-chapeau_casquette.py — Casquette rouge (shop : `chapeau_casquette`, 100 pièces).
+chapeau_casquette.py — Casquette (boîte d'accessoires n°1 : `chapeau_casquette`, Commun, Tête).
+VERSION v5 « plus jeu moderne » (docs/art-bible.md §13.8 fiche 1), faite SUR le cheval.
 
-Fiche suivie : docs/art-bible.md §6.3 et §6.4. Lancer (Blender fermé) :
+Lancer (Blender fermé) :
     /Applications/Blender.app/Contents/MacOS/Blender --background --python blender/chapeau_casquette.py
+Sortie : blender/exports/chapeau_casquette.fbx et docs/captures/v5_cheval_chapeau_casquette.png.
 
-Un seul objet, nommé comme l'identifiant du shop. Origine = point d'accroche = sommet de la
-tête (à poser sur `PointChapeau` du personnage, position et rotation locales à zéro).
-Le bas de la calotte descend sous l'origine (jusqu'à -0,17) pour coiffer la tête.
-Avant (visière) = +Y dans Blender = -Z dans Unity.
+Les trois niveaux de forme (bible §13.2) :
+  - primaire   : la calotte bombée en 6 panneaux (rainures de 2 cm entre eux) ;
+  - secondaire : la visière longue (0,55), courbée et penchée de 12° vers le bas, portée
+                 « de travers » (62° vers la droite de l'image) : elle dépasse de la
+                 silhouette, donc on la voit de face, sans jamais cacher les yeux ; le
+                 bourrelet blanc cassé tout autour de la base ;
+  - tertiaire  : le bouton bombé Ø 0,14, 2 œillets, une couture blanche sur le bord de la
+                 visière, une petite étoile « brodée » sur le panneau avant (pas de marque).
+Matières : calotte mate (0,20), visière satinée (0,50), bouton / bourrelet vernis (0,85).
+
+Hiérarchie (le code Unity retrouve les pièces par leur nom) :
+    chapeau_casquette   vide, origine = PointChapeau (attachScale 1, attachOffset 0)
+    └── Anim_Casquette  toute la casquette ; origine = centre de sa base (le « ressort » :
+                        petit sursaut de 0,03 m à l'atterrissage, bible §13.5 type A)
 """
 
 import math
@@ -15,101 +27,134 @@ import os
 import sys
 
 import bmesh
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import commun as C  # noqa: E402
 
 NOM = "chapeau_casquette"
-MATS = ["M_TissuRouge", "M_TissuRougeFonce", "M_Blanc"]  # indices 0, 1, 2
-SEGMENTS = 18          # 18 = 6 coutures x 3 (la fiche dit 16 : 18 permet 6 coutures régulières)
-BAS_CALOTTE = -0.10    # la calotte est une demi-sphère aplatie posée sur y = -0,10 (Unity)
-HAUT_CALOTTE = 0.25    # ≈ 0,35 au-dessus de -0,10
+POINT = "PointChapeau"
+MATS = ["M5_CasquetteRouge", "M5_CasquetteVisiere", "M5_BlancVerni"]  # 0, 1, 2
+BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.04, C.CHAPEAU_BASE[2]
+R0 = C.CHAPEAU_RAYON + 0.03     # rayon de la base de la calotte (elle coiffe la tête)
+HAUT = 0.34                     # hauteur de la calotte
+SEG = 18                        # 6 panneaux × 3
 
 
-def calotte():
-    """Demi-sphère aplatie (Ø 1,0) + petit rebord rentrant qui épouse la tête.
-    Une méridienne sur trois est légèrement bombée : ce sont les 6 coutures."""
-    bm = bmesh.new()
-    profil = []
-    n = 5
-    for k in range(n + 1):  # du sommet à l'équateur
-        a = (math.pi / 2) * k / n
-        profil.append((0.5 * math.sin(a), BAS_CALOTTE + (HAUT_CALOTTE - BAS_CALOTTE) * math.cos(a)))
-    profil += [(0.42, -0.17), (0.0, -0.17)]  # rebord rentrant puis fond (caché dans la tête)
+ANGLE_VISIERE = 62.0            # degrés : visière tournée vers la droite de l'image
 
-    def coutures(angle, i, r, z):
-        s = round((angle - math.pi / 2) / (2 * math.pi / SEGMENTS)) % SEGMENTS
-        if s % 3 == 0 and 0 < i <= n:
-            return r * 1.025, z  # la couture ressort de ~1 cm
+
+def base_blender():
+    return C.U(BX, BY, BZ)
+
+
+def calotte(bm):
+    """Dôme « poire » : il gonfle un peu au-dessus de la base, puis s'arrondit."""
+    profil = [(0.0, HAUT), (0.17, HAUT - 0.025), (0.29, HAUT - 0.10), (R0 + 0.025, 0.12),
+              (R0 + 0.01, 0.03), (R0 - 0.03, -0.02)]
+
+    def rainure(a, i, r, z):
+        # 6 rainures : sur 1 méridien sur 3, la calotte rentre de 2 cm (sauf sommet et bord).
+        k = round(a / (2 * math.pi / SEG)) % 3
+        if k == 0 and 0 < i < len(profil) - 2:
+            return r - 0.02, z
         return r, z
 
-    anneaux = C.bm_revolution(bm, profil, SEGMENTS, mats=[0] * (len(profil) - 1),
-                              angle_depart=math.pi / 2, rayon_fn=coutures)
-    # Arêtes des coutures marquées « nettes » pour qu'elles accrochent la lumière.
-    for i in range(1, n):
-        for s in range(0, SEGMENTS, 3):
-            a, b = anneaux[i][s], anneaux[i + 1][s]
-            for e in a.link_edges:
-                if e.other_vert(a) is b:
-                    e.smooth = False
-    return C.objet_depuis_bmesh("Calotte", bm, MATS)
+    v_avant = set(bm.verts)
+    C.bm_revolution(bm, profil, SEG, mats=[0] * (len(profil) - 1), rayon_fn=rainure,
+                    fermer_bas=True)
+    v = [x for x in bm.verts if x not in v_avant]
+    bmesh.ops.translate(bm, vec=base_blender(), verts=v)
 
 
-def visiere():
-    """Visière large vers l'avant (0,60 x 0,45, 5 cm d'épaisseur), courbée : les bords
-    sont plus bas que le centre (4 segments en largeur), légèrement inclinée vers l'avant."""
-    colonnes, rangs = 4, 2
-    largeur = 0.30
-    bm = bmesh.new()
-    grille = []
-    for j in range(rangs + 1):
-        t = j / rangs  # 0 = arrière (dans la calotte), 1 = bord avant
-        ligne = []
-        for i in range(colonnes + 1):
-            x = -largeur + 2 * largeur * i / colonnes
-            u = x / largeur
-            y_arriere = math.sqrt(0.45 ** 2 - x ** 2)
-            y_avant = 0.45 + 0.45 * math.sqrt(1 - 0.75 * u * u)
-            y = y_arriere + (y_avant - y_arriere) * t
-            z = -0.085 - 0.07 * u * u - 0.04 * t
-            ligne.append(bm.verts.new((x, y, z)))
-        grille.append(ligne)
-    for j in range(rangs):
-        for i in range(colonnes):
-            f = bm.faces.new((grille[j][i], grille[j][i + 1], grille[j + 1][i + 1], grille[j + 1][i]))
-            f.material_index = 1
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    for f in bm.faces:  # normales vers le haut
-        if f.normal.z < 0:
-            f.normal_flip()
-    o = C.objet_depuis_bmesh("Visiere", bm, MATS)
-    epais = o.modifiers.new("Epaisseur", "SOLIDIFY")
-    epais.thickness = 0.05
-    epais.offset = 0.0
-    C.biseau(o, 0.015, 1, 30)
-    C.appliquer(o)
-    return o
+def bourrelet(bm):
+    v = C.bm_tore(bm, R0 + 0.008, 0.038, segments=SEG, segments_tube=5, mat=2)
+    bmesh.ops.translate(bm, vec=base_blender() + Vector((0, 0, 0.012)), verts=v)
+
+
+def visiere(bm, bm_couture):
+    """Visière : une plaque courbe (bords 5 cm plus bas que le centre), longue de 0,55,
+    penchée de 12° vers le bas. Construite en grille (u = travers, v = longueur) dans un
+    repère local (base de la calotte à l'origine, avant = +Y), puis tournée de
+    ANGLE_VISIERE vers le côté : portée « de travers », elle dépasse nettement de la
+    silhouette (on la voit de face) et ne passe JAMAIS devant les yeux. Une visière droit
+    devant, à cette hauteur, cacherait les deux yeux depuis la caméra du jeu (qui est
+    au-dessus) : nous l'avons vérifié en rendu."""
+    nu, nv = 6, 3
+    larg, long_ = 0.56, 0.55
+    epais = 0.05
+    inc = math.radians(12)
+    hs, bs = [], []
+    for j in range(nv + 1):
+        t = j / nv
+        demi = max((larg / 2) * math.sqrt(max(1 - (t * 0.93) ** 2, 0.0)), 0.07)
+        rh, rb = [], []
+        for i in range(nu + 1):
+            s = -1 + 2 * i / nu
+            x = s * demi
+            y0 = math.sqrt(max((R0 - 0.02) ** 2 - x ** 2, 0.0))     # sur le bord de la calotte
+            y = y0 + long_ * t * math.cos(inc)
+            z = 0.03 - long_ * t * math.sin(inc) - 0.05 * s * s * t
+            rh.append(bm.verts.new((x, y, z + epais / 2)))
+            rb.append(bm.verts.new((x, y, z - epais / 2)))
+        hs.append(rh)
+        bs.append(rb)
+    faces = []
+    for j in range(nv):
+        for i in range(nu):
+            faces.append(bm.faces.new((hs[j][i], hs[j][i + 1], hs[j + 1][i + 1], hs[j + 1][i])))
+            faces.append(bm.faces.new((bs[j][i], bs[j + 1][i], bs[j + 1][i + 1], bs[j][i + 1])))
+    tour = lambda g: ([g[j][0] for j in range(nv + 1)] + g[nv][1:] +
+                      [g[j][nu] for j in range(nv - 1, -1, -1)] + g[0][nu - 1:0:-1])
+    ch, cb = tour(hs), tour(bs)
+    for k in range(len(ch)):
+        q = (k + 1) % len(ch)
+        faces.append(bm.faces.new((ch[k], cb[k], cb[q], ch[q])))
+    for f in faces:
+        f.material_index = 1
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    # Couture blanche en relief (2 cm), 4 cm en retrait du bord, sur le dessus.
+    chemin = []
+    for j, i in [(1, 0), (2, 0)] + [(nv, i) for i in range(1, nu)] + [(2, nu), (1, nu)]:
+        co = hs[j][i].co
+        vers_centre = Vector((-co.x, 0, 0)).normalized() if j < nv else Vector((0, -1, 0))
+        chemin.append(co + vers_centre * 0.04 + Vector((0, 0, 0.012)))
+    v = C.bm_tube(bm_couture, chemin, 0.013, cotes=4, mat=2)
+    rot = Matrix.Translation(base_blender()) @ Matrix.Rotation(math.radians(ANGLE_VISIERE), 4, "Z")
+    bmesh.ops.transform(bm, matrix=rot, verts=bm.verts)
+    bmesh.ops.transform(bm_couture, matrix=rot, verts=v)
+
+
+def details(bm, arbre):
+    """Bouton du sommet, 2 œillets et l'étoile brodée du panneau avant (face à la caméra),
+    posés pile sur la calotte par des rayons."""
+    b = base_blender()
+    C.bm_disque(bm, 0.07, 0.03, Matrix.Translation(b + Vector((0, 0, HAUT + 0.005)))
+                @ Matrix.Rotation(math.radians(-90), 4, "X"), cotes=10, mat=2, bombe=0.025)
+    centre = b + Vector((0, 0, 0.05))
+    for cote in (-1, 1):
+        p, n = C.poser_sur(arbre, centre, C.direction_angles(cote * 0.62, math.radians(30)), 0.004)
+        C.bm_disque(bm, 0.034, 0.03, C.repere(p, n), cotes=8, mat=1)
+    p, n = C.poser_sur(arbre, centre, C.direction_angles(0.0, math.radians(22)), 0.008)
+    C.bm_etoile(bm, 0.075, 0.03, C.repere(p, n), mat=2)
 
 
 def construire():
     C.nouvelle_scene()
-    c = calotte()
-    C.lisser_tout(c)
-    v = visiere()
-    C.lisser_angle(v, 30)
     bm = bmesh.new()
-    C.bm_sphere(bm, 0.05, (0, 0, HAUT_CALOTTE + 0.005), segments=6, anneaux=4,
-                echelle=(1, 1, 0.6), mat=2)
-    bouton = C.objet_depuis_bmesh("Bouton", bm, MATS)
-    C.lisser_tout(bouton)
-    chapeau = C.joindre([c, v, bouton], NOM)
-    return chapeau
+    calotte(bm)
+    arbre = C.arbre_bm(bm)
+    bourrelet(bm)
+    details(bm, arbre)
+    bm_v = bmesh.new()
+    visiere(bm_v, bm)
+    tissu = C.piece("Calotte", bm, MATS, lissage="tout")
+    bm = bm_v
+    vis = C.piece("Visiere", bm, MATS, biseau=0.02, segments=2)
+    casquette = C.joindre([tissu, vis], "Anim_Casquette")
+    C.deplacer_origine(casquette, base_blender())
+    return C.racine_v5(NOM, POINT, [casquette])
 
 
 if __name__ == "__main__":
-    racine = construire()
-    C.rapport(racine)
-    C.rendre_miniature(racine, f"blender_{NOM}.png")
-    chemin = C.exporter_fbx(racine, f"{NOM}.fbx")
-    C.verifier_fbx(chemin)
+    C.finir_v5(construire(), NOM, POINT)

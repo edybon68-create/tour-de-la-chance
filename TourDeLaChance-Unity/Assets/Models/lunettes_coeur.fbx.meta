@@ -3,7 +3,27 @@ guid: db67dc46055c54c5f9adac81833dbdf6
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_CoeurVerni
+    second: {fileID: 2100000, guid: 42ccae18061a24d15a3f9b4189e992c9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_JauneVerni
+    second: {fileID: 2100000, guid: 79f80655d7836407b8f29b73f31698b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_MontureBlanche
+    second: {fileID: 2100000, guid: f4c5c0bd1b17f45eba76b1b4f11634d5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Reflet
+    second: {fileID: 2100000, guid: 2641bc82f86d942118c4e8c7849ffcbc, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -163,25 +163,40 @@ namespace TourDeLaChance
             return 0; // poids incomplets (erreur signalée par Validate) : on retombe sur le premier
         }
 
-        /// Gain d'un trésor (spec v4 §9.3, remplace v3 §5.5) :
-        ///   arrondi( base × étage × (1 + bonus Bourse + bonus de tenue) × rareté du coffre )
+        /// Gain d'un trésor (spec v4 §9.3, v5 §13.1) :
+        ///   arrondi( base × étage × (1 + bonus Bourse + bonus de tenue) × rareté du coffre × renaissance )
+        /// v5 : × 2 après la renaissance (rebirthMultiplier), sans plafond de tenue.
+        /// Exemple v5 : étage 3, Bourse 1, bronze, tenue +12 %, renaissance → 59,4 × 2 = 118,8 → 119.
         /// Le bonus de tenue s'AJOUTE au bonus de la Bourse (les deux sont des « + % du gain de
-        /// base ») : il compte surtout au début et peu à la fin. Il est déjà plafonné (50 %).
+        /// base ») : il compte surtout au début et peu à la fin. (v5 : plus de plafond.)
         /// Exemples : étage 3, Bourse 1, bronze, tenue +12 % → 10 × 3 × 1,32 × 1,5 = 59,4 → 59 ;
         ///            étage 5, Bourse 10, diamant, tenue +46 % → 10 × 5 × 3,46 × 5 = 865.
         /// Arrondi au plus proche avec Mathf.RoundToInt, comme en v3 (mêmes gains sans tenue).
-        public static int FloorGain(int coinsPerFloor, int floor, int gainsLevel, int rarityRank, int outfitBonusPercent = 0)
+        public static int FloorGain(int coinsPerFloor, int floor, int gainsLevel, int rarityRank, int outfitBonusPercent = 0,
+                                    int rebirthMultiplier = 1)
         {
             var rarity = Rarity(rarityRank);
             double bourseBonus = GainMultiplier(gainsLevel) - 1.0;   // niveau 1 : 0,2 ; niveau 10 : 2,0
             double outfitBonus = Mathf.Max(0, outfitBonusPercent) / 100.0;
-            double m = (1.0 + bourseBonus + outfitBonus) * (rarity != null ? rarity.multiplier : 1.0);
+            double m = (1.0 + bourseBonus + outfitBonus) * (rarity != null ? rarity.multiplier : 1.0) * Mathf.Max(1, rebirthMultiplier);
             return Mathf.RoundToInt((float)(coinsPerFloor * floor * m));
         }
 
         // =====================================================================
         // Outils de test (depuis `unity command script eval`)
         // =====================================================================
+
+        /// v5 §13 : la renaissance remet les 3 améliorations au niveau 0. save = false quand
+        /// l'appelant (Rebirth) sauvegarde lui-même tout en une fois.
+        public static void ResetAllLevels(bool save)
+        {
+            foreach (var id in new[] { Upgrades_.Gains, Upgrades_.Chests, Upgrades_.Traps })
+                PlayerPrefs.SetInt(SaveKey(id), 0);
+            if (save) { PlayerPrefs.Save(); Changed?.Invoke(); }
+        }
+
+        /// Prévient l'affichage que les niveaux ont changé « de l'extérieur » (renaissance).
+        public static void NotifyChanged() => Changed?.Invoke();
 
         /// OUTIL DE TEST : fixe les trois niveaux (et sauvegarde). Ne pas utiliser dans le jeu.
         public static void DebugSetLevels(int gains, int chests, int traps)

@@ -1,86 +1,104 @@
 """
 chapeau_bonnet.py — Bonnet de laine (boîte d'accessoires n°1 : `chapeau_bonnet`, Commun, Tête).
+VERSION v5 « plus jeu moderne » (docs/art-bible.md §13.8 fiche 3), fait SUR le cheval.
 
-Fiche suivie : docs/specs/boites.md §5.6 (et art-bible.md §2.8, §3). Lancer (Blender fermé) :
+Lancer (Blender fermé) :
     /Applications/Blender.app/Contents/MacOS/Blender --background --python blender/chapeau_bonnet.py
+Sortie : blender/exports/chapeau_bonnet.fbx et docs/captures/v5_cheval_chapeau_bonnet.png.
 
-Un seul objet, nommé comme l'identifiant. Origine = point d'accroche Tête = `PointChapeau`
-(sommet de la tête, Unity (0 ; 2,0 ; 0) local à Joueur) : position et rotation locales à zéro.
-Le revers descend jusqu'à -0,21 : c'est là que son bord intérieur (rayon 0,40) touche la tête.
+Les trois niveaux de forme (bible §13.2) :
+  - primaire   : le dôme turquoise « mou », dont le haut retombe un peu vers l'arrière
+                 gauche (l'asymétrie de vie permise sur UN élément) ;
+  - secondaire : le revers côtelé (16 côtes en relief de 2 cm), une bande blanc cassé de
+                 6 cm à mi-hauteur (contraste de valeur) ;
+  - tertiaire  : le gros pompon Ø 0,30 à 12 bosses ; une petite étiquette carrée vernie
+                 cousue sur le revers, à gauche : le seul point brillant.
+Matières : laine mate (0,15) partout, étiquette vernie (0,85).
+
+Hiérarchie (le code Unity retrouve les pièces par leur nom) :
+    chapeau_bonnet      vide, origine = PointChapeau (attachScale 1, attachOffset 0)
+    └── Bonnet          dôme + revers + étiquette ; origine = centre de la base
+        └── Anim_Pompon le pompon ; origine = sa base (ressort, bible §13.5 type A)
 """
 
 import math
 import os
-import random
 import sys
 
 import bmesh
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import commun as C  # noqa: E402
 
 NOM = "chapeau_bonnet"
-EMPLACEMENT = "tete"
-MATS = ["M_LaineTurquoise", "M_LaineBlanche"]  # indices 0, 1
-SEGMENTS = 20           # 20 côtés : assez rond une fois lissé, 10 côtes sur le revers
-BAS_DOME = -0.10        # la calotte est posée sur y = -0,10 (fiche)
-HAUT_DOME = 0.35        # 0,45 de haut au total
-RAYON_DOME = 0.475      # Ø 0,95
+POINT = "PointChapeau"
+MATS = ["M5_LaineTurquoise", "M5_BlancMat", "M5_TurquoiseVerni"]  # 0, 1, 2
+BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.05, C.CHAPEAU_BASE[2]
+R0 = C.CHAPEAU_RAYON + 0.02
+HAUT = 0.46
+REVERS = 0.13           # hauteur du revers
 
 
-def dome():
-    """Calotte : demi-ellipsoïde douce, lissée (la laine n'a pas d'arêtes)."""
-    bm = bmesh.new()
-    n = 5
-    profil = []
-    for k in range(n + 1):  # du sommet (pôle) à l'équateur
-        a = (math.pi / 2) * k / n
-        profil.append((RAYON_DOME * math.sin(a), BAS_DOME + (HAUT_DOME - BAS_DOME) * math.cos(a)))
-    # Fond plat caché dans le revers (on ne le voit jamais).
-    C.bm_revolution(bm, profil, SEGMENTS, mats=[0] * n, fermer_bas=True)
-    o = C.objet_depuis_bmesh("Dome", bm, MATS)
-    C.lisser_tout(o)
-    return o
+def mou(co):
+    """Le haut du bonnet retombe vers l'arrière gauche (plus on monte, plus il glisse)."""
+    t = max(0.0, co.z) / HAUT
+    return co + Vector((0.07, -0.06, -0.04)) * t * t
 
 
-def revers():
-    """Revers : gros anneau de laine blanc cassé de 10 cm de haut (Ø 1,0), avec des côtes
-    verticales (une colonne de sommets sur deux ressort de 1 cm)."""
-    bm = bmesh.new()
-    # Section de l'anneau (rayon, hauteur), fermée : bord intérieur caché contre la tête.
-    profil = [(0.40, -0.21), (0.48, -0.215), (0.505, -0.18), (0.505, -0.12),
-              (0.48, -0.085), (0.43, -0.085), (0.40, -0.21)]
+def dome(bm):
+    profil = [(0.0, HAUT), (0.14, HAUT - 0.02), (0.25, HAUT - 0.08), (0.31, HAUT - 0.15),
+              (0.335, 0.30), (0.34, 0.27), (0.345, 0.24), (R0 + 0.03, 0.16), (R0 + 0.02, 0.08),
+              (R0 - 0.01, 0.08)]
+    mats = [0, 0, 0, 0, 1, 1, 0, 0, 0]
+    # la bande blanche (6 cm, entre 0,24 et 0,30) ressort de 1,5 cm
+    def bande(a, i, r, z):
+        return (r + 0.015, z) if i in (5, 6) else (r, z)
+    v_avant = set(bm.verts)
+    C.bm_revolution(bm, profil, 20, mats=mats, rayon_fn=bande)
+    v = [x for x in bm.verts if x not in v_avant]
+    for x in v:
+        x.co = mou(x.co)
+    return v
 
-    def cotes(angle, i, r, z):
-        s = round(angle / (2 * math.pi / SEGMENTS)) % SEGMENTS
-        if s % 2 == 0 and i in (2, 3):
-            return r + 0.012, z
+
+def revers(bm):
+    """Revers côtelé : un gros boudin de laine, 16 côtes verticales de 2 cm."""
+    profil = [(R0 - 0.02, REVERS - 0.01), (R0 + 0.035, REVERS), (R0 + 0.06, REVERS - 0.03),
+              (R0 + 0.06, 0.02), (R0 + 0.035, -0.01), (R0 - 0.03, -0.01)]
+
+    def cotes(a, i, r, z):
+        if 1 <= i <= 4:
+            return r + 0.025 * (0.5 + 0.5 * math.cos(16 * a)), z
         return r, z
-
-    C.bm_revolution(bm, profil, SEGMENTS, mats=[1] * (len(profil) - 1), rayon_fn=cotes)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
-    o = C.objet_depuis_bmesh("Revers", bm, MATS)
-    C.lisser_angle(o, 50)
-    return o
-
-
-def pompon():
-    """Gros pompon bosselé Ø 0,25 au sommet (sommets décalés au hasard, graine fixe)."""
-    bm = bmesh.new()
-    C.bm_sphere(bm, 0.125, (0, 0, 0), segments=10, anneaux=6, mat=1)
-    for v in bm.verts:
-        v.co *= 1.0 + random.uniform(-0.12, 0.12)
-        v.co.z += 0.42
-    o = C.objet_depuis_bmesh("Pompon", bm, MATS)
-    C.lisser_tout(o)
-    return o
+    v_avant = set(bm.verts)
+    C.bm_revolution(bm, profil, 32, mats=[1] * 5, rayon_fn=cotes)
+    return [x for x in bm.verts if x not in v_avant]
 
 
 def construire():
     C.nouvelle_scene()
-    C.graine(11)
-    return C.joindre([dome(), revers(), pompon()], NOM)
+    base = C.U(BX, BY, BZ)
+    bm = bmesh.new()
+    v = dome(bm) + revers(bm)
+    # Étiquette 8 × 8 cm vernie, à gauche de l'image sur le revers (angle +0,7 rad).
+    a = 0.7
+    d = C.direction_angles(a)
+    p = d * (R0 + 0.085) + Vector((0, 0, REVERS / 2 + 0.005))
+    v += C.bm_plaque(bm, C.contour_rectangle_arrondi(0.08, 0.08, 0.015, par_coin=1), 0.02,
+                     C.repere(p, d), mat=2)
+    bmesh.ops.translate(bm, vec=base, verts=list(set(v)))
+    bonnet = C.piece("Bonnet", bm, MATS, lissage="tout", pivot=base)
+
+    bm = bmesh.new()
+    rp = 0.15
+    sommet = mou(Vector((0, 0, HAUT)))
+    v = C.bm_pompon(bm, sommet + Vector((0, 0, rp * 0.8)), rp, mat=1, bosses=0.09)
+    bmesh.ops.translate(bm, vec=base, verts=v)
+    pompon = C.piece("Anim_Pompon", bm, MATS, lissage="tout", pivot=base + sommet)
+    C.parenter(pompon, bonnet)
+    return C.racine_v5(NOM, POINT, [bonnet])
 
 
 if __name__ == "__main__":
-    C.finir_accessoire(construire(), NOM, EMPLACEMENT)
+    C.finir_v5(construire(), NOM, POINT)

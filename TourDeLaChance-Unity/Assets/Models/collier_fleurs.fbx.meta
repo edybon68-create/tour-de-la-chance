@@ -3,7 +3,27 @@ guid: ca07d11ce73014447b0cfe469a8ec592
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_BlancVerni
+    second: {fileID: 2100000, guid: 52e5278c23b63448ca0516b5a085a9bf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_JauneVerni
+    second: {fileID: 2100000, guid: 79f80655d7836407b8f29b73f31698b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_PetaleBlanc
+    second: {fileID: 2100000, guid: aff0efce65b1d4430a1e3a3018476b86, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_PetaleRose
+    second: {fileID: 2100000, guid: fe3828f62eed54176a9a7b49de3491bf, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

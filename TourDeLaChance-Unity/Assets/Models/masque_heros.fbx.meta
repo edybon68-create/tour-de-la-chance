@@ -7,13 +7,13 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_MasqueBleu
-    second: {fileID: 2100000, guid: 213eda87cef54436fb1dfacf752e1ac8, type: 2}
+      name: M5_GalonVerni
+    second: {fileID: 2100000, guid: 7970c0c2c989143a0ad71817acd2d266, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_MasqueBord
-    second: {fileID: 2100000, guid: 8cc6a60307bd64e45a3756b404b12680, type: 2}
+      name: M_MasqueFramboise
+    second: {fileID: 2100000, guid: 213eda87cef54436fb1dfacf752e1ac8, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

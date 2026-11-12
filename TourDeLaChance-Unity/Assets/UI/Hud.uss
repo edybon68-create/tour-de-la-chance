@@ -80,38 +80,7 @@
     margin: 2px 0 0 0;
 }
 
-/* v3 §5.6 : l'étiquette d'étage, une rangée de pastilles juste au-dessus du message. */
-.floor-tag {
-    flex-direction: row;
-    justify-content: center;
-    align-self: center;
-    margin-bottom: 10px;
-}
-
-.floor-pill {
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(31, 23, 48, 0.75); /* #1F1730 à 75 % */
-    border-radius: 14px;
-    padding: 4px 16px 4px 10px;
-    margin: 0 6px;
-}
-
-.floor-pill-icon {
-    width: 40px;
-    height: 40px;
-    margin-right: 8px;
-    -unity-background-scale-mode: scale-to-fit;
-    flex-shrink: 0;
-}
-
-.floor-pill-text {
-    font-size: 26px;
-    color: #F4EEE6;
-    -unity-font-style: bold;
-    padding: 0;
-    margin: 0;
-}
+/* v5 §9 : les pastilles v3 (.floor-tag) sont remplacées par la carte d'étage (V5.uss). */
 
 .spacer {
     flex-grow: 1;

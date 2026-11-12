@@ -28,6 +28,11 @@ namespace TourDeLaChance
         [SerializeField] Transform neckPoint;  // PointCou     (0 ; 1,05 ; 0,01)
         [SerializeField] Transform backPoint;  // PointDos     (0 ; 0,95 ; 0,296)
 
+        [Header("v5 §8.5 : mode vitrine (cheval vierge)")]
+        [Tooltip("Vrai pour le cheval vierge de l'Index et du studio d'ouverture : il ne lit JAMAIS " +
+                 "la sauvegarde, il affiche seulement ce qu'on lui demande (ShowOnly).")]
+        [SerializeField] bool showcaseMode;
+
         [Header("Effets des Légendaires (facultatif)")]
         [SerializeField] RainbowSparkles sparkles;   // paillettes de l'arc-en-ciel
         [SerializeField] PlayerAnimator playerAnimator; // pour accélérer pendant le saut de joie
@@ -70,7 +75,40 @@ namespace TourDeLaChance
 
         void Awake() => Prepare();
 
-        void Start() => ShowEquipped();
+        void Start()
+        {
+            if (showcaseMode) ShowOnly(null); // couleur plâtre, aucun objet
+            else ShowEquipped();
+        }
+
+        /// v5 §8.5 : la couleur « plâtre » du cheval vierge (#E6E1EE, mat 0,35).
+        static ShopItem plaster;
+        public static ShopItem PlasterSkin =>
+            plaster != null ? plaster : (plaster = ShopItem.CreateRuntimeSkin("platre", "Plâtre", new Color(0.902f, 0.882f, 0.933f), 0.35f));
+
+        /// v5 §8.5 (mode vitrine) : montre UN SEUL objet sur un cheval neutre. Un skin : le
+        /// cheval porte ce skin, sans accessoire. Un accessoire : le cheval « plâtre » porte
+        /// seulement cet accessoire. null : plâtre, rien du tout. Rien n'est sauvegardé.
+        public void ShowOnly(ShopItem item)
+        {
+            Prepare();
+            ApplySkin(item != null && item.Category == ShopCategory.Skin ? item : PlasterSkin);
+            for (int s = 0; s < 4; s++)
+            {
+                var slot = (AccessorySlot)s;
+                var keep = item != null && item.Category == ShopCategory.Accessoire && item.Slot == slot ? item : Shop.DefaultAccessory(slot);
+                if (keep != null) ApplyAccessory(keep);
+                else ClearSlot(slot);
+            }
+        }
+
+        void ClearSlot(AccessorySlot slot)
+        {
+            int index = (int)slot;
+            if (accessoryInstances[index] != null) Destroy(accessoryInstances[index]);
+            accessoryInstances[index] = null;
+            shownAccessories[index] = null;
+        }
 
         /// Prépare les matériaux et les UV du corps (une seule fois).
         void Prepare()
@@ -105,6 +143,7 @@ namespace TourDeLaChance
         /// Affiche les objets équipés (ceux de la sauvegarde) : le skin et les 4 emplacements.
         public void ShowEquipped()
         {
+            if (showcaseMode) return; // le cheval vierge ne lit jamais la sauvegarde
             Show(Shop.GetEquippedSkin());
             for (int s = 0; s < 4; s++) Show(Shop.GetEquippedAccessory((AccessorySlot)s));
         }
@@ -285,6 +324,8 @@ namespace TourDeLaChance
             SetLayer(instance.transform, body != null ? body.gameObject.layer : gameObject.layer);
             if (item.Animation != AccessoryAnimation.Aucune)
                 instance.AddComponent<AccessoryMotion>().Setup(item.Animation);
+            // v5 : les pièces « Anim_* » des accessoires modernisés (ressorts, boucles, éclats).
+            instance.AddComponent<AccessoryRig>();
             accessoryInstances[index] = instance;
         }
 

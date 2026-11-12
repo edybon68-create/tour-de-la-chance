@@ -2,6 +2,7 @@
     <!-- La structure de l'interface (comme du HTML). Le style est dans Hud.uss (comme du CSS). -->
     <Style src="Hud.uss" />
     <Style src="Buttons.uss" />
+    <Style src="V5.uss" />
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
         <!-- Le voile sombre des transitions d'étage (§3.11). Il est en premier : il passe
              devant la scène 3D mais derrière le reste de l'interface. -->
@@ -25,15 +26,19 @@
                     <ui:VisualElement name="pot-coin" class="coin" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:VisualElement name="wallet-counter" class="counter" picking-mode="Ignore">
+                    <!-- v5 §13.5 : le badge « ×2 » après la renaissance (dessiné par le code/USS). -->
+                    <ui:Label name="rebirth-badge" text="×2" class="rebirth-badge" picking-mode="Ignore" />
                     <ui:Label name="wallet" text="Porte-monnaie : 0" class="counter-text" picking-mode="Ignore" />
                     <ui:VisualElement name="wallet-coin" class="coin" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <!-- v5 §10.4 : le compteur de diamants, visible après le premier diamant gagné. -->
+                <ui:VisualElement name="diamond-counter" class="counter diamond-counter" picking-mode="Ignore">
+                    <ui:Label name="diamonds" text="0" class="counter-text diamond-text" picking-mode="Ignore" />
+                    <ui:VisualElement name="diamond-icon" class="diamant diamant--compteur" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="spacer" picking-mode="Ignore" />
-        <!-- v3 §5.6 : l'étiquette d'étage (gain, rareté des coffres, nombre de coffres),
-             juste au-dessus du message. Les pastilles sont créées par le code (FloorTagView). -->
-        <ui:VisualElement name="floor-tag" class="floor-tag" picking-mode="Ignore" />
         <!-- Le message est en bas, au-dessus des boutons, pour ne jamais cacher le chapeau.
              v3 : une 2e ligne plus petite (« Cagnotte perdue : X pièces. »). -->
         <ui:VisualElement name="message-box" class="message" picking-mode="Ignore">
@@ -48,6 +53,8 @@
             </ui:Button>
             <ui:Button name="replay" text="Rejouer" class="btn btn--violet btn--ombre btn-action" />
         </ui:VisualElement>
+        <!-- v5 §9 : la carte d'étage (remplace les pastilles en bas). Créée par FloorRecapView. -->
+        <ui:VisualElement name="floor-recap" class="floor-recap" picking-mode="Ignore" />
         <!-- Calque des effets : textes « +20 » et pièces volantes (créés par le code). -->
         <ui:VisualElement name="fx-layer" class="fx-layer" picking-mode="Ignore" />
         <!-- La bannière « Étage N » de la montée, et le nom du palier s'il change. -->

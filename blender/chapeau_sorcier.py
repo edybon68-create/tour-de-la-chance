@@ -1,15 +1,28 @@
 """
 chapeau_sorcier.py — Chapeau de sorcier (boîte d'accessoires n°1 : `chapeau_sorcier`, Rare, Tête).
+VERSION v5 « plus jeu moderne » (docs/art-bible.md §13.8 fiche 10), fait SUR le cheval.
 
-Fiche suivie : docs/specs/boites.md §5.6. Lancer (Blender fermé) :
+Lancer (Blender fermé) :
     /Applications/Blender.app/Contents/MacOS/Blender --background --python blender/chapeau_sorcier.py
+Sortie : blender/exports/chapeau_sorcier.fbx et docs/captures/v5_cheval_chapeau_sorcier.png.
 
-Un seul objet, nommé comme l'identifiant. Origine = point d'accroche Tête = `PointChapeau`
-(sommet de la tête) : position et rotation locales à zéro.
-  - bord Ø 1,2, 5 cm d'épaisseur, centré sur y = −0,05, légèrement ondulé ;
-  - cône de 0,75 (base Ø 0,7) construit anneau par anneau le long d'une « colonne » : droite
-    sur les deux premiers tiers, puis qui se plie vers l'arrière (pointe tordue) ;
-  - ruban jaune de 8 cm à la base du cône, petite étoile à 5 branches devant.
+Les trois niveaux de forme (bible §13.2) :
+  - primaire   : le grand bord ondulé (6 vagues de 4 cm) et le cône dont la pointe fait un
+                 S (2 plis, le bout retombe vers l'arrière gauche, pour être vu de face) ;
+  - secondaire : le ruban jaune satiné et la grande étoile Ø 0,20 bombée, vernie, avec un
+                 reflet peint — le détail-signature ;
+  - tertiaire  : 3 petites étoiles jaunes semées sur le cône ; une pièce rapiécée carrée
+                 (12 cm) violette avec 4 points de couture (« vieux chapeau aimé »).
+Matières : feutre mat (0,20), ruban satin (0,50), étoiles vernies (0,90), reflet.
+
+Hiérarchie (le code Unity retrouve les pièces par leur nom) :
+    chapeau_sorcier     vide, origine = PointChapeau (attachScale 1, attachOffset 0)
+    └── Chapeau         bord + cône + ruban + étoiles + pièce ; origine = centre de la base
+        ├── Anim_Pointe le dernier tiers de la pointe ; origine = le 2e pli (ressort, et
+        │               balancement ±6° en 2,5 s : bible §13.5 types A et B)
+        ├── Eclat_1     vides : points d'éclat sur les branches de la grande étoile
+        ├── Eclat_2     (un éclat toutes les 4 s, sans émission : rareté Rare)
+        └── Eclat_3
 """
 
 import math
@@ -23,120 +36,98 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import commun as C  # noqa: E402
 
 NOM = "chapeau_sorcier"
-EMPLACEMENT = "tete"
-MATS = ["M_FeutreViolet", "M_RubanJaune"]  # indices 0, 1
-BASE_CONE = -0.025       # dessus du bord
-HAUT_CONE = 0.75
-R_CONE = 0.35
-SEG_CONE = 16
-ANNEAUX = 9
-PLI_DEBUT = 0.6          # le pli commence aux 3/5 de la hauteur…
-PLI_FINAL = 50.0         # … et la pointe finit penchée de 50° (≈ 30° en moyenne sur le tiers)
+POINT = "PointChapeau"
+MATS = ["M5_FeutreViolet", "M5_RubanJaune", "M5_JauneVerni", "M5_Rapiece", "M5_Reflet"]
+BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.08, C.CHAPEAU_BASE[2]
+R_CONE = 0.31
+# colonne du cône : (avant Blender y, hauteur z) et facteur de rayon
+# (x, avant y, hauteur z) en Blender, base du chapeau à l'origine. La pointe retombe vers
+# l'arrière ET vers la gauche de l'image (+X) : droit vers l'arrière, la caméra du jeu (qui
+# est devant) ne verrait jamais le S.
+COLONNE = [((0.0, 0.0, 0.0), 1.0), ((0.0, 0.0, 0.20), 0.80), ((0.0, 0.03, 0.38), 0.60),
+           ((0.03, 0.02, 0.53), 0.43), ((0.10, -0.04, 0.64), 0.30),
+           ((0.20, -0.10, 0.70), 0.20),                                       # 2e pli
+           ((0.29, -0.15, 0.67), 0.12), ((0.34, -0.19, 0.59), 0.035)]
+PLI = 5                  # indice du 2e pli : la pièce Anim_Pointe commence ici
 
 
-def bord():
-    bm = bmesh.new()
-    profil = [(0.27, -0.025), (0.58, -0.03), (0.60, -0.05), (0.58, -0.072), (0.27, -0.075),
-              (0.27, -0.025)]
-
-    def ondule(angle, i, r, z):
-        poids = max(0.0, (r - 0.30) / 0.30)          # le centre ne bouge pas, le bord ondule
-        return r, z + 0.025 * poids * math.sin(4 * angle + 0.6)
-
-    C.bm_revolution(bm, profil, 24, mats=[0] * (len(profil) - 1), rayon_fn=ondule)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
-    o = C.objet_depuis_bmesh("Bord", bm, MATS)
-    C.lisser_angle(o, 50)
-    return o
+def colonne(i):
+    p, f = COLONNE[i]
+    return Vector(p), f
 
 
-def colonne():
-    """Centres et directions des anneaux du cône (repère Blender, arrière = -Y)."""
-    pas = HAUT_CONE / ANNEAUX
-    p = Vector((0, 0, BASE_CONE))
-    res = []
-    for k in range(ANNEAUX + 1):
-        t = k / ANNEAUX
-        alpha = 0.0 if t <= PLI_DEBUT else math.radians(PLI_FINAL) * (t - PLI_DEBUT) / (1 - PLI_DEBUT)
-        # Vers l'arrière (-Y), avec un peu de côté (vers la droite de l'image, -X Blender) :
-        # un pli purement vers l'arrière serait invisible depuis la caméra, qui est devant.
-        direction = Vector((-0.45 * math.sin(alpha), -0.9 * math.sin(alpha), math.cos(alpha)))
-        direction.normalize()
-        res.append((p.copy(), direction, t))
-        p += direction * pas
-    return res
+def cone(bm, debut, fin):
+    chemin = [colonne(i)[0] for i in range(debut, fin + 1)]
+    rayons = [colonne(i)[1] for i in range(debut, fin + 1)]
+    return C.bm_tube(bm, chemin, R_CONE, cotes=12, mat=0, haut=Vector((1, 1, 0)).normalized(),
+                     boucher=True, rayons=rayons)
 
 
-def cone():
-    bm = bmesh.new()
-    anneaux = []
-    for centre, direction, t in colonne():
-        if t >= 1.0:
-            anneaux.append([bm.verts.new(centre)])
-            continue
-        r = R_CONE * (1 - t) ** 0.95
-        # Deux axes perpendiculaires à la colonne pour dessiner l'anneau.
-        ax = (Vector((1, 0, 0)) - direction * direction.x).normalized()
-        ay = direction.cross(ax)
-        anneau = []
-        for s in range(SEG_CONE):
-            a = math.pi / 2 + 2 * math.pi * s / SEG_CONE
-            anneau.append(bm.verts.new(centre + ax * (r * math.cos(a)) + ay * (r * math.sin(a))))
-        anneaux.append(anneau)
-    faces = [bm.faces.new(anneaux[0])]
-    for i in range(len(anneaux) - 1):
-        A, B = anneaux[i], anneaux[i + 1]
-        for s in range(SEG_CONE):
-            t = (s + 1) % SEG_CONE
-            if len(B) == 1:
-                faces.append(bm.faces.new((A[s], A[t], B[0])))
-            else:
-                faces.append(bm.faces.new((A[s], A[t], B[t], B[s])))
-    bmesh.ops.recalc_face_normals(bm, faces=faces)
-    o = C.objet_depuis_bmesh("Cone", bm, MATS)
-    C.lisser_tout(o)
-    return o
+def bord(bm):
+    n = 36
+    loops = []
+    for r_, dz in ((R_CONE - 0.03, 0.018), (0.54, 0.018), (0.56, 0.0), (0.54, -0.018),
+                   (R_CONE - 0.03, -0.018)):
+        loop = []
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            vague = 0.04 * math.sin(6 * a) * max(0.0, (r_ - R_CONE) / (0.56 - R_CONE))
+            loop.append((r_ * math.cos(a), r_ * math.sin(a), dz + vague))
+        loops.append(loop)
+    loops.append(loops[0])
+    rangs = C.bm_anneaux(bm, loops, mats=[0] * 5)
+    v = [x for r in rangs for x in r]
+    bmesh.ops.remove_doubles(bm, verts=v, dist=1e-5)
+    return [x for x in v if x.is_valid]
 
 
-def ruban():
-    """Bande jaune de 8 cm, 1,5 cm plus large que le cône, à sa base."""
-    bm = bmesh.new()
-    r_haut = R_CONE * (1 - 0.08 / HAUT_CONE)
-    profil = [(R_CONE + 0.015, BASE_CONE), (r_haut + 0.015, BASE_CONE + 0.08),
-              (r_haut - 0.03, BASE_CONE + 0.08), (R_CONE - 0.03, BASE_CONE),
-              (R_CONE + 0.015, BASE_CONE)]
-    C.bm_revolution(bm, profil, SEG_CONE, mats=[1] * 4, angle_depart=math.pi / 2)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
-    o = C.objet_depuis_bmesh("Ruban", bm, MATS)
-    C.lisser_angle(o, 40)
-    return o
-
-
-def etoile():
-    """Étoile à 5 branches Ø 0,18 (fiche : 0,14, grossie pour se lire de loin), 4 cm d'épaisseur, posée devant sur le ruban et penchée
-    comme la pente du cône."""
-    bm = bmesh.new()
-    contour = []
-    for k in range(10):
-        a = math.pi / 2 + 2 * math.pi * k / 10
-        r = 0.09 if k % 2 == 0 else 0.04
-        contour.append((r * math.cos(a), r * math.sin(a)))
-    pente = math.atan2(R_CONE, HAUT_CONE)
-    z = BASE_CONE + 0.045
-    rayon = R_CONE * (1 - 0.04 / HAUT_CONE) + 0.015 + 0.02
-    avant = Vector((0, math.cos(pente), math.sin(pente)))
-    C.bm_plaque(bm, contour, 0.04, C.repere(Vector((0, rayon, z)), avant), mat=1)
-    o = C.objet_depuis_bmesh("Etoile", bm, MATS)
-    C.biseau(o, largeur=0.008, segments=1, angle=40)
-    C.appliquer(o)
-    C.lisser_angle(o, 40)
-    return o
+def ruban(bm):
+    prof = [(R_CONE - 0.004, 0.015), (R_CONE + 0.012, 0.025), (R_CONE * 0.93 + 0.012, 0.11),
+            (R_CONE * 0.91, 0.12)]
+    v = C.bm_revolution(bm, prof, 12, mats=[1] * 3)
+    return [x for r in v for x in r]
 
 
 def construire():
     C.nouvelle_scene()
-    return C.joindre([bord(), cone(), ruban(), etoile()], NOM)
+    base = C.U(BX, BY, BZ)
+    bm = bmesh.new()
+    v = cone(bm, 0, PLI)
+    arbre = C.arbre_bm(bm)          # le cône seul, pour poser les détails dessus
+    v += bord(bm) + ruban(bm)
+    # grande étoile Ø 0,20 sur le ruban, devant (un peu à gauche de l'image)
+    d = C.direction_angles(0.25, math.radians(10))
+    p, n = C.poser_sur(arbre, Vector((0, 0, 0.07)), d, 0.03)
+    m_et = C.repere(p, Vector((n.x, n.y, 0)).normalized())
+    v += C.bm_etoile(bm, 0.10, 0.035, m_et, mat=2, bombe=0.02)
+    v += C.bm_reflet(bm, m_et @ Matrix.Translation((0.02, 0.05, 0.02)), mat=4, echelle=0.55)
+    eclats = [m_et @ Vector((0.10 * math.cos(math.pi / 2 + 2 * math.pi * k / 5), 0.04,
+                             0.10 * math.sin(math.pi / 2 + 2 * math.pi * k / 5)))
+              for k in (0, 1, 4)]
+    # 3 petites étoiles sur le cône
+    for ang, h in ((-0.45, 0.28), (0.6, 0.36), (-0.1, 0.47)):
+        p, n = C.poser_sur(arbre, Vector((0, 0.01, h)), C.direction_angles(ang), 0.005)
+        v += C.bm_etoile(bm, 0.045, 0.025, C.repere(p, n), mat=2)
+    # pièce rapiécée (12 cm) et 4 points de couture, à droite de l'image
+    p, n = C.poser_sur(arbre, Vector((0, 0, 0.24)), C.direction_angles(-0.9), 0.006)
+    m_p = C.repere(p, n) @ Matrix.Rotation(math.radians(12), 4, "Y")
+    v += C.bm_plaque(bm, C.contour_rectangle_arrondi(0.12, 0.12, 0.015, par_coin=1), 0.02,
+                     m_p, mat=3)
+    for sx, sz in ((-1, -1), (-1, 1), (1, -1), (1, 1)):
+        v += C.bm_boite(bm, (0.02, 0.015, 0.02), m_p @ Vector((sx * 0.045, 0.012, sz * 0.045)),
+                        mat=1)
+    bmesh.ops.translate(bm, vec=base, verts=list(set(v)))
+    chapeau = C.piece("Chapeau", bm, MATS, lissage="angle", pivot=base)
+
+    bm = bmesh.new()
+    vp = cone(bm, PLI, len(COLONNE) - 1)
+    bmesh.ops.translate(bm, vec=base, verts=vp)
+    pointe = C.piece("Anim_Pointe", bm, MATS, lissage="tout", pivot=base + colonne(PLI)[0])
+    C.parenter(pointe, chapeau)
+    for e in C.reperes_effets([base + e for e in eclats]):
+        C.parenter(e, chapeau)
+    return C.racine_v5(NOM, POINT, [chapeau])
 
 
 if __name__ == "__main__":
-    C.finir_accessoire(construire(), NOM, EMPLACEMENT)
+    C.finir_v5(construire(), NOM, POINT)

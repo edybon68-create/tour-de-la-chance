@@ -20,6 +20,9 @@ namespace TourDeLaChance
         [SerializeField] GameManager game;
         [SerializeField] AltitudeDecor decor; // pour le nom du palier (2e ligne de la bannière)
         [SerializeField] GameTexts texts;     // les phrases (Assets/Data/Textes.asset)
+        [Tooltip("v5 §9 : la carte d'étage (FloorRecapView) remplace la bannière « Étage N » et " +
+                 "les bannières séparées. Cocher pour revenir à l'ancienne bannière.")]
+        [SerializeField] bool showBanner = false;
 
         // Moments de la montée, d'après le tableau §3.11.
         const float VeilStart = 0.10f;
@@ -53,7 +56,7 @@ namespace TourDeLaChance
         void OnClimbStarted()
         {
             Restart(ref veilRoutine, ClimbVeil());
-            Restart(ref bannerRoutine, Banner());
+            if (showBanner) Restart(ref bannerRoutine, Banner());
         }
 
         void OnDescentStarted() => Restart(ref veilRoutine, DescentVeil());

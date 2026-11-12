@@ -7,13 +7,23 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Feutre
-    second: {fileID: 2100000, guid: 50a4beb1cb4b34fc78a601276b120cd7, type: 2}
+      name: M5_BlancSatin
+    second: {fileID: 2100000, guid: 27e75aae3766246c392a2f14020b41a3, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: M_Satin
-    second: {fileID: 2100000, guid: b9a706f9c6b1a4c0780c971fe5f5368a, type: 2}
+      name: M5_DoreDeco
+    second: {fileID: 2100000, guid: d912dbb94f2b74eeab4285d001f7d88e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_FeutreSoie
+    second: {fileID: 2100000, guid: 6622078b9da7341609d9efb72ed4b312, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_SatinRouge
+    second: {fileID: 2100000, guid: 3e014c380bd7c4ac1a2c3ead262b090b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

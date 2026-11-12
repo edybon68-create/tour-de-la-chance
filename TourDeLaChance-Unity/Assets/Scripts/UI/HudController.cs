@@ -195,7 +195,7 @@ namespace TourDeLaChance
 
             // Fin de partie : « Rejouer », 0,3 s après le résultat. Caché pendant la
             // redescente / le remélange et quand un panneau est ouvert.
-            bool showReplay = over && !shop && !locked;
+            bool showReplay = over && !shop && !locked && !game.BoxOpeningActive;
             float delay = over && (stateChanged || lastPanelOpen != shop) ? 0.3f : 0f;
 
             if (showReplay && !shown.Contains(replayButton)) ShowAnimated(replayButton, delay, 1f, null);
@@ -224,7 +224,9 @@ namespace TourDeLaChance
                     ? $"Choisis un coffre pour monter… ou encaisse tes {game.Pot} pièces !"
                     : "Choisis un coffre ! Un seul est piégé…",
                 GameState.Revealing => "…",
-                GameState.Climbing => $"+{game.LastGain} pièces ! On monte…",
+                GameState.Climbing => game.LastDiamonds > 0
+                    ? $"+{game.LastDiamonds} ◆ ! On monte…"            // v5 §10.5 : trésor en diamants
+                    : $"+{game.LastGain} pièces ! On monte…",
                 GameState.Lost => endLine1,
                 GameState.CashedOut => endLine1,
                 _ => ""
@@ -233,7 +235,8 @@ namespace TourDeLaChance
             messageSub.style.display = over && endLine2.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
             // Panneau ouvert, ou redescente / remélange en cours : pas de message.
-            bool visible = !shop && !(over && game.TransitionLocked);
+            // v5 §11 : pendant la reprise proposée, c'est sa fenêtre qui parle.
+            bool visible = !shop && !(over && game.TransitionLocked) && state != GameState.ReviveOffer && !game.RebirthPlaying && !game.BoxOpeningActive;
             messageBox.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (!visible) return;
 

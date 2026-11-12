@@ -17,7 +17,7 @@ pièces à temps… ou risque tout pour aller plus haut.
 | Moteur | Unity 6.3 LTS, rendu URP |
 | Plateforme | Mac / PC (desktop) |
 | Joueurs | 1 joueur, hors ligne ; classement local (v4), prévu en ligne plus tard (`docs/specs/v4.md` §12) |
-| Monnaie | **Pièces virtuelles uniquement** — jamais d'argent réel |
+| Monnaie | **Deux monnaies virtuelles gagnées en jouant** (v5) : les **pièces** et les **diamants** (rares, trouvés dans les trésors). **Aucun paiement en argent réel actif ni intégré** (`docs/specs/v5.md` §2, §15.5, §16) |
 
 ## 3. La boucle de jeu
 ```
@@ -34,7 +34,7 @@ pièces à temps… ou risque tout pour aller plus haut.
                                                   └──────> Rejouer <──────┘
 
  Colonne de gauche : Boutique · Inventaire · Index · Améliorations ; colonne de droite :
- Classement. Elles apparaissent APRÈS « Jouer » (v4 : rien sur l'écran titre, sauf la roue
+ Classement · Renaissance (v5 : boutons ronds d'icône seule). Elles apparaissent APRÈS « Jouer » (v4 : rien sur l'écran titre, sauf la roue
  dentée des Réglages) et ouvrent des pop-ups centrées aux moments calmes (voir §6).
 ```
 **v4** (`docs/specs/v4.md`) : interface façon jeu de plateforme (gros boutons arrondis à
@@ -46,6 +46,13 @@ badge « ÉTAGE N » coloré selon l'altitude, roue dentée Réglages (musique /
 la cagnotte à l'abri. À l'étage 1, rien à encaisser (bouton caché). Coffres et bouton sont
 bloqués pendant la transition et 0,5 s après, pour éviter les clics accidentels.
 Détails : `docs/specs/sons-animations.md` §2.1 et §3.11.
+
+**v5** (`docs/specs/v5.md`) : à chaque montée, une **carte d'étage** résume ce qu'on vient de
+gagner et ce qui attend (nombre de coffres, rareté, trésor, chance de diamants), puis se range en
+barre compacte (elle ne bloque jamais). Après un piège (étage 2 et plus), si le joueur a un
+diamant, on lui propose **une fois par partie** une **reprise** : 1 diamant pour garder la
+cagnotte et rejouer l'étage (nouveau tirage), sans compte à rebours. La **renaissance** (une
+seule en v5) remet pièces et améliorations à zéro contre un ×2 permanent.
 
 **Le décor change avec l'altitude** (pur affichage) — **v3 : on commence de jour** : étages
 1-3 en plein jour (ciel bleu clair), 4-6 dans les nuages au coucher du soleil, 7-9 au-dessus
@@ -66,13 +73,21 @@ drôle tirée au hasard, chaque piège aussi (`docs/specs/v3.md` §11).
 
 Plus on monte, plus les épreuves risquées apparaissent souvent.
 
-## 5. L'économie (v4, détails et calculs : `docs/specs/v4.md` §9 à §11 ; v3 : `v3.md` §5 et §6)
+## 5. L'économie (v5 : `docs/specs/v5.md` §10, §13, §18 ; v4 : `v4.md` §9 à §11 ; v3 : `v3.md` §5 et §6)
 - Gain de l'étage N = `arrondi(10 × N × (1 + bonus Bourse + bonus de tenue) × rareté des
-  coffres)` pièces. Sans amélioration ni tenue : `10 × N` (étage 1 = 10, étage 5 = 50…). Le
-  gain est figé quand l'étage est préparé et affiché sur l'étiquette d'étage (« Trésor : +54 »).
-- **Bonus de tenue (v4)** : chaque cosmétique équipé ajoute Commun +1 %, Peu commun +2 %,
-  Rare +4 %, Super rare +6 %, Légendaire +10 %, Secret +15 % ; total plafonné à +50 %. Il ne
-  touche que les gains des trésors, jamais les chances.
+  coffres × renaissance)` pièces (renaissance : ×1, ou ×2 une fois faite). Sans amélioration ni
+  tenue : `10 × N` (étage 1 = 10, étage 5 = 50…). Le gain est figé quand l'étage est préparé et
+  affiché sur la carte d'étage (v5, « Trésor : +54 »).
+- **Bonus de tenue (v5)** : le skin + les **2 accessoires** équipés ajoutent chacun Commun +1 %,
+  Peu commun +2 %, Rare +4 %, Super rare +6 %, Légendaire +10 %, Secret +15 % ; **plus de
+  plafond** (au plus +45 % avec 3 Secrets). Il ne touche que les gains des trésors, jamais les
+  chances.
+- **Diamants (v5)** : chaque trésor a une petite chance d'être **en diamants à la place des
+  pièces** : 1 % (bois), 1,5 % (bronze), 2 % (argent), 3 % (or), 5 % (diamant), tirée à la
+  préparation de l'étage. 1 diamant (étages 1-5), 2 (6-9), 3 (10 et plus), ×2 après la
+  renaissance. Ils vont directement dans le compteur de diamants, **jamais dans la cagnotte**,
+  et ne se perdent jamais. Usages : reprise (1), Boîtes Pirates (5). Repères : ~2,6 diamants
+  par heure au départ, ~15 au maximum, ~30 avec la renaissance.
 - **Rareté des coffres** (même rareté pour tous les coffres d'un étage, tirée et affichée avant
   le choix) : Bois ×1, Bronze ×1,5, Argent ×2, Or ×3, Diamant ×5.
 - **Cagnotte** : la somme des gains de la partie en cours, perdue si on échoue.
@@ -111,7 +126,20 @@ amélioration achetée ne s'applique qu'à l'étage suivant.
 | Boîte | Prix | Contenu |
 |---|---|---|
 | Boîte de skins n°1 | **250 pièces** (v3 ; 100 en v2) | 16 skins (couleurs, motifs, matières) |
-| Boîte d'accessoires n°1 | **250 pièces** | 16 accessoires sur 4 emplacements : Tête, Visage, Cou, Dos (un accessoire par emplacement) |
+| Boîte d'accessoires n°1 | **250 pièces** | 16 accessoires sur 4 emplacements : Tête, Visage, Cou, Dos |
+| **Animaux : skins** (v5) | **500 pièces**, après la 1re renaissance | 16 skins, taux habituels |
+| **Animaux : accessoires** (v5) | **500 pièces**, après la 1re renaissance | 16 accessoires, taux habituels |
+| **Pirates : skins** (v5) | **5 diamants** | 12 skins : 6 Super rares, 4 Légendaires, 2 Secrets ; taux propres 60 / 30 / 10 % |
+| **Pirates : accessoires** (v5) | **5 diamants** | 12 accessoires, même répartition et mêmes taux |
+
+**v5** : on porte un skin et **au plus 2 accessoires, sur deux emplacements différents** (deux
+chapeaux, ou lunettes + masque, sont interdits car ils se chevauchent). La Boutique a 3 onglets
+(Boîtes, Pirates, Diamants : packs **désactivés** « Bientôt disponible ») et des cartes compactes
+qui gardent les taux visibles ; « Contenu et taux » montre une boîte en détail. L'**Index** montre
+tous les objets en couleurs (sauf les Secrets non obtenus, « ? »), rangés Tous / Par rareté / Par
+catégorie, et une **fiche agrandie** avec l'objet en 3D sur un **cheval vierge**. L'ouverture des
+boîtes se joue **en 3D** (boîte qui tombe, tremble, s'ouvre, objet qui sort), toujours identique
+jusqu'à la révélation. Catalogue des 56 nouveaux objets : `docs/specs/v5-catalogue.md`.
 
 | Rareté | Taux de drop | Objets par boîte | Revente d'un doublon (v3) |
 |---|---|---|---|
@@ -121,6 +149,10 @@ amélioration achetée ne s'applique qu'à l'étage suivant.
 | Super rare | 7 % | 2 | 100 |
 | Légendaire | 3 % | 1 | 150 |
 | Secret | 1 % | 1 | 200 |
+
+(Taux habituels : boîtes n°1 et Animaux. Les Boîtes Pirates ont leurs **taux propres** : Super
+rare 60 %, Légendaire 30 %, Secret 10 %, affichés comme les autres. Un doublon se revend toujours
+en **pièces**, jamais en diamants.)
 
 Les 5 couleurs et 4 chapeaux de la v1 sont gardés (même identifiant) et rangés dans les
 boîtes avec une rareté ; ceux déjà achetés restent possédés.
@@ -145,7 +177,7 @@ toujours inférieure au prix d'une boîte.
 |---|---|---|
 | Dés | Dé doré, dé en cristal | (en boîte) |
 | Effets de victoire | Confettis, feux d'artifice | (en boîte) |
-| Boîtes n°2 | Nouveaux skins et accessoires | 250 |
+| ~~Boîtes n°2~~ | Faites en v5 : Boîtes Animaux et Pirates | — |
 
 ## 6 ter. Les améliorations (v4 : 10 niveaux, progression assumée)
 Achetées avec le porte-monnaie, **10 niveaux** chacune (5 en v3, niveaux 1 à 5 inchangés),
@@ -161,6 +193,14 @@ l'étiquette d'étage du HUD. Détails : `docs/specs/v3.md` §5 et `docs/specs/v
 Garde-fous : toujours exactement 1 piège par étage, risque jamais sous **1 sur 6 (16,7 %)**
 (v4 ; 20 % en v3, à valider par l'auteur), un piège fait toujours perdre toute la cagnotte,
 chiffres affichés = chiffres du code (une seule source).
+
+## 6 quinquies. La renaissance (v5, `docs/specs/v5.md` §13)
+Une seule renaissance en v5, depuis le bouton rond sous le Classement. Elle coûte **10 000
+pièces**, remet à zéro le porte-monnaie et les 3 améliorations, garde les objets, la tenue, les
+diamants, les records et le classement, et donne **pour toujours ×2 pièces** sur les trésors,
+**×2 diamants** et l'accès aux **Boîtes Animaux**. Seulement sans cagnotte en jeu (Perdu,
+Encaissé ou étage 1), avec une pop-up claire « Tu perds / Tu gardes / Tu gagnes », une
+confirmation et une animation de 4,2 s. Rentable après ~3 h de jeu si on la fait vers le niveau 5.
 
 ## 6 quater. Le classement (v4)
 Trois classements : **étage le plus haut**, **total des pièces encaissées** (pas le
@@ -193,12 +233,17 @@ Détails complets : `docs/specs/sons-animations.md`.
 **Modèles 3D (Blender, par script)** : la tour et ses étages, le personnage (**cheval**, v3),
 le coffre et ses 4 variantes de rareté (bronze, argent, or, diamant), le dé, la roue, la pièce
 géante, les chapeaux et les 12 nouveaux accessoires (`docs/specs/boites.md` §5.6), plus les
-retouches pour le cheval (`docs/specs/v3.md` §16).
+retouches pour le cheval (`docs/specs/v3.md` §16). **v5** (`docs/specs/v5.md` §17.1) : les 16
+accessoires de la boîte n°1 modernisés (écharpe et masque refaits sur le cheval), 28 nouveaux
+accessoires (Pirates, Animaux), les extras de 4 skins (Kraken, Abysses, Paon, Lion solaire),
+6 boîtes 3D d'ouverture, le podium du studio, le diamant.
 
 **Images (Gemini)** : concept art général, textures (pierre de la tour, bois des coffres),
 icônes des cosmétiques (skins à refaire avec le cheval) et des 2 boîtes, 4 fonds de ciel
 (jour, coucher de soleil, crépuscule, nuit étoilée), icônes des 4 panneaux, des 3
-améliorations et des 5 coffres de rareté, logo du jeu (`docs/specs/v3.md` §15).
+améliorations et des 5 coffres de rareté, logo du jeu (`docs/specs/v3.md` §15). **v5**
+(`docs/specs/v5.md` §17.3) : 56 icônes de nouveaux objets + 16 accessoires refaits, 4 images de
+boîtes, icônes Diamant et Renaissance, 4 images de packs de diamants.
 
 **Code (Unity C#)** : gestion de partie (nouveau flux d'étage), épreuves, économie,
 améliorations, sauvegarde, boîtes / inventaire / index, 4 panneaux, décor par altitude,
@@ -219,24 +264,40 @@ interface.
    plateforme (boutons, pop-ups, défilement), badge d'étage, Réglages, Galaxie animée, noms
    simplifiés, bonus de tenue, améliorations jusqu'au niveau 10 (6 coffres), classement local
    prêt pour le en-ligne.
+9. **Version 5** (`docs/specs/v5.md`, catalogue `v5-catalogue.md`) : bug des 6 coffres, boutons
+   d'icône sans texte, 2 accessoires au plus et bonus de tenue sans plafond, accessoires
+   modernisés, carte d'étage, diamants et reprise, Boîtes Pirates (diamants) et Animaux (après
+   la renaissance), renaissance, Boutique à onglets (packs de diamants désactivés), Index refait
+   avec fiche 3D, ouverture des boîtes en 3D.
 
-## 9. Règle d'or (mise à jour v4, **à valider par l'auteur**)
-Le jeu reste un jeu : **aucun achat en argent réel**, aucune pièce achetable.
-Les pièces se gagnent uniquement en jouant (et en revendant ses doublons). Les boîtes ne
-s'ouvrent qu'avec ces pièces virtuelles, leurs taux sont affichés exactement comme dans le
-code.
+## 9. Règle d'or (mise à jour v5, **à valider par l'auteur** ; détails : `docs/specs/v5.md` §2)
+Le jeu reste un jeu : **aucun paiement en argent réel n'est actif ni intégré** (aucun code,
+aucun paquet, aucun lien de paiement). Il y a **deux monnaies virtuelles**, gagnées uniquement en
+jouant : les **pièces** (trésors, revente des doublons) et les **diamants** (rares, trouvés à la
+place des pièces dans certains trésors). La Boutique affiche des packs de diamants
+**désactivés** (« Bientôt disponible », sans prix) : simple préparation. Activer un jour des
+paiements demande une décision explicite de l'auteur et la checklist de `v5.md` §16 (dont : ce
+qui s'achète avec de l'argent ne doit jamais être aléatoire). Toutes les boîtes, y compris celles
+payées en diamants, affichent leurs taux exactement comme dans le code.
 - Les **cosmétiques** ne changent **jamais les chances** : ni le piège, ni le nombre de
-  coffres, ni la rareté des coffres, ni les taux des boîtes. **v4** : équipés, ils donnent un
-  **bonus de pièces sur les trésors** (bonus de tenue : +1 % à +15 % par objet selon sa rareté,
-  total plafonné à +50 %), affiché en chiffres avant le choix ; il ne touche que les **gains**.
-- Les **améliorations**, elles, changent le jeu : c'est une **progression assumée**, achetée
-  uniquement avec des pièces gagnées en jeu (jamais d'argent réel). Leur effet est affiché
-  clairement, en chiffres lus dans les mêmes données que le code. Il reste toujours exactement
-  un coffre piégé par étage (risque jamais sous **1 sur 6, soit 16,7 %**, v4).
-- Ni une amélioration achetée ni un cosmétique équipé ne changent l'étage en cours : ils
-  s'appliquent au prochain étage préparé.
+  coffres, ni la rareté des coffres, ni les taux des boîtes. Équipés (le skin + **2
+  accessoires**, v5), ils donnent un **bonus de pièces sur les trésors** (+1 % à +15 % par objet
+  selon sa rareté, **sans plafond**, au plus +45 %), affiché en chiffres avant le choix ; il ne
+  touche que les **gains**.
+- Les **améliorations** et la **renaissance** (v5), elles, changent le jeu : c'est une
+  **progression assumée**, payée uniquement avec des pièces gagnées en jeu. Leur effet est
+  affiché clairement, en chiffres lus dans les mêmes données que le code. La renaissance double
+  les **gains** (pièces et diamants), jamais les chances. Il reste toujours exactement un coffre
+  piégé par étage (risque jamais sous **1 sur 6, soit 16,7 %**, v4).
+- Un piège fait perdre la cagnotte, **sauf reprise** (v5) : 1 diamant, **une seule fois par
+  partie**, proposée seulement si le joueur a un diamant et une cagnotte à sauver, **sans compte
+  à rebours** ; l'étage est alors rejoué avec un tirage tout neuf. Sans diamant, rien n'est
+  proposé (on ne pousse jamais à en acheter).
+- Ni une amélioration achetée, ni un cosmétique équipé, ni la renaissance ne changent l'étage en
+  cours : ils s'appliquent au prochain étage préparé.
 - Le classement ne montre jamais de faux joueurs.
-- **Le spectacle ne triche jamais** : le résultat est tiré avant l'animation, et rien de ce
-  qu'on voit ou entend ne permet de le deviner.
+- **Le spectacle ne triche jamais** : le résultat (piège, trésor en pièces ou en diamants, objet
+  d'une boîte) est tiré et sauvegardé avant l'animation, et rien de ce qu'on voit ou entend ne
+  permet de le deviner (v5 : même animation 3D pour toutes les boîtes jusqu'à la révélation).
 - Pas de pression : pas de compte à rebours, d'offre limitée, de prix barré ni de pastille
   d'incitation.

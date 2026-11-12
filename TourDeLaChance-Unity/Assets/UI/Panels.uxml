@@ -2,8 +2,8 @@
     <!-- Les POP-UPS v4 et leurs boutons d'ouverture (spec v4 §5.5, §5.6, §6.2).
          Ordre de dessin (un élément est dessiné PAR-DESSUS ceux qui le précèdent) :
            1. le fond assombri (un clic dessus ferme la pop-up) ;
-           2. la pop-up centrée : son ombre, la fenêtre (bandeau de titre + corps), l'icône
-              qui déborde du bandeau, et le bouton fermer rond rouge à cheval sur le coin ;
+           2. la pop-up centrée : son ombre, la fenêtre (bandeau de titre + corps) et le bouton
+              fermer rond rouge à cheval sur le coin (v5 §7.2 : plus d'icône dans le bandeau) ;
            3. les deux colonnes de boutons et la roue dentée : AU-DESSUS du fond assombri, pour
               rester nettes et cliquables (on passe d'une pop-up à l'autre).
          Les cartes et les lignes sont créées par le code (PanelsController et ses pages) à
@@ -15,6 +15,7 @@
     <Style src="Panels.uss" />
     <Style src="Buttons.uss" />
     <Style src="Popups.uss" />
+    <Style src="V5.uss" />
     <ui:VisualElement name="panels-root" class="panels-root" picking-mode="Ignore">
         <ui:VisualElement name="popup-dim" class="popup-dim" />
         <ui:VisualElement name="popup-layer" class="popup-layer" picking-mode="Ignore">
@@ -31,8 +32,9 @@
                         </ui:VisualElement>
                         <ui:Label name="pot-note" text="" class="pot-note" picking-mode="Ignore" />
 
-                        <!-- Boutique : une carte par boîte (créées par le code) -->
-                        <ui:ScrollView name="page-boutique" class="shop-page shop-scroll" />
+                        <!-- Boutique v5 (§15) : onglets Boîtes / Pirates / Diamants, cartes compactes et
+                             sous-page « Contenu et taux ». Tout est construit par BoutiquePage. -->
+                        <ui:VisualElement name="page-boutique" class="shop-page boutique-page" />
 
                         <!-- Inventaire : vitrine du cheval à gauche + grille -->
                         <ui:VisualElement name="page-inventaire" class="shop-page page-split">
@@ -55,24 +57,12 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
 
-                        <!-- Index : vitrine du cheval à gauche + grille -->
-                        <ui:VisualElement name="page-index" class="shop-page page-split">
-                            <ui:VisualElement name="idx-showcase" class="showcase" picking-mode="Ignore" />
-                            <ui:VisualElement class="page-split-main">
-                                <ui:VisualElement name="idx-tabs" class="subtabs" />
-                                <ui:VisualElement class="progress-row" picking-mode="Ignore">
-                                    <ui:Label name="idx-progress" text="0 / 16 trouvés" class="progress-text" picking-mode="Ignore" />
-                                    <ui:VisualElement class="progress-bar" picking-mode="Ignore">
-                                        <ui:VisualElement name="idx-bar-fill" class="progress-fill" picking-mode="Ignore" />
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                                <ui:ScrollView name="idx-grid" class="shop-scroll" />
-                                <ui:VisualElement class="idx-info-row">
-                                    <ui:Label name="idx-info" text="" class="idx-info" picking-mode="Ignore" />
-                                    <ui:Button name="idx-goto" text="Voir dans l'inventaire" class="link-btn" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
+                        <!-- Index v5 (§8) : onglets Tous / Par rareté / Par catégorie, grille de cartes,
+                             fiche agrandie au clic. Plus de vitrine du cheval du joueur. Construit par IndexPage. -->
+                        <ui:VisualElement name="page-index" class="shop-page index-page" />
+
+                        <!-- Renaissance v5 (§13.3) : Tu perds / Tu gardes / Tu gagnes. Construit par RebirthPage. -->
+                        <ui:VisualElement name="page-renaissance" class="shop-page rebirth-page" />
 
                         <!-- Améliorations : une carte par amélioration (créées par le code) -->
                         <ui:ScrollView name="page-ameliorations" class="shop-page shop-scroll" />
@@ -123,7 +113,7 @@
                                     <ui:VisualElement class="switch-knob" picking-mode="Ignore" />
                                 </ui:Button>
                             </ui:VisualElement>
-                            <ui:Label text="Tour de la Chance · version 4" class="settings-footer" picking-mode="Ignore" />
+                            <ui:Label text="Tour de la Chance · version 5" class="settings-footer" picking-mode="Ignore" />
                         </ui:VisualElement>
 
                         <!-- Choisis ton pseudo (§12.7) -->
@@ -138,7 +128,6 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="popup-icon" class="popup-icon" picking-mode="Ignore" />
                 <ui:Button name="close" class="btn btn--rouge btn-rond popup-close">
                     <ui:VisualElement class="croix" picking-mode="Ignore">
                         <ui:VisualElement class="croix-barre croix-barre--a" picking-mode="Ignore" />
@@ -148,32 +137,74 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Colonne de gauche : 4 boutons de 128 × 128, de y = 170 à 730 -->
+        <!-- v5 §7.1 (art bible §12.17) : boutons RONDS d'icône seule, sans libellé. Le nom
+             s'affiche dans l'info-bulle maison au survol. Colonne de gauche : Boutique,
+             Inventaire, Index, Améliorations. -->
         <ui:VisualElement name="column" class="col col--gauche" picking-mode="Ignore">
-            <ui:Button name="col-boutique" class="btn btn--sombre btn--ombre col-btn">
-                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
-                <ui:Label text="Boutique" class="col-btn-text" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="col-inventaire" class="btn btn--sombre btn--ombre col-btn">
-                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
-                <ui:Label text="Inventaire" class="col-btn-text" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="col-index" class="btn btn--sombre btn--ombre col-btn">
-                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
-                <ui:Label text="Index" class="col-btn-text" picking-mode="Ignore" />
-            </ui:Button>
-            <ui:Button name="col-ameliorations" class="btn btn--sombre btn--ombre col-btn">
-                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
-                <ui:Label text="Améliorations" class="col-btn-text col-btn-text--small" picking-mode="Ignore" />
-            </ui:Button>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-boutique" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--boutique">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-inventaire" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--inventaire">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-index" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--index">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-ameliorations" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--ameliorations">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Colonne de droite : le Classement (place prévue pour d'autres boutons plus tard) -->
+        <!-- Colonne de droite : Classement, puis Renaissance (v5 §13.5). -->
         <ui:VisualElement name="column-right" class="col col--droite" picking-mode="Ignore">
-            <ui:Button name="col-classement" class="btn btn--sombre btn--ombre col-btn">
-                <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
-                <ui:Label text="Classement" class="col-btn-text" picking-mode="Ignore" />
-            </ui:Button>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-classement" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--classement">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+            <ui:VisualElement class="btn-holder" picking-mode="Ignore">
+                <ui:Button name="col-renaissance" class="btn btn--sombre btn--ombre son-rond col-btn col-btn--rebirth">
+                    <ui:VisualElement class="col-btn-anneau" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-reflet" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="col-btn-badge" picking-mode="Ignore">
+                        <ui:Label class="col-btn-badge__texte" text="×2" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- La roue dentée (Réglages) : en haut à gauche sur l'écran titre, à droite du badge
@@ -182,6 +213,14 @@
             <ui:Button name="gear" class="btn btn--sombre btn--ombre btn-rond gear">
                 <ui:VisualElement class="roue-icone" picking-mode="Ignore" />
             </ui:Button>
+        </ui:VisualElement>
+        <!-- v5 §11 : la fenêtre de reprise après un piège (construite par ReviveOfferView). -->
+        <ui:VisualElement name="revive-layer" class="revive-layer" picking-mode="Ignore" />
+        <!-- v5 §4.4 : petits messages (toasts), ex. migration de la tenue. -->
+        <ui:VisualElement name="toast-layer" class="toast-layer" picking-mode="Ignore" />
+        <!-- v5 §7.1 : l'info-bulle maison (un seul élément, placé par le code), tout en haut. -->
+        <ui:VisualElement name="info-bulle" class="info-bulle" picking-mode="Ignore">
+            <ui:Label name="info-bulle-texte" class="info-bulle__texte" text="" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

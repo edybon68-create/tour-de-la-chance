@@ -11,5 +11,7 @@ namespace TourDeLaChance
         public int Floor;      // l'étage où l'on a pu choisir un coffre (perdu ou encaissé)
         public int CashedOut;  // les pièces encaissées (0 pour une partie perdue)
         public bool Lost;      // vrai si la partie s'est finie sur un piège
+        /// v5 §11.4 : la partie a utilisé une reprise (le classement local la marque d'un ◆).
+        public bool UsedRevive;
     }
 }

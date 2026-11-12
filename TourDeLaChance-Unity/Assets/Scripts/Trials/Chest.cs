@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace TourDeLaChance
@@ -369,16 +370,9 @@ namespace TourDeLaChance
             ApplyPose(Vector3.one, 0f, 0f);
         }
 
-        /// Cache le coffre (échelle 0) en attendant PopIn : coffre en plus pendant la montée.
-        public void HideForPop()
-        {
-            StopAllCoroutines();
-            idle = false;
-            extraScale = 0f;
-            ApplyPose(Vector3.one, 0f, 0f);
-        }
-
         /// Le coffre « pousse » : échelle 0 → 1,08 → 1 (durée donnée), après un délai.
+        /// v5 : ne sert plus qu'au remélange (« Rejouer » à l'étage 1, reprise) : les coffres
+        /// en plus ne « poussent » plus après la montée (bug v5 §5).
         public void PopIn(float delay, float duration)
         {
             StopAllCoroutines();
@@ -400,6 +394,36 @@ namespace TourDeLaChance
             extraScale = 1f;
             idle = true; // Update reprend la main (survol, sauts)
             ApplyPose(Vector3.one, 0f, 0f);
+        }
+
+        /// v5 §5.2 : la petite ARRIVÉE commune à tous les coffres d'un étage (3 à 6), tous en
+        /// même temps : échelle 0,9 → 1,05 → 1 en 0,2 s, pendant le verrou anti-clic. Le coffre
+        /// est déjà visible (jamais caché) : c'est un simple « rebond » d'accueil.
+        public void Arrive(float duration)
+        {
+            StopAllCoroutines();
+            StartCoroutine(ArriveRoutine(duration));
+        }
+
+        IEnumerator ArriveRoutine(float duration)
+        {
+            idle = false;
+            for (float t = 0f; t < duration; t += Time.deltaTime)
+            {
+                extraScale = Ease.Pop(t / duration, 0.9f, 1.05f);
+                ApplyPose(Vector3.one, 0f, 0f);
+                yield return null;
+            }
+            extraScale = 1f;
+            idle = true;
+            ApplyPose(Vector3.one, 0f, 0f);
+        }
+
+        /// v5 §5.2 : les 5 modèles de rareté de ce coffre (pour le préchargement).
+        public IEnumerable<GameObject> AllLookObjects()
+        {
+            foreach (var look in looks)
+                if (look.model != null) yield return look.model.gameObject;
         }
 
         // ---------- Outils ----------

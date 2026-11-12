@@ -13,13 +13,16 @@ namespace TourDeLaChance
         Revealing,  // animation d'ouverture en cours
         Climbing,   // gagné : on monte tout seul à l'étage suivant (transition)
         Lost,       // piégé : la cagnotte est perdue
-        CashedOut   // encaissé : la cagnotte va dans le porte-monnaie
+        CashedOut,  // encaissé : la cagnotte va dans le porte-monnaie
+        ReviveOffer // v5 §11 : piégé, mais la reprise (1 diamant) est proposée ; la partie
+                    // n'est PAS encore finie (ajouté à la fin : Title doit rester le premier)
     }
 
     /// Les pop-ups (spec v3 §4.1, v4 §5.6). None = aucune pop-up ouverte.
     /// v4 : + Classement (colonne de droite) et Reglages (roue dentée). AJOUTÉS À LA FIN :
     /// les outils de test utilisent les numéros (Boutique = 1 … Ameliorations = 4).
-    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations, Classement, Reglages }
+    /// v5 : + Renaissance (colonne de droite, sous le Classement), ajoutée à la fin.
+    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations, Classement, Reglages, Renaissance }
 
     /// <summary>
     /// Le chef d'orchestre : il connaît l'étage, la cagnotte, l'état de la partie,
@@ -31,6 +34,10 @@ namespace TourDeLaChance
     /// Il décide aussi QUAND un panneau peut s'ouvrir (CanOpenPanel) et lequel est ouvert,
     /// et gère « Rejouer » (redescente, ou remélange sur place à l'étage 1), le record et la
     /// cagnotte perdue (LastLoss).
+    ///
+    /// v5 : il tire aussi « ce trésor contient-il des diamants ? » à la préparation de l'étage
+    /// (§10), propose la REPRISE après un piège (§11 : état ReviveOffer, AcceptRevive,
+    /// DeclineRevive) et lance la nouvelle partie après la RENAISSANCE (§13, RequestRebirth).
     ///
     /// C'est ce script qui mène la danse (le temps de la montée, le verrou anti-clic) :
     /// les scripts d'animation se contentent de suivre ses événements. Si une animation
@@ -57,6 +64,13 @@ namespace TourDeLaChance
         public const float ReshuffleDuration = 0.55f;
         /// Durée du fondu de l'écran titre (les coffres attendent la fin).
         public const float TitleFadeDuration = 0.4f;
+        /// v5 §11.2 : la reprise rejoue l'étage par un remélange sur place (mêmes durées que
+        /// « Rejouer » à l'étage 1, plus la spirale bleutée de 0,4 s au début).
+        public const float ReviveSwapTime = 0.45f;
+        public const float ReviveDuration = 0.7f;
+        /// v5 §13.4 : durée de l'animation de renaissance (passable après 1 s).
+        public const float RebirthDuration = 4.2f;
+        public const float RebirthSkippableAfter = 1f;
 
         /// Clé de sauvegarde du plus haut étage atteint (spec v3 §17).
         public const string RecordKey = "record_etage";
@@ -110,7 +124,8 @@ namespace TourDeLaChance
         /// Peut-on ouvrir les Réglages (roue dentée) ? Comme les autres pop-ups, ET sur l'écran
         /// titre (pour couper la musique avant de jouer). Jamais pendant une ouverture de boîte.
         public bool CanOpenSettings =>
-            !BoxOpeningActive && ((State == GameState.Title && !TransitionLocked) || CanOpenPanel);
+            !BoxOpeningActive && ((State == GameState.Title && !TransitionLocked) || CanOpenPanel ||
+                                  (State == GameState.ReviveOffer && !TransitionLocked));
 
         /// Le record d'étage au début de la partie en cours (pour le badge « RECORD »).
         public int RecordAtRunStart => recordAtRunStart;
@@ -125,6 +140,35 @@ namespace TourDeLaChance
         public bool CanCashOut =>
             !IsPanelOpen && !TransitionLocked &&
             State == GameState.Choosing && Floor >= 2 && Pot > 0;
+
+        // ---------- v5 : diamants, reprise, renaissance ----------
+
+        /// Les diamants gagnés au dernier trésor en diamants (0 sinon). Ils sont DÉJÀ dans le
+        /// compteur (et sauvegardés) quand l'événement DiamondsWon arrive.
+        public int LastDiamonds { get; private set; }
+        /// La reprise a-t-elle déjà servi dans cette partie ? (jamais sauvegardé : une partie
+        /// en cours ne l'est jamais)
+        public bool ReviveUsed { get; private set; }
+        /// Vrai pour l'étage rejoué juste après une reprise (la carte d'étage le dit).
+        public bool RevivedThisFloor { get; private set; }
+        /// La renaissance est en cours d'animation (avant la nouvelle partie).
+        public bool RebirthPlaying { get; private set; }
+
+        /// Coût de la reprise (1 diamant), lu dans le catalogue de l'économie.
+        public static int ReviveCost => EconomyCatalog.Instance.ReviveCost;
+
+        /// Peut-on proposer la reprise après ce piège ? (§11.1) Cagnotte > 0 (donc à partir de
+        /// l'étage 2), au moins 1 diamant, reprise pas encore utilisée dans la partie.
+        /// Sans diamant : RIEN n'est proposé (on ne propose jamais d'acheter).
+        bool ReviveAllowed(int pot) =>
+            pot > 0 && !ReviveUsed && EconomyCatalog.Instance.MaxRevivesPerRun > 0 && Diamonds.Count >= ReviveCost;
+
+        /// v5 §13.2 : est-ce un moment calme, SANS cagnotte, pour renaître ? Perdu, Encaissé,
+        /// ou choix à l'étage 1. Jamais pendant une épreuve, une transition, une ouverture de
+        /// boîte ou une reprise proposée. (Les pièces sont vérifiées par Rebirth.)
+        public bool CanRebirthNow =>
+            !TransitionLocked && !BoxOpeningActive && !RebirthPlaying &&
+            (State == GameState.Lost || State == GameState.CashedOut || (State == GameState.Choosing && Floor <= 1 && Pot == 0));
 
         /// L'interface s'abonne à cet événement pour se mettre à jour.
         public event Action Changed;
@@ -142,6 +186,14 @@ namespace TourDeLaChance
         /// v4 §12 : une partie vient de se terminer (Perdu ou Encaissé). Le GameManager
         /// prévient seulement : les statistiques et le classement s'en occupent.
         public event Action<RunResult> RunEnded;
+        /// v5 §10.5 : un trésor en diamants vient d'être ouvert (montant déjà ajouté et sauvegardé).
+        public event Action<int> DiamondsWon;
+        /// v5 §11 : la reprise est proposée (état ReviveOffer).
+        public event Action ReviveOffered;
+        /// v5 §11.2 : reprise acceptée : la spirale « retour en arrière » et le remélange commencent.
+        public event Action ReviveStarted;
+        /// v5 §13.4 : la renaissance vient d'être faite, son animation commence.
+        public event Action RebirthStarted;
 
         Coroutine transition;
         // Le générateur des RÈGLES (nombre de coffres, rareté, piège) : créé une fois, séparé
@@ -154,6 +206,9 @@ namespace TourDeLaChance
 
         // Outils de test : forcer le nombre de coffres / la rareté du prochain étage (−1 = non).
         int forcedCount = -1, forcedRarity = -1;
+        bool forcedDiamonds;       // outil de test : le prochain étage est « en diamants »
+        int savedPot;              // la cagnotte mise de côté pendant la reprise proposée
+        bool skipRebirthRequested; // clic pendant l'animation de renaissance
 
         void OnEnable()
         {
@@ -213,7 +268,7 @@ namespace TourDeLaChance
             Wallet.Add(Pot);
             Pot = 0;
             SetState(GameState.CashedOut);
-            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false });
+            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false, UsedRevive = ReviveUsed });
         }
 
         // =====================================================================
@@ -287,13 +342,28 @@ namespace TourDeLaChance
             forcedCount = forcedRarity = -1; // un forçage ne vaut que pour UN étage
             count = Mathf.Clamp(count, 3, ChestTrial.MaxChests);
 
+            // v5 §13 : ×2 après la renaissance (lu MAINTENANT, comme les niveaux).
+            int rebirth = Rebirth.CoinMultiplier;
+            var rarity = Upgrades.Rarity(rank);
+
+            // v5 §10 : « ce trésor contient-il des diamants ? » Tiré APRÈS le gain et AVANT le
+            // piège, avec le générateur des règles ; chacun des tirages reste indépendant.
+            int chance = rarity != null ? Mathf.Clamp(rarity.diamondChancePermille, 0, 1000) : 0;
+            bool diamonds = rulesRandom.Next(0, 1000) < chance;
+            if (forcedDiamonds) { diamonds = true; forcedDiamonds = false; }
+            int diamondAmount = EconomyCatalog.Instance.DiamondsForFloor(Floor) * Rebirth.DiamondMultiplier;
+
             Setup = new FloorSetup
             {
                 ChestCount = count,
                 RarityRank = rank,
-                Rarity = Upgrades.Rarity(rank),
-                Gain = Upgrades.FloorGain(coinsPerFloor, Floor, gainsLevel, rank, outfitBonus),
-                OutfitBonusPercent = outfitBonus
+                Rarity = rarity,
+                Gain = Upgrades.FloorGain(coinsPerFloor, Floor, gainsLevel, rank, outfitBonus, rebirth),
+                OutfitBonusPercent = outfitBonus,
+                DiamondTreasure = diamonds,
+                DiamondAmount = diamondAmount,
+                DiamondChancePermille = chance,
+                RebirthMultiplier = rebirth
             };
             chestTrial.Begin(Floor, count, rank, rulesRandom);
             UpdateRecord();
@@ -304,6 +374,9 @@ namespace TourDeLaChance
             Floor = 1;
             Pot = 0;
             LastLoss = 0;
+            LastDiamonds = 0;
+            ReviveUsed = false;
+            RevivedThisFloor = false;
             recordAtRunStart = Record;
             recordAnnounced = false;
         }
@@ -349,6 +422,38 @@ namespace TourDeLaChance
             forcedRarity = rarityRank;
         }
 
+        /// OUTIL DE TEST (v5) : le PROCHAIN étage préparé sera « en diamants ».
+        public void DebugForceDiamondTreasure() => forcedDiamonds = true;
+
+        /// OUTIL DE TEST (v5) : choisit le coffre piégé de l'étage (pour tester la reprise).
+        public void DebugPickTrap() => chestTrial.Choose(chestTrial.DebugTrapIndex);
+
+        /// OUTIL DE TEST (v5) : choisit un coffre qui n'est PAS piégé.
+        public void DebugPickTreasure() => chestTrial.Choose(chestTrial.DebugTrapIndex == 0 ? 1 : 0);
+
+        /// OUTIL DE TEST (v5 critère 26) : simule n étages préparés avec un générateur à part
+        /// (rien n'est sauvegardé) et renvoie la part d'étages « en diamants » par rareté.
+        public static string DebugSimulateDiamonds(int floors, int chestsLevel, int seed)
+        {
+            var random = new System.Random(seed);
+            int n = Upgrades.RarityCount;
+            var total = new int[n];
+            var withDiamonds = new int[n];
+            for (int i = 0; i < floors; i++)
+            {
+                Upgrades.DrawChestCount(0, random);                 // même ordre que le jeu
+                int rank = Upgrades.DrawChestRarity(chestsLevel, random);
+                int chance = Upgrades.Rarity(rank).diamondChancePermille;
+                total[rank]++;
+                if (random.Next(0, 1000) < chance) withDiamonds[rank]++;
+                ChestTrial.DrawTrap(3, random);
+            }
+            var sb = new System.Text.StringBuilder($"{floors} étages : ");
+            for (int r = 0; r < n; r++)
+                if (total[r] > 0) sb.Append($"{Upgrades.Rarity(r).shortName} {100.0 * withDiamonds[r] / total[r]:0.00} % ({total[r]}) ; ");
+            return sb.ToString();
+        }
+
         /// OUTIL DE TEST : le coffre piégé de l'étage (critère 2 : il ne change pas quand on
         /// ouvre et ferme un panneau).
         public int DebugTrapIndex => chestTrial.DebugTrapIndex;
@@ -357,10 +462,24 @@ namespace TourDeLaChance
 
         void OnTrialFinished(bool won)
         {
+            RevivedThisFloor = false;
             if (won)
             {
-                LastGain = Setup.Gain; // le gain FIGÉ à la préparation de l'étage
-                Pot += LastGain;
+                if (Setup.DiamondTreasure && Setup.DiamondAmount > 0)
+                {
+                    // v5 §10.1 : trésor en diamants. Les diamants vont DIRECTEMENT dans le
+                    // compteur (sauvegardé tout de suite) ; la cagnotte ne bouge pas.
+                    LastGain = 0;
+                    LastDiamonds = Setup.DiamondAmount;
+                    Diamonds.Add(LastDiamonds, fromTreasure: true);
+                    DiamondsWon?.Invoke(LastDiamonds);
+                }
+                else
+                {
+                    LastGain = Setup.Gain; // le gain FIGÉ à la préparation de l'étage
+                    LastDiamonds = 0;
+                    Pot += LastGain;
+                }
                 SetLock(true); // coffres et « Encaisser » ignorés jusqu'à la fin du verrou
                 SetState(GameState.Climbing);
                 RunTransition(ClimbRoutine());
@@ -368,11 +487,120 @@ namespace TourDeLaChance
             else
             {
                 LastGain = 0;
+                LastDiamonds = 0;
                 LastLoss = Pot;
-                Pot = 0;
-                SetState(GameState.Lost);
-                RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true });
+                if (ReviveAllowed(Pot))
+                {
+                    // v5 §11.2 : la cagnotte est mise de côté (pas encore perdue) et la partie
+                    // n'est pas terminée : pas de RunEnded. Aucun compte à rebours.
+                    savedPot = Pot;
+                    SetState(GameState.ReviveOffer);
+                    ReviveOffered?.Invoke();
+                    return;
+                }
+                EndRunLost();
             }
+        }
+
+        /// La partie est perdue pour de bon (piège sans reprise, ou « Non merci »).
+        void EndRunLost()
+        {
+            Pot = 0;
+            savedPot = 0;
+            SetState(GameState.Lost);
+            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true, UsedRevive = ReviveUsed });
+        }
+
+        // =====================================================================
+        // v5 §11 : la reprise
+        // =====================================================================
+
+        /// « Continuer — 1 ◆ » : la logique relit tout (un double-clic ne dépense qu'un
+        /// diamant : au 2e clic, on n'est plus en ReviveOffer). Dépense et sauvegarde le
+        /// diamant, marque la reprise, rend la cagnotte et REJOUE l'étage avec un tirage neuf.
+        public bool AcceptRevive()
+        {
+            if (State != GameState.ReviveOffer || TransitionLocked) return false;
+            if (!ReviveAllowed(savedPot) || !Diamonds.TrySpend(ReviveCost))
+            {
+                DeclineRevive();
+                return false;
+            }
+            Diamonds.CountRevive();
+            ReviveUsed = true;
+            Pot = savedPot;
+            LastLoss = 0;
+            RunTransition(ReviveRoutine());
+            return true;
+        }
+
+        /// « Non merci » (ou Échap) : la partie est perdue comme avant.
+        public void DeclineRevive()
+        {
+            if (State != GameState.ReviveOffer) return;
+            LastLoss = savedPot;
+            EndRunLost();
+        }
+
+        /// Le remélange de la reprise (comme v3 §12, mais SANS nouvelle partie) : même étage,
+        /// nouveau tirage complet (coffres, rareté, gain, diamants, piège) avec les niveaux et
+        /// la tenue du moment.
+        IEnumerator ReviveRoutine()
+        {
+            SetLock(true);
+            ReviveStarted?.Invoke();
+            Changed?.Invoke();
+
+            yield return new WaitForSeconds(ReviveSwapTime);
+            PrepareFloor();
+            RevivedThisFloor = true;
+            FloorPrepared?.Invoke();
+            Changed?.Invoke();
+
+            yield return new WaitForSeconds(ReviveDuration - ReviveSwapTime);
+            SetState(GameState.Choosing);
+            FloorShown?.Invoke();
+
+            yield return new WaitForSeconds(AntiClickLock);
+            SetLock(false);
+            Changed?.Invoke();
+        }
+
+        // =====================================================================
+        // v5 §13 : la renaissance
+        // =====================================================================
+
+        /// Clic sur « Oui, renaître ! » : vérifie le moment (calme, sans cagnotte) puis la
+        /// sauvegarde (Rebirth.TryRebirth fait tout en une fois et sauvegarde), ferme la pop-up
+        /// et lance l'animation ; à la fin, une NOUVELLE PARTIE (le 1er étage a le ×2).
+        public bool RequestRebirth()
+        {
+            if (!CanRebirthNow) return false;
+            if (!Rebirth.TryRebirth()) return false;
+            PanelOpen = PanelId.None;
+            RebirthPlaying = true;
+            skipRebirthRequested = false;
+            chestTrial.CancelChoice();
+            SetLock(true);
+            RebirthStarted?.Invoke();
+            Changed?.Invoke();
+            RunTransition(RebirthRoutine());
+            return true;
+        }
+
+        /// L'animation peut être passée après 1 s (clic, Espace, Échap).
+        public void SkipRebirthAnimation() => skipRebirthRequested = true;
+
+        IEnumerator RebirthRoutine()
+        {
+            for (float t = 0f; t < RebirthDuration; t += Time.deltaTime)
+            {
+                if (skipRebirthRequested && t >= RebirthSkippableAfter) break;
+                yield return null;
+            }
+            RebirthPlaying = false;
+            // Nouvelle partie : remélange sur place à l'étage 1, redescente sinon.
+            yield return Floor <= 1 ? ReshuffleRoutine() : DescentRoutine();
         }
 
         // =====================================================================

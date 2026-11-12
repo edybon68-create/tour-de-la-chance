@@ -3,7 +3,27 @@ guid: 39048975af12a42b1b339d68b4da01cb
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_DoreDeco
+    second: {fileID: 2100000, guid: d912dbb94f2b74eeab4285d001f7d88e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_MontureSombre
+    second: {fileID: 2100000, guid: 2a28153f608de461b83c55669fd9d98a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_Reflet
+    second: {fileID: 2100000, guid: 2641bc82f86d942118c4e8c7849ffcbc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_VerreNuit
+    second: {fileID: 2100000, guid: 6c6077e208b9f491db9dcfa8e297b234, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

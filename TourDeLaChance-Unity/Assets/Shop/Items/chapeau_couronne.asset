@@ -26,5 +26,10 @@ MonoBehaviour:
   smoothness: 0.3
   accessoryPrefab: {fileID: 8163305123220073116, guid: 6b5f01f2544334a86a8fe265b6ab53dd, type: 3}
   animation: 0
-  attachOffset: {x: 0, y: 0.02, z: 0}
-  attachScale: 0.68
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1
+  flavorText: 
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}

@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ce2523df2424f8ba5201254697e32f, type: 3}
+  m_Name: EconomyCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.EconomyCatalog
+  diamondTiers:
+  - fromFloor: 1
+    amount: 1
+  - fromFloor: 6
+    amount: 2
+  - fromFloor: 10
+    amount: 3
+  reviveCost: 1
+  maxRevivesPerRun: 1
+  rebirthCost: 10000
+  rebirthCoinMultiplier: 2
+  rebirthDiamondMultiplier: 2
+  maxRebirths: 1
+  showDiamondPacks: 1
+  diamondPacks:
+  - id: pack_diamants_1
+    displayName: "Poign\xE9e de diamants"
+    amount: 10
+    icon: {fileID: 21300000, guid: e79cbb443896a424f8fc1a151aaf6060, type: 3}
+  - id: pack_diamants_2
+    displayName: Bourse de diamants
+    amount: 30
+    icon: {fileID: 21300000, guid: f469304e7f0534c97a497f07a23b2887, type: 3}
+  - id: pack_diamants_3
+    displayName: Coffret de diamants
+    amount: 70
+    icon: {fileID: 21300000, guid: 6f57966357c70496283a1a5117b85de2, type: 3}
+  - id: pack_diamants_4
+    displayName: "Tr\xE9sor de diamants"
+    amount: 160
+    icon: {fileID: 21300000, guid: 6f57966357c70496283a1a5117b85de2, type: 3}

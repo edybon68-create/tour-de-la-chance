@@ -89,6 +89,9 @@ MATERIAUX = {
     "M_RubanJaune": ("#FFD54A", 0.0, 0.50),
     "M_MasqueBleu": ("#3A5BD9", 0.0, 0.50),
     "M_MasqueBord": ("#22357F", 0.0, 0.50),
+    # v3/v5 : masque du cheval, framboise à galon jaune (arbitrage du DA, bible §2.8)
+    "M_MasqueFramboise": ("#D63A6E", 0.0, 0.50),
+    "M_MasqueGalon": ("#FFD54A", 0.0, 0.50),
     "M_Plume": ("#F4EEE6", 0.0, 0.70),
     "M_PlumeOmbre": ("#D9D2E4", 0.0, 0.70),
     "M_AilePapillon": ("#2BB8C4", 0.0, 0.40),
@@ -511,6 +514,10 @@ def verifier_fbx(chemin):
 # ---------------------------------------------------------------------------------------
 # 6. Miniature de rendu (vue de 3/4 avant, comme la caméra du jeu)
 # ---------------------------------------------------------------------------------------
+# Les scripts d'accessoires v5 mettent ce drapeau à True (rendus avec le monde en dégradé).
+MONDE_DEGRADE = False
+
+
 def monde_nuit(scene, ambiance=1.0):
     """Monde : fond violet nuit uni (ce que voit la caméra) + lumière d'ambiance douce
     violette (ce que « voient » les objets), comme le ciel en Gradient de la scène Unity."""
@@ -521,6 +528,24 @@ def monde_nuit(scene, ambiance=1.0):
     eclairage = nt.nodes["Background"]  # ce que « voient » les objets (ambiance)
     eclairage.inputs["Color"].default_value = hex_vers_lineaire("#8C7AB8")
     eclairage.inputs["Strength"].default_value = ambiance
+    if MONDE_DEGRADE:
+        # Bible §13.4 : pour juger le métal, l'ambiance est un DÉGRADÉ (ciel #8C7AB8 en haut,
+        # sol #2A2030 en bas) au lieu d'une couleur unie : l'or reflète un ciel clair au-dessus
+        # et un sol sombre en dessous, comme un vrai objet doré, au lieu de ressortir marron.
+        coord = nt.nodes.new("ShaderNodeTexCoord")
+        separe = nt.nodes.new("ShaderNodeSeparateXYZ")
+        rampe = nt.nodes.new("ShaderNodeValToRGB")
+        rampe.color_ramp.elements[0].position = 0.30
+        rampe.color_ramp.elements[0].color = hex_vers_lineaire("#2A2030")
+        rampe.color_ramp.elements[1].position = 0.50
+        rampe.color_ramp.elements[1].color = hex_vers_lineaire("#8C7AB8")
+        carte = nt.nodes.new("ShaderNodeMapRange")       # z de -1..1 -> 0..1
+        carte.inputs["From Min"].default_value = -1.0
+        nt.links.new(coord.outputs["Generated"], separe.inputs["Vector"])
+        nt.links.new(separe.outputs["Z"], carte.inputs["Value"])
+        nt.links.new(carte.outputs["Result"], rampe.inputs["Fac"])
+        nt.links.new(rampe.outputs["Color"], eclairage.inputs["Color"])
+        eclairage.inputs["Strength"].default_value = ambiance * 1.2
     visible = nt.nodes.new("ShaderNodeBackground")  # ce que voit la caméra (fond uni)
     visible.inputs["Color"].default_value = hex_vers_lineaire("#1F1730")
     chemin_rayon = nt.nodes.new("ShaderNodeLightPath")
@@ -1138,3 +1163,423 @@ def sur_cheval(arbre, angle, y_unity, ecart, centre=CHEVAL_CRANE_CENTRE):
     if hit is None:
         hit = axe
     return hit + d * ecart, d
+
+
+def direction_angles(angle, elevation=0.0):
+    """Direction (Blender) donnée par deux angles, comme sur une carte du monde :
+    `angle` = longitude (0 = droit devant, positif = vers la gauche de l'image),
+    `elevation` = latitude (0 = horizontal, positif = vers le haut)."""
+    ce = math.cos(elevation)
+    return Vector((math.sin(angle) * ce, math.cos(angle) * ce, math.sin(elevation)))
+
+
+def rayon_cheval(arbre, centre_blender, d):
+    """Distance entre `centre_blender` et la surface la plus EXTÉRIEURE du cheval dans la
+    direction `d` (on lance le rayon depuis loin dehors, vers le centre : on touche donc la
+    crinière, une oreille ou le museau s'ils sont sur le chemin)."""
+    hit, _, _, _ = arbre.ray_cast(centre_blender + d * 3.0, -d)
+    return 0.0 if hit is None else (hit - centre_blender).dot(d)
+
+
+def sur_cheval_lisse(arbre, centre_unity, angle, elevation, ecart, pente=0.5,
+                     fenetre=(0.35, 0.21), pas=0.07):
+    """Comme sur_cheval(), mais vu depuis un POINT (on peut viser vers le haut ou le bas) et
+    surtout « LISSÉ » : un tissu ou un masque rigide ne rentre pas dans chaque creux, il
+    passe par-dessus les bosses voisines (crinière, toupet, racine du museau).
+
+    Comment : on mesure la surface autour de la direction voulue (une petite grille
+    d'angles, `fenetre` = demi-largeurs en radians) et on garde le point le plus « haut »,
+    en retirant `pente` × la distance (en mètres) jusqu'à ce voisin. Résultat : une
+    enveloppe en forme de tente qui ne touche jamais l'intérieur du cheval.
+    Renvoie (point Blender, direction vers l'extérieur)."""
+    c = depuis_unity(*centre_unity)
+    d = direction_angles(angle, elevation)
+    r0 = rayon_cheval(arbre, c, d)
+    meilleur = r0
+    na, ne = int(round(fenetre[0] / pas)), int(round(fenetre[1] / pas))
+    for i in range(-na, na + 1):
+        for j in range(-ne, ne + 1):
+            if i == 0 and j == 0:
+                continue
+            da, de = i * pas, j * pas
+            r = rayon_cheval(arbre, c, direction_angles(angle + da, elevation + de))
+            # distance approximative sur la surface entre les deux points visés
+            dist = r0 * math.sqrt((da * math.cos(elevation)) ** 2 + de ** 2)
+            meilleur = max(meilleur, r - pente * dist)
+    return c + d * (meilleur + ecart), d
+
+
+def bm_balayage_surface(bm, chemin, hauts, section, mat=0, ferme=False):
+    """Fait glisser une `section` 2D (liste de (côté, hauteur)) le long d'un `chemin` 3D,
+    avec un vecteur « haut » PAR POINT (`hauts`, en général la direction qui sort de la
+    surface). Sert aux galons posés à plat sur une surface courbe (bord du masque) :
+    la largeur reste couchée sur la surface, l'épaisseur pointe vers l'extérieur.
+    ferme=True : boucle fermée (le dernier point rejoint le premier, pas de bouchons)."""
+    pts = [Vector(p) for p in chemin]
+    n = len(pts)
+    anneaux = []
+    for i, p in enumerate(pts):
+        if ferme:
+            t = pts[(i + 1) % n] - pts[i - 1]
+        elif i == 0:
+            t = pts[1] - pts[0]
+        elif i == n - 1:
+            t = pts[-1] - pts[-2]
+        else:
+            t = pts[i + 1] - pts[i - 1]
+        t.normalize()
+        cote = t.cross(Vector(hauts[i])).normalized()
+        h = cote.cross(t).normalized()
+        anneaux.append([bm.verts.new(p + cote * a + h * b) for a, b in section])
+    m = len(section)
+    faces = []
+    for i in range(n if ferme else n - 1):
+        A, B = anneaux[i], anneaux[(i + 1) % n]
+        for s in range(m):
+            u = (s + 1) % m
+            f = bm.faces.new((A[s], B[s], B[u], A[u]))
+            f.material_index = mat
+            faces.append(f)
+    if not ferme:
+        for r in (anneaux[0], anneaux[-1]):
+            f = bm.faces.new(r)
+            f.material_index = mat
+            faces.append(f)
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    return anneaux
+
+
+# ---------------------------------------------------------------------------------------
+# 10. Accessoires v5 « plus jeu moderne » (docs/art-bible.md §13)
+# ---------------------------------------------------------------------------------------
+# Pourquoi des matériaux NEUFS (préfixe M5_) au lieu de retoucher les anciens ?
+#   Dans Unity, l'import d'un modèle retrouve ses matériaux PAR LEUR NOM dans
+#   Assets/Models/Materials. Si on changeait seulement la brillance de « M_Satin », Unity
+#   garderait l'ancien réglage (le .mat existe déjà). Un nom neuf = un .mat neuf, réglé
+#   comme ici. Préréglages de la bible §13.4 (roughness Blender = 1 − smoothness Unity) :
+#   mat doux 0,85 · satin 0,50 · carton brillant 0,35 · verni 0,15 · pierre 0,05 ·
+#   nacre (metallic 0,2) 0,15 · doré déco (metallic 1) 0,20.
+# Les noms que le CODE Unity cherche gardent leur nom d'origine : M_Aureole (émission de
+# l'auréole) et M_AnneauPlanete (émission de l'anneau de la planète).
+MATERIAUX.update({
+    "M5_Reflet": ("#FFFFFF", 0.0, 0.10),
+    "M5_DoreDeco": ("#E8B830", 1.0, 0.20),
+    "M5_Nacre": ("#F4EEE6", 0.2, 0.15),
+    "M5_BlancVerni": ("#F4EEE6", 0.0, 0.15),
+    "M5_BlancSatin": ("#F4EEE6", 0.0, 0.50),
+    "M5_BlancMat": ("#F4EEE6", 0.0, 0.85),
+    "M5_JauneVerni": ("#FFD54A", 0.0, 0.15),
+    # casquette
+    "M5_CasquetteRouge": ("#E04040", 0.0, 0.80),
+    "M5_CasquetteVisiere": ("#A02828", 0.0, 0.50),
+    # chapeau de fête
+    "M5_CartonRose": ("#FF6FB5", 0.0, 0.35),
+    "M5_CartonJaune": ("#FFD54A", 0.0, 0.35),
+    # bonnet
+    "M5_LaineTurquoise": ("#2BB8C4", 0.0, 0.85),
+    "M5_TurquoiseVerni": ("#2BB8C4", 0.0, 0.15),
+    # lunettes de soleil
+    "M5_MontureSombre": ("#2A2A3A", 0.0, 0.50),
+    "M5_VerreNuit": ("#34286A", 0.0, 0.05),
+    # nœud papillon, haut-de-forme
+    "M5_SatinRouge": ("#C0392B", 0.0, 0.45),
+    "M5_SatinFonce": ("#8E2A20", 0.0, 0.70),
+    "M5_FeutreSoie": ("#1E1E1E", 0.0, 0.60),
+    # lunettes cœur
+    "M5_CoeurVerni": ("#FF6FB5", 0.0, 0.10),
+    "M5_MontureBlanche": ("#F4EEE6", 0.0, 0.70),
+    # collier de fleurs
+    "M5_PetaleRose": ("#FF6FB5", 0.0, 0.70),
+    "M5_PetaleBlanc": ("#F4EEE6", 0.0, 0.70),
+    # sorcier
+    "M5_FeutreViolet": ("#4B2E83", 0.0, 0.80),
+    "M5_RubanJaune": ("#FFD54A", 0.0, 0.50),
+    "M5_Rapiece": ("#6A4C9C", 0.0, 0.80),
+    # masque
+    "M5_GalonVerni": ("#FFD54A", 0.0, 0.20),
+    # couronne
+    "M5_Rubis": ("#D62839", 0.0, 0.05, 0.2),
+    "M5_Velours": ("#4B2E83", 0.0, 0.90),
+    # papillon
+    "M5_AilePapillon": ("#2BB8C4", 0.0, 0.35),
+    "M5_BordPapillon": ("#34286A", 0.0, 0.70),
+    "M5_TachePapillon": ("#F28C38", 0.0, 0.35, 0.4),
+    # planète
+    "M5_Planete": ("#B48CFF", 0.0, 0.40),
+    "M5_BandePlanete": ("#8E5BD6", 0.0, 0.40),
+    "M5_LuneMat": ("#F4EEE6", 0.0, 0.85),
+})
+
+
+def U(x, y, z):
+    """Raccourci : point donné en Unity (local à Joueur, base du cheval) -> Blender."""
+    return depuis_unity(x, y, z)
+
+
+def biseau_v5(obj, largeur=0.05, segments=2, angle=30.0):
+    """Biseau « jouet en vinyle » de la bible §13.3 : large et rond (2 segments, profil 0,5),
+    normales durcies (Harden Normals), puis normales pondérées (Weighted Normal, poids 50,
+    Keep Sharp, Face Area). Les grandes faces restent bien plates (reflet net) et la
+    lumière ne « tourne » que dans le biseau : un coup de lumière sur chaque bord."""
+    for p in obj.data.polygons:      # les normales durcies demandent un lissage
+        p.use_smooth = True
+    mod = obj.modifiers.new("Biseau", "BEVEL")
+    mod.width = largeur
+    mod.segments = segments
+    mod.profile = 0.5
+    mod.limit_method = "ANGLE"
+    mod.angle_limit = math.radians(angle)
+    mod.use_clamp_overlap = True
+    mod.harden_normals = True
+    mod.miter_outer = "MITER_ARC"
+    wn = obj.modifiers.new("NormalesPonderees", "WEIGHTED_NORMAL")
+    wn.weight = 50
+    wn.keep_sharp = True
+    wn.mode = "FACE_AREA"
+    return mod
+
+
+def piece(nom, bm, mats, biseau=0.0, segments=2, angle=30.0, lissage="tout", pivot=None):
+    """Crée une pièce d'accessoire v5 à partir d'un bmesh.
+    - biseau > 0 : biseau_v5 de cette largeur (puis appliqué) ;
+    - lissage : "tout" (objet mou, rond) ou "angle" (objet dur, arêtes > 35° nettes) ;
+      ignoré si biseau > 0 (les normales durcies s'en chargent) ;
+    - pivot : point Blender où mettre l'origine (la charnière d'une pièce animée)."""
+    o = objet_depuis_bmesh(nom, bm, mats)
+    if biseau > 0:
+        biseau_v5(o, biseau, segments, angle)
+        appliquer(o)
+    elif lissage == "angle":
+        lisser_angle(o, 35)
+    else:
+        lisser_tout(o)
+    if pivot is not None:
+        deplacer_origine(o, pivot)
+    return o
+
+
+def racine_v5(nom, point, enfants):
+    """Objet vide racine `nom` posé sur le point d'accroche du cheval `point` ; les
+    `enfants` (déjà construits à leur place sur le cheval) y sont rangés sans bouger,
+    puis le tout revient à l'origine. Résultat : origine de l'accessoire = point
+    d'accroche, donc dans Unity attachScale = 1 et attachOffset = (0 ; 0 ; 0)."""
+    racine = vide(nom, depuis_unity(*CHEVAL_ACCROCHES[point]))
+    for e in enfants:
+        if e.parent is None:
+            parenter(e, racine)
+    racine.location = (0, 0, 0)
+    bpy.context.view_layer.update()
+    return racine
+
+
+def reperes_effets(eclats=(), fx=None, parent=None):
+    """Objets vides que le code cherche par leur nom (bible §13.5) : `Eclat_1..3` (où
+    peut apparaître une étoile de reflet) et `Fx_Emetteur` (où naissent les particules).
+    Positions en Blender. Renvoie la liste des vides créés."""
+    res = []
+    for i, p in enumerate(eclats):
+        res.append(vide(f"Eclat_{i + 1}", Vector(p), parent))
+    if fx is not None:
+        res.append(vide("Fx_Emetteur", Vector(fx), parent))
+    for o in res:
+        o.empty_display_size = 0.05
+    return res
+
+
+def finir_v5(racine, nom, point, y_min=1.0):
+    """Fin commune des accessoires v5 : rapport (triangles), rendu porté par le cheval
+    (docs/captures/v5_cheval_<nom>.png, monde en dégradé), export FBX dans
+    blender/exports/ (le dossier d'attente : on ne touche pas au projet Unity)."""
+    global MONDE_DEGRADE
+    MONDE_DEGRADE = True
+    total = rapport(racine)
+    rendre_porte_cheval(racine, f"v5_cheval_{nom}.png", point, y_min=y_min)
+    chemin = exporter_fbx(racine, f"{nom}.fbx", dossier=DOSSIER_EXPORTS)
+    verifier_fbx(chemin)
+    print(f"RESUME {nom} triangles={total}")
+    return total
+
+
+# --- Briques de forme v5 ---------------------------------------------------------------
+def contour_etoile(rayon, branches=5, creux=0.45, depart=math.pi / 2):
+    """Contour 2D (x, z) d'une étoile : `branches` pointes, creux à `creux` × rayon."""
+    pts = []
+    for k in range(2 * branches):
+        r = rayon if k % 2 == 0 else rayon * creux
+        a = depart + math.pi * k / branches
+        pts.append((r * math.cos(a), r * math.sin(a)))
+    return pts
+
+
+def contour_coeur(taille, n=24):
+    """Contour 2D (x, z) d'un cœur de `taille` de large, centré, pointe en bas."""
+    pts = []
+    for k in range(n):
+        t = 2 * math.pi * k / n
+        x = 16 * math.sin(t) ** 3
+        z = 13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
+        pts.append((x, z + 2.5))
+    pts.reverse()                      # sens inverse des aiguilles d'une montre
+    k = taille / 32.0
+    return [(x * k, z * k) for x, z in pts]
+
+
+def bm_coussin(bm, contour, e_bord, e_centre, matrice=None, mat=0, mat_dos=None,
+               anneaux=2, dos_plat=False):
+    """Plaque BOMBÉE comme un coussin (verres en cœur, ailes de nœud, pétales, taches) :
+    épaisse de `e_bord` sur le bord et de `e_centre` au milieu. Le devant regarde +Y local.
+    `contour` 2D (x, z) autour de (0, 0). dos_plat=True : seul le devant est bombé."""
+    n = len(contour)
+    mat_dos = mat if mat_dos is None else mat_dos
+
+    def couche(signe, bombe):
+        rangs = []
+        for k in range(anneaux):
+            t = k / anneaux
+            s = math.cos(t * math.pi / 2)
+            y = e_bord / 2 + (e_centre - e_bord) / 2 * math.sin(t * math.pi / 2) * bombe
+            rangs.append([bm.verts.new((x * s, signe * y, z * s)) for x, z in contour])
+        y = e_bord / 2 + (e_centre - e_bord) / 2 * bombe
+        return rangs, bm.verts.new((0, signe * y, 0))
+
+    devant, sommet_av = couche(+1, 1.0)
+    dos, sommet_ar = couche(-1, 0.0 if dos_plat else 1.0)
+    faces = []
+
+    def relier(rangs, sommet, m):
+        for k in range(len(rangs) - 1):
+            A, B = rangs[k], rangs[k + 1]
+            for i in range(n):
+                j = (i + 1) % n
+                f = bm.faces.new((A[i], A[j], B[j], B[i]))
+                f.material_index = m
+                faces.append(f)
+        last = rangs[-1]
+        for i in range(n):
+            f = bm.faces.new((last[i], last[(i + 1) % n], sommet))
+            f.material_index = m
+            faces.append(f)
+
+    relier(devant, sommet_av, mat)
+    relier(dos, sommet_ar, mat_dos)
+    for i in range(n):                 # la tranche
+        j = (i + 1) % n
+        f = bm.faces.new((devant[0][i], dos[0][i], dos[0][j], devant[0][j]))
+        f.material_index = mat_dos
+        faces.append(f)
+    bmesh.ops.recalc_face_normals(bm, faces=faces)
+    verts = list({v for f in faces for v in f.verts})
+    if matrice is not None:
+        bmesh.ops.transform(bm, matrix=matrice, verts=verts)
+    return verts
+
+
+def bm_reflet(bm, matrice, mat, echelle=1.0):
+    """Reflet peint (bible §13.4) : une barre en diagonale + un point, blancs, en relief de
+    1 cm, à poser EN HAUT À GAUCHE d'une surface vernie. `matrice` = repère de la surface
+    (Y local = la normale, +X local = la gauche de l'image). Coordonnées locales en mètres."""
+    e = echelle
+    verts = []
+    barre = [(-0.035 * e, -0.009 * e), (0.035 * e, -0.009 * e),
+             (0.035 * e, 0.009 * e), (-0.035 * e, 0.009 * e)]
+    rot = Matrix.Rotation(math.radians(-40), 4, "Y")
+    verts += bm_plaque(bm, barre, 0.012, matrice @ rot, mat=mat)
+    point = contour_ellipse(0.012 * e, 0.012 * e, n=6)
+    verts += bm_plaque(bm, point, 0.012,
+                       matrice @ Matrix.Translation((0.045 * e, 0, 0.03 * e)), mat=mat)
+    return verts
+
+
+def bm_pompon(bm, centre, rayon, mat=0, bosses=0.20, graine_=3, boules=0):
+    """Pompon « duveteux » : une icosphère dont les 12 sommets d'origine sont poussés vers
+    l'extérieur (12 bosses), 80 triangles seulement. `bosses` = profondeur relative.
+    boules=7 : à la place, 7 petites boules groupées (1 au centre, 6 autour), ~250 triangles."""
+    rnd = random.Random(graine_)
+    if boules:
+        verts = []
+        rb = rayon * 0.52
+        pos = [Vector((0, 0, 0))]
+        for k in range(boules - 1):
+            a = 2 * math.pi * k / (boules - 1)
+            pos.append(Vector((math.cos(a), math.sin(a), 0.45 * (-1) ** k)).normalized()
+                       * (rayon - rb))
+        for p in pos:
+            verts += bm_sphere(bm, rb * rnd.uniform(0.92, 1.05), Vector(centre) + p,
+                               segments=6, anneaux=4, mat=mat)
+        return verts
+    res = bmesh.ops.create_icosphere(bm, subdivisions=2, radius=1.0)
+    verts = res["verts"]
+    for v in verts:
+        bosse = len(v.link_edges) == 5             # les 12 sommets d'origine
+        r = 1.0 if bosse else 1.0 - bosses
+        r *= 1.0 + rnd.uniform(-0.04, 0.04)
+        v.co = v.co.normalized() * r * rayon + Vector(centre)
+    for v in verts:
+        for f in v.link_faces:
+            f.material_index = mat
+    return verts
+
+
+def bm_tube(bm, chemin, rayon, cotes=6, mat=0, haut=Vector((0, 0, 1)), boucher=True,
+            rayons=None):
+    """Tube rond (section à `cotes` côtés) le long d'un chemin 3D. `rayons` (facultatif) :
+    un facteur par point, multiplié par `rayon` (pour un bout qui s'affine)."""
+    if rayons is None:
+        section = [(rayon * math.cos(2 * math.pi * k / cotes),
+                    rayon * math.sin(2 * math.pi * k / cotes)) for k in range(cotes)]
+        return bm_balayage(bm, chemin, section, haut=haut, mat=mat, boucher=boucher)
+    avant = set(bm.verts)
+    section = [(math.cos(2 * math.pi * k / cotes), math.sin(2 * math.pi * k / cotes))
+               for k in range(cotes)]
+    bm_balayage(bm, chemin, section, haut=haut, mat=mat, boucher=boucher)
+    nouveaux = [v for v in bm.verts if v not in avant]
+    for i, p in enumerate(chemin):           # chaque anneau est réduit à son rayon
+        anneau = nouveaux[i * cotes:(i + 1) * cotes]
+        for v in anneau:
+            v.co = Vector(p) + (v.co - Vector(p)) * rayons[i] * rayon
+    return nouveaux
+
+
+def bm_disque(bm, rayon, epaisseur, matrice, cotes=8, mat=0, bombe=0.0):
+    """Petit disque (bouton, œillet, pois, perle plate) : devant +Y local, bombé de
+    `bombe` mètres au centre si demandé."""
+    contour = contour_ellipse(rayon, rayon, n=cotes)
+    if bombe > 0:
+        return bm_coussin(bm, contour, epaisseur, epaisseur + 2 * bombe, matrice, mat,
+                          anneaux=2, dos_plat=True)
+    return bm_plaque(bm, contour, epaisseur, matrice, mat=mat)
+
+
+def bm_etoile(bm, rayon, epaisseur, matrice, mat=0, bombe=0.0, branches=5, creux=0.45):
+    """Étoile en relief (plaque, ou bombée si `bombe` > 0). Devant = +Y local."""
+    contour = contour_etoile(rayon, branches, creux)
+    if bombe > 0:
+        return bm_coussin(bm, contour, epaisseur, epaisseur + 2 * bombe, matrice, mat,
+                          anneaux=1)
+    return bm_plaque(bm, contour, epaisseur, matrice, mat=mat)
+
+
+# Base commune des chapeaux sur le cheval (mesurée par rayons sur personnage_cheval.fbx) :
+# à y = 1,80 la tête tient dans un cercle de rayon 0,31 centré en z = 0,04 (le front est à
+# z = −0,23, la crinière à z = +0,34). Au-dessus, les oreilles (x ≈ ±0,15) et le toupet
+# montent jusqu'à y ≈ 2,02 : l'intérieur d'un chapeau doit les contenir.
+CHAPEAU_BASE = (0.0, 1.80, 0.04)
+CHAPEAU_RAYON = 0.31
+
+
+def arbre_bm(bm):
+    """« Arbre de recherche » (BVH) d'un bmesh en cours de construction : sert à poser des
+    détails pile SUR une forme déjà faite (un œillet sur la calotte, une étoile sur le cône)."""
+    from mathutils.bvhtree import BVHTree
+    bm.normal_update()
+    return BVHTree.FromBMesh(bm)
+
+
+def poser_sur(arbre, centre, direction, ecart=0.0):
+    """Point de la surface de `arbre` vu depuis `centre` dans `direction` (rayon lancé depuis
+    l'extérieur vers le centre), décollé de `ecart`. Renvoie (point, normale de la face)."""
+    d = Vector(direction).normalized()
+    hit, normale, _, _ = arbre.ray_cast(Vector(centre) + d * 3.0, -d)
+    if hit is None:
+        return Vector(centre), d
+    return hit + normale * ecart, normale

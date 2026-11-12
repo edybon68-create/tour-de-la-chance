@@ -32,7 +32,8 @@ SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
 # Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
 # de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
 # les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
-OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png", "icone_reglages.png"}
+OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png", "icone_reglages.png",
+                 "icone_rebirth.png"}
 SEUIL_TROU = 0.035
 # Images qui ne sont pas des icônes du shop : on les laisse de côté.
 IGNORER = set()

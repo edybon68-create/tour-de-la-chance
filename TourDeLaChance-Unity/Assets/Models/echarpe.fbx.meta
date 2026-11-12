@@ -3,7 +3,17 @@ guid: 6b88c6ad893a546aa90f91484400107a
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_LaineBlanche
+    second: {fileID: 2100000, guid: 79a5b3e2a54f6484a877d3d532d4c3c9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_LaineMenthe
+    second: {fileID: 2100000, guid: c4b7f50aee9524747a87e52c49428813, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

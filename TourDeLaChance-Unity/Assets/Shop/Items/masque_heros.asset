@@ -28,3 +28,8 @@ MonoBehaviour:
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
+  flavorText: 
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}

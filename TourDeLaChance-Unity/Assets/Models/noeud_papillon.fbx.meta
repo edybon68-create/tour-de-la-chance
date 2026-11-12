@@ -3,7 +3,22 @@ guid: 9dcb250a66ac640798e1dd1241781dfd
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_BlancVerni
+    second: {fileID: 2100000, guid: 52e5278c23b63448ca0516b5a085a9bf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_SatinFonce
+    second: {fileID: 2100000, guid: 0563ddae0eb7b4a108fadb32e34777d1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_SatinRouge
+    second: {fileID: 2100000, guid: 3e014c380bd7c4ac1a2c3ead262b090b, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

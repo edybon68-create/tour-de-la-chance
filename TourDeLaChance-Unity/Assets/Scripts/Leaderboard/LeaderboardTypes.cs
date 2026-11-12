@@ -42,6 +42,7 @@ namespace TourDeLaChance
         public int etage;
         public int pieces;        // 0 pour une partie perdue
         public string date;       // "yyyy-MM-dd"
+        public bool reprise;      // v5 §11.4 : la partie a utilisé une reprise (marquée d'un ◆)
     }
 
     /// Ce qu'on envoie au service : les 3 totaux d'un coup, plus (pour le local) la partie qui

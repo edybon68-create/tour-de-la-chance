@@ -3,7 +3,17 @@ guid: 501e2e39971a445d88b5bcdb7f497f6f
 ModelImporter:
   serializedVersion: 24300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M5_DoreDeco
+    second: {fileID: 2100000, guid: d912dbb94f2b74eeab4285d001f7d88e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: M_Aureole
+    second: {fileID: 2100000, guid: b12b5b56a0b6b407d9e133a17876fdee, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
