@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 1
   rarity: peu_commun
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 02553fafb941a403c89e3ab77f930aa5, type: 3}
   skinStyle: 0
   color: {r: 0.54901963, g: 0.34901962, b: 0.2, a: 1}
   secondaryColor: {r: 1, g: 1, b: 1, a: 1}
@@ -33,3 +33,8 @@ MonoBehaviour:
   textureTiling: {x: 1, y: 1}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
+  pattern: 0
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0

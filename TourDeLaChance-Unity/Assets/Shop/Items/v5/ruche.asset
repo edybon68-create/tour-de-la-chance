@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 0
   rarity: super_rare
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: fb00425f19785451db6a43fd284e83b5, type: 3}
   skinStyle: 0
   color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
   secondaryColor: {r: 1, g: 1, b: 1, a: 1}
@@ -33,3 +33,8 @@ MonoBehaviour:
   textureTiling: {x: 1, y: 1}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
+  pattern: 0
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0

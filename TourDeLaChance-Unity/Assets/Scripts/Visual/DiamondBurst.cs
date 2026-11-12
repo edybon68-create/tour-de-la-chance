@@ -152,7 +152,7 @@ namespace TourDeLaChance
             if (fx == null || fx.panel == null) return;
             Vector2 panelPos = RuntimePanelUtils.CameraTransformWorldToPanel(fx.panel, chestPosition + new Vector3(0f, 1.6f, 0f), Camera.main);
             Vector2 local = fx.WorldToLocal(panelPos);
-            var label = new Label($"+{amount} ◆") { pickingMode = PickingMode.Ignore };
+            var label = new Label($"+{amount} {ShopUi.Diamant}") { pickingMode = PickingMode.Ignore };
             label.AddToClassList("float-text");
             label.AddToClassList("float-text--diamants");
             label.style.left = local.x;

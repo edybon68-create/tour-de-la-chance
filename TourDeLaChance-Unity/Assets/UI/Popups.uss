@@ -24,72 +24,92 @@
 .popup-frame {
     width: 1000px;
     height: 840px;
+    /* v5.1 : la fenêtre descend de 60 px (marge haute de 120 px, centrée) pour laisser la
+       place au titre qui déborde au-dessus, sans toucher la roue dentée du HUD. */
+    margin-top: 120px;
     display: none;
 }
 
 .popup-shadow {
     position: absolute;
     left: 0; right: 0; top: 12px; bottom: -12px;
-    border-radius: 32px;
+    border-radius: 28px;
     background-color: rgba(0, 0, 0, 0.4);
 }
 
+/* v5.1 (art bible §12.18) : la fenêtre « façon jeu Roblox » : fond BLANC CASSÉ très arrondi
+   (28 px), contour d'encre épais (6 px). overflow: hidden découpe le motif en filigrane et
+   les voiles des confirmations suivant les coins arrondis. */
 .popup-window {
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
     border-width: 6px;
     border-color: #110D1F;
-    border-radius: 32px;
-    background-color: #2A2440;
+    border-radius: 28px;
+    background-color: #FBF8F2;
     background-image: url("Degrades/popup_corps.png");
     -unity-background-scale-mode: stretch-to-fill;
+    overflow: hidden;
 }
 
-/* Le bandeau de titre (96 px) : sa couleur dépend de la pop-up (classe posée par le code). */
+/* Le motif répété (étoile, pièce, diamant : Degrades/motif_popup.png, fabriqué par
+   UiFxTextures) à 6 % d'opacité : on le devine à peine, comme un papier peint. */
+.popup-motif {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-image: url("Degrades/motif_popup.png");
+    background-repeat: repeat;
+    background-size: 150px 150px;
+    opacity: 0.06;
+}
+
+/* Le titre qui DÉBORDE en haut à gauche : une rangée (grande icône + titre) posée à cheval
+   sur le bord haut de la fenêtre, un peu sortie à gauche. Le centre de la rangée tombe
+   juste sur le contour du haut. */
 .popup-header {
-    height: 96px;
-    flex-shrink: 0;
+    position: absolute;
+    left: -34px;
+    top: -64px;
+    height: 128px;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    background-color: #5A4F88;
-    border-top-left-radius: 26px;
-    border-top-right-radius: 26px;
-    border-bottom-width: 4px;
-    border-bottom-color: #110D1F;
 }
-.popup-header--boutique { background-color: #C2477A; }
-.popup-header--inventaire { background-color: #3B7DD8; }
-.popup-header--index { background-color: #2E9E8E; }
-.popup-header--ameliorations { background-color: #D99A1A; }
-.popup-header--classement { background-color: #6C4FE0; }
-.popup-header--reglages, .popup-header--pseudo { background-color: #5A4F88; }
-.popup-header--renaissance { background-color: #EF6A32; }  /* v5 : « flamme » de la Renaissance */
-.popup-header--confirmation { background-color: #5A4F88; }
 
+/* L'icône du menu (posée par le code) : 120 px, la même que le bouton de la colonne. Les
+   icônes ont leur propre contour noir (détourage v5.1) : scale-to-fit les garde entières. */
+.popup-icon {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Le grand titre blanc très gras : contour d'encre de 5 px (le maximum propre de la
+   police) et une ombre décalée vers le bas, qui fait l'épaisseur « autocollant ». */
 .popup-title {
-    font-size: 48px;
+    font-size: 62px;
     color: #FFFFFF;
     -unity-font-style: bold;
-    -unity-text-outline-width: 4px;
+    -unity-text-outline-width: 5px;
     -unity-text-outline-color: #110D1F;
-    -unity-text-align: middle-center;
-    margin: 0;
+    text-shadow: 0 5px 0 #110D1F;
+    -unity-text-align: middle-left;
+    margin: 0 0 0 10px;
     padding: 0;
 }
 
-/* v5 §7.2 : plus d'icône dans le bandeau (.popup-icon supprimée), le titre est centré. */
-
-/* Le bouton fermer : rond Ø 72, rouge, à cheval sur le coin haut droit. */
+/* Le bouton fermer : rond Ø 72, rouge, à cheval sur le coin haut droit (inchangé). */
 .popup-close {
     position: absolute;
     top: -20px;
     right: -20px;
 }
 
+/* Le corps : de la place en haut pour le titre qui descend dans la fenêtre. */
 .popup-body {
     flex-grow: 1;
     flex-shrink: 1;
-    padding: 16px 32px 28px 32px;
+    padding: 60px 32px 26px 32px;
 }
 
 .panel-wallet-row { margin: 0 0 4px 0; }

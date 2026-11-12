@@ -6,18 +6,15 @@ using UnityEngine.UIElements;
 namespace TourDeLaChance
 {
     /// <summary>
-    /// La pop-up « Renaissance » (spec v5 §13.3) : trois cadres, « Tu perds » (rouge), « Tu
+    /// La pop-up « Renaissance » (spec v5 §13.3) : trois cartes, « Tu perds » (rouge), « Tu
     /// gardes » (bleu), « Tu gagnes » (or), avec TOUS les nombres lus dans la sauvegarde et les
-    /// catalogues ; un conseil ; le bouton « Renaître — 10 000 » (grisé avec la raison si besoin)
-    /// et sa confirmation. Après la renaissance : « Renaissance faite ✓ ».
+    /// catalogues ; un conseil ; le message important (v5.1) ; le gros bouton vert « Renaître !
+    /// [pièce] 10 000 » (grisé avec la raison si besoin) et sa confirmation. Après la renaissance : « Renaissance faite ✓ ».
     /// Ce n'est pas un MonoBehaviour : PanelsController le crée. Il AFFICHE et TRANSMET : la
     /// règle est dans Rebirth (sauvegarde) et GameManager.RequestRebirth (bon moment).
     /// </summary>
     public class RebirthPage : IDisposable
     {
-        static readonly Color Red = new Color(0.839f, 0.271f, 0.271f);   // #D64545
-        static readonly Color Blue = new Color(0.231f, 0.490f, 0.847f);  // #3B7DD8
-        static readonly Color Gold = new Color(1f, 0.835f, 0.29f);       // #FFD54A
 
         readonly VisualElement page;
         readonly GameManager game;
@@ -69,7 +66,7 @@ namespace TourDeLaChance
             columns.AddToClassList("rebirth-columns");
 
             // Tu perds : TOUTES les pièces et les 3 améliorations.
-            var lose = Column(columns, "Tu perds", Red);
+            var lose = Column(columns, "Tu perds", "carte--rouge");
             Line(lose, $"Toutes tes pièces : {ShopUi.Thousands(Wallet.Coins)}");
             var levels = new[] { Upgrades_.Gains, Upgrades_.Chests, Upgrades_.Traps }
                 .Select(id => (def: Upgrades.Catalog != null ? Upgrades.Catalog.Get(id) : null, level: Upgrades.Level(id)))
@@ -77,14 +74,14 @@ namespace TourDeLaChance
             Line(lose, "Tes améliorations : " + string.Join(", ", levels));
 
             // Tu gardes : objets, tenue, diamants, records.
-            var keep = Column(columns, "Tu gardes", Blue);
+            var keep = Column(columns, "Tu gardes", "carte--bleue");
             int objects = Shop.Catalog == null ? 0 : Shop.Catalog.Boxes.SelectMany(b => b.items).Count(i => i != null && Shop.CountOf(i) >= 1);
             Line(keep, $"Tes skins et accessoires : {objects} objet{(objects > 1 ? "s" : "")}");
             Line(keep, $"Ta tenue, tes diamants ({Diamonds.Count})");
             Line(keep, "Tes records et ton classement");
 
             // Tu gagnes : ×2 pièces, ×2 diamants, les Boîtes Animaux.
-            var gain = Column(columns, "Tu gagnes", Gold);
+            var gain = Column(columns, "Tu gagnes", "carte--or");
             Line(gain, $"×{eco.RebirthCoinMultiplier} pièces sur chaque trésor, pour toujours");
             Line(gain, $"×{eco.RebirthDiamondMultiplier} diamants dans les trésors");
             var animals = Shop.Boxes.FirstOrDefault(b => b.requiresRebirth);
@@ -93,12 +90,18 @@ namespace TourDeLaChance
 
             page.Add(ShopUi.NewLabel("Tu rachèteras tes améliorations deux fois plus vite. La renaissance devient rentable après environ 3 heures de jeu.", "rebirth-tip"));
 
+            // v5.1 : le message important, en blanc contouré, la partie positive en vert.
+            var message = new VisualElement { pickingMode = PickingMode.Ignore };
+            message.AddToClassList("message-important");
+            message.Add(ShopUi.NewLabel("Les pièces et les améliorations sont remises à zéro.", "message-important__texte"));
+            message.Add(ShopUi.NewLabel("Tu gardes tout le reste !", "message-important__texte message-important__texte--positif"));
+            page.Add(message);
+
             // Le bouton (grisé avec la raison : pas assez de pièces, ou une cagnotte en jeu).
+            // v5.1 : gros bouton vert d'action, avec son prix.
             var row = new VisualElement();
             row.AddToClassList("rebirth-row");
-            rebirthButton = new Button(OnRebirthClicked) { text = $"Renaître — {ShopUi.Thousands(Rebirth.Cost)}" };
-            rebirthButton.AddToClassList("btn");
-            rebirthButton.AddToClassList("btn--or");
+            rebirthButton = PopupDecor.PriceButton(OnRebirthClicked, "Renaître !", Rebirth.Cost, false);
             rebirthButton.AddToClassList("rebirth-btn");
             row.Add(rebirthButton);
             reasonLabel = ShopUi.NewLabel(Reason(), "missing");
@@ -115,7 +118,7 @@ namespace TourDeLaChance
             var buttons = new VisualElement();
             buttons.AddToClassList("v5-confirm-buttons");
             var yes = new Button(OnConfirm) { text = "Oui, renaître !" };
-            yes.AddToClassList("btn"); yes.AddToClassList("btn--or"); yes.AddToClassList("v5-confirm-btn");
+            yes.AddToClassList("btn"); yes.AddToClassList("btn--vert"); yes.AddToClassList("v5-confirm-btn");
             var no = new Button(() => confirm.style.display = DisplayStyle.None) { text = "Annuler" };
             no.AddToClassList("btn"); no.AddToClassList("btn--sombre"); no.AddToClassList("v5-confirm-btn");
             buttons.Add(yes);
@@ -136,15 +139,14 @@ namespace TourDeLaChance
             return "";
         }
 
-        static VisualElement Column(VisualElement parent, string title, Color color)
+        /// Un cadre « carte » v5.1 : fond en dégradé vif (classe de couleur), titre blanc contouré.
+        static VisualElement Column(VisualElement parent, string title, string colorClass)
         {
             var col = new VisualElement { pickingMode = PickingMode.Ignore };
             col.AddToClassList("rebirth-col");
-            col.style.borderTopColor = color; col.style.borderBottomColor = color;
-            col.style.borderLeftColor = color; col.style.borderRightColor = color;
-            var t = ShopUi.NewLabel(title, "rebirth-col__titre");
-            t.style.color = color;
-            col.Add(t);
+            col.AddToClassList("carte");
+            col.AddToClassList(colorClass);
+            col.Add(ShopUi.NewLabel(title, "rebirth-col__titre"));
             parent.Add(col);
             return col;
         }

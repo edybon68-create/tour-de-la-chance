@@ -18,7 +18,7 @@ MonoBehaviour:
   slot: 0
   rarity: secret
   free: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 8ef859c90c2eb4342b9c42835404da57, type: 3}
   skinStyle: 0
   color: {r: 1, g: 0.72156864, b: 0.1882353, a: 1}
   secondaryColor: {r: 1, g: 0.47843137, b: 0.10980392, a: 1}

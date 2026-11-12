@@ -15,6 +15,15 @@ namespace TourDeLaChance
     {
         static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
 
+        /// v5.1 : les PICTOGRAMMES des monnaies dans un texte. La police n'a pas de joli
+        /// diamant : on insère une petite image avec la balise « sprite » du texte enrichi.
+        /// Les images viennent du Sprite Asset Assets/UI/Monnaies/monnaies.asset (diamant.png et
+        /// piece.png, avec leur contour noir), réglé comme « Default Sprite Asset » dans
+        /// Assets/UI/TexteReglages.asset (les réglages de texte de HudPanelSettings).
+        /// Exemple : $"Continuer — 1 {ShopUi.Diamant}".
+        public const string Diamant = "<sprite name=\"diamant\">";
+        public const string Piece = "<sprite name=\"piece\">";
+
         /// Un pourcentage avec 2 décimales au plus, sans zéros inutiles : 10 %, 6,25 %, 4,67 %.
         public static string Percent(double value) => value.ToString("0.##", French) + " %";
 

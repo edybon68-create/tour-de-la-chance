@@ -102,9 +102,9 @@ namespace TourDeLaChance
         {
             shown = true;
             int pot = game.Pot;
-            text.text = $"Utilise {GameManager.ReviveCost} ◆ pour garder ta cagnotte ({ShopUi.Thousands(pot)}) et rejouer l'étage {game.Floor} avec de nouveaux coffres.";
-            reminder.text = $"Une seule reprise par partie · Tu as {Diamonds.Count} ◆";
-            continueButton.text = $"Continuer — {GameManager.ReviveCost} ◆";
+            text.text = $"Utilise {GameManager.ReviveCost} {ShopUi.Diamant} pour garder ta cagnotte ({ShopUi.Thousands(pot)}) et rejouer l'étage {game.Floor} avec de nouveaux coffres.";
+            reminder.text = $"Une seule reprise par partie · Tu as {Diamonds.Count} {ShopUi.Diamant}";
+            continueButton.text = $"Continuer — {GameManager.ReviveCost} {ShopUi.Diamant}";
             window.style.display = DisplayStyle.Flex;
             appear = 0f;
             if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RepriseOffre);

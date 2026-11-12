@@ -133,9 +133,10 @@ amélioration achetée ne s'applique qu'à l'étage suivant.
 | **Pirates : accessoires** (v5) | **5 diamants** | 12 accessoires, même répartition et mêmes taux |
 
 **v5** : on porte un skin et **au plus 2 accessoires, sur deux emplacements différents** (deux
-chapeaux, ou lunettes + masque, sont interdits car ils se chevauchent). La Boutique a 3 onglets
-(Boîtes, Pirates, Diamants : packs **désactivés** « Bientôt disponible ») et des cartes compactes
-qui gardent les taux visibles ; « Contenu et taux » montre une boîte en détail. L'**Index** montre
+chapeaux, ou lunettes + masque, sont interdits car ils se chevauchent). La Boutique est **une seule
+liste qui défile** (v5.1) : Boîtes classiques, Pirates, Animaux, Diamants (packs **désactivés**
+« Bientôt disponible ») ; les onglets du haut y font défiler en douceur, et les cartes gardent
+les taux visibles ; « Contenu et taux » montre une boîte en détail. L'**Index** montre
 tous les objets en couleurs (sauf les Secrets non obtenus, « ? »), rangés Tous / Par rareté / Par
 catégorie, et une **fiche agrandie** avec l'objet en 3D sur un **cheval vierge**. L'ouverture des
 boîtes se joue **en 3D** (boîte qui tombe, tremble, s'ouvre, objet qui sort), toujours identique

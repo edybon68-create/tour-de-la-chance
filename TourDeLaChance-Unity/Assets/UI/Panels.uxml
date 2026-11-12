@@ -2,8 +2,9 @@
     <!-- Les POP-UPS v4 et leurs boutons d'ouverture (spec v4 §5.5, §5.6, §6.2).
          Ordre de dessin (un élément est dessiné PAR-DESSUS ceux qui le précèdent) :
            1. le fond assombri (un clic dessus ferme la pop-up) ;
-           2. la pop-up centrée : son ombre, la fenêtre (bandeau de titre + corps) et le bouton
-              fermer rond rouge à cheval sur le coin (v5 §7.2 : plus d'icône dans le bandeau) ;
+           2. la pop-up centrée : son ombre, la fenêtre blanc cassé (motif en filigrane + corps),
+              le titre qui déborde en haut à gauche (grande icône + titre, v5.1) et le bouton
+              fermer rond rouge à cheval sur le coin ;
            3. les deux colonnes de boutons et la roue dentée : AU-DESSUS du fond assombri, pour
               rester nettes et cliquables (on passe d'une pop-up à l'autre).
          Les cartes et les lignes sont créées par le code (PanelsController et ses pages) à
@@ -16,15 +17,15 @@
     <Style src="Buttons.uss" />
     <Style src="Popups.uss" />
     <Style src="V5.uss" />
+    <Style src="V51.uss" />
     <ui:VisualElement name="panels-root" class="panels-root" picking-mode="Ignore">
         <ui:VisualElement name="popup-dim" class="popup-dim" />
         <ui:VisualElement name="popup-layer" class="popup-layer" picking-mode="Ignore">
             <ui:VisualElement name="popup-frame" class="popup-frame">
                 <ui:VisualElement class="popup-shadow" picking-mode="Ignore" />
                 <ui:VisualElement name="popup-window" class="popup-window">
-                    <ui:VisualElement name="popup-header" class="popup-header" picking-mode="Ignore">
-                        <ui:Label name="popup-title" text="Boutique" class="popup-title" picking-mode="Ignore" />
-                    </ui:VisualElement>
+                    <!-- v5.1 : le motif en filigrane (étoiles, pièces, diamants à ~6 %), sous le contenu. -->
+                    <ui:VisualElement class="popup-motif" picking-mode="Ignore" />
                     <ui:VisualElement name="popup-body" class="popup-body">
                         <ui:VisualElement name="popup-wallet-row" class="panel-wallet-row" picking-mode="Ignore">
                             <ui:VisualElement class="coin coin--wallet" picking-mode="Ignore" />
@@ -32,8 +33,9 @@
                         </ui:VisualElement>
                         <ui:Label name="pot-note" text="" class="pot-note" picking-mode="Ignore" />
 
-                        <!-- Boutique v5 (§15) : onglets Boîtes / Pirates / Diamants, cartes compactes et
-                             sous-page « Contenu et taux ». Tout est construit par BoutiquePage. -->
+                        <!-- Boutique v5.1 : UNE seule liste qui défile (Boîtes, Pirates, Animaux, Diamants) ;
+                             les onglets du haut y font défiler en douceur. Sous-page « Contenu et taux ».
+                             Tout est construit par BoutiquePage. -->
                         <ui:VisualElement name="page-boutique" class="shop-page boutique-page" />
 
                         <!-- Inventaire : vitrine du cheval à gauche + grille -->
@@ -49,7 +51,7 @@
                                 <ui:VisualElement class="inv-actions">
                                     <ui:Label name="inv-selected" text="" class="inv-selected" picking-mode="Ignore" />
                                     <ui:VisualElement class="inv-buttons">
-                                        <ui:Button name="inv-equip" text="Équiper" class="btn btn--bleu action-btn action-btn--equip" />
+                                        <ui:Button name="inv-equip" text="Équiper" class="btn btn--vert action-btn action-btn--equip" />
                                         <ui:Button name="inv-sell" text="Vendre 1 doublon" class="btn btn--sombre action-btn action-btn--sell" />
                                     </ui:VisualElement>
                                     <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="btn btn--sombre action-btn action-btn--sellall" />
@@ -127,6 +129,13 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
+                </ui:VisualElement>
+                <!-- v5.1 (art bible §12.18) : le titre DÉBORDE en haut à gauche de la fenêtre : la
+                     grande icône du menu (posée par le code) puis le grand titre blanc contouré.
+                     Il est APRÈS la fenêtre pour être dessiné par-dessus son bord. -->
+                <ui:VisualElement name="popup-header" class="popup-header" picking-mode="Ignore">
+                    <ui:VisualElement name="popup-icon" class="popup-icon" picking-mode="Ignore" />
+                    <ui:Label name="popup-title" text="Boutique" class="popup-title" picking-mode="Ignore" />
                 </ui:VisualElement>
                 <ui:Button name="close" class="btn btn--rouge btn-rond popup-close">
                     <ui:VisualElement class="croix" picking-mode="Ignore">

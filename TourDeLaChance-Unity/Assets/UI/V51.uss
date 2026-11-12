@@ -1,0 +1,326 @@
+/* v5.1 : les retouches d'interface « façon jeu Roblox » (art bible §12.18).
+   Chargé EN DERNIER par Panels.uxml : à précision égale, ses règles gagnent sur Shop.uss,
+   Panels.uss, Popups.uss et V5.uss.
+
+   L'idée : les pop-ups ont maintenant un fond BLANC CASSÉ (Popups.uss). Les textes clairs
+   écrits pour l'ancien fond sombre deviennent donc foncés quand ils sont posés directement
+   sur la fenêtre (règles qui commencent par « .popup-window »). Les CARTES (boîtes, packs,
+   améliorations, cadres de la Renaissance) ont un fond en dégradé vif : leurs textes restent
+   blancs, avec un contour d'encre. Les tuiles d'objets restent sombres (les couleurs de
+   rareté ont été choisies pour un fond sombre, art bible §10). Référence 1920 × 1080. */
+
+/* =====================================================================
+   1. Les cartes en dégradé vif (classe .carte + une couleur)
+   ===================================================================== */
+.carte {
+    border-width: 5px;
+    border-color: #110D1F;
+    border-radius: 24px;
+    background-color: #FF7A7A;
+    -unity-background-scale-mode: stretch-to-fill;
+    overflow: hidden;     /* le rayonnement ne dépasse pas des coins arrondis */
+}
+.carte--rose     { background-color: #FF8A6B; background-image: url("Degrades/carte_rose.png"); }
+.carte--bleue    { background-color: #4FA0EE; background-image: url("Degrades/carte_bleue.png"); }
+.carte--verte    { background-color: #7AD25E; background-image: url("Degrades/carte_verte.png"); }
+.carte--violette { background-color: #9F80F0; background-image: url("Degrades/carte_violette.png"); }
+.carte--or       { background-color: #FFC245; background-image: url("Degrades/carte_or.png"); }
+.carte--rouge    { background-color: #F06A62; background-image: url("Degrades/carte_rouge.png"); }
+
+/* Le titre d'une carte : blanc très gras, contour d'encre et petite ombre dessous. */
+.carte__titre {
+    font-size: 30px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #110D1F;
+    text-shadow: 0 3px 0 #110D1F;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin: 0 0 4px 0;
+    padding: 0;
+}
+.carte__milieu { flex-direction: row; align-items: center; }
+/* L'illustration et son rayonnement (RaysElement, plus grand que l'image, derrière elle). */
+.carte__illu { width: 132px; height: 132px; flex-shrink: 0; align-items: center; justify-content: center; }
+.carte-rayons { position: absolute; left: -34px; top: -34px; right: -34px; bottom: -34px; }
+.carte__desc { flex-grow: 1; flex-shrink: 1; margin-left: 12px; }
+.carte__texte {
+    font-size: 22px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: #110D1F;
+    white-space: normal;
+    margin: 0 0 6px 0;
+    padding: 0;
+}
+
+/* =====================================================================
+   2. La grosse pilule verte de prix (PopupDecor.PriceButton) et les boutons d'action
+   ===================================================================== */
+.btn.btn-prix {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 72px;
+    min-width: 230px;
+    padding: 0 24px;
+    margin: 0;
+    border-radius: 24px;
+}
+.btn-prix__verbe, .btn-prix__montant {
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: var(--contour);
+    margin: 0;
+    padding: 0;
+}
+.btn-prix__verbe { font-size: 24px; margin-right: 12px; }
+.btn-prix__montant { font-size: 32px; -unity-text-outline-width: 4px; }
+.btn-prix__icone { width: 36px; height: 36px; margin: 0 6px 0 0; flex-shrink: 0; }
+/* Grisée (pas assez de pièces) : texte gris sans contour, icône pâlie. */
+.btn-prix:disabled .btn-prix__verbe, .btn-prix:disabled .btn-prix__montant { color: #D0CCE0; -unity-text-outline-width: 0; }
+.btn-prix:disabled .btn-prix__icone { -unity-background-image-tint-color: rgba(255, 255, 255, 0.55); }
+
+/* Les tailles de la pilule selon l'endroit (deux classes : elles gagnent sur V5.uss). */
+.btn.btn-prix.btq-open { height: 70px; min-width: 220px; margin: 0 10px 0 0; border-radius: 24px; }
+.btn.btn-prix.up-buy { height: 78px; min-width: 300px; }
+.btn.btn-prix.rebirth-btn { height: 88px; min-width: 380px; margin-right: 16px; border-radius: 26px; }
+.btn.btn-prix.rebirth-btn .btn-prix__verbe { font-size: 36px; -unity-text-outline-width: 4px; }
+
+/* Les autres boutons d'action (Équiper, Oui renaître…) : gros, texte blanc bien contouré. */
+.btn.action-btn--equip { font-size: 28px; height: 70px; -unity-text-outline-width: 4px; }
+.btn.v5-confirm-btn { -unity-text-outline-width: 4px; }
+
+/* =====================================================================
+   3. Les badges de taux sous les objets (PopupDecor.RateBadges)
+   ===================================================================== */
+.taux-rangee { flex-direction: row; justify-content: space-around; margin: 8px 0 2px 0; }
+.taux-objet { width: 68px; align-items: center; }
+.taux-objet__cadre {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    border-width: 3px;
+    background-color: rgba(255, 255, 255, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+.taux-objet__visuel { width: 50px; height: 50px; align-items: center; justify-content: center; }
+.taux-objet__visuel .item-question { font-size: 40px; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.taux-objet__visuel .item-placeholder { width: 44px; height: 44px; border-radius: 22px; border-width: 3px; }
+.taux-objet__visuel .item-placeholder__lettre { font-size: 22px; }
+.taux-objet__visuel .item-swatch { width: 40px; height: 40px; border-radius: 10px; }
+.taux-badge {
+    font-size: 17px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 3px;
+    -unity-text-outline-color: #110D1F;
+    border-width: 2px;
+    border-color: #110D1F;
+    border-radius: 10px;
+    padding: 0 6px;
+    margin: -10px 0 0 0;     /* le badge mord sur le bas du cadre, comme une étiquette */
+}
+
+/* =====================================================================
+   4. La Boutique : une seule liste, des titres de section décorés
+   ===================================================================== */
+.btq-scroll { flex-grow: 1; }
+.btq-content-host { flex-grow: 1; flex-shrink: 1; }
+.btq-section { margin-bottom: 6px; }
+.section-titre { flex-direction: row; align-items: center; justify-content: center; margin: 6px 0 12px 0; }
+.section-titre__texte {
+    font-size: 34px;
+    color: #2A2440;
+    -unity-font-style: bold;
+    margin: 0 14px;
+    padding: 0;
+}
+.section-deco { width: 42px; height: 42px; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; }
+.section-deco--piece { background-image: url("../Art/icones_detourees/piece.png"); }
+.section-deco--diamant { background-image: url("../Art/icones_detourees/diamant.png"); }
+
+/* L'onglet « Diamants · Bientôt » reste grisé (rien ne s'achète). */
+.btn.v5-tab.v5-tab--bientot { opacity: 0.55; }
+
+.btq-card {
+    width: 49%;
+    height: auto;
+    margin-bottom: 16px;
+    padding: 12px 16px 14px 16px;
+}
+.btq-card-image { width: 116px; height: 116px; margin: 0; }
+.btq-card .progress-text { color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.btq-card .progress-bar { height: 14px; border-radius: 7px; border-width: 2px; border-color: #110D1F; background-color: rgba(17, 13, 31, 0.45); }
+.btq-card-buttons { justify-content: center; margin-top: 10px; }
+.btq-card .missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #8A1A1E; -unity-text-align: middle-center; margin: 4px 0 0 0; }
+.btq-complete {
+    color: #3A2200;
+    background-color: #FFD54A;
+    border-width: 3px;
+    border-color: #110D1F;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 16px;
+    top: 10px;
+    right: 10px;
+}
+.btq-lock { border-radius: 18px; }
+
+/* La note « D'où viennent les diamants ? » : un encart bleu clair. */
+.btq-note { background-color: #E3F4FF; border-width: 3px; border-color: #110D1F; border-radius: 18px; margin: 0 0 16px 0; }
+.btq-note__titre { color: #2858A0; }
+.btq-note__texte { color: #2A2440; }
+
+/* Les packs de diamants : cartes violettes, grisées (opacity de V5.uss) et sans prix. */
+.btq-packs-intro { color: #3A3358; }
+.btq-pack { padding: 12px; }
+.btq-pack-image { width: 120px; height: 120px; }
+.btq-pack-picture { width: 104px; height: 104px; align-items: center; justify-content: center; -unity-background-scale-mode: scale-to-fit; }
+.btq-pack-name { -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.btq-pack-amount { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+
+/* « Contenu et taux » : la colonne de gauche est posée sur le fond clair. */
+.popup-window .price-text { -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; }
+.popup-window .rates { background-color: rgba(17, 13, 31, 0.06); border-width: 2px; border-color: rgba(17, 13, 31, 0.15); }
+.popup-window .rate-row--header { border-color: rgba(17, 13, 31, 0.15); }
+.popup-window .rate-cell { color: #2A2440; }
+.popup-window .rate-row--header .rate-cell { color: #6E6A80; }
+/* Les noms de rareté gardent leur couleur (posée par le code) : un contour les rend lisibles. */
+.popup-window .rate-name { -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+.popup-window .rates-note { color: #5A5470; }
+
+/* =====================================================================
+   5. Les textes posés directement sur le fond clair
+   ===================================================================== */
+.popup-window .pot-note { color: #6E6A80; }
+.popup-window .bonus-line { color: #3A3358; }
+.popup-window .progress-text { color: #2A2440; }
+.popup-window .link-btn { color: #5A4F88; }
+.popup-window .link-btn:hover { color: #C2477A; }
+.popup-window .settings-footer { color: #6E6A80; }
+.popup-window .name-hint { color: #3A3358; }
+
+/* La barre de défilement : piste claire, curseur or (inchangé). */
+.popup-window .unity-scroller--vertical .unity-base-slider__tracker {
+    background-color: rgba(17, 13, 31, 0.1);
+    border-color: rgba(17, 13, 31, 0.35);
+}
+.popup-window .unity-scroller--vertical .unity-base-slider__dragger { border-color: #110D1F; }
+
+/* Inventaire */
+.popup-window .inv-selected { color: #2A2440; -unity-font-style: bold; }
+.popup-window .inv-actions { border-color: rgba(17, 13, 31, 0.15); }
+.popup-window .inv-empty { color: #6E6A80; }
+.popup-window .inv-slot { background-color: #FFFFFF; border-color: #110D1F; }
+.popup-window .inv-slot--libre { background-color: rgba(17, 13, 31, 0.04); border-color: #B8B4C8; }
+.popup-window .inv-slot__titre { color: #6E6A80; }
+.popup-window .inv-slot__libre { color: #8A84A0; }
+.popup-window .inv-slot__nom { color: #2A2440; }
+.popup-window .inv-slot__detail { color: #6E6A80; }
+.popup-window .item-frame--selected { border-color: #FF9F1C; }
+
+/* Index */
+.popup-window .idx-section-count { color: #6E6A80; }
+.popup-window .idx-info { color: #3A3358; }
+
+/* Classement */
+.popup-window .lb-info { color: #3A3358; background-color: #EFEAF7; border-width: 2px; border-color: rgba(17, 13, 31, 0.12); }
+.popup-window .lb-row { background-color: #FFFFFF; border-width: 3px; border-color: #110D1F; }
+.popup-window .lb-row--me { background-color: #FFF4C9; border-width: 4px; border-color: #FF9F1C; }
+.popup-window .lb-row--ghost { background-color: #ECE8F2; border-width: 0; }
+.popup-window .lb-rank { color: #6E6A80; }
+.popup-window .lb-name { color: #2A2440; }
+.popup-window .lb-detail { color: #6E6A80; }
+.popup-window .lb-score { -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; }
+.popup-window .lb-empty { color: #6E6A80; }
+.popup-window .lb-mode { color: #6E6A80; }
+
+/* =====================================================================
+   6. Les cartes des Améliorations
+   ===================================================================== */
+.up-card { padding: 16px 20px; }
+.up-name { font-size: 32px; color: #FFFFFF; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 3px 0 #110D1F; }
+.up-desc, .up-effect, .up-note, .up-cell { color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+.up-level { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.up-effect--strong { font-size: 24px; color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.up-row--header .up-cell { color: #F4EEE6; }
+.up-table { background-color: rgba(17, 13, 31, 0.28); }
+.up-dot { border-color: #110D1F; background-color: rgba(255, 255, 255, 0.4); }
+.up-dot--full { background-color: #FFD54A; border-color: #110D1F; }
+.up-missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #8A1A1E; }
+.up-max { border-color: #110D1F; }
+
+/* =====================================================================
+   7. La Renaissance : trois cartes, le message important
+   ===================================================================== */
+.rebirth-col { padding: 14px 16px; }
+.rebirth-col__titre { font-size: 32px; color: #FFFFFF; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 3px 0 #110D1F; }
+.rebirth-col__ligne { color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+.popup-window .rebirth-tip { color: #5A5470; margin: 10px 0 4px 0; }
+.popup-window .rebirth-done__texte { color: #2A2440; }
+.popup-window .rebirth-done__petit { color: #6E6A80; }
+
+/* Un message important : blanc très contouré ; la partie positive en vert. */
+.message-important { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; margin: 4px 0 14px 0; }
+.message-important__texte {
+    font-size: 26px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #110D1F;
+    margin: 0 8px;
+    padding: 0;
+}
+.message-important__texte--positif { color: #6BE34A; }
+
+/* =====================================================================
+   8. Les fenêtres par-dessus (confirmations, fiche agrandie) : même style clair
+   ===================================================================== */
+.v5-confirm-box, .lb-confirm-box {
+    background-color: #FBF8F2;
+    border-width: 6px;
+    border-color: #110D1F;
+    border-radius: 28px;
+}
+.v5-confirm-text, .lb-confirm-text {
+    font-size: 26px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 4px;
+    -unity-text-outline-color: #110D1F;
+}
+.detail-sheet { background-color: #FBF8F2; border-color: #110D1F; border-radius: 28px; }
+.detail-line { color: #2A2440; }
+.detail-flavor { color: #8A5A00; }
+.detail-rarity { -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+
+/* =====================================================================
+   9. La fenêtre de reprise après un piège : même panneau, titre qui déborde
+   ===================================================================== */
+.revive-window { background-color: #FBF8F2; border-radius: 28px; }
+.revive-header {
+    height: 88px;
+    margin-top: -46px;
+    background-color: rgba(0, 0, 0, 0);
+    border-bottom-width: 0;
+}
+.revive-title { font-size: 56px; -unity-text-outline-width: 5px; text-shadow: 0 5px 0 #110D1F; }
+.revive-text { color: #2A2440; -unity-font-style: bold; }
+.revive-reminder { color: #2858A0; }
+
+/* Les voiles des confirmations et de la fiche agrandie couvrent tout le corps, y compris la
+   marge haute laissée au titre qui déborde (padding du corps : 60 32 26 32). */
+.v5-confirm, .lb-confirm, .detail-overlay { left: -32px; right: -32px; top: -60px; bottom: -26px; }
+
+/* « Contenu et taux » : la colonne de gauche un peu plus large pour le tableau complet. */
+.btq-content-left { width: 440px; }
+.popup-window .rate-chance { width: 100px; }
+.popup-window .rate-count { width: 76px; }
+
+/* La rangée des onglets de la Boutique : plus serrée, pour laisser la place aux deux soldes. */
+.btq-top .btn.v5-tab { min-width: 0; padding: 0 18px; margin-right: 8px; }

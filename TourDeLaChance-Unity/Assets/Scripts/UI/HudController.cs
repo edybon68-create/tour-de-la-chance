@@ -225,7 +225,7 @@ namespace TourDeLaChance
                     : "Choisis un coffre ! Un seul est piégé…",
                 GameState.Revealing => "…",
                 GameState.Climbing => game.LastDiamonds > 0
-                    ? $"+{game.LastDiamonds} ◆ ! On monte…"            // v5 §10.5 : trésor en diamants
+                    ? $"+{game.LastDiamonds} {ShopUi.Diamant} ! On monte…"            // v5 §10.5 : trésor en diamants
                     : $"+{game.LastGain} pièces ! On monte…",
                 GameState.Lost => endLine1,
                 GameState.CashedOut => endLine1,

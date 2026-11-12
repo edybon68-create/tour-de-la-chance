@@ -756,7 +756,7 @@ namespace TourDeLaChance
             sellButton.style.display = canSell ? DisplayStyle.Flex : DisplayStyle.None;
             sellButton.text = $"Vendre (+{Shop.SellValue(item)})";
             // « Rouvrir — 100 » : toujours, grisé si pas assez de pièces.
-            reopenButton.text = current.Box.currency == BoxCurrency.Diamants ? $"Rouvrir — {current.Box.price} ◆" : $"Rouvrir — {ShopUi.Thousands(current.Box.price)}";
+            reopenButton.text = current.Box.currency == BoxCurrency.Diamants ? $"Rouvrir — {current.Box.price} {ShopUi.Diamant}" : $"Rouvrir — {ShopUi.Thousands(current.Box.price)} {ShopUi.Piece}";
             reopenButton.SetEnabled(Shop.CanOpen(current.Box));
             // Badge : le nombre d'exemplaires peut changer après une vente.
             if (!current.IsNew) badge.text = $"Doublon — tu en as {Shop.CountOf(item)}";

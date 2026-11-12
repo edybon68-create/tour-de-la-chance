@@ -163,7 +163,7 @@ namespace TourDeLaChance
 
             // Petites mentions (seulement si non nulles / actives).
             var m = new List<string>();
-            if (setup.DiamondChancePermille > 0) m.Add($"◆ Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
+            if (setup.DiamondChancePermille > 0) m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
             if (setup.OutfitBonusPercent > 0) m.Add($"Tenue +{setup.OutfitBonusPercent} %");
             if (setup.RebirthMultiplier > 1) m.Add($"Renaissance ×{setup.RebirthMultiplier}");
             mentions.text = string.Join("   ·   ", m);
@@ -175,7 +175,7 @@ namespace TourDeLaChance
             // La barre compacte : « Trésor +150 · 5 coffres · Or ×3 · ◆ 3 % ».
             var b = new List<string> { $"Trésor +{setup.Gain}", $"{setup.ChestCount} coffres" };
             if (precious) b.Add($"{setup.Rarity.shortName} ×{ShopUi.Number(setup.Rarity.multiplier)}");
-            if (setup.DiamondChancePermille > 0) b.Add($"◆ {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
+            if (setup.DiamondChancePermille > 0) b.Add($"{ShopUi.Diamant} {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
             barText.text = string.Join(" · ", b);
 
             bigDuration = banner.text.Length > 0 ? BigTimeBanner : BigTime;

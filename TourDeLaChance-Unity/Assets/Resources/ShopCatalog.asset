@@ -113,7 +113,7 @@ MonoBehaviour:
   - id: boite_animaux_skins
     displayName: 'Animaux : skins'
     price: 500
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: fd8aa1ad2c05b4cc39b793abcefaa397, type: 3}
     items:
     - {fileID: 11400000, guid: 042ef3d44aa1d4858818bcaac677dc7b, type: 2}
     - {fileID: 11400000, guid: ac856654349fc4faab795e57c7a06792, type: 2}
@@ -140,7 +140,7 @@ MonoBehaviour:
   - id: boite_animaux_accessoires
     displayName: 'Animaux : accessoires'
     price: 500
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 893fd578ac9a5459f89c6baf759b198e, type: 3}
     items:
     - {fileID: 11400000, guid: f6f5dc70a2e664e98961ee008deebe6d, type: 2}
     - {fileID: 11400000, guid: 76fe699c2132440ed99e42b532b5a6e2, type: 2}
@@ -167,7 +167,7 @@ MonoBehaviour:
   - id: boite_pirates_skins
     displayName: 'Pirates : skins'
     price: 5
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 90371841fec6d4d6da4d639df1278af7, type: 3}
     items:
     - {fileID: 11400000, guid: 8c4576f3325b64377882629eaaeec782, type: 2}
     - {fileID: 11400000, guid: d2d9a2203096845078f17095cb4f8876, type: 2}
@@ -190,7 +190,7 @@ MonoBehaviour:
   - id: boite_pirates_accessoires
     displayName: 'Pirates : accessoires'
     price: 5
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 4d0b41e24767a4fb09699f9fb3fa818a, type: 3}
     items:
     - {fileID: 11400000, guid: 1bb9365b004284f6ab9b0263bb861e55, type: 2}
     - {fileID: 11400000, guid: de4f2752ae79c4d9da16a8de9d4a1639, type: 2}

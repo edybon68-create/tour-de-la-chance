@@ -18,7 +18,7 @@ namespace TourDeLaChance
     ///     droite (Classement) et la roue dentée (Réglages) : cachées sur l'écran titre (sauf
     ///     la roue), elles glissent en place à la fin du fondu de « Jouer » ;
     ///   - le fond assombri et la fenêtre centrée (ouverture qui rebondit, fermeture, passage
-    ///     d'une pop-up à l'autre), son bandeau de titre, son icône, le bouton fermer, Échap ;
+    ///     d'une pop-up à l'autre), son titre qui déborde avec sa grande icône (v5.1), le bouton fermer, Échap ;
     ///   - la vitrine du cheval (Inventaire, Index) ;
     ///   - et confie le contenu aux pages (BoutiquePage, InventoryPage, IndexPage, UpgradesPage,
     ///     LeaderboardPopup, SettingsPage, NamePage).
@@ -70,7 +70,7 @@ namespace TourDeLaChance
 
         VisualElement doc, dim, frame, window, header, walletRow, columnLeft, columnRight, gearHolder, toastLayer;
         VisualElement pageBoutique, pageInventaire, pageIndex, pageAmeliorations, pageClassement, pageReglages, pagePseudo, pageRenaissance;
-        VisualElement invShowcase;
+        VisualElement invShowcase, popupIcon;
         Label title, walletLabel, potNote;
         Button closeButton, gearButton, colBoutique, colInventaire, colIndex, colAmeliorations, colClassement, colRenaissance;
         InfoBulle infoBulle;
@@ -122,6 +122,7 @@ namespace TourDeLaChance
             window = doc.Q<VisualElement>("popup-window");
             header = doc.Q<VisualElement>("popup-header");
             title = doc.Q<Label>("popup-title");
+            popupIcon = doc.Q<VisualElement>("popup-icon");
             walletRow = doc.Q<VisualElement>("popup-wallet-row");
             walletLabel = doc.Q<Label>("panel-wallet");
             potNote = doc.Q<Label>("pot-note");
@@ -523,9 +524,9 @@ namespace TourDeLaChance
             }
             else switch (panel)
             {
-                case PanelId.Boutique: size = new Vector2(1080f, 800f); key = "boutique"; text = "Boutique"; break;
+                case PanelId.Boutique: size = new Vector2(1160f, 820f); key = "boutique"; text = "Boutique"; break;
                 case PanelId.Inventaire: size = new Vector2(1240f, 840f); key = "inventaire"; text = "Inventaire"; break;
-                case PanelId.Index: size = new Vector2(1360f, 860f); key = "index"; text = "Index"; break;
+                case PanelId.Index: size = new Vector2(1360f, 820f); key = "index"; text = "Index"; break;
                 case PanelId.Ameliorations: size = new Vector2(1000f, 840f); key = "ameliorations"; text = "Améliorations"; break;
                 case PanelId.Classement: size = new Vector2(920f, 840f); key = "classement"; text = "Classement"; break;
                 case PanelId.Renaissance: size = new Vector2(1080f, 800f); key = "renaissance"; text = "Renaissance"; break;
@@ -536,6 +537,7 @@ namespace TourDeLaChance
             title.text = text;
             foreach (var k in new[] { "boutique", "inventaire", "index", "ameliorations", "classement", "reglages", "pseudo", "renaissance" })
                 ShopUi.SetClass(header, "popup-header--" + k, k == key);
+            SetHeaderIcon(panel);
 
             // Le porte-monnaie et la note de la cagnotte : Inventaire, Index, Améliorations (la
             // Boutique et la Renaissance affichent leurs propres soldes).
@@ -576,6 +578,29 @@ namespace TourDeLaChance
             }
             pendingInventoryFocus = null;
             pendingBoxContent = null;
+        }
+
+        /// v5.1 (art bible §12.18) : la grande icône du menu revient, en haut à gauche du titre.
+        /// C'est la même image que le bouton de la colonne (le pseudo prend celle du Classement).
+        /// Sans image de Renaissance, la flèche dorée est dessinée par le code, comme dans la colonne.
+        void SetHeaderIcon(PanelId panel)
+        {
+            Sprite icon = panel switch
+            {
+                PanelId.Boutique => iconBoutique,
+                PanelId.Inventaire => iconInventaire,
+                PanelId.Index => iconIndex,
+                PanelId.Ameliorations => iconAmeliorations,
+                PanelId.Classement => iconClassement,
+                PanelId.Renaissance => iconRenaissance,
+                _ => iconReglages
+            };
+            popupIcon.generateVisualContent -= DrawRebirthIcon; // jamais deux fois
+            bool drawn = panel == PanelId.Renaissance && icon == null;
+            if (drawn) popupIcon.generateVisualContent += DrawRebirthIcon;
+            popupIcon.style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
+            popupIcon.style.display = icon != null || drawn ? DisplayStyle.Flex : DisplayStyle.None;
+            popupIcon.MarkDirtyRepaint();
         }
 
         /// « Choisis ton pseudo » (1re ouverture du Classement, ou « Changer de pseudo »).

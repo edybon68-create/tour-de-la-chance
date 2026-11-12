@@ -53,6 +53,13 @@
 >   chiffrée et les règles d'équité.
 > - Nouvelles images : `art/prompts/lot5.md` (icône Diamant, icône Rebirth, packs de diamants).
 
+>
+> **Mise à jour « v5.1 » (retouches d'interface)** — nouvelle section **§12.18 « Pop-ups et
+> cartes façon jeu Roblox »** : fond blanc cassé à motif en filigrane, titre qui déborde avec
+> sa grande icône (l'icône d'en-tête **revient**, elle annule le §12.17.6), cartes en dégradé
+> vif, pilule de prix verte, badges de taux, messages importants, Boutique en une seule page.
+> Elle remplace les lignes « Cadre », « En-tête », « Icône d'en-tête » et « Titre » du §12.6.
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -1482,7 +1489,7 @@ croix et la touche Échap. Les règles de la v3 sur les moments où l'on peut ou
 | Tailles | **S** 680 px de large (Paramètres, confirmations), hauteur selon le contenu ; **M** 1080 × 800 (Boutique, Améliorations, Classement) ; **L** 1360 × 860 (Inventaire, Index : 7 cartes par ligne) ; jamais plus haut que **920 px** |
 | Cadre | contour **6 px** `#1F1730`, bas **14 px** (l'épaisseur du « plateau »), coins **32 px**, fond `#2E2552` |
 | En-tête | hauteur **96 px**, fond = face de la famille, bordure basse 6 px « sombre » de la famille, coins hauts 26 px ; reflet blanc 16 % sur 45 % de la hauteur |
-| Icône d'en-tête | ~~120 px en haut à gauche~~ — **supprimée en v5** (§12.17.6) : l'en-tête ne porte plus que le titre, centré |
+| Icône d'en-tête | ~~supprimée en v5 (§12.17.6)~~ — **revient en v5.1** : 120 px, elle déborde en haut à gauche avec le titre (§12.18.2) |
 | Titre | 52 px, blanc, contour 4 px `#1F1730` (§12.3) ; v5 : centré, plus de `padding-left` |
 | Corps | `padding: 20px 28px 24px 28px` |
 | Fermer | bouton rond rouge 72 px, `top: -26px; right: -26px` |
@@ -2174,7 +2181,7 @@ survolé (`InfoBulle`, un seul `VisualElement` + un `Label`, `picking-mode="Igno
 gauche. Si les variables USS ne passent pas dans `border-top-color` sur cette version de Unity,
 le code écrit la couleur directement dans `style.borderTopColor`.)
 
-#### 12.17.6 Les pop-ups n'ont plus d'icône en haut à gauche
+#### 12.17.6 Les pop-ups n'ont plus d'icône en haut à gauche (annulé en v5.1, voir §12.18.2)
 
 - L'élément `.popup-icon` est **retiré** de toutes les pop-ups (Boutique, Inventaire, Index,
   Améliorations, Classement, Réglages, Pseudo, et la future Rebirth).
@@ -2192,6 +2199,112 @@ le code écrit la couleur directement dans `style.borderTopColor`.)
 - Sur le ciel clair du palier 1 : l'ombre et le contour suffisent à détacher les boutons.
 - Survol : l'info-bulle ne passe jamais sous une pop-up ouverte (elle est dans la couche la plus
   haute du HUD) et ne sort pas de l'écran.
+
+### 12.18 Pop-ups et cartes « façon jeu Roblox » (v5.1)
+
+> **Pourquoi ?** L'auteur a fourni trois captures d'un jeu de ce genre
+> (`docs/references/v5_1_ref_*.png|jpg`). On reprend leurs **codes d'interface très répandus**
+> (panneau clair très arrondi, titre autocollant qui déborde, cartes vives, pilule de prix
+> verte) **sans rien copier** : ni textes, ni personnages, ni logo, ni monnaie de la marque
+> (§12.1 reste valable). Code : `Assets/UI/Popups.uss` (fenêtre, titre) et `Assets/UI/V51.uss`
+> (tout le reste), pièces partagées dans `Scripts/UI/PopupDecor.cs`, images fabriquées par
+> `UiFxTextures.BakeAll()` dans `Assets/UI/Degrades/`.
+
+#### 12.18.1 Le panneau
+
+| Partie | Valeur |
+|---|---|
+| Fond | **blanc cassé** : dégradé `#FFFDF8` (haut) → `#F1ECE2` (bas), `popup_corps.png` |
+| Contour | **6 px `#110D1F`** (l'encre), coins **28 px** |
+| Motif en filigrane | `motif_popup.png` (étoile, pièce, diamant en encre, tuile 192 px affichée à **150 px**), répété (`background-repeat: repeat`), **opacité 6 %** ; la fenêtre a `overflow: hidden` pour qu'il suive les coins |
+| Place | la fenêtre descend de 60 px (`margin-top: 120px`) pour que le titre ne touche pas la roue dentée du HUD |
+| Corps | `padding: 60px 32px 26px 32px` (le haut laisse la place au titre) |
+| Textes posés sur le fond | **foncés** : `#2A2440` (normal), `#3A3358` (phrases), `#6E6A80` (discret) ; jamais de texte clair sur le blanc |
+| Fondus haut/bas des listes | de la couleur du fond (`#F8F4ED` / `#F4F0E8`), sinon une bande sombre salit la liste |
+| Barre de défilement | piste `rgba(17,13,31,0.1)`, curseur or inchangé, contour encre |
+
+#### 12.18.2 Le titre qui déborde
+
+- **L'icône du menu revient** (la même que le bouton de colonne ; Pseudo = Classement) :
+  **120 × 120 px**, `scale-to-fit`, posée **en haut à gauche, à cheval sur le bord** :
+  la rangée « icône + titre » est à `left: -34px; top: -64px`, haute de 128 px, donc centrée sur
+  le contour du haut. Les icônes reçoivent leur **propre contour noir** (détourage v5.1) : le
+  contour fait partie de l'image, la boîte de 120 px le garde entier.
+- **Titre** : **62 px** Bold blanc, `-unity-text-outline-width: 5px` (le maximum propre de la
+  police : marge de l'atlas 9 px pour 90 pt), `-unity-text-outline-color: #110D1F`,
+  **ombre** `text-shadow: 0 5px 0 #110D1F` (l'épaisseur « autocollant »), 10 px après l'icône.
+- **Croix de fermeture : inchangée** (rond rouge 72 px à cheval sur le coin, croix blanche).
+  L'auteur la trouve parfaite et elle rappelle la roue dentée.
+- Les bandeaux de couleur par pop-up (`.popup-header--*`) ne sont plus dessinés.
+
+#### 12.18.3 Les cartes (boîtes, packs, améliorations, cadres de la Renaissance)
+
+| Partie | Valeur |
+|---|---|
+| Fond | **dégradé vif en diagonale** (haut gauche → bas droite) + **lueur blanche** ronde (35 % au centre, un peu au-dessus du milieu) : images `carte_*.png` 256 px |
+| Couleurs | rose `#FFC94A → #FF4F8B` (Boîtes classiques), bleue `#62E6FF → #3B5BDB` (Pirates, amélioration « pièges », « Tu gardes »), verte `#D2F55A → #1FAE6A` (Animaux), violette `#D2B4FF → #6C4FE0` (packs de diamants, « coffres »), or `#FFE66B → #FF9F1C` (« gains », « Tu gagnes »), rouge `#FFA08A → #E0404A` (« Tu perds ») |
+| Cadre | contour **5 px `#110D1F`**, coins **24 px**, `overflow: hidden` |
+| Titre | 30 px Bold blanc, contour 4 px encre, ombre `0 3px 0` encre, centré |
+| Illustration | 116 px au centre d'une zone de 132 px, sur un **rayonnement** (`RaysElement`, 12 rayons blancs à 85 % qui s'effacent vers l'extérieur) ; la **courte description** à côté (22 px blanc contour 3 px) |
+| Textes | toujours **blancs contourés d'encre** (2 à 4 px selon la taille) : lisibles sur toutes les couleurs vives |
+| Tuiles d'objets (Inventaire, Index) | **restent sombres** (`#2A2440`, liseré de rareté) : les couleurs de rareté du §10 sont faites pour un fond sombre |
+
+#### 12.18.4 La pilule de prix et les boutons d'action
+
+- **Prix = gros bouton vert en relief** (famille `.btn--vert` : dégradé `#5AD68C → #2E9E5B`,
+  **bord bas 10 px plus foncé** `#1E6E3E`, contour `#0E3D21`) : `[verbe] [icône de la monnaie
+  36 px] [montant 32 px]`, texte blanc contour 3–4 px. Hauteur 70–88 px, coins 24 px.
+  Exemples : « Ouvrir ● 250 », « Ouvrir ◆ 5 », « Améliorer ● 900 », « Renaître ! ● 10 000 ».
+- Grisée (pas assez) : famille désactivée (gris, sans contour de texte), icône pâlie, et la
+  raison écrite dessous (« Il te manque 3 pièces »).
+- **Boutons d'action** (Équiper, Ouvrir, Renaître, Oui renaître !) : **verts**, gros, texte blanc
+  contour 4 px. Les boutons de navigation (Contenu et taux, Retour, Annuler) restent sombres.
+
+#### 12.18.5 Les taux en badges
+
+Sous l'illustration de chaque boîte : **une vignette par rareté** (un objet de cette rareté,
+cadre 60 px liseré de la couleur de rareté, fond blanc 50 %) et, mordant sur le bas du cadre,
+un **badge** (17 px Bold blanc contour 3 px, fond = couleur de rareté, contour 2 px encre) avec
+le **taux de la rareté** lu dans les données de la boîte. **Les taux affichés sont toujours
+vrais** : c'est le taux de la rareté (pas celui de l'objet montré, qui est dans « Contenu et
+taux »). Un Secret jamais obtenu reste un « ? », comme dans l'Index.
+
+#### 12.18.6 Les messages importants
+
+Une phrase à ne pas rater (ex. Renaissance) : **26 px Bold blanc, contour 4 px encre**, centrée ;
+la partie **positive en vert `#6BE34A`** avec le même contour : « Les pièces et les améliorations
+sont remises à zéro. **Tu gardes tout le reste !** ». Les confirmations (« Sûr ? … ») utilisent le
+même style, dans une petite fenêtre au même panneau blanc cassé.
+
+#### 12.18.7 Boutique en une seule page
+
+- Une **seule liste** qui défile : **Boîtes classiques** (déco : pièces) → **Boîtes de pirates**
+  (déco : couronnes dessinées) → **Boîtes Animaux** (déco : pattes dessinées) → **Diamants**
+  (déco : diamants). La police n'a pas d'émoji : les décorations sont des **images** ou des
+  **formes dessinées par le code** (`PopupDecor`), 42 px, de part et d'autre d'un titre de
+  section **34 px Bold `#2A2440`**.
+- Les **onglets** deviennent des **raccourcis** : un clic fait défiler en douceur jusqu'à la
+  section en **0,3 s, ralenti en fin de course** (ease-out) ; le titre s'arrête 20 px sous le haut
+  (sous le petit fondu). En défilant à la main, l'onglet de la **section visible s'allume**.
+- **Aucun paiement réel** : l'onglet « Diamants · Bientôt » reste **grisé** (opacité 55 %), les
+  packs sont affichés grisés, **sans prix**, avec « Bientôt disponible » désactivé.
+
+#### 12.18.8 Les monnaies dans le texte
+
+La police n'a pas de joli « ◆ » : dans une phrase, les monnaies sont des **pictogrammes en
+ligne** (balise `<sprite name="diamant">` / `<sprite name="piece">`, constantes
+`ShopUi.Diamant` et `ShopUi.Piece`). Sprite Asset : `Assets/UI/Monnaies/monnaies.asset` (atlas
+`monnaies.png` fait à partir de `diamant.png` et `piece.png` avec leur contour noir), branché
+comme « Default Sprite Asset » de `Assets/UI/TexteReglages.asset`, les réglages de texte de
+`HudPanelSettings`. Taille d'environ **1,1 fois la hauteur des chiffres**, centré sur eux (glyphe
+128 px, `pointSize` 128, échelle 1,2, `bearingY` 100). Ne plus écrire « ◆ » dans un texte affiché.
+
+#### 12.18.9 À éviter (v5.1)
+
+- Du texte clair (`#B8B4C8`, `#E6E1EE`…) posé directement sur le fond blanc cassé.
+- Un contour de texte de plus de 5 px (la police se déforme).
+- Un taux « arrangé » ou un objet montré avec un taux qui n'est pas le sien sans le dire.
+- Toucher à la croix de fermeture.
 
 ---
 

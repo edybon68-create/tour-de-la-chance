@@ -28,8 +28,10 @@ namespace TourDeLaChance
         string flashId;
         int popLevel = -1;
 
-        static readonly Color CardColor = new Color(0.227f, 0.227f, 0.314f);  // #3A3A50
-        static readonly Color FlashColor = new Color(0.353f, 0.29f, 0.125f);  // #5A4A20
+        // v5.1 : la carte a un fond en dégradé (une image) : le flash or TEINTE cette image
+        // (blanc = couleurs normales, or pâle = la carte s'illumine).
+        static readonly Color CardTint = Color.white;
+        static readonly Color FlashTint = new Color(1f, 0.93f, 0.55f);
 
         public UpgradesPage(ScrollView page, MonoBehaviour coroutineHost)
         {
@@ -61,6 +63,14 @@ namespace TourDeLaChance
 
             var card = new VisualElement();
             card.AddToClassList("up-card");
+            // v5.1 (art bible §12.18) : une couleur vive par amélioration.
+            card.AddToClassList("carte");
+            card.AddToClassList(def.id switch
+            {
+                Upgrades_.Gains => "carte--or",
+                Upgrades_.Chests => "carte--violette",
+                _ => "carte--bleue"
+            });
 
             // 1. Icône, nom, phrase
             var top = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -109,9 +119,8 @@ namespace TourDeLaChance
             else
             {
                 string id = def.id;
-                var buy = new Button(() => OnBuy(id)) { text = $"Améliorer — {Upgrades.NextPrice(id)}" };
-                buy.AddToClassList("btn");
-                buy.AddToClassList("btn--vert");
+                // v5.1 : la grosse pilule verte « Améliorer [pièce] 900 ».
+                var buy = PopupDecor.PriceButton(() => OnBuy(id), "Améliorer", Upgrades.NextPrice(id), false);
                 buy.AddToClassList("up-buy");
                 buy.AddToClassList(UiSounds.SilentClass); // le son d'amélioration suffit
                 buy.name = "buy-" + id;
@@ -234,15 +243,15 @@ namespace TourDeLaChance
             Refresh(); // le bouton redevient actif (s'il reste assez de pièces)
         }
 
-        /// La carte fait un flash or : #3A3A50 → #5A4A20 → #3A3A50 en 0,4 s.
+        /// La carte fait un flash or (son dégradé est teinté d'or pâle puis revient) en 0,4 s.
         static IEnumerator FlashCard(VisualElement card)
         {
             for (float t = 0f; t < 0.4f; t += Time.deltaTime)
             {
-                card.style.backgroundColor = Color.Lerp(CardColor, FlashColor, Ease.Sine(t / 0.4f));
+                card.style.unityBackgroundImageTintColor = Color.Lerp(CardTint, FlashTint, Ease.Sine(t / 0.4f));
                 yield return null;
             }
-            card.style.backgroundColor = StyleKeyword.Null;
+            card.style.unityBackgroundImageTintColor = StyleKeyword.Null;
         }
 
         /// La pastille du nouveau niveau se remplit avec un « pop » (0 → 1,3 → 1 en 0,25 s).

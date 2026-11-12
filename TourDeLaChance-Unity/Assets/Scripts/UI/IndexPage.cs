@@ -142,7 +142,7 @@ namespace TourDeLaChance
         /// Titre d'une section « par boîte » : nom, prix (pièces ou ◆), cadenas si verrouillée.
         static string BoxTitle(LootBox box)
         {
-            string price = box.currency == BoxCurrency.Diamants ? $"{box.price} ◆" : $"{ShopUi.Thousands(box.price)} pièces";
+            string price = box.currency == BoxCurrency.Diamants ? $"{box.price} {ShopUi.Diamant}" : $"{ShopUi.Thousands(box.price)} pièces";
             // (Pas d'émoji cadenas : la police n'en a pas ; le cadenas est dit en toutes lettres.)
             return $"{box.displayName}  ·  {price}" + (Shop.IsLocked(box) ? "  ·  verrouillée (après la renaissance)" : "");
         }

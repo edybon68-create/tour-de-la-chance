@@ -169,7 +169,7 @@ namespace TourDeLaChance
         {
             // v5 : « 2026-11-11|r » → « 11 nov. · ◆ reprise ».
             if (date != null && date.EndsWith(ReviveMark))
-                return PrettyDate(date.Substring(0, date.Length - ReviveMark.Length)) + " · ◆ reprise";
+                return PrettyDate(date.Substring(0, date.Length - ReviveMark.Length)) + " · " + ShopUi.Diamant + " reprise";
             if (DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
                 return d.ToString("d MMM", French);
             return date ?? "";
