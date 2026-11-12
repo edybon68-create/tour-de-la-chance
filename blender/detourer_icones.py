@@ -28,13 +28,21 @@ SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
     "chapeau_fete.png", "echarpe.png", "collier_fleurs.png", "lunettes_coeur.png",
     "matiere_arc_en_ciel.png", "matiere_cristal.png", "matiere_argent.png", "boite_skins_1.png",
     "boite_accessoires_1.png", "chapeau_bonnet.png",
-    "icone_inventaire.png", "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png"]}
+    "icone_inventaire.png", "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png",
+    "chapeau_capitaine.png", "bocal_poisson.png"]}
 # Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
 # de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
 # les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
 OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png", "icone_reglages.png",
                  "icone_rebirth.png"}
 SEUIL_TROU = 0.035
+# v5.1 : épaisseur du contour noir (en pixels, pour une image de 1024 px) et sa couleur
+# (#110D1F, le même violet presque noir que les contours de l'interface).
+# Mettre 0 pour retrouver les icônes sans contour.
+CONTOUR_PX = 30
+# Écart de teinte maximal pour qu'un pixel plus sombre que le fond soit pris pour une ombre portée.
+SEUIL_OMBRE = 0.06
+COULEUR_CONTOUR = np.array([0x11, 0x0D, 0x1F], dtype=np.float32) / 255.0
 # Images qui ne sont pas des icônes du shop : on les laisse de côté.
 IGNORER = set()
 
@@ -65,6 +73,14 @@ def detourer(chemin_entree, chemin_sortie):
     dist = np.sqrt(((px[:, :, :3] - fond) ** 2).sum(axis=2))
     seuil_fond, seuil_opaque = SEUILS_SPECIAUX.get(os.path.basename(chemin_entree), (SEUIL_FOND, SEUIL_OPAQUE))
     candidat = dist < seuil_opaque
+    # v5.1 : les ombres portées douces que le générateur ajoute parfois sous l'objet ont la
+    # MÊME teinte que le fond, juste plus sombre. On les reconnaît à leur « couleur relative »
+    # (couleur divisée par la luminosité) proche de celle du fond, et on les traite comme du fond.
+    lum = px[:, :, :3].mean(axis=2) + 1e-4
+    lum_fond = float(fond.mean()) + 1e-4
+    teinte = px[:, :, :3] / lum[:, :, None] - fond / lum_fond
+    ombre = (np.sqrt((teinte ** 2).sum(axis=2)) < SEUIL_OMBRE) & (lum < lum_fond) & (lum > 0.55 * lum_fond)
+    candidat |= ombre
 
     # 3. Remplissage depuis les bords, limité aux pixels candidats.
     atteint = np.zeros_like(candidat)
@@ -85,6 +101,48 @@ def detourer(chemin_entree, chemin_sortie):
     alpha = np.ones((h, w), dtype=np.float32)
     rampe = np.clip((dist - seuil_fond) / (seuil_opaque - seuil_fond), 0.0, 1.0)
     alpha[atteint] = rampe[atteint]
+    alpha[atteint & ombre] = 0.0  # ombre portée reliée au fond : entièrement transparente
+
+    # 5. v5.1 : contour noir épais, façon « autocollant » (style des jeux Roblox).
+    # On « grossit » la silhouette de CONTOUR_PX pixels (filtre maximum répété), puis on
+    # pose l'objet par-dessus une couche sombre de cette silhouette agrandie.
+    # Le filtre travaille sur l'alpha en nombres décimaux : le bord reste doux (anti-crénelé).
+    if CONTOUR_PX > 0:
+        # Les ombres douces (demi-transparentes) sous certains objets ne doivent pas être
+        # entourées : on ne garde que les pixels franchement opaques, avec un bord adouci.
+        alpha = np.clip((alpha - 0.45) / 0.3, 0.0, 1.0)
+        # Objets transparents (bocal, fantôme…) : l'intérieur peu opaque, entièrement
+        # entouré par l'objet, n'est pas du fond. On le rend opaque (ses couleurs d'origine
+        # contiennent déjà le reflet du fond), sinon le contour noir apparaîtrait au travers.
+        # On ne le fait pas pour les objets vraiment troués (anneaux, auréole…).
+        if os.path.basename(chemin_entree) not in OBJETS_TROUES:
+            bas = alpha < 0.5
+            dehors = np.zeros_like(bas)
+            dehors[0, :] = dehors[-1, :] = True
+            dehors[:, 0] = dehors[:, -1] = True
+            dehors &= bas
+            while True:
+                suivant = dilater(dehors) & bas
+                if suivant.sum() == dehors.sum():
+                    break
+                dehors = suivant
+            alpha[bas & ~dehors] = 1.0
+        grand = alpha.copy()
+        for i in range(CONTOUR_PX):
+            g = grand.copy()
+            g[1:, :] = np.maximum(g[1:, :], grand[:-1, :])
+            g[:-1, :] = np.maximum(g[:-1, :], grand[1:, :])
+            g[:, 1:] = np.maximum(g[:, 1:], grand[:, :-1])
+            g[:, :-1] = np.maximum(g[:, :-1], grand[:, 1:])
+            if i % 2:  # une fois sur deux, aussi en diagonale : contour presque rond
+                g[1:, 1:] = np.maximum(g[1:, 1:], grand[:-1, :-1])
+                g[:-1, :-1] = np.maximum(g[:-1, :-1], grand[1:, 1:])
+                g[1:, :-1] = np.maximum(g[1:, :-1], grand[:-1, 1:])
+                g[:-1, 1:] = np.maximum(g[:-1, 1:], grand[1:, :-1])
+            grand = g
+        a = alpha[:, :, None]
+        px[:, :, :3] = px[:, :, :3] * a + COULEUR_CONTOUR * (1.0 - a)
+        alpha = grand
     px[:, :, 3] = alpha
 
     sortie = bpy.data.images.new(os.path.basename(chemin_sortie), w, h, alpha=True)
