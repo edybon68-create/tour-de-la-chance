@@ -46,12 +46,19 @@
   - contour noir épais sur toutes les icônes ;
   - pictogrammes diamant et pièce dans les textes.
   - 49 icônes du lot 6 sur 60, dont 20 rendues dans Blender (`blender/rendu_icones.py`).
-- **v6** : à faire. Liste complète dans `docs/specs/v6-a-faire.md` (dictée par l'auteur le 13/11/2026). D'abord une inspection QA, puis ajout de ses trouvailles à cette liste.
+- **v6** (13-14/11/2026). Liste de l'auteur et du QA dans `docs/specs/v6-a-faire.md`, spec dans `docs/specs/v6.md`, design dans l'art bible §15.
+  - Bugs du QA corrigés.
+  - Route des trophées (clic sur l'étage), reprise à coût qui double (1, 2, 4, 8, 16 ; 5 au plus) avec confirmation sur Rejouer.
+  - Échange diamants → pièces sans plafond (200 pièces le diamant), améliorations −25 / −35 %.
+  - Bonus de diamants Pirates, récompenses de collection et de palier.
+  - « Équiper le meilleur », « Mes skins », Index aux visuels cachés.
+  - Fiche agrandie qu'on fait tourner, avec flèches.
+  - Renaissance refaite, 25 bulles rendues dans Blender, graphismes Faible / Moyen / Élevé.
+  - Nouvelles icônes Boutique (échoppe) et Réglages.
 
 ## En cours / prochaine étape (v6, au 13/11/2026)
-- Spec v6 écrite (`docs/specs/v6.md`), design v6 dans l'art bible §15, prompts dans `art/prompts/lot7.md`.
-- Nouvelles icônes Boutique (échoppe) et Réglages (roue sans trou) générées dans Gemini (conversation `9ad2ff149e58f7d8`). Images 4 à 9 du lot 7 restantes : Gemini était bloqué.
-- En cours au moment de la coupure : le programmeur corrige les bugs QA (points 29-53), l'artiste 3D rend les 25 bulles (`blender/rendu_bulles.py`). Ensuite : fonctionnalités v6 par le programmeur.
+- V6 livrée, en attente des tests de l'auteur.
+- À surveiller : retouches USS non recapturées (route, renaissance), mesure des performances au Profiler, animation de l'échange (pièces volantes) non faite.
 
 - Lot 6 terminé (60/60 icônes, commit 4d60aac). Si on doit refaire des images : conversation Gemini des skins Animaux `7c4b360605bc4139`, ou ChatGPT avec une image de référence jointe.
 - Inspection QA en cours, puis spec v6 par le game designer à partir de `docs/specs/v6-a-faire.md`.

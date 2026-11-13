@@ -22,43 +22,43 @@ MonoBehaviour:
       value: 1
       weights: 
       effectText: Gain normal
-    - price: 150
+    - price: 120
       value: 1.2
       weights: 
       effectText: "Tr\xE9sors +20 %"
-    - price: 400
+    - price: 300
       value: 1.4
       weights: 
       effectText: "Tr\xE9sors +40 %"
-    - price: 900
+    - price: 680
       value: 1.6
       weights: 
       effectText: "Tr\xE9sors +60 %"
-    - price: 1800
+    - price: 1350
       value: 1.8
       weights: 
       effectText: "Tr\xE9sors +80 %"
-    - price: 3500
+    - price: 2600
       value: 2
       weights: 
       effectText: "Tr\xE9sors +100 %"
-    - price: 6000
+    - price: 4000
       value: 2.2
       weights: 
       effectText: "Tr\xE9sors +120 %"
-    - price: 9000
+    - price: 6000
       value: 2.4
       weights: 
       effectText: "Tr\xE9sors +140 %"
-    - price: 13000
+    - price: 8500
       value: 2.6
       weights: 
       effectText: "Tr\xE9sors +160 %"
-    - price: 18000
+    - price: 11500
       value: 2.8
       weights: 
       effectText: "Tr\xE9sors +180 %"
-    - price: 25000
+    - price: 16000
       value: 3
       weights: 
       effectText: "Tr\xE9sors \xD73 !"
@@ -71,43 +71,43 @@ MonoBehaviour:
       value: 1
       weights: 6400000000000000000000000000000000000000
       effectText: 
-    - price: 200
+    - price: 150
       value: 1
       weights: 4b00000019000000000000000000000000000000
       effectText: 
-    - price: 500
+    - price: 380
       value: 1
       weights: 37000000200000000d0000000000000000000000
       effectText: 
-    - price: 1100
+    - price: 820
       value: 1
       weights: 2800000021000000140000000700000000000000
       effectText: 
-    - price: 2200
+    - price: 1650
       value: 1
       weights: 1e00000020000000180000000b00000003000000
       effectText: 
-    - price: 4000
+    - price: 3000
       value: 1
       weights: 140000001e0000001c0000000f00000007000000
       effectText: 
-    - price: 7000
+    - price: 4500
       value: 1
       weights: 0f0000001b0000001e0000001300000009000000
       effectText: 
-    - price: 10500
+    - price: 6800
       value: 1
       weights: 0a000000190000001f000000170000000b000000
       effectText: 
-    - price: 15000
+    - price: 9800
       value: 1
       weights: 0600000016000000200000001b0000000d000000
       effectText: 
-    - price: 21000
+    - price: 13500
       value: 1
       weights: 0300000012000000210000001f0000000f000000
       effectText: 
-    - price: 29000
+    - price: 19000
       value: 1
       weights: 000000000f000000210000002300000011000000
       effectText: 
@@ -120,43 +120,43 @@ MonoBehaviour:
       value: 1
       weights: 64000000000000000000000000000000
       effectText: 
-    - price: 300
+    - price: 220
       value: 1
       weights: 4b000000190000000000000000000000
       effectText: 
-    - price: 750
+    - price: 560
       value: 1
       weights: 32000000320000000000000000000000
       effectText: 
-    - price: 1500
+    - price: 1130
       value: 1
       weights: 190000004b0000000000000000000000
       effectText: 
-    - price: 3000
+    - price: 2250
       value: 1
       weights: 00000000640000000000000000000000
       effectText: 
-    - price: 6000
+    - price: 4500
       value: 1
       weights: 00000000320000003200000000000000
       effectText: 
-    - price: 9000
+    - price: 5800
       value: 1
       weights: 00000000190000004b00000000000000
       effectText: 
-    - price: 13500
+    - price: 8800
       value: 1
       weights: 00000000000000006400000000000000
       effectText: 
-    - price: 19500
+    - price: 12500
       value: 1
       weights: 00000000000000004b00000019000000
       effectText: 
-    - price: 27000
+    - price: 17500
       value: 1
       weights: 00000000000000003200000032000000
       effectText: 
-    - price: 38000
+    - price: 25000
       value: 1
       weights: 00000000000000000000000064000000
       effectText: 

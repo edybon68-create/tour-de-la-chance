@@ -446,10 +446,13 @@ namespace TourDeLaChance
             // --- Flash : blanc à l'ouverture (0 → 0,7 → 0), puis coloré à la révélation ---
             float flashAlpha = 0f;
             Color flashColor = Color.white;
-            if (Studio3D && !skipped && t >= BoxStudio.LidTime && t < 1.90f)
+            if (Studio3D && !skipped && t >= BoxStudio.LidTime && t < BoxStudio.Reveal)
             {
-                // v5 (bible §14.4) : le flash blanc accompagne le couvercle : 0 → 0,7 (1,68) → 0 (1,90).
-                flashAlpha = t < 1.68f ? 0.7f * (t - BoxStudio.LidTime) / 0.06f : 0.7f * (1f - (t - 1.68f) / 0.22f);
+                // v6 §13 : une seule source pour l'instant de la révélation (R = BoxStudio.Reveal,
+                // 1,75 s). Le flash blanc accompagne le couvercle : 0 → 0,7 (1,68) → 0 (R).
+                const float peak = 1.68f;
+                flashAlpha = t < peak ? 0.7f * (t - BoxStudio.LidTime) / (peak - BoxStudio.LidTime)
+                                      : 0.7f * (1f - (t - peak) / (BoxStudio.Reveal - peak));
             }
             else if (!Studio3D && !skipped && t >= ShakeEnd && t < RevealStart)
                 flashAlpha = 0.7f * Mathf.Sin(Mathf.PI * (t - ShakeEnd) / (RevealStart - ShakeEnd));

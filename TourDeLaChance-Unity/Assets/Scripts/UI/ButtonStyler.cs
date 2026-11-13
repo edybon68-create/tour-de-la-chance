@@ -29,6 +29,8 @@ namespace TourDeLaChance
         /// Les gros boutons qui ont une ombre portée (Jouer, Encaisser, Rejouer, colonnes…).
         public const string ShadowClass = "btn--ombre";
         const string BounceClass = "btn--rebond";
+        /// v6 : les bulles en image (colonnes, croix, roue, Rejouer, Continuer, Encaisser).
+        public const string BubbleClass = "bulle";
 
         public static void Register(VisualElement root) => Apply(root);
 
@@ -50,9 +52,13 @@ namespace TourDeLaChance
         {
             // B2 : un bouton ne prend jamais le focus clavier (sauf exception voulue).
             if (!b.ClassListContains(KeepFocusClass)) b.focusable = false;
-            if (b.ClassListContains(ShadowClass) && b.parent != null) RegisterShadowParent(b.parent);
+            // v6 (art bible §15.1.8) : une BULLE en image a déjà son reflet et son ombre dans le
+            // PNG : on ne lui ajoute ni reflet ni ombre (sinon le « double reflet » revient).
+            bool bubble = b.ClassListContains(BubbleClass);
+            if (!bubble && b.ClassListContains(ShadowClass) && b.parent != null) RegisterShadowParent(b.parent);
             if (!b.ClassListContains(ButtonClass) || b.ClassListContains(StyledClass)) return;
             b.AddToClassList(StyledClass);
+            if (bubble) { AddBounce(b); return; }
             // Le reflet est DESSINÉ (Painter2D) sur le bouton lui-même, et non ajouté comme
             // enfant : un enfant empêcherait le bouton de prendre la taille de son texte
             // (UI Toolkit ne mesure le texte que des éléments sans enfants).
@@ -60,6 +66,12 @@ namespace TourDeLaChance
             b.generateVisualContent += reflet.Draw;
             b.RegisterCallback<PointerEnterEvent>(_ => { reflet.hovered = true; b.MarkDirtyRepaint(); });
             b.RegisterCallback<PointerLeaveEvent>(_ => { reflet.hovered = false; b.MarkDirtyRepaint(); });
+            AddBounce(b);
+        }
+
+        /// Rebond au relâché (commun aux boutons classiques et aux bulles).
+        static void AddBounce(Button b)
+        {
             // Rebond au relâché : 1,12 pendant 0,07 s, puis retour au survol (1,08) avec le
             // ease-out-back du USS. TrickleDown : on le voit même si le bouton « mange » l'événement.
             b.RegisterCallback<PointerUpEvent>(_ =>
@@ -123,7 +135,7 @@ namespace TourDeLaChance
             var p = ctx.painter2D;
             foreach (var child in parent.Children())
             {
-                if (!child.ClassListContains(ShadowClass)) continue;
+                if (!child.ClassListContains(ShadowClass) || child.ClassListContains(BubbleClass)) continue;
                 var st = child.resolvedStyle;
                 if (st.display == DisplayStyle.None || st.visibility == Visibility.Hidden || st.opacity <= 0.01f) continue;
                 Rect l = child.layout;

@@ -13,7 +13,9 @@ namespace TourDeLaChance
     ///     noir de la montée (FloorPrepared) ;
     ///   - « pop » du nombre (1 → 1,35 → 1 en 0,3 s) quand le nouvel étage se montre ;
     ///   - record battu pendant la partie : contour or et étiquette « RECORD » ;
-    ///   - au tout premier étage (fin du fondu de « Jouer »), le badge apparaît (0,6 → 1,08 → 1).
+    ///   - au tout premier étage (fin du fondu de « Jouer »), le badge apparaît (0,6 → 1,08 → 1) ;
+    ///   - v6 §8.3 : un CLIC sur le badge ouvre la route des trophées (le GameManager décide si
+    ///     c'est permis : jamais pendant une épreuve, une transition ou une reprise proposée).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class FloorBadgeView : MonoBehaviour
@@ -47,6 +49,7 @@ namespace TourDeLaChance
                 stars.Add(star);
                 starElements[i] = star;
             }
+            badge.RegisterCallback<ClickEvent>(OnBadgeClicked);
             game.Changed += Refresh;
             game.FloorPrepared += Refresh;
             game.FloorShown += OnFloorShown;
@@ -55,9 +58,17 @@ namespace TourDeLaChance
 
         void OnDisable()
         {
+            badge.UnregisterCallback<ClickEvent>(OnBadgeClicked);
             game.Changed -= Refresh;
             game.FloorPrepared -= Refresh;
             game.FloorShown -= OnFloorShown;
+        }
+
+        /// Clic sur le badge : la route des trophées (ou la ferme si elle est déjà ouverte).
+        void OnBadgeClicked(ClickEvent evt)
+        {
+            if (game.PanelOpen != PanelId.Route && !game.CanOpen(PanelId.Route)) { UiSounds.PlayRefus(); return; }
+            game.TogglePanel(PanelId.Route);
         }
 
         /// Le texte affiché (pour les tests).

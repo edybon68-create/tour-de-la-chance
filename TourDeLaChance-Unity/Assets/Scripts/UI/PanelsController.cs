@@ -32,6 +32,10 @@ namespace TourDeLaChance
     /// Renaissance sous le Classement (§13.5), plus d'icône dans le bandeau (§7.2), Index sans
     /// vitrine (§8), Boutique à onglets (§15), page Renaissance (§13.3), petits messages
     /// (toasts), et application de la règle « 2 accessoires » au démarrage (§4.4).
+    ///
+    /// v6 : la Route des trophées (TrophyRoadPage, clic sur le badge d'étage) ; les petits
+    /// messages des récompenses (collection complète, rattrapage des paliers), 1,5 s d'écart ;
+    /// la vérification des collections après chaque ouverture (« OK ») ; les bulles en image.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class PanelsController : MonoBehaviour
@@ -66,15 +70,17 @@ namespace TourDeLaChance
         const float GearSlideTime = 0.2f;
         // La roue : sur l'écran titre en (32 ; 32) ; pendant le jeu, à droite du badge d'étage
         // (badge en x = 32, 200 px de large, 16 px d'écart ; centrée sur ses 116 px de haut).
-        static readonly Vector2 GearInGameOffset = new Vector2(32f + 200f + 16f - 32f, 24f + 58f - 36f - 32f);
+        // v6 : la roue est une bulle de 96 px dont la face visible (Ø 62) est centrée en (48 ; 40).
+        static readonly Vector2 GearInGameOffset = new Vector2(32f + 200f + 16f - 12f - 32f, 24f + 58f - 40f - 32f);
 
         VisualElement doc, dim, frame, window, header, walletRow, columnLeft, columnRight, gearHolder, toastLayer;
-        VisualElement pageBoutique, pageInventaire, pageIndex, pageAmeliorations, pageClassement, pageReglages, pagePseudo, pageRenaissance;
+        VisualElement pageBoutique, pageInventaire, pageIndex, pageAmeliorations, pageClassement, pageReglages, pagePseudo, pageRenaissance, pageRoute;
         VisualElement invShowcase, popupIcon;
         Label title, walletLabel, potNote;
         Button closeButton, gearButton, colBoutique, colInventaire, colIndex, colAmeliorations, colClassement, colRenaissance;
         InfoBulle infoBulle;
         RebirthPage rebirthPage;
+        TrophyRoadPage routePage;
         BoutiquePage boutique;
         InventoryPage inventory;
         IndexPage index;
@@ -91,6 +97,7 @@ namespace TourDeLaChance
         bool columnsShown;     // les colonnes ont fait leur arrivée après « Jouer »
         ShopItem pendingInventoryFocus;
         LootBox pendingBoxContent;
+        ShopItem pendingShopItem; // v6 §6.1 : la fiche à ouvrir dans « Contenu et taux »
         readonly RollingCounter wallet = new RollingCounter();
 
         enum Anim { None, Opening, Closing, Switching }
@@ -111,6 +118,7 @@ namespace TourDeLaChance
         public BoutiquePage Boutique_Page => boutique;
         public IndexPage Index_Page => index;
         public RebirthPage Rebirth_Page => rebirthPage;
+        public TrophyRoadPage Route_Page => routePage;
         public string TooltipText => infoBulle != null ? infoBulle.Text : "";
 
         void OnEnable()
@@ -146,6 +154,10 @@ namespace TourDeLaChance
             pageReglages = doc.Q<VisualElement>("page-reglages");
             pagePseudo = doc.Q<VisualElement>("page-pseudo");
             pageRenaissance = doc.Q<VisualElement>("page-renaissance");
+            pageRoute = doc.Q<VisualElement>("page-route");
+            // v6 : les nouvelles icônes (échoppe, roue sans trou), chargées par leur nom.
+            if (UiImages.Boutique != null) iconBoutique = UiImages.Boutique;
+            if (UiImages.Reglages != null) iconReglages = UiImages.Reglages;
             invShowcase = doc.Q<VisualElement>("inv-showcase");
 
             SetIcon(colBoutique, iconBoutique);
@@ -164,8 +176,10 @@ namespace TourDeLaChance
             upgrades = new UpgradesPage(doc.Q<ScrollView>("page-ameliorations"), this);
             leaderboard = new LeaderboardPopup(pageClassement);
             settings = new SettingsPage(pageReglages);
+            settings.Toast += ShowToast;
             namePage = new NamePage(pagePseudo);
-            rebirthPage = new RebirthPage(pageRenaissance, game);
+            rebirthPage = new RebirthPage(pageRenaissance, game, iconAmeliorations, iconClassement);
+            routePage = new TrophyRoadPage(pageRoute, game);
 
             // Toutes les zones qui défilent : barre dorée intégrée, molette 80 px par cran,
             // jamais de barre horizontale, petites ombres « encore du contenu » en haut et en bas.
@@ -175,6 +189,10 @@ namespace TourDeLaChance
             boutique.ShowInInventoryRequested += ShowInInventory;
             index.ShowInInventoryRequested += ShowInInventory;
             index.ShowBoxRequested += ShowBoxContent;
+            index.ShowInShopRequested += ShowInShop;
+            CollectionRewards.Granted += OnCollectionReward;
+            TrophyRoad.CatchUpGranted += OnTrophyCatchUp;
+            CoinExchange.Exchanged += OnExchanged;
             inventory.PreviewRequested += Preview;
             inventory.Equipped += OnEquipped;
             inventory.Sold += OnSold;
@@ -229,6 +247,10 @@ namespace TourDeLaChance
             boutique.ShowInInventoryRequested -= ShowInInventory;
             index.ShowInInventoryRequested -= ShowInInventory;
             index.ShowBoxRequested -= ShowBoxContent;
+            index.ShowInShopRequested -= ShowInShop;
+            CollectionRewards.Granted -= OnCollectionReward;
+            TrophyRoad.CatchUpGranted -= OnTrophyCatchUp;
+            CoinExchange.Exchanged -= OnExchanged;
             inventory.PreviewRequested -= Preview;
             inventory.Equipped -= OnEquipped;
             inventory.Sold -= OnSold;
@@ -240,9 +262,11 @@ namespace TourDeLaChance
             index.Dispose();
             upgrades.Dispose();
             leaderboard.Dispose();
+            settings.Toast -= ShowToast;
             settings.Dispose();
             namePage.Dispose();
             rebirthPage.Dispose();
+            routePage.Dispose();
             infoBulle.Dispose();
 
             closeButton.clicked -= game.ClosePanel;
@@ -379,11 +403,16 @@ namespace TourDeLaChance
                 bool consumed = (shownPanel == PanelId.Index && index.HandleEscape())
                              || (shownPanel == PanelId.Boutique && boutique.HandleEscape())
                              || (shownPanel == PanelId.Inventaire && inventory.HandleEscape())
-                             || (shownPanel == PanelId.Renaissance && rebirthPage.HandleEscape());
+                             || (shownPanel == PanelId.Renaissance && rebirthPage.HandleEscape())
+                             || (shownPanel == PanelId.Inventaire && inventory.HandleEscape());
                 if (!consumed) game.ClosePanel();
             }
             if (shownPanel == PanelId.Index) index.Tick(Time.deltaTime);
             if (shownPanel == PanelId.Boutique) boutique.Tick(Time.deltaTime);
+            if (shownPanel == PanelId.Route) routePage.Tick(Time.deltaTime);
+            if (shownPanel == PanelId.Inventaire) inventory.Tick(Time.deltaTime);
+            if (shownPanel == PanelId.Renaissance) rebirthPage.Tick(Time.deltaTime);
+            TickToastQueue(Time.deltaTime);
             infoBulle.Tick(Time.deltaTime);
             TickToasts(Time.deltaTime);
 
@@ -516,7 +545,8 @@ namespace TourDeLaChance
                 showcase.SetActive(split);
                 if (split) invShowcase.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(showcase.Texture));
             }
-            if (blankHorse != null && panel != PanelId.Index && panel != PanelId.Boutique) blankHorse.SetActive(false);
+            // Le cheval vierge ne sert qu'à la fiche agrandie : c'est elle qui le rallume.
+            if (blankHorse != null) blankHorse.SetActive(false);
 
             Vector2 size;
             string key, text;
@@ -531,14 +561,15 @@ namespace TourDeLaChance
                 case PanelId.Index: size = new Vector2(1360f, 820f); key = "index"; text = "Index"; break;
                 case PanelId.Ameliorations: size = new Vector2(1000f, 840f); key = "ameliorations"; text = "Améliorations"; break;
                 case PanelId.Classement: size = new Vector2(920f, 840f); key = "classement"; text = "Classement"; break;
-                case PanelId.Renaissance: size = new Vector2(1080f, 800f); key = "renaissance"; text = "Renaissance"; break;
-                // v6 (QA n°48) : moins haute (440 → 370) : deux lignes et la version, sans grand vide.
-                default: size = new Vector2(560f, 370f); key = "reglages"; text = "Réglages"; break;
+                case PanelId.Renaissance: size = new Vector2(1100f, 840f); key = "renaissance"; text = "Renaissance"; break;  // v6 §15.4
+                case PanelId.Route: size = new Vector2(1360f, 860f); key = "route"; text = "Route des trophées"; break;      // v6 §8.3 : taille L
+                // v6 (art bible §15.7) : 640 × 600 avec la nouvelle ligne Graphismes.
+                default: size = new Vector2(640f, 600f); key = "reglages"; text = "Réglages"; break;
             }
             frame.style.width = size.x;
             frame.style.height = size.y;
             title.text = text;
-            foreach (var k in new[] { "boutique", "inventaire", "index", "ameliorations", "classement", "reglages", "pseudo", "renaissance" })
+            foreach (var k in new[] { "boutique", "inventaire", "index", "ameliorations", "classement", "reglages", "pseudo", "renaissance", "route" })
                 ShopUi.SetClass(header, "popup-header--" + k, k == key);
             SetHeaderIcon(panel);
 
@@ -556,10 +587,11 @@ namespace TourDeLaChance
             ShopUi.SetClass(pagePseudo, "shop-page--active", panel == PanelId.Classement && showingName);
             ShopUi.SetClass(pageReglages, "shop-page--active", panel == PanelId.Reglages);
             ShopUi.SetClass(pageRenaissance, "shop-page--active", panel == PanelId.Renaissance);
+            ShopUi.SetClass(pageRoute, "shop-page--active", panel == PanelId.Route);
 
             switch (panel)
             {
-                case PanelId.Boutique: boutique.Open(pendingBoxContent); break;
+                case PanelId.Boutique: boutique.Open(pendingBoxContent, pendingShopItem); break;
                 case PanelId.Inventaire:
                     inventory.Open(pendingInventoryFocus);
                     // v5 §4.4 : le message de la migration, une seule fois.
@@ -572,6 +604,7 @@ namespace TourDeLaChance
                 case PanelId.Index: index.Open(); break;
                 case PanelId.Ameliorations: upgrades.Open(); break;
                 case PanelId.Renaissance: rebirthPage.Open(); break;
+                case PanelId.Route: routePage.Open(); break;
                 case PanelId.Classement:
                     // 1re ouverture : on demande d'abord le pseudo (§12.7), jamais au lancement.
                     if (!showingName && !Leaderboard.HasName) { ShowNamePage(); return; }
@@ -581,6 +614,7 @@ namespace TourDeLaChance
             }
             pendingInventoryFocus = null;
             pendingBoxContent = null;
+            pendingShopItem = null;
         }
 
         /// v5.1 (art bible §12.18) : la grande icône du menu revient, en haut à gauche du titre.
@@ -596,6 +630,7 @@ namespace TourDeLaChance
                 PanelId.Ameliorations => iconAmeliorations,
                 PanelId.Classement => iconClassement,
                 PanelId.Renaissance => iconRenaissance,
+                PanelId.Route => UiImages.Route,
                 _ => iconReglages
             };
             popupIcon.generateVisualContent -= DrawRebirthIcon; // jamais deux fois
@@ -751,6 +786,7 @@ namespace TourDeLaChance
                 case PanelId.Index: index.Refresh(); break;
                 case PanelId.Ameliorations: upgrades.Refresh(); break;
                 case PanelId.Renaissance: rebirthPage.Refresh(); break;
+                case PanelId.Route: routePage.Refresh(); break;
                 case PanelId.Classement: if (!showingName) leaderboard.Refresh(); break;
             }
         }
@@ -765,6 +801,18 @@ namespace TourDeLaChance
         {
             pendingBoxContent = box;
             if (shownPanel == PanelId.Boutique) { boutique.Open(box); pendingBoxContent = null; }
+            else game.OpenPanel(PanelId.Boutique);
+        }
+
+        /// v6 §6.1 : « Voir dans la Boutique » (fiche d'un objet non obtenu de l'Index) : ouvre la
+        /// Boutique sur « Contenu et taux » de sa boîte, avec la fiche de l'objet déjà ouverte.
+        void ShowInShop(ShopItem item)
+        {
+            var box = Shop.BoxOf(item);
+            if (box == null) return;
+            pendingBoxContent = box;
+            pendingShopItem = item;
+            if (shownPanel == PanelId.Boutique) { boutique.Open(box, item); pendingBoxContent = null; pendingShopItem = null; }
             else game.OpenPanel(PanelId.Boutique);
         }
 
@@ -813,6 +861,9 @@ namespace TourDeLaChance
         void OnOpeningClosed()
         {
             avatar.ShowEquipped();
+            // v6 §6.3 : l'ouverture qui vient de compléter une collection donne sa récompense,
+            // juste après l'écran de résultat (au clic sur OK). Le toast suit (OnCollectionReward).
+            CollectionRewards.GrantAllPending();
             if (shownPanel == PanelId.Boutique) RefreshPage();
             else if (shownPanel != PanelId.None) game.OpenPanel(PanelId.Boutique);
             if (refreshPending) RefreshPage();
@@ -843,6 +894,46 @@ namespace TourDeLaChance
         {
             var label = pageBoutique.Q<Label>(className: "progress-text");
             return label != null ? label.text : "";
+        }
+
+        // =====================================================================
+        // v6 : récompenses (collection, paliers) et échange
+        // =====================================================================
+
+        // Les messages en attente : un toutes les 1,5 s (v6 §6.3).
+        readonly Queue<string> toastQueue = new Queue<string>();
+        float toastQueueTimer;
+        const float ToastGap = 1.5f;
+
+        /// Ajoute un message à la file (affiché dès que le précédent a 1,5 s).
+        public void QueueToast(string text) => toastQueue.Enqueue(text);
+
+        void TickToastQueue(float dt)
+        {
+            toastQueueTimer -= dt;
+            if (toastQueue.Count == 0 || toastQueueTimer > 0f) return;
+            ShowToast(toastQueue.Dequeue());
+            toastQueueTimer = ToastGap;
+        }
+
+        void OnCollectionReward(LootBox box, int diamonds)
+        {
+            QueueToast($"Collection complète : {box.displayName} ! +{diamonds} {ShopUi.Diamant}");
+            if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.DiamantGain1);
+            Refresh();
+        }
+
+        void OnTrophyCatchUp(int diamonds, int record)
+        {
+            QueueToast($"Route des trophées : +{diamonds} {ShopUi.Diamant} pour ton record (étage {record})");
+            if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.DiamantGain1);
+        }
+
+        /// v6 §5.4 : échange confirmé : son de pièces (les compteurs défilent par Refresh).
+        void OnExchanged(CoinPackDef pack)
+        {
+            if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.PiecesAchat);
+            Refresh();
         }
 
         // =====================================================================

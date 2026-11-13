@@ -3547,6 +3547,7 @@ MonoBehaviour:
   game: {fileID: 597386551}
   chestTrial: {fileID: 597386552}
   texts: {fileID: 11400000, guid: 3f2c2e6e00ea945b1a45ebf6c4c982d3, type: 2}
+  reviveView: {fileID: 105359412}
 --- !u!114 &865624840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3849,6 +3850,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -6937437852623343117, guid: 3aff8acfdfb2a44c093c4004bbdb3b6f, type: 3}
   m_PrefabInstance: {fileID: 867333247}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &890996075
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 890996077}
+  - component: {fileID: 890996076}
+  m_Layer: 0
+  m_Name: Graphismes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &890996076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890996075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c56ac35ef53354b9d81e56a89127bef1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.GraphicsApplier
+  volume: {fileID: 1343829301}
+--- !u!4 &890996077
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 890996075}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &893866756
 GameObject:
   m_ObjectHideFlags: 0
@@ -9240,3 +9286,4 @@ SceneRoots:
   - {fileID: 1744661686}
   - {fileID: 1212207092}
   - {fileID: 1970542318}
+  - {fileID: 890996077}

@@ -43,6 +43,7 @@ namespace TourDeLaChance
         public int pieces;        // 0 pour une partie perdue
         public string date;       // "yyyy-MM-dd"
         public bool reprise;      // v5 §11.4 : la partie a utilisé une reprise (marquée d'un ◆)
+        public int reprises;      // v6 §9.4 : combien de reprises (0 à 5) ; « ◆×3 » au classement
     }
 
     /// Ce qu'on envoie au service : les 3 totaux d'un coup, plus (pour le local) la partie qui

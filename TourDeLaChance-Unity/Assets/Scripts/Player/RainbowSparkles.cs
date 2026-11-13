@@ -102,7 +102,8 @@ namespace TourDeLaChance
             if (active)
             {
                 timer -= dt;
-                if (timer <= 0f) { timer += interval; Spawn(); }
+                // v6 §12.2 : en graphismes Faible, deux fois moins d'étincelles (intervalle doublé).
+                if (timer <= 0f) { timer += GraphicsLevel.Current == GraphicsLevel.Low ? interval * 2f : interval; Spawn(); }
             }
 
             Color tint = fixedColor ?? (avatar != null ? avatar.RainbowColorNow : Color.white);

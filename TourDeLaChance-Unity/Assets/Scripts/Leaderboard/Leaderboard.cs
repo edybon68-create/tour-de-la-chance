@@ -234,7 +234,8 @@ namespace TourDeLaChance
                 etage = run.Floor,
                 pieces = run.Lost ? 0 : run.CashedOut,
                 date = LocalLeaderboardService.Today(),
-                reprise = run.UsedRevive
+                reprise = run.UsedRevive,
+                reprises = run.RevivesUsed
             };
             return SubmitAsync(scores);
         }

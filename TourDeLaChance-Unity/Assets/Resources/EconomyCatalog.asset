@@ -19,13 +19,46 @@ MonoBehaviour:
     amount: 2
   - fromFloor: 10
     amount: 3
-  reviveCost: 1
-  maxRevivesPerRun: 1
+  reviveBaseCost: 1
+  reviveCostGrowth: 2
+  maxRevivesPerRun: 5
+  diamondBonusCap: 50
+  coinPacks:
+  - id: echange_poignee
+    displayName: "Poign\xE9e de pi\xE8ces"
+    diamonds: 1
+    coins: 200
+    icon: {fileID: 0}
+  - id: echange_sac
+    displayName: "Sac de pi\xE8ces"
+    diamonds: 5
+    coins: 1000
+    icon: {fileID: 0}
+  - id: echange_coffre
+    displayName: "Coffre de pi\xE8ces"
+    diamonds: 25
+    coins: 5000
+    icon: {fileID: 0}
+  trophyMilestones:
+  - floor: 5
+    diamonds: 1
+  - floor: 10
+    diamonds: 2
+  - floor: 15
+    diamonds: 3
+  - floor: 20
+    diamonds: 5
+  - floor: 25
+    diamonds: 5
+  - floor: 30
+    diamonds: 10
+  trophyRepeatEvery: 10
+  trophyRepeatDiamonds: 10
   rebirthCost: 10000
   rebirthCoinMultiplier: 2
   rebirthDiamondMultiplier: 2
   maxRebirths: 1
-  showDiamondPacks: 1
+  showDiamondPacks: 0
   diamondPacks:
   - id: pack_diamants_1
     displayName: "Poign\xE9e de diamants"

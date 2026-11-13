@@ -41,8 +41,10 @@ namespace TourDeLaChance
         public void Play(Vector3 chestPosition)
         {
             origin = new Vector3(chestPosition.x, 0.9f, chestPosition.z);
+            int shown = GraphicsLevel.Particles(PuffCount); // v6 §12.2 : moitié des bouffées en Faible
             for (int i = 0; i < PuffCount; i++)
             {
+                if (i >= shown) { puffs[i].gameObject.SetActive(false); continue; }
                 // Directions réparties en cercle, avec un petit décalage au hasard.
                 float angle = (i + (float)random.NextDouble() * 0.6f) / PuffCount * Mathf.PI * 2f;
                 directions[i] = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));

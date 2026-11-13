@@ -8,7 +8,11 @@ namespace TourDeLaChance
 {
     /// <summary>
     /// La pop-up « Index » v5 (spec v5 §8) : toute la collection, pour DÉCOUVRIR et CONSULTER.
-    /// Trois onglets : Tous (une section par boîte), Par rareté (Secret en haut), Par catégorie
+    /// v6 : l'Index montre ce qu'on a DÉJÀ eu : un objet non obtenu (non Secret) garde son nom
+    /// mais son visuel est remplacé par le pictogramme « pas encore vu » (§6.1) ; les raretés vont
+    /// de Commun à Secret partout (§5.3) ; chaque boîte de l'onglet Tous dit sa récompense de
+    /// collection (§6.3).
+    /// Trois onglets : Tous (une section par boîte), Par rareté (Commun en haut), Par catégorie
     /// (Skins, Tête, Visage, Cou, Dos). Tout est visible en couleurs, SAUF les Secrets non
     /// obtenus (« ? » et « ??? ») ; un objet non obtenu porte le ruban « Pas encore ». Chaque
     /// carte montre la chance par objet, le bonus de tenue et la mini-image de sa boîte.
@@ -35,6 +39,8 @@ namespace TourDeLaChance
         /// « Voir dans l'inventaire » / « Voir la boîte » (fiche agrandie).
         public event Action<ShopItem> ShowInInventoryRequested;
         public event Action<LootBox> ShowBoxRequested;
+        /// v6 §6.1 : « Voir dans la Boutique » (fiche d'un objet non obtenu).
+        public event Action<ShopItem> ShowInShopRequested;
 
         public Tab CurrentTab => lastTab;
         public ItemDetailView Detail => detail;
@@ -78,8 +84,9 @@ namespace TourDeLaChance
             page.Add(grid);
             PanelsController.SetupScroll(grid);
 
-            detail = new ItemDetailView(page, horse);
+            detail = new ItemDetailView(page, horse, hideUnowned: true);
             detail.ShowInInventoryRequested += item => ShowInInventoryRequested?.Invoke(item);
+            detail.ShowInShopRequested += item => ShowInShopRequested?.Invoke(item);
             detail.ShowBoxRequested += box => ShowBoxRequested?.Invoke(box);
             ButtonStyler.Apply(page);
         }
@@ -113,11 +120,11 @@ namespace TourDeLaChance
             {
                 case Tab.Tous:
                     foreach (var box in Shop.BoxesInShopOrder) // v6 (QA n°43) : l'ordre de la Boutique
-                        Section(BoxTitle(box), box.items.Where(i => i != null).ToList(), null);
+                        Section(BoxTitle(box), box.items.Where(i => i != null).ToList(), null, box);
                     break;
                 case Tab.ParRarete:
                     if (Shop.Catalog == null) break;
-                    foreach (var rarity in Shop.Catalog.Rarities.Reverse())
+                    foreach (var rarity in Shop.Catalog.Rarities) // v6 §5.3 : Commun en haut, Secret en bas
                     {
                         var items = Shop.BoxesInShopOrder.SelectMany(b => b.items).Where(i => i != null && i.RarityId == rarity.id).ToList();
                         if (items.Count == 0) continue;
@@ -128,7 +135,7 @@ namespace TourDeLaChance
                     var boxOrder = Shop.BoxesInShopOrder.ToList();
                     IEnumerable<ShopItem> Sorted(Func<ShopItem, bool> filter) => Shop.Boxes.SelectMany(b => b.items)
                         .Where(i => i != null && filter(i))
-                        .OrderByDescending(Shop.RarityRank)
+                        .OrderBy(Shop.RarityRank)   // v6 §5.3 : du plus commun au plus rare
                         .ThenBy(i => boxOrder.IndexOf(Shop.BoxOf(i)))
                         .ThenBy(Shop.NumberOf);
                     Section("Skins", Sorted(i => i.Category == ShopCategory.Skin).ToList(), null);
@@ -147,7 +154,7 @@ namespace TourDeLaChance
             return $"{box.displayName}  ·  {price}" + (Shop.IsLocked(box) ? "  ·  verrouillée (après la renaissance)" : "");
         }
 
-        void Section(string title, List<ShopItem> items, RarityDef rarity)
+        void Section(string title, List<ShopItem> items, RarityDef rarity, LootBox box = null)
         {
             var head = new VisualElement { pickingMode = PickingMode.Ignore };
             head.AddToClassList("idx-section-head");
@@ -158,6 +165,9 @@ namespace TourDeLaChance
             head.Add(t);
             int found = items.Count(i => Shop.CountOf(i) >= 1);
             head.Add(ShopUi.NewLabel($"{found} / {items.Count}", "idx-section-count"));
+            // v6 §6.3 : la récompense de collection de la boîte (onglet Tous seulement).
+            string reward = RewardLine(box);
+            if (reward.Length > 0) head.Add(ShopUi.NewLabel(reward, "idx-section-recompense"));
             grid.Add(head);
 
             var cells = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -168,11 +178,19 @@ namespace TourDeLaChance
                 int position = order.Count;
                 order.Add(item);
                 VisualElement card = null;
-                card = ShopUi.CollectionTile(item, () => detail.Open(new List<ShopItem>(order), position, card));
+                card = ShopUi.CollectionTile(item, () => detail.Open(new List<ShopItem>(order), position, card), hideUnowned: true);
                 cards[item] = card;
                 cells.Add(card);
             }
             grid.Add(cells);
+        }
+
+        /// « Tout collectionner : 5 ◆ », ou « ✓ Récompense reçue » une fois donnée ("" sans récompense).
+        public static string RewardLine(LootBox box)
+        {
+            int reward = CollectionRewards.RewardOf(box);
+            if (box == null || reward <= 0) return "";
+            return CollectionRewards.Received(box) ? "✓ Récompense reçue" : $"Tout collectionner : {reward} {ShopUi.Diamant}";
         }
 
         /// OUTIL DE TEST : choisit l'onglet (0 Tous, 1 Par rareté, 2 Par catégorie).

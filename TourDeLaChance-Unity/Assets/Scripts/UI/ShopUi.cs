@@ -96,11 +96,15 @@ namespace TourDeLaChance
         /// « ? » pour un Secret non obtenu), nom, liseré de rareté, chance par objet, bonus de
         /// tenue, mini-image de la boîte d'origine, badge « ×3 », coin vert « ✓ » si obtenu,
         /// ruban gris « Pas encore » sinon.
-        public static Button CollectionTile(ShopItem item, Action onClick)
+        /// v6 §6.1 : hideUnowned = vrai dans l'Index : un objet non obtenu (non Secret) montre son
+        /// NOM mais pas son icône (pictogramme « pas encore vu » teinté de sa rareté). Dans
+        /// « Contenu et taux » (Boutique), faux : tout est en couleurs sauf les Secrets non obtenus.
+        public static Button CollectionTile(ShopItem item, Action onClick, bool hideUnowned = false)
         {
             int count = Shop.CountOf(item);
             bool owned = count >= 1;
             bool mystery = !owned && item.RarityId == "secret";
+            bool notSeen = hideUnowned && !owned && !mystery;
             var frame = new Button(onClick);
             frame.AddToClassList("item-frame");
             frame.AddToClassList("tile-frame");
@@ -120,7 +124,16 @@ namespace TourDeLaChance
             else if (box != null) { mini.AddToClassList("tile-box--vide"); mini.style.backgroundColor = box.openingTint; }
             inner.Add(mini);
 
-            inner.Add(Visual(item, mystery ? Look.Mystery : Look.Normal));
+            if (notSeen)
+            {
+                var holder = new VisualElement { pickingMode = PickingMode.Ignore };
+                holder.AddToClassList("item-visual");
+                holder.style.alignItems = Align.Center;
+                holder.style.justifyContent = Justify.Center;
+                holder.Add(NotSeenPicto(rarity, 88f));
+                inner.Add(holder);
+            }
+            else inner.Add(Visual(item, mystery ? Look.Mystery : Look.Normal));
             inner.Add(NewLabel(mystery ? "???" : item.DisplayName, "item-name"));
             inner.Add(NewLabel(Percent(Shop.ItemChance(item)), "item-extra"));
             int bonus = Shop.BonusPercent(item);
@@ -219,6 +232,83 @@ namespace TourDeLaChance
                 box.Add(token);
             }
             return box;
+        }
+
+        // =====================================================================
+        // v6 §6.1 : le pictogramme « objet pas encore vu » (Index)
+        // =====================================================================
+
+        /// Le pictogramme « pas encore vu », LE MÊME pour tous les objets, teinté de la couleur de
+        /// la rareté : un jeton rond contouré d'encre avec un œil fermé. Dessiné par le code (en
+        /// attendant un dessin du DA) : AUCUN pixel de l'icône ni du modèle de l'objet n'est montré.
+        public static VisualElement NotSeenPicto(RarityDef rarity, float size)
+        {
+            var e = new VisualElement { pickingMode = PickingMode.Ignore };
+            e.AddToClassList("pas-vu");
+            e.style.width = size;
+            e.style.height = size;
+            Color tint = rarity != null ? rarity.color : new Color(0.6f, 0.6f, 0.7f);
+            e.generateVisualContent += ctx => DrawNotSeen(ctx, tint);
+            return e;
+        }
+
+        static void DrawNotSeen(MeshGenerationContext ctx, Color tint)
+        {
+            var r = ctx.visualElement.contentRect;
+            if (r.width <= 0f) return;
+            var p = ctx.painter2D;
+            Vector2 c = r.center;
+            float rad = Mathf.Min(r.width, r.height) * 0.44f;
+            var ink = new Color(0.067f, 0.051f, 0.122f);
+            // Le jeton : la couleur de la rareté, un peu assombrie en bas (relief).
+            p.fillColor = Color.Lerp(tint, Color.black, 0.15f);
+            p.BeginPath(); p.Arc(c, rad, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();
+            p.fillColor = Color.Lerp(tint, Color.white, 0.15f);
+            p.BeginPath(); p.Arc(c + new Vector2(0f, -rad * 0.08f), rad * 0.86f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();
+            p.strokeColor = ink; p.lineWidth = Mathf.Max(3f, rad * 0.1f);
+            p.BeginPath(); p.Arc(c, rad, Angle.Degrees(0f), Angle.Degrees(360f)); p.Stroke();
+            // L'œil fermé : un arc blanc contouré, et trois cils.
+            float w = rad * 0.55f;
+            foreach (var (width, col) in new[] { (rad * 0.2f, ink), (rad * 0.1f, Color.white) })
+            {
+                p.strokeColor = col; p.lineWidth = width; p.lineCap = LineCap.Round;
+                p.BeginPath(); p.Arc(c + new Vector2(0f, -rad * 0.15f), w, Angle.Degrees(30f), Angle.Degrees(150f)); p.Stroke();
+                for (int k = -1; k <= 1; k++)
+                {
+                    float a = (90f + k * 40f) * Mathf.Deg2Rad;
+                    Vector2 from = c + new Vector2(0f, -rad * 0.15f) + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * w;
+                    p.BeginPath(); p.MoveTo(from); p.LineTo(from + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * rad * 0.22f); p.Stroke();
+                }
+            }
+        }
+
+        /// Un chevron ◀ ou ▶ dessiné par le code (flèches de la fiche agrandie, art bible §15.6) :
+        /// trait blanc contouré d'encre, avec sa copie « épaisseur » dessous.
+        public static VisualElement Chevron(bool right)
+        {
+            var e = new VisualElement { pickingMode = PickingMode.Ignore };
+            e.AddToClassList("chevron");
+            e.generateVisualContent += ctx =>
+            {
+                var r = ctx.visualElement.contentRect;
+                if (r.width <= 0f) return;
+                var p = ctx.painter2D;
+                Vector2 c = new Vector2(r.width * 0.5f, r.height * 0.5f); // centre de la face de la bulle
+                float s = right ? 1f : -1f;
+                void Path(Vector2 off)
+                {
+                    p.BeginPath();
+                    p.MoveTo(c + off + new Vector2(-8f * s, -16f));
+                    p.LineTo(c + off + new Vector2(10f * s, 0f));
+                    p.LineTo(c + off + new Vector2(-8f * s, 16f));
+                    p.Stroke();
+                }
+                p.lineCap = LineCap.Round; p.lineJoin = LineJoin.Round;
+                p.strokeColor = new Color(0.18f, 0.165f, 0.306f); p.lineWidth = 18f; Path(new Vector2(0f, 3f)); // épaisseur #2E2A4E
+                p.strokeColor = new Color(0.118f, 0.102f, 0.2f); p.lineWidth = 18f; Path(Vector2.zero);         // contour #1E1A33
+                p.strokeColor = Color.white; p.lineWidth = 11f; Path(Vector2.zero);
+            };
+            return e;
         }
     }
 }

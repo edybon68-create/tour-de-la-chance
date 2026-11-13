@@ -12,7 +12,9 @@ namespace TourDeLaChance
     /// trésor ×3 », « Trésor : +150 » et les petites mentions (◆ Diamants : 3 %, Tenue +12 %,
     /// Renaissance ×2). Après 2 s (2,6 s avec une bannière), elle se range en une BARRE
     /// compacte en haut, qui reste visible pendant le choix : le gain est toujours affiché
-    /// avant le choix (règle d'or). Un clic sur la barre rouvre la carte 2 s.
+    /// avant le choix (règle d'or). v6 §8.3 : un clic sur la barre ouvre la ROUTE DES TROPHÉES
+    /// (au lieu de rouvrir la carte) ; bannière « Trophée : étage 10 ! +2 ◆ » à un palier ;
+    /// mention du bonus de diamants de la tenue ; « dont 1 grâce à ta tenue ».
     ///
     /// Elle ne bloque JAMAIS : survoler ou choisir un coffre, appuyer sur 1-6 ou encaisser la
     /// range aussitôt, et elle ne reçoit pas les clics (sauf la barre compacte).
@@ -33,7 +35,6 @@ namespace TourDeLaChance
         const float BigTimeBanner = 2.6f;// …plus longtemps s'il y a une bannière spéciale
         const float FoldTime = 0.3f;     // se range en barre compacte
         const float QuickFoldTime = 0.15f; // rangée aussitôt (survol d'un coffre, choix…)
-        const float ReopenTime = 2.0f;   // un clic sur la barre la rouvre 2 s
 
         enum Phase { Hidden, Arriving, Big, Folding, Compact }
         Phase phase = Phase.Hidden;
@@ -149,6 +150,8 @@ namespace TourDeLaChance
             else if (floor >= 2 && game.LastDiamonds > 0)
             {
                 won.text = $"+{game.LastDiamonds} diamant{(game.LastDiamonds > 1 ? "s" : "")} !";
+                // v6 §11.3 : quand le bonus de la tenue a ajouté un diamant, on le dit.
+                if (game.LastDiamondsFromBonus > 0) won.text += $" (dont {game.LastDiamondsFromBonus} grâce à ta tenue)";
                 won.AddToClassList("recap-won--diamants");
             }
             else if (floor >= 2 && game.LastGain > 0) won.text = $"+{game.LastGain} pièces · cagnotte {game.Pot}";
@@ -156,10 +159,14 @@ namespace TourDeLaChance
             Show(won, won.text.Length > 0);
 
             // Bannière spéciale (remplace les bannières séparées) : record, nouveau palier.
+            // v6 §8.4 : priorité Trophée > Nouveau record > décor (le trophée remplace le record).
             var lines = new List<string>();
-            if (game.NewRecordThisFloor && TextPicker.Texts != null) lines.Add(TextPicker.Texts.recordLine);
+            bool trophy = game.TrophyDiamondsThisFloor > 0;
+            if (trophy) lines.Add($"Trophée : étage {game.TrophyFloorThisFloor} ! +{game.TrophyDiamondsThisFloor} {ShopUi.Diamant}");
+            else if (game.NewRecordThisFloor && TextPicker.Texts != null) lines.Add(TextPicker.Texts.recordLine);
             if (!string.IsNullOrEmpty(tierName)) lines.Add(tierName);
             banner.text = string.Join(" · ", lines);
+            ShopUi.SetClass(banner, "recap-banner--trophee", trophy);
             Show(banner, banner.text.Length > 0);
             // v6 (QA n°30) : carte moins chargée. Avec une bannière (record, palier), la phrase
             // drôle s'efface : la bannière est plus importante et la carte reste lisible.
@@ -174,7 +181,9 @@ namespace TourDeLaChance
 
             // Petites mentions (seulement si non nulles / actives).
             var m = new List<string>();
-            if (setup.DiamondChancePermille > 0) m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%");
+            if (setup.DiamondChancePermille > 0)
+                m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%"
+                      + (setup.DiamondBonusPercent > 0 ? $" · tenue {ShopUi.Diamant} +{setup.DiamondBonusPercent}\u00A0%" : ""));
             if (setup.OutfitBonusPercent > 0) m.Add($"Tenue +{setup.OutfitBonusPercent}\u00A0%");
             if (setup.RebirthMultiplier > 1) m.Add($"Renaissance ×{setup.RebirthMultiplier}");
             mentions.text = string.Join("   ·   ", m);
@@ -212,7 +221,8 @@ namespace TourDeLaChance
             Fill();
             SetPhase(Phase.Arriving);
             if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RecapEtage);
-            if (game.NewRecordThisFloor && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Record);
+            if ((game.NewRecordThisFloor || game.TrophyDiamondsThisFloor > 0) && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Record);
+            if (game.TrophyDiamondsThisFloor > 0 && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.DiamantGain1);
         }
 
         void OnGameChanged()
@@ -241,11 +251,12 @@ namespace TourDeLaChance
             SetPhase(Phase.Folding);
         }
 
+        /// v6 §8.3 : la barre compacte ouvre la route des trophées (le GameManager décide si
+        /// c'est permis). L'ancien « rouvrir la carte 2 s » est remplacé.
         void OnBarClicked(ClickEvent evt)
         {
             if (phase != Phase.Compact || !Allowed) return;
-            bigDuration = ReopenTime;
-            SetPhase(Phase.Arriving);
+            if (game.CanOpen(PanelId.Route)) game.OpenPanel(PanelId.Route);
         }
 
         void SetPhase(Phase p)

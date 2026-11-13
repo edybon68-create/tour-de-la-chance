@@ -83,6 +83,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: 49afeff2ed4b9404abcc87be529d5920, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 0
+    diamondBonusPercent: 
+    completionReward: 5
   - id: boite_accessoires_1
     displayName: "Bo\xEEte d'accessoires n\xB01"
     price: 250
@@ -110,6 +112,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: 01a2dffdcf26f49ddad3fbb8a8a28f3d, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 0
+    diamondBonusPercent: 
+    completionReward: 5
   - id: boite_animaux_skins
     displayName: 'Animaux : skins'
     price: 500
@@ -137,6 +141,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: 52f7966fd883d4a7fb86ac25478d7cf9, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 2
+    diamondBonusPercent: 
+    completionReward: 8
   - id: boite_animaux_accessoires
     displayName: 'Animaux : accessoires'
     price: 500
@@ -164,6 +170,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: 5735d37bafdf0422d9d1980cdbc6bbca, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 2
+    diamondBonusPercent: 
+    completionReward: 8
   - id: boite_pirates_skins
     displayName: 'Pirates : skins'
     price: 5
@@ -187,6 +195,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: aefa3324a140344a48d7061aaee2967b, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 1
+    diamondBonusPercent: 000000000000000000000000000000000f0000001e000000
+    completionReward: 10
   - id: boite_pirates_accessoires
     displayName: 'Pirates : accessoires'
     price: 5
@@ -210,6 +220,8 @@ MonoBehaviour:
     openingPrefab: {fileID: 919132149155446097, guid: 03b909662146d429eabb931378fe7a09, type: 3}
     openingTint: {r: 1, g: 1, b: 1, a: 1}
     family: 1
+    diamondBonusPercent: 000000000000000000000000000000000f0000001e000000
+    completionReward: 10
   freeItems:
   - {fileID: 11400000, guid: 7d07bbf06ddd2484eab96d87021d63db, type: 2}
   - {fileID: 11400000, guid: 53e29cef8643e45248339583c76c42cc, type: 2}

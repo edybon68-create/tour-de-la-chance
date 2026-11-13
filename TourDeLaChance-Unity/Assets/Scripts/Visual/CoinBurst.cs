@@ -69,6 +69,8 @@ namespace TourDeLaChance
         /// Fait jaillir "count" pièces depuis le centre d'un coffre.
         public void Burst(Vector3 chestPosition, int count)
         {
+            // v6 §12.2 : en graphismes Faible, moitié des pièces (arrondi au-dessus, au moins 1).
+            count = GraphicsLevel.Particles(count);
             Vector3 start = new Vector3(chestPosition.x, 0.9f, chestPosition.z);
             int launched = 0;
             foreach (var coin in coins)

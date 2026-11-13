@@ -1,0 +1,391 @@
+/* =====================================================================================
+   Interface v6 (art bible §15). Ce fichier est chargé EN DERNIER par Hud.uxml et Panels.uxml :
+   ses règles passent devant celles des fichiers plus anciens (V5, V51, Popups…).
+   Tailles en pixels de référence 1920 × 1080.
+   ===================================================================================== */
+
+/* ---------- 1. Les bulles sont des IMAGES (§15.1) ----------
+   Le bouton n'a plus ni bordure ni couleur de fond : toute l'apparence (relief, reflet, ombre)
+   est dans le PNG rendu par Blender. ButtonStyler ne leur ajoute ni reflet ni ombre. */
+.btn.bulle {
+    border-width: 0;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 0;
+}
+.btn.bulle:active { translate: 0 0; scale: 0.96 0.96; border-bottom-width: 0; }
+.btn.bulle:disabled { opacity: 0.45; }
+
+/* ---------- 2. Les colonnes : grande bulle de 160 px (dont 18 px de marge transparente) (§15.2) ----------
+   Les deux colonnes ont le même haut (y = 232 → haut visible à 240), sous le compteur de diamants. */
+.col { position: absolute; top: 232px; width: 160px; }
+.col--gauche { left: 14px; }
+.col--droite { right: 14px; top: 232px; }
+.btn-holder { width: 160px; height: 160px; margin: 0 0 -4px 0; }   /* pas de 156 px */
+.btn.col-btn { width: 160px; height: 160px; border-radius: 0; }
+.col-btn-icon { position: absolute; left: 34px; top: 24px; width: 92px; height: 92px; }
+.btn.col-btn:active > .col-btn-icon { translate: 0 6px; scale: 1 1; }
+.btn.col-btn.col-btn--active { background-color: rgba(0, 0, 0, 0); }
+.col-btn-badge { top: 4px; right: 10px; }
+
+.btn.col-btn--boutique        { background-image: url("Bulles/bulle_rond_boutique.png"); }
+.btn.col-btn--boutique:active { background-image: url("Bulles/bulle_rond_boutique_appui.png"); }
+.btn.col-btn--inventaire        { background-image: url("Bulles/bulle_rond_inventaire.png"); }
+.btn.col-btn--inventaire:active { background-image: url("Bulles/bulle_rond_inventaire_appui.png"); }
+.btn.col-btn--index        { background-image: url("Bulles/bulle_rond_index.png"); }
+.btn.col-btn--index:active { background-image: url("Bulles/bulle_rond_index_appui.png"); }
+.btn.col-btn--ameliorations        { background-image: url("Bulles/bulle_rond_ameliorations.png"); }
+.btn.col-btn--ameliorations:active { background-image: url("Bulles/bulle_rond_ameliorations_appui.png"); }
+.btn.col-btn--classement        { background-image: url("Bulles/bulle_rond_classement.png"); }
+.btn.col-btn--classement:active { background-image: url("Bulles/bulle_rond_classement_appui.png"); }
+.btn.col-btn--rebirth        { background-image: url("Bulles/bulle_rond_renaissance.png"); }
+.btn.col-btn--rebirth:active { background-image: url("Bulles/bulle_rond_renaissance_appui.png"); }
+
+/* Pop-up ouverte : le cercle or posé sur la bulle (élément .col-btn-actif, caché par défaut). */
+.col-btn-actif {
+    display: none; position: absolute; left: 14px; top: 4px; width: 132px; height: 132px;
+    border-radius: 66px; border-width: 6px; border-color: #FFD54A;
+}
+.col-btn--active .col-btn-actif { display: flex; }
+
+/* ---------- 3. Petites bulles : la croix de fermeture, la roue dentée, les flèches (§15.1.6) ---------- */
+.btn.bulle-petit { width: 96px; height: 96px; border-radius: 0; }
+.btn.bulle-petit:hover { scale: 1.08 1.08; }
+.btn.bulle-petit--rouge          { background-image: url("Bulles/bulle_petit_rouge.png"); }
+.btn.bulle-petit--rouge:active   { background-image: url("Bulles/bulle_petit_rouge_appui.png"); }
+.btn.bulle-petit--ardoise        { background-image: url("Bulles/bulle_petit_ardoise.png"); }
+.btn.bulle-petit--ardoise:active { background-image: url("Bulles/bulle_petit_ardoise_appui.png"); }
+.btn.bulle-petit--or             { background-image: url("Bulles/bulle_petit_or.png"); }
+.btn.bulle-petit--or:active      { background-image: url("Bulles/bulle_petit_or_appui.png"); }
+.bulle-petit .croix { position: absolute; left: 28px; top: 20px; width: 40px; height: 40px; }
+.bulle-petit .roue-icone { position: absolute; left: 16px; top: 8px; width: 64px; height: 64px; }
+.btn.bulle-petit:active .croix, .btn.bulle-petit:active .roue-icone { translate: 0 5px; }
+.bulle-petit .croix-barre { width: 36px; height: 11px; border-radius: 5.5px; border-width: 3px; border-color: #7A1A1F; }
+.bulle-petit .croix-barre--ombre { background-color: #9A2228; border-color: #9A2228; translate: 0 3px; }
+.popup-close.bulle-petit { position: absolute; top: -24px; right: -32px; }
+
+/* ---------- 4. Bulles rectangulaires en 9-slice : Encaisser, Rejouer, Continuer (§15.1.8) ----------
+   L'image (400 × 240, rendue en ×2) est découpée : les 40 px de gauche et de droite (affichage)
+   ne bougent pas, seul le milieu s'étire EN LARGEUR. La hauteur reste 120 px. */
+.btn.bulle-rect {
+    height: 120px;
+    min-width: 300px;
+    margin: 0 12px;
+    padding: 0 36px 16px 36px;      /* le texte se centre sur la FACE, pas sur le socle */
+    flex-direction: row; align-items: center; justify-content: center;
+    border-radius: 0;
+    -unity-slice-left: 80; -unity-slice-right: 80; -unity-slice-top: 80; -unity-slice-bottom: 100;
+    -unity-slice-scale: 0.5px;
+}
+.btn.bulle-rect:hover  { scale: 1.05 1.05; }
+.btn.bulle-rect:active { scale: 0.97 0.97; }
+.btn.bulle-rect:active > * { translate: 0 6px; }
+.btn.bulle-rect--vert          { background-image: url("Bulles/bulle_rect_vert.png");   --contour: #0E3D21; }
+.btn.bulle-rect--vert:active   { background-image: url("Bulles/bulle_rect_vert_appui.png"); }
+.btn.bulle-rect--violet        { background-image: url("Bulles/bulle_rect_violet.png"); --contour: #21155E; }
+.btn.bulle-rect--violet:active { background-image: url("Bulles/bulle_rect_violet_appui.png"); }
+.btn.bulle-rect--aqua          { background-image: url("Bulles/bulle_rect_aqua.png");   --contour: #0B4A6E; }
+.btn.bulle-rect--aqua:active   { background-image: url("Bulles/bulle_rect_aqua_appui.png"); }
+.btn.bulle-rect:disabled { background-image: url("Bulles/bulle_rect_gris.png"); --contour: #45425A; color: #E6E2F0; opacity: 1; }
+.bulle-rect__texte {
+    font-size: 38px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: var(--contour); margin: 0; padding: 0;
+}
+.btn.bulle-rect:disabled .bulle-rect__texte { color: #E6E2F0; -unity-text-outline-color: #45425A; }
+.bulle-rect .coin, .bulle-rect .diamant { width: 40px; height: 40px; margin: 0 6px; }
+.btn.btn-cashout.bulle-rect { min-width: 300px; height: 120px; }
+.btn.btn-replay.bulle-rect { min-width: 280px; }
+.btn.btn-continue.bulle-rect { min-width: 340px; }
+.actions .btn.bulle-rect { margin: 0 12px; }    /* 24 px entre deux boutons */
+
+/* ---------- 5. La barre du haut (carte d'étage compacte) décollée du bord (§15.2.2) ---------- */
+.recap-bar {
+    top: 38px;                /* bord haut à y = 40 à l écran (vérifié en capture) */
+    height: 64px;
+    padding: 0 28px;
+    border-width: 5px;
+    border-color: #110D1F;
+    border-radius: 24px;
+}
+.recap-banner--trophee { background-color: #FFC83A; color: #3A2200; border-width: 3px; border-color: #6B4300; }
+
+/* Le badge d'étage se clique (il ouvre la route des trophées). */
+.badge.badge--cliquable:hover { scale: 1.04 1.04; }
+
+/* ---------- 6. L'écran après un piège : Rejouer / Continuer (v6 §9.2) ---------- */
+.revive-info { align-items: center; margin-bottom: 8px; }
+.revive-info__titre {
+    font-size: 44px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0;
+}
+.revive-info__texte {
+    font-size: 28px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 4px 0 0 0; padding: 0;
+}
+.revive-info__petit {
+    font-size: 21px; color: #DDE8FF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; margin: 2px 0 0 0;
+}
+
+/* La confirmation « Tu es sûr ? » (fenêtre S, voile sur toute la fenêtre) */
+.sur-voile {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(14, 10, 26, 0.75); align-items: center; justify-content: center;
+}
+.sur-boite {
+    width: 640px; padding: 30px 30px 26px 30px; background-color: #FBF8F2;
+    border-width: 6px; border-color: #110D1F; border-radius: 28px; align-items: center;
+}
+.sur-titre {
+    font-size: 46px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F; margin: 0 0 12px 0;
+}
+.sur-texte { font-size: 26px; color: #2A2440; white-space: normal; -unity-text-align: middle-center; margin: 0 0 20px 0; }
+.sur-boutons { flex-direction: row; }
+.btn.sur-btn { font-size: 26px; height: 72px; min-width: 220px; padding: 0 20px; margin: 0 10px; border-radius: 20px; }
+.btn.btn--rouge-vif { --contour: #5E1013; --epaisseur: #9A2228; background-color: #D64545; background-image: none; }
+.btn.sur-btn--defaut { border-left-color: #FFD54A; border-right-color: #FFD54A; border-top-color: #FFD54A; }
+
+/* ---------- 7. Boutique : onglets sur toute la largeur (§15.2.3) ---------- */
+.btq-top { flex-direction: row; align-items: center; justify-content: flex-start; }
+.btq-top .v5-tabs { flex-direction: row; flex-grow: 1; flex-shrink: 1; }
+.btq-top .btn.v5-tab {
+    flex-grow: 1; flex-basis: 0; min-width: 0;
+    height: 64px; padding: 0 8px; margin: 0 16px 0 0;
+    flex-direction: row; justify-content: center; align-items: center;
+}
+.btq-top .btq-balance { flex-shrink: 0; margin-left: 24px; }
+.v5-tab__texte { font-size: 26px; }
+
+/* La section Échanges */
+.ech-intro { font-size: 24px; color: #2A2440; -unity-text-align: middle-center; white-space: normal; margin: 0 0 12px 0; }
+.ech-cartes { flex-direction: row; justify-content: center; flex-wrap: wrap; }
+.ech-carte { width: 300px; margin: 0 12px 16px 12px; padding: 14px; align-items: center; }
+.ech-image { width: 150px; height: 130px; align-items: center; justify-content: center; }
+.ech-image__piles { width: 130px; height: 120px; -unity-background-scale-mode: scale-to-fit; }
+.ech-nom {
+    font-size: 28px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; margin: 6px 0 0 0;
+}
+.ech-taux {
+    font-size: 24px; color: #FFE66B; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; margin: 4px 0 10px 0;
+}
+.btn.ech-btn { height: 66px; min-width: 220px; font-size: 24px; padding: 0 18px; border-radius: 18px; }
+.ech-manque {
+    font-size: 20px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin-top: 6px;
+}
+.collection-recompense { font-size: 18px; color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; margin: 2px 0 0 0; }
+.idx-section-recompense { font-size: 20px; color: #6B4300; -unity-font-style: bold; margin: 0 0 0 16px; }
+
+/* « Collection : X / N » moins gras (point 9) */
+.progress-text, .btq-card .progress-text, .popup-window .progress-text { -unity-font-style: normal; }
+.btq-card .progress-text { -unity-text-outline-width: 2px; }
+
+/* ---------- 8. Index : le pictogramme « pas encore vu » (§6.1) ---------- */
+.pas-vu { width: 96px; height: 96px; align-items: center; justify-content: center; }
+.pas-vu__texte {
+    font-size: 30px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0;
+}
+.detail-pas-vu { position: absolute; left: 0; right: 0; top: 0; bottom: 0; align-items: center; justify-content: center; }
+.detail-pas-vu__texte {
+    font-size: 24px; color: #FFFFFF; -unity-font-style: bold; white-space: normal; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; width: 340px; margin-top: 18px;
+}
+
+/* ---------- 9. Fiche agrandie : flèches en bulles, « glisse pour tourner » (§15.6) ---------- */
+.btn.detail-arrow.bulle { width: 120px; height: 120px; top: 284px; border-radius: 0; }
+.btn.detail-arrow--gauche.bulle { left: -60px; }
+.btn.detail-arrow--droite.bulle { right: -60px; }
+.chevron { position: absolute; left: 0; top: 0; width: 120px; height: 100px; }
+.btn.detail-arrow.bulle:active .chevron { translate: 0 6px; }
+.tourne-indice {
+    position: absolute; bottom: 16px; align-self: center;
+    height: 48px; padding: 0 18px 0 8px; flex-direction: row; align-items: center;
+    background-color: rgba(17, 13, 31, 0.75); border-radius: 24px;
+}
+.tourne-indice__icone { width: 40px; height: 40px; -unity-background-scale-mode: scale-to-fit; margin-right: 8px; }
+.tourne-indice__texte { font-size: 22px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0; }
+
+/* ---------- 10. Inventaire : 3 onglets, « Équiper le meilleur », « Mes skins » ---------- */
+.inv-haut { flex-direction: row; align-items: center; flex-shrink: 0; }
+.inv-haut .subtabs { flex-grow: 1; margin: 0; }
+.btn.inv-meilleur { height: 60px; font-size: 22px; padding: 0 18px; border-radius: 18px; margin-left: 10px; }
+.tenues { flex-direction: column; }
+.tenue {
+    flex-direction: row; align-items: center; min-height: 104px; margin: 0 6px 10px 0; padding: 10px 14px;
+    border-width: 4px; border-color: #110D1F; border-radius: 20px; background-color: #3A3358;
+}
+.tenue--vide { border-color: #8A84B8; background-color: rgba(58, 51, 88, 0.35); }
+.tenue__libre { font-size: 22px; color: #5A5470; flex-grow: 1; -unity-font-style: bold; }
+.tenue__infos { flex-grow: 1; flex-shrink: 1; margin-left: 12px; }
+.tenue__nom { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; }
+.tenue__bonus { font-size: 19px; color: #FFE66B; margin: 2px 0 0 0; -unity-font-style: bold; }
+.tenue__manque { font-size: 18px; color: #FF9A9A; margin: 2px 0 0 0; -unity-font-style: bold; }
+.tenue__portee { font-size: 18px; color: #6BE34A; -unity-font-style: bold; margin: 2px 0 0 0; }
+.tenue__icones { flex-direction: row; }
+.tenue__icone {
+    width: 64px; height: 64px; margin-right: 6px; border-width: 3px; border-color: #110D1F; border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.12); align-items: center; justify-content: center;
+}
+.tenue__icone .item-visual { width: 56px; height: 56px; }
+.tenue__icone-manque { font-size: 30px; color: #A8A4BC; -unity-font-style: bold; margin: 0; }
+.tenue__boutons { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; max-width: 430px; }
+.btn.tenue__btn { height: 50px; font-size: 18px; padding: 0 12px; margin: 3px; border-radius: 14px; }
+.diamant-badge {
+    position: absolute; bottom: 4px; left: 4px; font-size: 15px; color: #0B4A6E; -unity-font-style: bold;
+    background-color: #8FEAFF; border-radius: 8px; padding: 0 5px; border-width: 2px; border-color: #110D1F;
+}
+.nom-champ { width: 460px; font-size: 26px; margin-bottom: 18px; }
+
+/* ---------- 11. La route des trophées ---------- */
+.route-page.shop-page--active { display: flex; }
+.route-entete { flex-direction: row; flex-shrink: 0; margin-bottom: 10px; }
+.route-entete__gauche {
+    flex-grow: 1; flex-shrink: 1; padding: 10px 16px; background-color: #3A3358;
+    border-width: 4px; border-color: #110D1F; border-radius: 20px;
+}
+.route-entete__titre { font-size: 22px; color: #FFD54A; -unity-font-style: bold; margin: 0 0 2px 0; }
+.route-entete__ligne { font-size: 19px; color: #FFFFFF; white-space: normal; margin: 1px 0; }
+.route-entete__droite { width: 340px; margin-left: 12px; justify-content: center; }
+.route-pilule {
+    height: 56px; border-radius: 28px; border-width: 4px; border-color: #110D1F; margin: 4px 0;
+    flex-direction: row; align-items: center; justify-content: center; padding: 0 14px;
+}
+.route-pilule--record { background-color: #FFC83A; }
+.route-pilule--trophees { background-color: #6C4FE0; }
+.route-pilule__texte { font-size: 21px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; }
+.route-pilule--record .route-pilule__texte { color: #3A2200; -unity-text-outline-width: 0; }
+.route-pilule__drapeau { width: 40px; height: 40px; -unity-background-scale-mode: scale-to-fit; margin-right: 6px; }
+.route-fenetre {
+    flex-grow: 1; background-color: #1F1A3A; border-width: 5px; border-color: #110D1F; border-radius: 22px; overflow: hidden;
+}
+.route-scroll { flex-grow: 1; }
+.route-fond { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.route-dalle {
+    height: 96px; flex-direction: row; align-items: center; padding: 0 16px; margin: 0 24px 0 0;
+}
+.route-noeud {
+    width: 64px; height: 64px; border-radius: 32px; border-width: 4px; border-color: #110D1F;
+    background-color: #FFFFFF; align-items: center; justify-content: center; margin-left: 96px;
+}
+.route-noeud--passe { background-color: #FFC83A; }
+.route-noeud--palier { width: 84px; height: 84px; border-radius: 42px; margin-left: 86px; background-color: #8A84B8; }
+.route-noeud--palier.route-noeud--passe { background-color: #FFC83A; }
+.route-noeud__num { font-size: 26px; color: #110D1F; -unity-font-style: bold; margin: 0; }
+.route-carte {
+    flex-grow: 1; margin-left: 18px; padding: 8px 16px; border-width: 4px; border-color: #110D1F; border-radius: 18px;
+    background-color: rgba(31, 23, 48, 0.82); flex-direction: row; align-items: center;
+}
+.route-carte--sombre { opacity: 0.78; }
+.route-carte__col { flex-grow: 1; }
+.route-carte__ligne { font-size: 21px; color: #FFFFFF; -unity-font-style: bold; margin: 0; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+.route-carte__petit { font-size: 18px; color: #DDD8EE; margin: 0; }
+.route-trophee {
+    padding: 4px 12px; border-radius: 14px; border-width: 3px; border-color: #110D1F; background-color: #FFC83A; margin-left: 10px;
+}
+.route-trophee--verrou { background-color: #B8B4C8; }
+.route-trophee__texte { font-size: 20px; color: #3A2200; -unity-font-style: bold; margin: 0; }
+.route-marque {
+    padding: 2px 12px; border-radius: 14px; border-width: 3px; border-color: #110D1F; background-color: #FFD54A; margin-left: 10px;
+    flex-direction: row; align-items: center;
+}
+.route-marque__texte { font-size: 19px; color: #3A2200; -unity-font-style: bold; margin: 0; }
+.route-marque__img { width: 34px; height: 34px; -unity-background-scale-mode: scale-to-fit; margin-right: 4px; }
+.route-bandeau { height: 40px; margin: 0 24px 0 0; align-items: center; justify-content: center; }
+.route-bandeau__texte {
+    font-size: 21px; color: #FFFFFF; -unity-font-style: bold; background-color: rgba(17, 13, 31, 0.6);
+    border-radius: 12px; padding: 2px 14px; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F;
+}
+.btn.route-aller { position: absolute; right: 24px; bottom: 16px; height: 64px; font-size: 22px; padding: 0 20px; border-radius: 20px; }
+
+/* ---------- 12. Réglages : Graphismes (§15.7) ---------- */
+.settings-graph { align-items: center; margin-top: 4px; }
+.settings-graph__titre-rangee { flex-direction: row; align-items: center; align-self: flex-start; margin-left: 8px; }
+.settings-graph__icone { width: 64px; height: 64px; -unity-background-scale-mode: scale-to-fit; margin-right: 16px; }
+.settings-graph__titre { font-size: 30px; color: #2A2440; -unity-font-style: bold; margin: 0; }
+.selecteur {
+    width: 560px; height: 84px; flex-direction: row; padding: 8px; margin-top: 8px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F; border-radius: 22px;
+}
+.btn.segment {
+    flex-grow: 1; flex-basis: 0; height: 60px; margin: 0 3px; border-radius: 16px;
+    border-width: 0; background-color: rgba(0, 0, 0, 0); background-image: none;
+    flex-direction: row; align-items: center; justify-content: center;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.btn.segment:hover { background-color: rgba(17, 13, 31, 0.06); scale: 1 1; }
+.btn.segment.segment--choisi {
+    background-color: #FFC83A; background-image: url("Degrades/bouton_or.png");
+    border-width: 4px; border-bottom-width: 6px; border-color: #6B4300; border-bottom-color: #D99A1A; scale: 1.04 1.04;
+}
+.segment__texte { font-size: 26px; color: #3A3358; -unity-font-style: bold; margin: 0 0 0 8px; -unity-text-outline-width: 0; }
+.segment--choisi .segment__texte { color: #3A2200; }
+.barres { flex-direction: row; align-items: flex-end; height: 30px; }
+.barre { width: 8px; margin-right: 4px; border-radius: 3px; background-color: rgba(17, 13, 31, 0.18); }
+.barre--pleine { background-color: #3A3358; }
+.segment--choisi .barre--pleine { background-color: #3A2200; }
+.settings-graph__phrase { font-size: 20px; color: #6E6A80; -unity-text-align: middle-center; margin-top: 8px; white-space: normal; }
+
+/* ---------- 13. La Renaissance refaite (§15.4) ---------- */
+.rebirth-page > * { flex-shrink: 0; }
+.rn-scene { height: 250px; align-items: center; justify-content: center; flex-shrink: 0; }
+.rn-lueur { position: absolute; width: 460px; height: 460px; }
+.rn-rayons { position: absolute; width: 520px; height: 520px; }
+.rn-heros { width: 250px; height: 250px; -unity-background-scale-mode: scale-to-fit; }
+.rn-macaron {
+    position: absolute; width: 150px; height: 150px; -unity-background-scale-mode: scale-to-fit;
+    align-items: center; justify-content: center; rotate: -8deg;
+}
+.rn-macaron__texte {
+    font-size: 76px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #8A4B00; text-shadow: 0 5px 0 #8A4B00;
+}
+.rn-macaron__fait {
+    position: absolute; bottom: 6px; font-size: 22px; color: #3A2200; background-color: #FFFFFF;
+    border-width: 3px; border-color: #110D1F; border-radius: 10px; padding: 0 8px; -unity-font-style: bold;
+}
+.rn-cartes { flex-direction: row; justify-content: center; align-items: flex-end; flex-shrink: 0; margin-top: 6px; }
+.rn-carte { width: 300px; height: 196px; margin: 0 10px; border-width: 5px; border-radius: 22px; padding: 10px; align-items: center; }
+.rn-carte--centre { width: 380px; border-width: 6px; translate: 0 -14px; }
+.rn-carte__titre { font-size: 32px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; margin: 0 0 8px 0; }
+.rn-carte--centre .rn-carte__titre { font-size: 36px; }
+.rn-icones { flex-direction: row; justify-content: center; flex-wrap: nowrap; }
+.rn-ic { width: 86px; align-items: center; margin: 0 1px; }
+.rn-ic__img { width: 56px; height: 56px; -unity-background-scale-mode: scale-to-fit; }
+.rn-carte--centre .rn-ic__img { width: 64px; height: 64px; }
+.rn-ic__legende {
+    font-size: 15px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F;
+    -unity-text-align: middle-center; white-space: normal; margin: 2px 0 0 0;
+}
+.rn-pastille {
+    position: absolute; right: -6px; bottom: -4px; width: 34px; height: 34px; border-radius: 17px;
+    border-width: 3px; border-color: #110D1F; align-items: center; justify-content: center;
+}
+.rn-pastille--moins { background-color: #E0404A; }
+.rn-pastille--coche { background-color: #6BE34A; }
+.rn-pastille__texte { font-size: 22px; color: #FFFFFF; -unity-font-style: bold; margin: 0; padding: 0; }
+.rn-x2 {
+    position: absolute; right: -10px; bottom: -8px; font-size: 34px; color: #FFD54A; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #3A2200; margin: 0; padding: 0;
+}
+.rn-phrase { flex-direction: row; justify-content: center; margin: 8px 0 6px 0; flex-shrink: 0; }
+.rn-jauge {
+    width: 560px; height: 26px; border-width: 3px; border-color: #110D1F; border-radius: 13px;
+    background-color: rgba(17, 13, 31, 0.15); align-self: center; margin-bottom: 6px; overflow: hidden; justify-content: center;
+}
+.rn-jauge__plein { position: absolute; left: 0; top: 0; bottom: 0; background-color: #FFB020; background-image: url("Degrades/bouton_or.png"); }
+.rn-jauge__texte { font-size: 18px; color: #2A2440; -unity-font-style: bold; -unity-text-align: middle-center; margin: 0; }
+.btn.bulle-rect.rn-bouton { width: 560px; align-self: center; }
+.rn-bouton .bulle-rect__texte { font-size: 46px; }
+.rn-bouton .coin { width: 44px; height: 44px; margin: 0 10px 0 18px; }
+.rn-note { font-size: 18px; color: #6E6A80; -unity-text-align: middle-center; margin-top: 4px; }
+.rn-raison { font-size: 20px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; -unity-text-align: middle-center; }
+.rn-fait {
+    width: 760px; align-self: center; padding: 22px; border-width: 6px; border-radius: 26px; align-items: center; margin-top: 10px;
+}
+.rn-fait__texte { font-size: 34px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; -unity-text-align: middle-center; white-space: normal; }
+
+.btn.detail-close.bulle-petit { position: absolute; top: -28px; right: -32px; }

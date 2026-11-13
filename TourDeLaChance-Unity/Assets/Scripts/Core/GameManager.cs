@@ -22,7 +22,8 @@ namespace TourDeLaChance
     /// v4 : + Classement (colonne de droite) et Reglages (roue dentée). AJOUTÉS À LA FIN :
     /// les outils de test utilisent les numéros (Boutique = 1 … Ameliorations = 4).
     /// v5 : + Renaissance (colonne de droite, sous le Classement), ajoutée à la fin.
-    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations, Classement, Reglages, Renaissance }
+    /// v6 §8.3 : + Route (route des trophées, clic sur le badge d'étage), ajoutée à la fin.
+    public enum PanelId { None, Boutique, Inventaire, Index, Ameliorations, Classement, Reglages, Renaissance, Route }
 
     /// <summary>
     /// Le chef d'orchestre : il connaît l'étage, la cagnotte, l'état de la partie,
@@ -38,6 +39,12 @@ namespace TourDeLaChance
     /// v5 : il tire aussi « ce trésor contient-il des diamants ? » à la préparation de l'étage
     /// (§10), propose la REPRISE après un piège (§11 : état ReviveOffer, AcceptRevive,
     /// DeclineRevive) et lance la nouvelle partie après la RENAISSANCE (§13, RequestRebirth).
+    ///
+    /// v6 : la reprise coûte de plus en plus cher (1, 2, 4, 8, 16 ◆, 5 au plus par partie, §9) ;
+    /// les PALIERS de la route des trophées sont donnés à l'arrivée d'un étage (§8.4) ; le bonus
+    /// de diamants de la tenue est figé à la préparation de l'étage et payé avec des « éclats »
+    /// (§11) ; au premier « Jouer » de la session, les récompenses déjà méritées par une
+    /// sauvegarde v5 (paliers, collections complètes) sont rattrapées.
     ///
     /// C'est ce script qui mène la danse (le temps de la montée, le verrou anti-clic) :
     /// les scripts d'animation se contentent de suivre ses événements. Si une animation
@@ -151,22 +158,36 @@ namespace TourDeLaChance
         /// Les diamants gagnés au dernier trésor en diamants (0 sinon). Ils sont DÉJÀ dans le
         /// compteur (et sauvegardés) quand l'événement DiamondsWon arrive.
         public int LastDiamonds { get; private set; }
-        /// La reprise a-t-elle déjà servi dans cette partie ? (jamais sauvegardé : une partie
-        /// en cours ne l'est jamais)
-        public bool ReviveUsed { get; private set; }
+        /// v6 §11.3 : combien de ces diamants viennent du bonus de la tenue (« dont 1 grâce à ta tenue »).
+        public int LastDiamondsFromBonus { get; private set; }
+        /// v6 §9 : nombre de reprises utilisées dans la partie (0 à 5). Jamais sauvegardé : une
+        /// partie en cours ne l'est jamais, et le coût repart à 1 à chaque nouvelle partie.
+        public int RevivesUsed { get; private set; }
+        /// Ancien nom (v5) : au moins une reprise a servi dans la partie.
+        public bool ReviveUsed => RevivesUsed > 0;
+        /// v6 §8.4 : le palier de la route atteint à CET étage (0 sinon) et ses diamants, déjà
+        /// ajoutés et sauvegardés. La carte d'étage affiche « Trophée : étage 10 ! +2 ◆ ».
+        public int TrophyFloorThisFloor { get; private set; }
+        public int TrophyDiamondsThisFloor { get; private set; }
+        /// v6 §8.3 : l'étage atteint à la dernière partie terminée (la route le marque « Dernière partie »).
+        public int LastRunFloor { get; private set; }
         /// Vrai pour l'étage rejoué juste après une reprise (la carte d'étage le dit).
         public bool RevivedThisFloor { get; private set; }
         /// La renaissance est en cours d'animation (avant la nouvelle partie).
         public bool RebirthPlaying { get; private set; }
 
-        /// Coût de la reprise (1 diamant), lu dans le catalogue de l'économie.
-        public static int ReviveCost => EconomyCatalog.Instance.ReviveCost;
+        /// v6 §9.4 : coût de la PROCHAINE reprise de la partie (1, 2, 4, 8, 16 ◆), lu dans le
+        /// catalogue de l'économie. 0 quand les 5 reprises ont servi.
+        public int NextReviveCost => EconomyCatalog.Instance.ReviveCostFor(RevivesUsed + 1);
 
-        /// Peut-on proposer la reprise après ce piège ? (§11.1) Cagnotte > 0 (donc à partir de
-        /// l'étage 2), au moins 1 diamant, reprise pas encore utilisée dans la partie.
-        /// Sans diamant : RIEN n'est proposé (on ne propose jamais d'acheter).
+        /// Nombre maximal de reprises par partie (5).
+        public static int MaxRevives => EconomyCatalog.Instance.MaxRevivesPerRun;
+
+        /// Peut-on proposer la reprise après ce piège ? (v6 §9.1) Cagnotte > 0 (donc à partir de
+        /// l'étage 2), moins de 5 reprises dans la partie, et AU MOINS le coût de la prochaine.
+        /// Pas assez de diamants : RIEN n'est proposé (ni bouton grisé, ni « il te manque »).
         bool ReviveAllowed(int pot) =>
-            pot > 0 && !ReviveUsed && EconomyCatalog.Instance.MaxRevivesPerRun > 0 && Diamonds.Count >= ReviveCost;
+            pot > 0 && RevivesUsed < MaxRevives && NextReviveCost > 0 && Diamonds.Count >= NextReviveCost;
 
         /// v5 §13.2 : est-ce un moment calme, SANS cagnotte, pour renaître ? Perdu, Encaissé,
         /// ou choix à l'étage 1. Jamais pendant une épreuve, une transition, une ouverture de
@@ -245,6 +266,11 @@ namespace TourDeLaChance
         public void StartGame()
         {
             if (State != GameState.Title || IsPanelOpen) return;
+            // v6 §6.3 et §8.4 : rattrapage des récompenses déjà méritées (sauvegarde v5) : les
+            // paliers dépassés par le record et les collections déjà complètes. Une seule fois
+            // (elles sont marquées reçues). L'affichage écoute les événements et fait les toasts.
+            TrophyRoad.CatchUp(Record);
+            CollectionRewards.GrantAllPending();
             BeginRun();
             PrepareFloor();
             FloorPrepared?.Invoke();
@@ -274,7 +300,8 @@ namespace TourDeLaChance
             Pot = 0;
             SetState(GameState.CashedOut);
             SaveRecord(); // AVANT RunEnded : le classement lit le record à ce moment-là
-            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false, UsedRevive = ReviveUsed });
+            LastRunFloor = Floor;
+            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false, RevivesUsed = RevivesUsed });
         }
 
         // =====================================================================
@@ -282,6 +309,8 @@ namespace TourDeLaChance
         // =====================================================================
 
         /// Peut-on ouvrir CETTE pop-up maintenant ? (Réglages a sa propre règle, §4.4.)
+        /// v6 : la Route suit la règle des autres pop-ups (jamais pendant une épreuve, une
+        /// transition, une reprise proposée ou une ouverture de boîte).
         public bool CanOpen(PanelId panel) => panel == PanelId.Reglages ? CanOpenSettings : CanOpenPanel;
 
         /// Ouvre un panneau (s'il est permis) ; s'il y en avait un autre, il est remplacé.
@@ -342,6 +371,7 @@ namespace TourDeLaChance
             int chestsLevel = Upgrades.Level(Upgrades_.Chests);
             int trapsLevel = Upgrades.Level(Upgrades_.Traps);
             int outfitBonus = Shop.OutfitBonusPercent;
+            int diamondBonus = Shop.DiamondBonusPercent; // v6 §11 : figé lui aussi pour l'étage
 
             int count = forcedCount > 0 ? forcedCount : Upgrades.DrawChestCount(trapsLevel, rulesRandom);
             int rank = forcedRarity >= 0 ? forcedRarity : Upgrades.DrawChestRarity(chestsLevel, rulesRandom);
@@ -369,8 +399,11 @@ namespace TourDeLaChance
                 DiamondTreasure = diamonds,
                 DiamondAmount = diamondAmount,
                 DiamondChancePermille = chance,
-                RebirthMultiplier = rebirth
+                RebirthMultiplier = rebirth,
+                DiamondBonusPercent = diamondBonus
             };
+            TrophyFloorThisFloor = 0;
+            TrophyDiamondsThisFloor = 0;
             chestTrial.Begin(Floor, count, rank, rulesRandom);
             UpdateRecord();
         }
@@ -381,7 +414,8 @@ namespace TourDeLaChance
             Pot = 0;
             LastLoss = 0;
             LastDiamonds = 0;
-            ReviveUsed = false;
+            LastDiamondsFromBonus = 0;
+            RevivesUsed = 0;
             RevivedThisFloor = false;
             recordAtRunStart = Record;
             recordAnnounced = false;
@@ -439,6 +473,26 @@ namespace TourDeLaChance
             forcedRarity = rarityRank;
         }
 
+        /// OUTIL DE TEST (v6) : fixe le nombre de reprises déjà utilisées dans la partie en cours.
+        public void DebugSetRevivesUsed(int n) => RevivesUsed = Mathf.Clamp(n, 0, MaxRevives);
+
+        /// OUTIL DE TEST (v6 critère 57) : simule n trésors en diamants (montant, bonus) avec les
+        /// éclats, SANS rien sauvegarder. Renvoie les gains un par un et la moyenne.
+        public static string DebugSimulateDiamondBonus(int treasures, int amount, int bonusPercent)
+        {
+            long shards = 0, total = 0;
+            var first = new System.Text.StringBuilder();
+            for (int i = 0; i < treasures; i++)
+            {
+                long t = shards + (long)amount * (100 + bonusPercent) * 10;
+                long given = t / Diamonds.ShardsPerDiamond;
+                shards = t % Diamonds.ShardsPerDiamond;
+                total += given;
+                if (i < 10) first.Append(given).Append(' ');
+            }
+            return $"premiers : {first}| moyenne {(double)total / treasures:0.0000} ◆ par trésor";
+        }
+
         /// OUTIL DE TEST (v5) : le PROCHAIN étage préparé sera « en diamants ».
         public void DebugForceDiamondTreasure() => forcedDiamonds = true;
 
@@ -486,15 +540,18 @@ namespace TourDeLaChance
                 {
                     // v5 §10.1 : trésor en diamants. Les diamants vont DIRECTEMENT dans le
                     // compteur (sauvegardé tout de suite) ; la cagnotte ne bouge pas.
+                    // v6 §11.3 : avec le bonus de la tenue (figé à la préparation de l'étage) et
+                    // les éclats mis de côté : toujours au moins le montant de base.
                     LastGain = 0;
-                    LastDiamonds = Setup.DiamondAmount;
-                    Diamonds.Add(LastDiamonds, fromTreasure: true);
+                    LastDiamonds = Diamonds.AddWithBonus(Setup.DiamondAmount, Setup.DiamondBonusPercent, out int fromBonus);
+                    LastDiamondsFromBonus = fromBonus;
                     DiamondsWon?.Invoke(LastDiamonds);
                 }
                 else
                 {
                     LastGain = Setup.Gain; // le gain FIGÉ à la préparation de l'étage
                     LastDiamonds = 0;
+                    LastDiamondsFromBonus = 0;
                     Pot += LastGain;
                 }
                 SetLock(true); // coffres et « Encaisser » ignorés jusqu'à la fin du verrou
@@ -526,33 +583,46 @@ namespace TourDeLaChance
             savedPot = 0;
             SetState(GameState.Lost);
             SaveRecord(); // AVANT RunEnded : le classement lit le record à ce moment-là
-            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true, UsedRevive = ReviveUsed });
+            LastRunFloor = Floor;
+            RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true, RevivesUsed = RevivesUsed });
         }
 
         // =====================================================================
         // v5 §11 : la reprise
         // =====================================================================
 
-        /// « Continuer — 1 ◆ » : la logique relit tout (un double-clic ne dépense qu'un
-        /// diamant : au 2e clic, on n'est plus en ReviveOffer). Dépense et sauvegarde le
-        /// diamant, marque la reprise, rend la cagnotte et REJOUE l'étage avec un tirage neuf.
+        /// « Continuer — N ◆ » : la logique relit tout (un double-clic ne paie qu'une fois : au 2e
+        /// clic, on n'est plus en ReviveOffer). Dépense et sauvegarde les diamants (coût de la
+        /// reprise n° RevivesUsed + 1), compte la reprise, rend la cagnotte et REJOUE l'étage
+        /// avec un tirage neuf.
         public bool AcceptRevive()
         {
             if (State != GameState.ReviveOffer || TransitionLocked) return false;
-            if (!ReviveAllowed(savedPot) || !Diamonds.TrySpend(ReviveCost))
+            int cost = NextReviveCost;
+            if (!ReviveAllowed(savedPot) || !Diamonds.TrySpend(cost))
             {
                 DeclineRevive();
                 return false;
             }
             Diamonds.CountRevive();
-            ReviveUsed = true;
+            RevivesUsed++;
             Pot = savedPot;
             LastLoss = 0;
             RunTransition(ReviveRoutine());
             return true;
         }
 
-        /// « Non merci » (ou Échap) : la partie est perdue comme avant.
+        /// « Oui, rejouer » (v6 §9.3, après la confirmation « Tu es sûr ? ») : la partie se
+        /// termine (cagnotte perdue, RunEnded, ligne au classement), puis la NOUVELLE partie
+        /// commence directement (redescente), sans repasser par l'écran Perdu.
+        public void DeclineReviveAndReplay()
+        {
+            if (State != GameState.ReviveOffer || TransitionLocked) return;
+            DeclineRevive();
+            NewRun();
+        }
+
+        /// La partie est perdue comme avant (la reprise n'est pas prise).
         public void DeclineRevive()
         {
             if (State != GameState.ReviveOffer) return;
@@ -582,6 +652,17 @@ namespace TourDeLaChance
             yield return new WaitForSeconds(AntiClickLock);
             SetLock(false);
             Changed?.Invoke();
+        }
+
+        /// v6 §8.4 : arriver pour la PREMIÈRE fois à un étage-palier (5, 10, 15…) donne ses
+        /// diamants, tout de suite, sauvegardés, jamais perdus (même si on tombe ensuite sur un
+        /// piège). Ni doublés par la renaissance, ni augmentés par le bonus de diamants.
+        void GrantTrophy()
+        {
+            int diamonds = TrophyRoad.GrantUpTo(Floor, out int highest);
+            if (diamonds <= 0) return;
+            TrophyFloorThisFloor = highest;
+            TrophyDiamondsThisFloor = diamonds;
         }
 
         // =====================================================================
@@ -647,6 +728,7 @@ namespace TourDeLaChance
             Changed?.Invoke(); // le compteur « Étage » change pendant le noir
 
             yield return new WaitForSeconds(ClimbDuration - ClimbDarkTime);
+            GrantTrophy(); // v6 §8.4 : palier de la route (donné à l'arrivée, avant la carte)
             SetState(GameState.Choosing); // le verrou reste posé…
             FloorShown?.Invoke();
 

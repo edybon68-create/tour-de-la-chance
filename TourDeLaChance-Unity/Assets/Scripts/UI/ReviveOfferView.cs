@@ -1,155 +1,127 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace TourDeLaChance
 {
     /// <summary>
-    /// La fenêtre de REPRISE après un piège (spec v5 §11.2). 0,8 s après la révélation du piège
-    /// (état ReviveOffer du GameManager), une petite fenêtre centrée, SANS fond assombri et SANS
-    /// compte à rebours : « Oh non, un piège ! », « Utilise 1 ◆ pour garder ta cagnotte (210)
-    /// et rejouer l'étage 5 avec de nouveaux coffres. », « Une seule reprise par partie · Tu as
-    /// 7 ◆ », et deux boutons : « Continuer — 1 ◆ » (vert) et « Non merci » (Échap).
-    /// Elle n'apparaît jamais sans diamant (le GameManager ne propose rien) et ne parle JAMAIS
-    /// d'acheter des diamants (règle d'or n°7).
-    ///
-    /// Elle dessine aussi la petite SPIRALE bleutée « retour en arrière » (0,4 s) quand la reprise
-    /// est acceptée. Pur affichage : elle transmet les clics au GameManager, qui décide.
+    /// v6 §9.2 : la fenêtre de reprise au centre a DISPARU. L'offre est maintenant sur l'écran du
+    /// bas (boutons « Rejouer » et « Continuer — N ◆ », dans HudController). Ce script ne garde
+    /// que la petite SPIRALE bleutée « retour en arrière » (0,4 s) quand la reprise est acceptée,
+    /// et la confirmation « Tu es sûr ? » (§9.3) que « Rejouer » ouvre quand « Continuer » est
+    /// proposé. Elle est ici (document des pop-ups) pour que son voile couvre TOUTE la fenêtre,
+    /// colonnes comprises. Pur affichage : les décisions sont dans le GameManager.
+    /// (Le nom de la classe est gardé pour ne pas débrancher la scène.)
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class ReviveOfferView : MonoBehaviour
     {
         [SerializeField] GameManager game;
 
-        const float ShowDelay = 0.8f;
         const float SpiralTime = 0.4f;
 
-        VisualElement layer, window, spiral;
-        Label text, reminder;
-        Button continueButton, declineButton;
-        float offerTime = -1f, spiralTime = -1f, appear;
-        bool shown;
+        VisualElement layer, spiral, sureVeil;
+        Label sureText;
+        float spiralTime = -1f;
 
-        public bool IsShown => shown;
-        public string Text => shown ? text.text + " | " + reminder.text : "";
+        /// La confirmation est-elle ouverte ? (HudController ne réagit alors plus à rien)
+        public bool ConfirmOpen => sureVeil != null && sureVeil.style.display == DisplayStyle.Flex;
+        public string ConfirmText => ConfirmOpen ? sureText.text : "";
 
         void OnEnable()
         {
             var root = GetComponent<UIDocument>().rootVisualElement;
             layer = root.Q<VisualElement>("revive-layer");
-            Build();
-            game.ReviveOffered += OnOffered;
-            game.ReviveStarted += OnReviveStarted;
-            game.Changed += OnGameChanged;
-            continueButton.clicked += OnContinue;
-            declineButton.clicked += OnDecline;
-            Hide();
-        }
-
-        void OnDisable()
-        {
-            game.ReviveOffered -= OnOffered;
-            game.ReviveStarted -= OnReviveStarted;
-            game.Changed -= OnGameChanged;
-            continueButton.clicked -= OnContinue;
-            declineButton.clicked -= OnDecline;
-        }
-
-        void Build()
-        {
             layer.Clear();
             layer.pickingMode = PickingMode.Ignore;
             spiral = new VisualElement { pickingMode = PickingMode.Ignore };
             spiral.AddToClassList("revive-spiral");
             spiral.generateVisualContent += DrawSpiral;
+            spiral.style.display = DisplayStyle.None;
             layer.Add(spiral);
-
-            window = new VisualElement();
-            window.AddToClassList("revive-window");
-            var header = new VisualElement { pickingMode = PickingMode.Ignore };
-            header.AddToClassList("revive-header");
-            header.Add(ShopUi.NewLabel("Oh non, un piège !", "revive-title"));
-            window.Add(header);
-            text = ShopUi.NewLabel("", "revive-text");
-            window.Add(text);
-            reminder = ShopUi.NewLabel("", "revive-reminder");
-            window.Add(reminder);
-            var buttons = new VisualElement();
-            buttons.AddToClassList("revive-buttons");
-            continueButton = new Button();
-            continueButton.AddToClassList("btn"); continueButton.AddToClassList("btn--vert"); continueButton.AddToClassList("revive-btn");
-            declineButton = new Button { text = "Non merci" };
-            declineButton.AddToClassList("btn"); declineButton.AddToClassList("btn--sombre"); declineButton.AddToClassList("revive-btn");
-            buttons.Add(continueButton);
-            buttons.Add(declineButton);
-            window.Add(buttons);
-            layer.Add(window);
-            UiSounds.Register(window);
-            ButtonStyler.Register(window);
+            BuildConfirm();
+            game.ReviveStarted += OnReviveStarted;
+            game.Changed += OnGameChanged;
         }
 
-        void OnOffered()
+        void OnDisable()
         {
-            offerTime = 0f; // la fenêtre attend 0,8 s (on voit d'abord le piège)
+            game.ReviveStarted -= OnReviveStarted;
+            game.Changed -= OnGameChanged;
+        }
+
+        // =====================================================================
+        // v6 §9.3 : « Tu es sûr ? »
+        // =====================================================================
+
+        void BuildConfirm()
+        {
+            sureVeil = new VisualElement();
+            sureVeil.AddToClassList("sur-voile");
+            var box = new VisualElement();
+            box.AddToClassList("sur-boite");
+            box.Add(ShopUi.NewLabel("Tu es sûr ?", "sur-titre"));
+            sureText = ShopUi.NewLabel("", "sur-texte");
+            box.Add(sureText);
+            var buttons = new VisualElement();
+            buttons.AddToClassList("sur-boutons");
+            var yes = new Button(OnYes) { text = "Oui, rejouer" };
+            yes.AddToClassList("btn"); yes.AddToClassList("btn--rouge-vif"); yes.AddToClassList("sur-btn");
+            // « Annuler » est le bouton PAR DÉFAUT (liseré or) : Entrée et Échap annulent.
+            var no = new Button(CloseConfirm) { text = "Annuler" };
+            no.AddToClassList("btn"); no.AddToClassList("btn--sombre"); no.AddToClassList("sur-btn"); no.AddToClassList("sur-btn--defaut");
+            buttons.Add(yes);
+            buttons.Add(no);
+            box.Add(buttons);
+            sureVeil.Add(box);
+            sureVeil.style.display = DisplayStyle.None;
+            layer.Add(sureVeil);
+            UiSounds.Register(sureVeil);
+            ButtonStyler.Register(sureVeil);
+        }
+
+        /// Ouvre la confirmation (seulement quand la reprise est proposée).
+        public void OpenConfirm()
+        {
+            if (game.State != GameState.ReviveOffer) return;
+            sureText.text = $"Tu vas perdre ta cagnotte de {ShopUi.Thousands(game.Pot)} pièces. Tu peux encore la sauver pour {game.NextReviveCost} {ShopUi.Diamant}.";
+            sureVeil.style.display = DisplayStyle.Flex;
+        }
+
+        public void CloseConfirm() => sureVeil.style.display = DisplayStyle.None;
+
+        /// « Oui, rejouer » : la partie se termine et la nouvelle commence (GameManager).
+        void OnYes()
+        {
+            CloseConfirm();
+            game.DeclineReviveAndReplay();
         }
 
         void OnGameChanged()
         {
-            if (game.State != GameState.ReviveOffer) { offerTime = -1f; Hide(); }
+            if (game.State != GameState.ReviveOffer && ConfirmOpen) CloseConfirm();
         }
 
-        void Show()
-        {
-            shown = true;
-            int pot = game.Pot;
-            text.text = $"Utilise {GameManager.ReviveCost} {ShopUi.Diamant} pour garder ta cagnotte ({ShopUi.Thousands(pot)}) et rejouer l'étage {game.Floor} avec de nouveaux coffres.";
-            reminder.text = $"Une seule reprise par partie · Tu as {Diamonds.Count} {ShopUi.Diamant}";
-            continueButton.text = $"Continuer — {GameManager.ReviveCost} {ShopUi.Diamant}";
-            window.style.display = DisplayStyle.Flex;
-            appear = 0f;
-            if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RepriseOffre);
-        }
-
-        void Hide()
-        {
-            shown = false;
-            window.style.display = DisplayStyle.None;
-        }
+        /// OUTILS DE TEST : les deux boutons de la confirmation.
+        public void DebugConfirmYes() => OnYes();
+        public void DebugConfirmNo() => CloseConfirm();
 
         void Update()
         {
-            if (offerTime >= 0f && game.State == GameState.ReviveOffer)
+            // Entrée = Annuler, Échap = Annuler (on ne perd jamais une partie par erreur).
+            if (ConfirmOpen)
             {
-                offerTime += Time.deltaTime;
-                if (!shown && offerTime >= ShowDelay) Show();
+                var kb = UnityEngine.InputSystem.Keyboard.current;
+                if (kb != null && (kb.escapeKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
+                    CloseConfirm();
             }
-            if (shown)
-            {
-                // Apparition : 0,85 → 1,04 → 1 en 0,25 s.
-                appear += Time.deltaTime;
-                float k = Mathf.Clamp01(appear / 0.25f);
-                float s = Ease.Pop(k, 0.85f, 1.04f);
-                window.style.scale = new Scale(new Vector3(s, s, 1f));
-                window.style.opacity = Mathf.Clamp01(k / 0.6f);
-                // Échap = « Non merci » (sauf si les Réglages sont ouverts par-dessus).
-                var kb = Keyboard.current;
-                if (kb != null && kb.escapeKey.wasPressedThisFrame && !game.IsPanelOpen) OnDecline();
-            }
-            if (spiralTime >= 0f)
-            {
-                spiralTime += Time.deltaTime;
-                spiral.MarkDirtyRepaint();
-                if (spiralTime >= SpiralTime) { spiralTime = -1f; spiral.style.display = DisplayStyle.None; }
-            }
+            if (spiralTime < 0f) return;
+            spiralTime += Time.deltaTime;
+            spiral.MarkDirtyRepaint();
+            if (spiralTime >= SpiralTime) { spiralTime = -1f; spiral.style.display = DisplayStyle.None; }
         }
-
-        // La logique est dans le GameManager (un double-clic ne dépense qu'un diamant).
-        void OnContinue() => game.AcceptRevive();
-        void OnDecline() => game.DeclineRevive();
 
         void OnReviveStarted()
         {
-            Hide();
             spiralTime = 0f;
             spiral.style.display = DisplayStyle.Flex;
             spiral.MarkDirtyRepaint();
@@ -181,9 +153,5 @@ namespace TourDeLaChance
             }
             p.Stroke();
         }
-
-        /// OUTILS DE TEST : clics sur les deux boutons.
-        public void DebugContinue() => OnContinue();
-        public void DebugDecline() => OnDecline();
     }
 }

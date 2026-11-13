@@ -3,6 +3,7 @@
     <Style src="Hud.uss" />
     <Style src="Buttons.uss" />
     <Style src="V5.uss" />
+    <Style src="V6.uss" />
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
         <!-- Le voile sombre des transitions d'étage (§3.11). Il est en premier : il passe
              devant la scène 3D mais derrière le reste de l'interface. -->
@@ -12,7 +13,8 @@
                  est écrit par le code (FloorBadgeView) d'après l'état du jeu. La roue dentée
                  des Réglages se place à sa droite (Panels.uxml). -->
             <ui:VisualElement name="badge-holder" class="badge-holder" picking-mode="Ignore">
-                <ui:VisualElement name="badge" class="badge badge--palier1" picking-mode="Ignore">
+                <!-- v6 §8.3 : le badge se clique (il ouvre la route des trophées). -->
+                <ui:VisualElement name="badge" class="badge badge--palier1 badge--cliquable" picking-mode="Position">
                     <ui:VisualElement name="badge-stars" class="badge-stars" picking-mode="Ignore" />
                     <ui:Label text="ÉTAGE" class="badge-word" picking-mode="Ignore" />
                     <ui:Label name="floor" text="1" class="badge-number" picking-mode="Ignore" />
@@ -45,14 +47,31 @@
             <ui:Label name="message" text="" class="message-text" picking-mode="Ignore" />
             <ui:Label name="message-sub" text="" class="message-sub" picking-mode="Ignore" />
         </ui:VisualElement>
+        <!-- v6 §9.2 : après un piège, quand la reprise est possible : le titre, la cagnotte qui peut
+             être sauvée, « Reprise 2 sur 5 · Tu as 7 ◆ » (textes écrits par HudController). -->
+        <ui:VisualElement name="revive-info" class="revive-info" picking-mode="Ignore">
+            <ui:Label name="revive-title" text="Oh non, un piège !" class="revive-info__titre" picking-mode="Ignore" />
+            <ui:Label name="revive-text" text="" class="revive-info__texte" picking-mode="Ignore" />
+            <ui:Label name="revive-small" text="" class="revive-info__petit" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <!-- v6 (art bible §15.1) : les gros boutons du bas sont des BULLES en image (9-slice). -->
         <ui:VisualElement class="actions" picking-mode="Ignore">
             <!-- « Encaisser X » : proposé pendant le choix d'un coffre, à partir de l'étage 2. -->
-            <ui:Button name="cashout" class="btn btn--vert btn--ombre btn-cashout">
-                <ui:Label name="cashout-text" text="Encaisser 0" class="btn-cashout-text" picking-mode="Ignore" />
+            <ui:Button name="cashout" class="btn bulle bulle-rect bulle-rect--vert btn-cashout">
+                <ui:Label name="cashout-text" text="Encaisser 0" class="bulle-rect__texte" picking-mode="Ignore" />
                 <ui:VisualElement class="coin" picking-mode="Ignore" />
             </ui:Button>
-            <ui:Button name="replay" text="Rejouer" class="btn btn--violet btn--ombre btn-action" />
+            <ui:Button name="replay" class="btn bulle bulle-rect bulle-rect--violet btn-replay">
+                <ui:Label text="Rejouer" class="bulle-rect__texte" picking-mode="Ignore" />
+            </ui:Button>
+            <!-- v6 §9.2 : « Continuer — N ◆ » (reprise), à droite de Rejouer. -->
+            <ui:Button name="continue" class="btn bulle bulle-rect bulle-rect--aqua btn-continue">
+                <ui:Label name="continue-text" text="Continuer —" class="bulle-rect__texte" picking-mode="Ignore" />
+                <ui:VisualElement class="diamant" picking-mode="Ignore" />
+                <ui:Label name="continue-price" text="1" class="bulle-rect__texte" picking-mode="Ignore" />
+            </ui:Button>
         </ui:VisualElement>
+
         <!-- v5 §9 : la carte d'étage (remplace les pastilles en bas). Créée par FloorRecapView. -->
         <ui:VisualElement name="floor-recap" class="floor-recap" picking-mode="Ignore" />
         <!-- Calque des effets : textes « +20 » et pièces volantes (créés par le code). -->

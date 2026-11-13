@@ -10,6 +10,7 @@ namespace TourDeLaChance
     /// affiche dans un cadre. Pur affichage.
     /// La caméra n'est allumée que pendant que l'une de ces deux pop-ups est ouverte : le reste
     /// du temps, elle ne coûte rien.
+    /// v6 §12 : la taille de l'image suit le niveau graphique (×0,75 en Faible, ×1,5 en Élevé).
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class HorseShowcase : MonoBehaviour
@@ -29,6 +30,7 @@ namespace TourDeLaChance
 
         void Awake()
         {
+            GraphicsLevel.Changed += OnGraphicsChanged;
             Prepare();
             cam.enabled = false; // éteinte au départ
         }
@@ -37,7 +39,8 @@ namespace TourDeLaChance
         {
             if (cam == null) cam = GetComponent<Camera>();
             if (target != null) return;
-            target = new RenderTexture(Width, Height, 24, RenderTextureFormat.ARGB32)
+            var size = GraphicsLevel.ShowcaseSize(Width, Height);
+            target = new RenderTexture(size.x, size.y, 24, RenderTextureFormat.ARGB32)
             {
                 name = "Vitrine du cheval",
                 antiAliasing = 4
@@ -53,8 +56,20 @@ namespace TourDeLaChance
             cam.enabled = on;
         }
 
+        /// Nouveau niveau graphique : l'image est refaite (la pop-up la reprend à sa prochaine ouverture).
+        void OnGraphicsChanged()
+        {
+            if (target == null) return;
+            if (cam != null) cam.targetTexture = null;
+            target.Release();
+            Destroy(target);
+            target = null;
+            Prepare();
+        }
+
         void OnDestroy()
         {
+            GraphicsLevel.Changed -= OnGraphicsChanged;
             if (cam != null) cam.targetTexture = null;
             if (target != null) { target.Release(); Destroy(target); }
         }

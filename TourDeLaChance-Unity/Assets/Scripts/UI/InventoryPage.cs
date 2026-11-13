@@ -16,12 +16,19 @@ namespace TourDeLaChance
     /// Visage / Cou / Dos des objets possédés (plus d'objet « Rien » : on « Retire »). Un objet
     /// d'un emplacement déjà occupé porte « Remplace : Couronne ». Si 2 accessoires sont portés
     /// et que l'emplacement est libre, « Équiper » ouvre la petite fenêtre « Lequel enlever ? ».
+    ///
+    /// v6 §7 : 3 onglets (Skins · Accessoires · Mes skins) ; « Équiper le meilleur (+40 %) » en
+    /// haut à droite (règle : Shop.BestOutfit) ; les objets rangés du plus commun au plus rare
+    /// (§5.3) ; badge « ◆ +15 % » et ligne « Bonus de diamants » (§11.3).
     /// </summary>
     public class InventoryPage : IDisposable
     {
         readonly VisualElement page;
         readonly ScrollView list;
-        readonly Button skinsTab, accessoriesTab, equipButton, sellButton, sellAllButton;
+        readonly Button skinsTab, accessoriesTab, outfitsTab, bestButton, equipButton, sellButton, sellAllButton;
+        readonly PanelsController owner;
+        readonly SavedOutfitsView outfits;
+        bool showOutfits; // l'onglet « Mes skins » est affiché
         readonly Label selectedLabel, bonusLabel;
         VisualElement replaceDialog;
 
@@ -38,7 +45,16 @@ namespace TourDeLaChance
         public InventoryPage(VisualElement page, PanelsController owner)
         {
             this.page = page;
+            this.owner = owner;
             list = page.Q<ScrollView>("inv-list");
+            outfitsTab = page.Q<Button>("inv-tenues");
+            bestButton = page.Q<Button>("inv-best");
+            outfitsTab.AddToClassList(UiSounds.TabClass);
+            outfitsTab.clicked += OnOutfitsTab;
+            bestButton.clicked += OnBest;
+            outfits = new SavedOutfitsView(page);
+            outfits.Worn += OnOutfitWorn;
+            SavedOutfits.Changed += OnOutfitsChanged;
             skinsTab = page.Q<Button>("inv-skins");
             accessoriesTab = page.Q<Button>("inv-accessoires");
             equipButton = page.Q<Button>("inv-equip");
@@ -64,6 +80,50 @@ namespace TourDeLaChance
             equipButton.clicked -= OnEquip;
             sellButton.clicked -= OnSell;
             sellAllButton.clicked -= OnSellAll;
+            outfitsTab.clicked -= OnOutfitsTab;
+            bestButton.clicked -= OnBest;
+            outfits.Worn -= OnOutfitWorn;
+            SavedOutfits.Changed -= OnOutfitsChanged;
+        }
+
+        public void Tick(float dt) { }
+
+        void OnOutfitsTab()
+        {
+            showOutfits = true;
+            CloseReplaceDialog();
+            Refresh();
+            list.scrollOffset = UnityEngine.Vector2.zero;
+        }
+
+        void OnOutfitsChanged() { if (showOutfits) Refresh(); }
+
+        void OnOutfitWorn(string message)
+        {
+            owner.ShowToast(message);
+            Equipped?.Invoke(Shop.GetEquippedSkin());
+        }
+
+        /// « Équiper le meilleur » : la tenue de Shop.BestOutfit, équipée en une fois. Pas de
+        /// confirmation (rien n'est perdu). Petit message « Tenue : +22 % → +40 % ».
+        void OnBest()
+        {
+            var best = Shop.BestOutfit();
+            if (Shop.IsWearing(best.Skin, best.Accessories)) return;
+            int before = Shop.OutfitBonusPercent;
+            Shop.TryEquipOutfit(best.Skin, best.Accessories.Count > 0 ? best.Accessories[0] : null, best.Accessories.Count > 1 ? best.Accessories[1] : null);
+            owner.ShowToast($"Tenue : +{before}\u00A0% → +{Shop.OutfitBonusPercent}\u00A0%");
+            Equipped?.Invoke(best.Skin);
+        }
+
+        /// Le texte du bouton : « Équiper le meilleur (+40 %) » ou « Tu portes déjà le meilleur ».
+        void RefreshBestButton()
+        {
+            var best = Shop.BestOutfit();
+            bool already = Shop.IsWearing(best.Skin, best.Accessories);
+            bestButton.text = already ? "Tu portes déjà le meilleur"
+                : $"Équiper le meilleur (+{Shop.OutfitCoinBonus(best.Skin, best.Accessories)}\u00A0%)";
+            bestButton.SetEnabled(!already);
         }
 
         void OnSkinsTab() => ShowCategory(ShopCategory.Skin, null);
@@ -80,6 +140,7 @@ namespace TourDeLaChance
         /// Échap ferme d'abord la fenêtre « Lequel enlever ? ».
         public bool HandleEscape()
         {
+            if (outfits.HandleEscape()) return true;
             if (replaceDialog == null || replaceDialog.parent == null) return false;
             CloseReplaceDialog();
             return true;
@@ -87,6 +148,8 @@ namespace TourDeLaChance
 
         void ShowCategory(ShopCategory newCategory, ShopItem focus)
         {
+            showOutfits = false;
+            outfits.Close();
             category = newCategory;
             selected = focus ?? (category == ShopCategory.Skin
                 ? Shop.GetEquippedSkin()
@@ -106,11 +169,17 @@ namespace TourDeLaChance
         /// Redessine la page à partir de la collection.
         public void Refresh()
         {
-            ShopUi.SetClass(skinsTab, "subtab--active", category == ShopCategory.Skin);
-            ShopUi.SetClass(accessoriesTab, "subtab--active", category == ShopCategory.Accessoire);
+            ShopUi.SetClass(skinsTab, "subtab--active", !showOutfits && category == ShopCategory.Skin);
+            ShopUi.SetClass(accessoriesTab, "subtab--active", !showOutfits && category == ShopCategory.Accessoire);
+            ShopUi.SetClass(outfitsTab, "subtab--active", showOutfits);
+            RefreshBestButton();
 
             list.Clear();
-            if (category == ShopCategory.Skin)
+            if (showOutfits)
+            {
+                list.Add(outfits.Build());
+            }
+            else if (category == ShopCategory.Skin)
             {
                 var grid = NewGrid();
                 foreach (var item in OwnedItems(i => i.Category == ShopCategory.Skin, includeFree: true)) grid.Add(Card(item));
@@ -173,16 +242,16 @@ namespace TourDeLaChance
         }
 
         /// Les objets possédés d'une catégorie : (le gratuit,) puis les autres triés par
-        /// rareté (du Secret au Commun), puis par boîte et numéro.
+        /// rareté (v6 §5.3 : du Commun au Secret), puis par boîte (ordre de la Boutique) et numéro.
         static IEnumerable<ShopItem> OwnedItems(Func<ShopItem, bool> filter, bool includeFree)
         {
             var catalog = Shop.Catalog;
             if (catalog == null) yield break;
             if (includeFree) foreach (var free in catalog.FreeItems.Where(i => i != null && filter(i))) yield return free;
-            var boxes = catalog.Boxes.ToList();
+            var boxes = Shop.BoxesInShopOrder.ToList();
             var owned = catalog.Boxes.SelectMany(b => b.items)
                 .Where(i => i != null && filter(i) && Shop.CountOf(i) >= 1)
-                .OrderByDescending(Shop.RarityRank)
+                .OrderBy(Shop.RarityRank)
                 .ThenBy(i => boxes.IndexOf(Shop.BoxOf(i)))
                 .ThenBy(Shop.NumberOf);
             foreach (var item in owned) yield return item;
@@ -195,6 +264,8 @@ namespace TourDeLaChance
             if (count >= 2) inner.Add(ShopUi.NewLabel("×" + count, "item-badge"));
             int bonus = Shop.BonusPercent(item);
             if (bonus > 0) inner.Add(ShopUi.NewLabel($"+{bonus}\u00A0%", "bonus-badge"));
+            int diamondBonus = Shop.DiamondBonusPercentOf(item);
+            if (diamondBonus > 0) inner.Add(ShopUi.NewLabel($"{ShopUi.Diamant} +{diamondBonus}\u00A0%", "diamant-badge"));
             if (Shop.IsEquipped(item) && !item.IsFree)
             {
                 var equipped = ShopUi.NewLabel("Équipé ✓", "item-extra");
@@ -217,11 +288,21 @@ namespace TourDeLaChance
             // deviendrait (calcul seulement, rien n'est sauvegardé).
             int now = Shop.OutfitBonusPercent;
             string line = $"Bonus de ta tenue : +{now}\u00A0% sur les trésors (skin + 2 accessoires)";
-            if (selected != null && !Shop.IsEquipped(selected))
-                line += $"\nAvec cet objet : +{Shop.OutfitBonusPercentWith(selected)}\u00A0%";
+            if (!showOutfits && selected != null && !Shop.IsEquipped(selected))
+                line += $" · avec cet objet : +{Shop.OutfitBonusPercentWith(selected)}\u00A0%";
+            // v6 §11.3 : le bonus de diamants (plafonné) et les éclats mis de côté.
+            int raw = Shop.DiamondBonusPercentRaw;
+            if (raw > 0 || Diamonds.Shards > 0)
+                line += $"\nBonus de diamants : +{Shop.DiamondBonusPercent}\u00A0% (max {Shop.DiamondBonusCap}\u00A0%) · éclats : {ShopUi.Number(Diamonds.Shards / 1000f)} {ShopUi.Diamant}";
             bonusLabel.text = line;
 
-            if (selected == null)
+            if (showOutfits)
+            {
+                selectedLabel.text = "";
+                equipButton.style.display = DisplayStyle.None;
+                sellButton.style.display = DisplayStyle.None;
+            }
+            else if (selected == null)
             {
                 selectedLabel.text = "";
                 equipButton.style.display = DisplayStyle.None;
@@ -325,6 +406,11 @@ namespace TourDeLaChance
         public bool ReplaceDialogOpen => replaceDialog != null;
         /// OUTIL DE TEST : sélectionne une carte (comme un clic).
         public void DebugSelect(ShopItem item) { if (item.Category != category) ShowCategory(item.Category, item); else Select(item); }
+        /// OUTILS DE TEST (v6) : onglet « Mes skins », « Équiper le meilleur », et la vue des tenues.
+        public void DebugOutfitsTab() => OnOutfitsTab();
+        public void DebugClickBest() => OnBest();
+        public string BestButtonText => bestButton.text;
+        public SavedOutfitsView Outfits => outfits;
         /// OUTIL DE TEST : clic sur « Équiper » / « Retirer ».
         public void DebugClickEquip() => OnEquip();
         /// OUTIL DE TEST : dans la fenêtre « Lequel enlever ? », clic sur l'objet à enlever (null = Annuler).

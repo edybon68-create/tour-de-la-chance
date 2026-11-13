@@ -15,6 +15,11 @@ namespace TourDeLaChance
     /// Elle s'occupe aussi des animations de l'interface (spec sons-animations §3.8 à §3.10) :
     /// compteurs qui défilent, texte flottant « +20 », pièces qui filent dans le
     /// porte-monnaie, apparition des boutons, battement de la cagnotte.
+    ///
+    /// v6 §9.2 : après un piège, quand la reprise est possible, l'écran du bas montre (0,8 s
+    /// après la révélation) « Oh non, un piège ! », la cagnotte qui peut être sauvée, et deux
+    /// boutons côte à côte : « Rejouer » (qui demande « Tu es sûr ? ») et « Continuer — N ◆ ».
+    /// Les boutons du bas sont des bulles en image (art bible §15.1).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class HudController : MonoBehaviour
@@ -22,11 +27,17 @@ namespace TourDeLaChance
         [SerializeField] GameManager game;
         [SerializeField] ChestTrial chestTrial;
         [SerializeField] GameTexts texts; // les phrases (Assets/Data/Textes.asset)
+        [Tooltip("v6 §9.3 : la confirmation « Tu es sûr ? » (sur le document des pop-ups).")]
+        [SerializeField] ReviveOfferView reviveView;
+
+        const float ReviveShowDelay = 0.8f; // v6 §9.2 : on voit d'abord le piège
 
         VisualElement hudRoot, fxLayer, potCounter, walletCounter, potCoin, walletCoin;
         Label potLabel, walletLabel, messageLabel, messageSub, cashOutText;
-        Button cashOutButton, replayButton;
-        VisualElement messageBox;
+        Button cashOutButton, replayButton, continueButton;
+        VisualElement messageBox, reviveInfo;
+        Label reviveText, reviveSmall, continuePrice;
+        float reviveOfferTime = -1f; // temps depuis le piège (−1 = pas de reprise proposée)
 
         // Les compteurs affichés, qui courent après les vraies valeurs.
         readonly RollingCounter pot = new RollingCounter();
@@ -71,12 +82,19 @@ namespace TourDeLaChance
             cashOutText = root.Q<Label>("cashout-text");
             cashOutButton = root.Q<Button>("cashout");
             replayButton = root.Q<Button>("replay");
+            continueButton = root.Q<Button>("continue");
+            continuePrice = root.Q<Label>("continue-price");
+            reviveInfo = root.Q<VisualElement>("revive-info");
+            reviveText = root.Q<Label>("revive-text");
+            reviveSmall = root.Q<Label>("revive-small");
             UiSounds.Register(hudRoot);
             ButtonStyler.Register(hudRoot);
             TextPicker.Use(texts);
 
             cashOutButton.clicked += game.CashOut;
-            replayButton.clicked += game.NewRun;
+            replayButton.clicked += OnReplay;
+            continueButton.clicked += OnContinue;
+            game.ReviveOffered += OnReviveOffered;
             game.Changed += Refresh;
             game.ClimbStarted += OnClimbStarted;
             game.ReshuffleStarted += OnClimbStarted; // le message s'efface aussi (0,1 s)
@@ -84,8 +102,9 @@ namespace TourDeLaChance
             Upgrades.Changed += Refresh; // idem après une amélioration
 
             // Au départ, tout est caché ; les boutons apparaissent avec leur animation.
-            foreach (var b in new VisualElement[] { cashOutButton, replayButton })
+            foreach (var b in new VisualElement[] { cashOutButton, replayButton, continueButton })
                 b.style.display = DisplayStyle.None;
+            reviveInfo.style.display = DisplayStyle.None;
             pot.Snap(game.Pot);
             wallet.Snap(Wallet.Coins);
             Refresh();
@@ -94,7 +113,9 @@ namespace TourDeLaChance
         void OnDisable()
         {
             cashOutButton.clicked -= game.CashOut;
-            replayButton.clicked -= game.NewRun;
+            replayButton.clicked -= OnReplay;
+            continueButton.clicked -= OnContinue;
+            game.ReviveOffered -= OnReviveOffered;
             game.Changed -= Refresh;
             game.ClimbStarted -= OnClimbStarted;
             game.ReshuffleStarted -= OnClimbStarted;
@@ -201,12 +222,61 @@ namespace TourDeLaChance
 
             // Fin de partie : « Rejouer », 0,3 s après le résultat. Caché pendant la
             // redescente / le remélange et quand un panneau est ouvert.
-            bool showReplay = over && !shop && !locked && !game.BoxOpeningActive;
+            // v6 §9.2 : aussi pendant la reprise proposée (0,8 s après le piège), avec
+            // « Continuer — N ◆ » à sa droite. Le coût est lu dans le GameManager.
+            bool reviveScreen = ReviveScreenVisible;
+            bool showReplay = (over || reviveScreen) && !shop && !locked && !game.BoxOpeningActive;
             float delay = over && (stateChanged || lastPanelOpen != shop) ? 0.3f : 0f;
 
             if (showReplay && !shown.Contains(replayButton)) ShowAnimated(replayButton, delay, 1f, null);
             else if (!showReplay && shown.Contains(replayButton)) HideNow(replayButton);
+
+            bool showContinue = reviveScreen && !shop && !locked;
+            continuePrice.text = game.NextReviveCost.ToString();
+            if (showContinue && !shown.Contains(continueButton)) ShowAnimated(continueButton, 0f, 1f, null);
+            else if (!showContinue && shown.Contains(continueButton)) HideNow(continueButton);
+
+            reviveInfo.style.display = reviveScreen && !shop ? DisplayStyle.Flex : DisplayStyle.None;
+            if (reviveScreen)
+            {
+                reviveText.text = $"Ta cagnotte de {ShopUi.Thousands(game.Pot)} peut encore être sauvée.";
+                reviveSmall.text = $"Reprise {game.RevivesUsed + 1} sur {GameManager.MaxRevives} · Tu as {Diamonds.Count} {ShopUi.Diamant}";
+            }
         }
+
+        /// v6 §9.2 : l'écran « Rejouer / Continuer » est-il affiché ? (reprise proposée, 0,8 s après le piège)
+        bool ReviveScreenVisible => game.State == GameState.ReviveOffer && reviveOfferTime >= ReviveShowDelay;
+
+        void OnReviveOffered()
+        {
+            reviveOfferTime = 0f;
+        }
+
+        /// « Rejouer » : sur l'écran Perdu, nouvelle partie tout de suite ; à côté de
+        /// « Continuer », d'abord la question « Tu es sûr ? » (§9.3).
+        void OnReplay()
+        {
+            if (game.State == GameState.ReviveOffer)
+            {
+                if (reviveView != null) reviveView.OpenConfirm();
+                return;
+            }
+            game.NewRun();
+        }
+
+        /// « Continuer — N ◆ » : le GameManager vérifie et paie (un double-clic ne paie qu'une fois).
+        void OnContinue()
+        {
+            if (reviveView != null && reviveView.ConfirmOpen) return;
+            game.AcceptRevive();
+        }
+
+        /// OUTILS DE TEST : clics sur les boutons du bas, et ce qu'ils affichent.
+        public void DebugClickReplay() => OnReplay();
+        public void DebugClickContinue() => OnContinue();
+        public bool ContinueShown => shown.Contains(continueButton);
+        public bool ReplayShown => shown.Contains(replayButton);
+        public string ReviveText => reviveInfo.resolvedStyle.display == DisplayStyle.Flex ? reviveText.text + " | " + reviveSmall.text + " | Continuer " + continuePrice.text : "";
 
         void UpdateMessage(GameState state, bool stateChanged)
         {
@@ -261,6 +331,18 @@ namespace TourDeLaChance
         void Update()
         {
             float dt = Time.deltaTime;
+            // v6 §9.2 : l'écran de reprise apparaît 0,8 s après le piège (avec son petit son).
+            if (game.State != GameState.ReviveOffer) reviveOfferTime = -1f;
+            else if (reviveOfferTime >= 0f)
+            {
+                bool before = reviveOfferTime >= ReviveShowDelay;
+                reviveOfferTime += dt;
+                if (!before && reviveOfferTime >= ReviveShowDelay)
+                {
+                    if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RepriseOffre);
+                    Refresh();
+                }
+            }
             bool potWasRolling = pot.Rolling;
             pot.Tick(dt);
             wallet.Tick(dt);

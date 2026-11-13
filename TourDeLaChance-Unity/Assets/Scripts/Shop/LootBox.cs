@@ -41,6 +41,15 @@ namespace TourDeLaChance
         [Tooltip("§6.6 : la touche thématique après un Secret (vague, empreintes…).")]
         public BoxFamily family = BoxFamily.Classique;
 
+        [Header("v6")]
+        [Tooltip("v6 §11.4 : bonus de DIAMANTS (en %) d'un objet de cette boîte quand il est équipé, " +
+                 "un nombre par rareté du catalogue (Commun … Secret), comme rarityWeights. VIDE = 0. " +
+                 "Pirates : 0 / 0 / 0 / 0 / 15 / 30. Ne touche JAMAIS la chance d'un trésor en diamants.")]
+        public List<int> diamondBonusPercent = new List<int>();
+        [Tooltip("v6 §6.3 : diamants offerts UNE fois quand on possède tous les objets de la boîte " +
+                 "(Skins/Accessoires n°1 : 5 ; Animaux : 8 ; Pirates : 10). 0 = pas de récompense.")]
+        [Min(0)] public int completionReward;
+
         /// La boîte a-t-elle ses propres taux ?
         public bool HasOwnWeights => rarityWeights != null && rarityWeights.Count > 0;
     }

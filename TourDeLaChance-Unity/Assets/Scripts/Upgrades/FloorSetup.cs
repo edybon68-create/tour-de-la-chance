@@ -30,5 +30,10 @@ namespace TourDeLaChance
 
         /// v5 §13 : ×2 après la renaissance (×1 avant). Déjà compris dans Gain et DiamondAmount.
         public int RebirthMultiplier;
+
+        /// v6 §11 : le bonus de DIAMANTS de la tenue (objets Pirates Légendaires et Secrets, en %,
+        /// plafonné à 50), lu à la préparation de l'étage comme le bonus de pièces. Il ne touche
+        /// que le NOMBRE de diamants d'un trésor déjà en diamants, jamais la chance qu'il le soit.
+        public int DiamondBonusPercent;
     }
 }

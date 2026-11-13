@@ -47,7 +47,9 @@ namespace TourDeLaChance
                 // Une partie perdue entre au classement Étage (on a bien atteint cet étage)
                 // mais pas au classement Pièces (rien d'encaissé).
                 // v5 : la date garde le marqueur « |r » d'une partie avec reprise.
-                string date = scores.partie.date + (scores.partie.reprise ? ReviveMark : "");
+                // v6 §9.4 : « |r3 » = 3 reprises (« |r » seul, ancien format = 1 reprise).
+                int n = Math.Max(scores.partie.reprises, scores.partie.reprise ? 1 : 0);
+                string date = scores.partie.date + (n > 0 ? ReviveMark + n.ToString(CultureInfo.InvariantCulture) : "");
                 if (scores.partie.etage >= 1) AddRun(EtageKey, scores.partie.etage, date);
                 if (scores.partie.pieces > 0) AddRun(PiecesKey, scores.partie.pieces, date);
             }
@@ -167,9 +169,14 @@ namespace TourDeLaChance
         /// « 2026-11-11 » → « 11 nov. » (à la française).
         public static string PrettyDate(string date)
         {
-            // v5 : « 2026-11-11|r » → « 11 nov. · ◆ reprise ».
-            if (date != null && date.EndsWith(ReviveMark))
-                return PrettyDate(date.Substring(0, date.Length - ReviveMark.Length)) + " · " + ShopUi.Diamant + " reprise";
+            // v5 : « 2026-11-11|r » → « 11 nov. · ◆ » ; v6 : « 2026-11-11|r3 » → « 11 nov. · ◆×3 ».
+            int mark = date != null ? date.IndexOf(ReviveMark, StringComparison.Ordinal) : -1;
+            if (mark > 0)
+            {
+                string tail = date.Substring(mark + ReviveMark.Length);
+                int n = int.TryParse(tail, NumberStyles.Integer, CultureInfo.InvariantCulture, out int v) ? Math.Max(1, v) : 1;
+                return PrettyDate(date.Substring(0, mark)) + " · " + ShopUi.Diamant + (n > 1 ? "×" + n : "");
+            }
             if (DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d))
                 return d.ToString("d MMM", French);
             return date ?? "";

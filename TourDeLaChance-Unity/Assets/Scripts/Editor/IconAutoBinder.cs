@@ -20,14 +20,20 @@ namespace TourDeLaChance.EditorTools
     /// Menu « Tour de la Chance › Brancher les icônes » : refait le branchement de toutes les
     /// icônes déjà présentes (utile après un changement de catalogue).
     /// Un objet SANS icône garde son substitut dessiné par l'interface.
+    /// v6 : il branche aussi les images d'interface (UiImages : icone_route, drapeau_record,
+    /// renaissance_heros…) et les images des lots d'échange (echange_sac…).
     /// </summary>
     public class IconAutoBinder : AssetPostprocessor
     {
         public const string IconFolder = "Assets/Art/icones_detourees/";
 
         // 1. Avant l'import : toute image du dossier est réglée en Sprite (comme les autres icônes).
+        /// v6 (art bible §15.1.5) : les bulles des boutons rendues dans Blender.
+        public const string BubbleFolder = "Assets/UI/Bulles/";
+
         void OnPreprocessTexture()
         {
+            if (assetPath.StartsWith(BubbleFolder)) { PrepareBubble(); return; }
             if (!assetPath.StartsWith(IconFolder)) return;
             var importer = (TextureImporter)assetImporter;
             if (importer.textureType == TextureImporterType.Sprite) return;
@@ -35,6 +41,24 @@ namespace TourDeLaChance.EditorTools
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = false;
+        }
+
+        /// Une bulle : Sprite, transparence, bords nets (Clamp), mip maps (elle est affichée à la
+        /// moitié de sa taille). Les bulles rectangulaires ont les bords du 9-slice : gauche 80,
+        /// droite 80, haut 80, bas 100 (pixels de l'image) : seul le milieu s'étire en largeur.
+        void PrepareBubble()
+        {
+            var importer = (TextureImporter)assetImporter;
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = true;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            // Vector4 du bord d'un sprite : (gauche, BAS, droite, haut).
+            importer.spriteBorder = Path.GetFileName(assetPath).StartsWith("bulle_rect_")
+                ? new Vector4(80, 100, 80, 80) : Vector4.zero;
         }
 
         // 2. Après l'import : on branche les icônes qui viennent d'arriver.
@@ -59,6 +83,7 @@ namespace TourDeLaChance.EditorTools
         {
             var catalog = Resources.Load<ShopCatalog>("ShopCatalog");
             var eco = Resources.Load<EconomyCatalog>("EconomyCatalog");
+            var ui = Resources.Load<UiImages>("UiImages");
             if (catalog == null) return 0;
             var items = catalog.AllItems.Where(i => i != null).GroupBy(i => i.Id).ToDictionary(g => g.Key, g => g.First());
             int changed = 0;
@@ -68,6 +93,22 @@ namespace TourDeLaChance.EditorTools
                 string id = Path.GetFileNameWithoutExtension(path);
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
                 if (sprite == null) continue;
+
+                // v6 : une image d'interface (UiImages). Pas de « continue » : piece.png et
+                // diamant.png peuvent aussi servir ailleurs.
+                string field = UiImages.FieldFor(id);
+                if (ui != null && field != null)
+                {
+                    var uso = new SerializedObject(ui);
+                    var prop = uso.FindProperty(field);
+                    if (prop != null && prop.objectReferenceValue != sprite)
+                    {
+                        prop.objectReferenceValue = sprite;
+                        uso.ApplyModifiedPropertiesWithoutUndo();
+                        EditorUtility.SetDirty(ui);
+                        changed++;
+                    }
+                }
 
                 // Un objet (skin ou accessoire) : case « icon » de sa fiche.
                 if (items.TryGetValue(id, out var item))
@@ -98,6 +139,15 @@ namespace TourDeLaChance.EditorTools
                     for (int i = 0; i < packs.arraySize; i++)
                     {
                         var p = packs.GetArrayElementAtIndex(i);
+                        if (p.FindPropertyRelative("id").stringValue != id) continue;
+                        var icon = p.FindPropertyRelative("icon");
+                        if (icon.objectReferenceValue != sprite) { icon.objectReferenceValue = sprite; ecoDirty = true; changed++; }
+                    }
+                    // v6 : les lots d'échange (echange_poignee, echange_sac, echange_coffre).
+                    var coinPacks = so.FindProperty("coinPacks");
+                    for (int i = 0; coinPacks != null && i < coinPacks.arraySize; i++)
+                    {
+                        var p = coinPacks.GetArrayElementAtIndex(i);
                         if (p.FindPropertyRelative("id").stringValue != id) continue;
                         var icon = p.FindPropertyRelative("icon");
                         if (icon.objectReferenceValue != sprite) { icon.objectReferenceValue = sprite; ecoDirty = true; changed++; }

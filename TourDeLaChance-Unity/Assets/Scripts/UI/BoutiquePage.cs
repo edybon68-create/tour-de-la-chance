@@ -21,13 +21,19 @@ namespace TourDeLaChance
     /// lu dans les données de la boîte), la pilule verte « Ouvrir [pièce] 250 » et « Contenu et
     /// taux » (sous-page avec le tableau complet et la grille des objets).
     ///
+    /// v6 : 4 onglets sur toute la largeur (Classiques · Pirates · Animaux · Échanges, §5.1) ; la
+    /// section ÉCHANGES remplace « Diamants · Bientôt » : on donne des diamants contre des pièces
+    /// (§5.4, règle dans CoinExchange) ; les packs désactivés viennent dessous seulement si
+    /// showDiamondPacks est vrai ; chaque carte dit sa récompense de collection (§6.3) ; la
+    /// Boutique peut s'ouvrir sur « Contenu et taux » avec la fiche d'un objet déjà ouverte.
+    ///
     /// Ce n'est pas un MonoBehaviour : PanelsController le crée. Il AFFICHE et TRANSMET les
     /// clics ; ouvrir une boîte est décidé par la classe Shop.
     /// </summary>
     public class BoutiquePage : IDisposable
     {
         /// Les sections de la liste, dans l'ordre (un onglet par section).
-        public enum Tab { Boites, Pirates, Animaux, Diamants }
+        public enum Tab { Boites, Pirates, Animaux, Echanges }
 
         /// La dernière section regardée, retenue pendant la session (jamais sauvegardée).
         static Tab lastTab = Tab.Boites;
@@ -105,17 +111,26 @@ namespace TourDeLaChance
 
         /// Ouvre la Boutique (sur la dernière section regardée) ou directement sur « Contenu et
         /// taux » d'une boîte.
-        public void Open(LootBox content = null)
+        public void Open(LootBox content = null, ShopItem showItem = null)
         {
             detail.Close();
+            CloseExchangeConfirm();
             contentBox = content;
             scrollTarget = null;
             jumpPending = content == null;
             Refresh();
+            // v6 §6.1 : « Voir dans la Boutique » : la fiche de l'objet est déjà ouverte (3D visible).
+            if (content != null && showItem != null)
+            {
+                var items = content.items.Where(i => i != null).ToList();
+                int at = items.IndexOf(showItem);
+                if (at >= 0) detail.Open(items, at, null);
+            }
         }
 
         public bool HandleEscape()
         {
+            if (exchangeConfirm != null) { CloseExchangeConfirm(); return true; }
             if (detail.HandleEscape()) return true;
             if (contentBox != null) { contentBox = null; jumpPending = true; Refresh(); return true; }
             return false;
@@ -153,11 +168,11 @@ namespace TourDeLaChance
             note.Add(ShopUi.NewLabel(DiamondOriginText(), "btq-note__texte"));
             pirates.Add(note);
             AddSection(Tab.Animaux, "Boîtes Animaux", PopupDecor.Deco.Patte, Shop.Boxes.Where(b => b.family == BoxFamily.Animaux));
-            if (EconomyCatalog.Instance.ShowDiamondPacks)
-            {
-                var packs = NewSection(Tab.Diamants, "Diamants", PopupDecor.Deco.Diamant);
-                BuildPacks(packs);
-            }
+            // v6 §5.4 : la section Échanges (diamants → pièces), puis, SEULEMENT si on les montre,
+            // les packs de diamants désactivés « Bientôt disponible » dessous.
+            var exchange = NewSection(Tab.Echanges, "Échanges", PopupDecor.Deco.Diamant);
+            BuildExchange(exchange);
+            if (EconomyCatalog.Instance.ShowDiamondPacks) BuildPacks(exchange);
         }
 
         VisualElement NewSection(Tab tab, string title, PopupDecor.Deco deco)
@@ -198,14 +213,13 @@ namespace TourDeLaChance
         {
             tabsRow.Clear();
             tabButtons.Clear();
-            bool packs = EconomyCatalog.Instance.ShowDiamondPacks;
-            if (!packs && lastTab == Tab.Diamants) lastTab = Tab.Boites;
-            AddTab(Tab.Boites, "Boîtes", "coin coin--small");
+            // v6 §5.1 : 4 onglets de même largeur, qui remplissent la place jusqu'aux monnaies.
+            AddTab(Tab.Boites, "Classiques", "coin coin--small");
             AddTab(Tab.Pirates, "Pirates", "diamant diamant--petit");
             AddTab(Tab.Animaux, "Animaux", "coin coin--small");
-            // Les diamants ne s'achètent pas : l'onglet reste grisé « Bientôt » (il montre
-            // seulement la section qui l'explique).
-            if (packs) AddTab(Tab.Diamants, "Diamants · Bientôt", "diamant diamant--petit").AddToClassList("v5-tab--bientot");
+            AddTab(Tab.Echanges, "Échanges", "diamant diamant--petit");
+            // Le dernier onglet colle aux monnaies (24 px de marge portés par les monnaies).
+            if (tabsRow.childCount > 0) tabsRow[tabsRow.childCount - 1].style.marginRight = 0;
             tabsRow.style.display = contentBox != null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
@@ -346,6 +360,9 @@ namespace TourDeLaChance
             desc.Add(ShopUi.NewLabel($"{total} objets à collectionner !", "carte__texte"));
             desc.Add(ShopUi.NewLabel($"Collection : {found} / {total}", "progress-text"));
             desc.Add(ProgressBar(found, total));
+            // v6 §6.3 : la petite ligne de la récompense de collection (sans pastille ni animation).
+            string reward = IndexPage.RewardLine(box);
+            if (reward.Length > 0) desc.Add(ShopUi.NewLabel(reward, "collection-recompense"));
             middle.Add(desc);
             card.Add(middle);
 
@@ -556,6 +573,114 @@ namespace TourDeLaChance
         }
 
         // =====================================================================
+        // v6 §5.4 : la section « Échanges » (diamants → pièces, jamais l'inverse)
+        // =====================================================================
+
+        VisualElement exchangeConfirm;
+
+        void BuildExchange(VisualElement section)
+        {
+            var packs = EconomyCatalog.Instance.CoinPacks;
+            // Le taux, lu dans les données (le même pour tous les lots, vérifié par Validate).
+            string rate = packs.Count > 0 ? ShopUi.Thousands(packs[0].coins / Mathf.Max(1, packs[0].diamonds)) : "?";
+            section.Add(ShopUi.NewLabel($"Change tes diamants en pièces. 1 {ShopUi.Diamant} = {rate} pièces, toujours.", "ech-intro"));
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("ech-cartes");
+            foreach (var pack in packs)
+            {
+                var p = pack;
+                var card = new VisualElement();
+                card.AddToClassList("ech-carte");
+                card.AddToClassList("carte");
+                card.AddToClassList("carte--or");
+                var image = new VisualElement { pickingMode = PickingMode.Ignore };
+                image.AddToClassList("ech-image");
+                image.Add(PopupDecor.CardRays());
+                var picture = new VisualElement { pickingMode = PickingMode.Ignore };
+                picture.AddToClassList("ech-image__piles");
+                if (p.icon != null) picture.style.backgroundImage = new StyleBackground(p.icon);
+                else picture.Add(CoinPile(p.diamonds));
+                image.Add(picture);
+                card.Add(image);
+                card.Add(ShopUi.NewLabel(p.displayName, "ech-nom"));
+                card.Add(ShopUi.NewLabel($"{p.diamonds} {ShopUi.Diamant} → {ShopUi.Thousands(p.coins)} pièces", "ech-taux"));
+                var button = new Button(() => OpenExchangeConfirm(p)) { text = $"Échanger — {p.diamonds} {ShopUi.Diamant}" };
+                button.AddToClassList("btn"); button.AddToClassList("btn--vert"); button.AddToClassList("ech-btn");
+                button.SetEnabled(CoinExchange.CanExchange(p));
+                card.Add(button);
+                // Pas assez : grisé + texte simple, sans aucun lien (on n'achète jamais de diamants).
+                if (!CoinExchange.CanExchange(p)) card.Add(ShopUi.NewLabel($"Il te manque {CoinExchange.MissingDiamonds(p)} {ShopUi.Diamant}", "ech-manque"));
+                row.Add(card);
+            }
+            section.Add(row);
+        }
+
+        /// Une pile de pièces dessinée (substitut tant que l'image du lot n'existe pas) :
+        /// d'autant plus de pièces que le lot est gros.
+        static VisualElement CoinPile(int diamonds)
+        {
+            var pile = new VisualElement { pickingMode = PickingMode.Ignore };
+            pile.style.flexDirection = FlexDirection.Row;
+            pile.style.flexWrap = Wrap.Wrap;
+            pile.style.justifyContent = Justify.Center;
+            pile.style.alignItems = Align.Center;
+            pile.style.width = 130; pile.style.height = 120;
+            int n = diamonds >= 25 ? 7 : diamonds >= 5 ? 4 : 2;
+            for (int i = 0; i < n; i++)
+            {
+                var coin = Icon("coin");
+                coin.style.width = 44; coin.style.height = 44; coin.style.marginLeft = -4;
+                pile.Add(coin);
+            }
+            return pile;
+        }
+
+        /// La confirmation (taille S) : « Échanger 5 ◆ contre 1 000 pièces ? »
+        void OpenExchangeConfirm(CoinPackDef pack)
+        {
+            if (!CoinExchange.CanExchange(pack)) { UiSounds.PlayRefus(); return; }
+            CloseExchangeConfirm();
+            exchangeConfirm = new VisualElement();
+            exchangeConfirm.AddToClassList("v5-confirm");
+            var box = new VisualElement();
+            box.AddToClassList("v5-confirm-box");
+            box.Add(ShopUi.NewLabel($"Échanger {pack.diamonds} {ShopUi.Diamant} contre {ShopUi.Thousands(pack.coins)} pièces ? Les diamants servent aussi aux reprises et aux Boîtes Pirates.", "v5-confirm-text"));
+            var buttons = new VisualElement();
+            buttons.AddToClassList("v5-confirm-buttons");
+            var yes = new Button(() => ConfirmExchange(pack)) { text = "Échanger" };
+            yes.AddToClassList("btn"); yes.AddToClassList("btn--vert"); yes.AddToClassList("v5-confirm-btn"); yes.AddToClassList(UiSounds.SilentClass);
+            var no = new Button(CloseExchangeConfirm) { text = "Annuler" };
+            no.AddToClassList("btn"); no.AddToClassList("btn--sombre"); no.AddToClassList("v5-confirm-btn");
+            buttons.Add(yes);
+            buttons.Add(no);
+            box.Add(buttons);
+            exchangeConfirm.Add(box);
+            page.Add(exchangeConfirm);
+            ButtonStyler.Apply(exchangeConfirm);
+        }
+
+        void CloseExchangeConfirm()
+        {
+            if (exchangeConfirm != null) exchangeConfirm.RemoveFromHierarchy();
+            exchangeConfirm = null;
+        }
+
+        /// « Échanger » : la règle (relire le solde, payer, créditer, sauvegarder) est dans
+        /// CoinExchange ; un double-clic ne fait qu'un échange s'il ne reste pas assez.
+        void ConfirmExchange(CoinPackDef pack)
+        {
+            CloseExchangeConfirm();
+            if (!CoinExchange.TryExchange(pack)) UiSounds.PlayRefus();
+            Refresh();
+        }
+
+        /// OUTILS DE TEST : clic sur « Échanger » d'un lot, puis sur « Échanger » ou « Annuler ».
+        public void DebugClickExchange(string packId) => OpenExchangeConfirm(CoinExchange.Find(packId));
+        public void DebugConfirmExchange(string packId) => ConfirmExchange(CoinExchange.Find(packId));
+        public void DebugCancelExchange() => CloseExchangeConfirm();
+        public bool ExchangeConfirmOpen => exchangeConfirm != null;
+
+        // =====================================================================
         // L'onglet « Diamants » (§15.5) : packs AFFICHÉS, DÉSACTIVÉS, sans prix
         // =====================================================================
 
@@ -595,7 +720,7 @@ namespace TourDeLaChance
         // Outils de test
         // =====================================================================
 
-        /// OUTIL DE TEST : clic sur un onglet (0 Boîtes, 1 Pirates, 2 Animaux, 3 Diamants) :
+        /// OUTIL DE TEST : clic sur un onglet (0 Classiques, 1 Pirates, 2 Animaux, 3 Échanges) :
         /// la liste défile en douceur jusqu'à la section.
         public void DebugTab(int tab) => ScrollTo((Tab)tab);
         /// OUTIL DE TEST : fait défiler la liste « à la main » jusqu'à la position y.

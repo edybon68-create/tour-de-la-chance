@@ -244,6 +244,13 @@ namespace TourDeLaChance
             {
                 case Kind.Spring:
                 {
+                    // v6 §12.2 : en graphismes Faible, les ressorts sont FIGÉS dans leur pose de repos.
+                    if (!GraphicsLevel.SpringsEnabled)
+                    {
+                        p.angle = Vector2.zero; p.speed = Vector2.zero;
+                        p.t.localRotation = p.restRot;
+                        break;
+                    }
                     Vector2 target = new Vector2(Mathf.Clamp(localAccel.z * 2.5f, -25f, 25f), Mathf.Clamp(-localAccel.x * 2.5f, -25f, 25f));
                     target += new Vector2(2f * Mathf.Sin(time * 2.1f), 1.5f * Mathf.Sin(time * 1.7f + 1f));
                     // v6 (QA n°32) : le ressort est calculé par petits pas d'au plus 1/60 s.

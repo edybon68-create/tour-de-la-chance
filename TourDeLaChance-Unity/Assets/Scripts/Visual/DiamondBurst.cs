@@ -84,7 +84,7 @@ namespace TourDeLaChance
         public void Burst(Vector3 chestPosition, int amount)
         {
             StopAllCoroutines();
-            int count = CountFor(amount);
+            int count = GraphicsLevel.Particles(CountFor(amount)); // v6 §12.2 : moitié en Faible
             for (int i = 0; i < pool.Count; i++)
             {
                 var p = pool[i];

@@ -356,6 +356,161 @@ namespace TourDeLaChance
         }
 
         // =====================================================================
+        // v6 §11 : le bonus de DIAMANTS des objets Pirates Légendaires et Secrets
+        // =====================================================================
+
+        /// Le bonus de diamants (en %) que donne CET objet équipé : lu dans SA boîte, par rareté
+        /// (LootBox.diamondBonusPercent ; vide = 0). Pirates : Légendaire 15, Secret 30.
+        /// RÈGLE D'OR : il ne touche que le NOMBRE de diamants d'un trésor déjà en diamants.
+        public static int DiamondBonusPercentOf(ShopItem item)
+        {
+            if (item == null || item.IsFree) return 0;
+            var box = BoxOf(item);
+            if (box == null || box.diamondBonusPercent == null || box.diamondBonusPercent.Count == 0) return 0;
+            int rank = RarityRank(item);
+            return rank >= 0 && rank < box.diamondBonusPercent.Count ? Mathf.Max(0, box.diamondBonusPercent[rank]) : 0;
+        }
+
+        /// Le plafond du bonus de diamants de la tenue (50 %).
+        public static int DiamondBonusCap => EconomyCatalog.Instance.DiamondBonusCap;
+
+        /// Le bonus de diamants de la tenue SAUVEGARDÉE, plafonné à 50 % (les 3 objets s'additionnent).
+        public static int DiamondBonusPercent => DiamondBonusPercentWith(null);
+
+        /// Le bonus de diamants de la tenue avant plafond (pour « +60 % → max 50 % »).
+        public static int DiamondBonusPercentRaw => RawDiamondBonus(GetEquippedSkin(), EquippedAccessories());
+
+        /// Comme OutfitBonusPercentWith, pour les diamants (aperçu ; rien n'est sauvegardé).
+        public static int DiamondBonusPercentWith(ShopItem tryItem, ShopItem replace = null)
+        {
+            var skin = GetEquippedSkin();
+            var accessories = OutfitAfter(tryItem, replace, out var newSkin);
+            if (newSkin != null) skin = newSkin;
+            return Mathf.Min(DiamondBonusCap, RawDiamondBonus(skin, accessories));
+        }
+
+        static int RawDiamondBonus(ShopItem skin, IEnumerable<ShopItem> accessories)
+        {
+            int total = DiamondBonusPercentOf(skin);
+            foreach (var acc in accessories) total += DiamondBonusPercentOf(acc);
+            return total;
+        }
+
+        /// Bonus de pièces et de diamants (plafonné) d'une tenue quelconque (skin + accessoires).
+        /// Sert à « Mes skins » et à « Équiper le meilleur ». Les objets non possédés ne comptent pas.
+        public static int OutfitCoinBonus(ShopItem skin, IEnumerable<ShopItem> accessories)
+        {
+            int total = IsOwned(skin) ? BonusPercent(skin) : 0;
+            foreach (var acc in accessories) if (IsOwned(acc)) total += BonusPercent(acc);
+            return total;
+        }
+
+        public static int OutfitDiamondBonus(ShopItem skin, IEnumerable<ShopItem> accessories)
+        {
+            int total = IsOwned(skin) ? DiamondBonusPercentOf(skin) : 0;
+            foreach (var acc in accessories) if (IsOwned(acc)) total += DiamondBonusPercentOf(acc);
+            return Mathf.Min(DiamondBonusCap, total);
+        }
+
+        // =====================================================================
+        // v6 §7.1 : « Équiper le meilleur » (calcul seulement : BestOutfit ne sauvegarde rien)
+        // =====================================================================
+
+        /// Une tenue complète : 1 skin et au plus 2 accessoires (emplacements différents).
+        public struct Outfit
+        {
+            public ShopItem Skin;
+            public List<ShopItem> Accessories;
+        }
+
+        /// La place d'un objet dans l'ordre de la Boutique (boîte, puis numéro) : sert à départager.
+        static int CatalogOrder(ShopItem item)
+        {
+            var boxes = BoxesInShopOrder;
+            var box = BoxOf(item);
+            int b = 0;
+            for (int i = 0; i < boxes.Count; i++) if (boxes[i] == box) { b = i; break; }
+            return b * 1000 + NumberOf(item);
+        }
+
+        /// La NOTE d'un objet (§7.1, étape 2), comparée dans cet ordre : bonus de pièces, bonus de
+        /// diamants, déjà porté (1 / 0), puis ordre du catalogue INVERSÉ (le premier gagne).
+        static (int coins, int diamonds, int worn, int order) Score(ShopItem item) =>
+            (BonusPercent(item), DiamondBonusPercentOf(item), IsEquipped(item) ? 1 : 0, -CatalogOrder(item));
+
+        static ShopItem BestOf(IEnumerable<ShopItem> items)
+        {
+            ShopItem best = null;
+            foreach (var i in items)
+                if (best == null || Score(i).CompareTo(Score(best)) > 0) best = i;
+            return best;
+        }
+
+        /// La tenue qui donne le PLUS GROS bonus de pièces (puis de diamants, puis ce qui est déjà
+        /// porté, puis l'ordre du catalogue). Seuls les objets POSSÉDÉS et non gratuits comptent.
+        ///   - Skin : le meilleur skin possédé ; aucun → on garde le skin actuel.
+        ///   - Accessoires : le champion de chacun des 4 emplacements, puis les 2 meilleurs
+        ///     champions (les bonus s'additionnent : c'est forcément la meilleure paire possible).
+        public static Outfit BestOutfit()
+        {
+            var owned = Catalog == null ? new List<ShopItem>()
+                : Catalog.Boxes.SelectMany(b => b.items).Where(i => i != null && !i.IsFree && CountOf(i) >= 1).Distinct().ToList();
+            var skin = BestOf(owned.Where(i => i.Category == ShopCategory.Skin)) ?? GetEquippedSkin();
+            var champions = new List<ShopItem>();
+            for (int s = 0; s < 4; s++)
+            {
+                var slot = (AccessorySlot)s;
+                var c = BestOf(owned.Where(i => i.Category == ShopCategory.Accessoire && i.Slot == slot));
+                if (c != null) champions.Add(c);
+            }
+            var pair = champions.OrderByDescending(Score).Take(MaxAccessories).ToList();
+            return new Outfit { Skin = skin, Accessories = pair };
+        }
+
+        /// La tenue portée a-t-elle EXACTEMENT ces objets ? (« Tu portes déjà le meilleur »)
+        public static bool IsWearing(ShopItem skin, IEnumerable<ShopItem> accessories)
+        {
+            if (skin != null && GetEquippedSkin() != skin) return false;
+            var worn = EquippedAccessories();
+            var wanted = accessories.Where(a => a != null && !a.IsFree).Distinct().ToList();
+            return worn.Count == wanted.Count && wanted.All(worn.Contains);
+        }
+
+        /// v6 §7.2 : met une tenue EN UNE FOIS : le skin, vide les 4 emplacements, met les
+        /// accessoires (au plus 2, emplacements différents), sauvegarde, prévient.
+        /// Un objet non possédé est LAISSÉ DE CÔTÉ (skin manquant → on garde le skin actuel ;
+        /// accessoire manquant → son emplacement reste vide). Renvoie le nombre d'objets laissés.
+        /// Comme tout équipement : effet au PROCHAIN étage préparé (FloorSetup est figé).
+        public static int TryEquipOutfit(ShopItem skin, ShopItem acc1, ShopItem acc2)
+        {
+            int missing = 0;
+            if (skin != null && skin.Category == ShopCategory.Skin)
+            {
+                if (IsOwned(skin)) PlayerPrefs.SetString(SkinKey, skin.Id);
+                else missing++;
+            }
+            for (int s = 0; s < 4; s++)
+            {
+                var empty = DefaultAccessory((AccessorySlot)s);
+                PlayerPrefs.SetString(AccessoryKey((AccessorySlot)s), empty != null ? empty.Id : "");
+            }
+            var used = new HashSet<AccessorySlot>();
+            int placed = 0;
+            foreach (var acc in new[] { acc1, acc2 })
+            {
+                if (acc == null || acc.IsFree || acc.Category != ShopCategory.Accessoire) continue;
+                if (!IsOwned(acc)) { missing++; continue; }
+                if (used.Contains(acc.Slot) || placed >= MaxAccessories) continue; // jamais deux sur le même emplacement
+                used.Add(acc.Slot);
+                placed++;
+                PlayerPrefs.SetString(AccessoryKey(acc.Slot), acc.Id);
+            }
+            PlayerPrefs.Save();
+            Changed?.Invoke();
+            return missing;
+        }
+
+        // =====================================================================
         // Équiper (v5 §4.4 : un skin et AU PLUS 2 accessoires, emplacements différents)
         // =====================================================================
 
