@@ -81,10 +81,14 @@ namespace TourDeLaChance
             phrase = Text_("recap-phrase", card);
             won = Text_("recap-won", card);
             banner = Text_("recap-banner", card);
+            // v6 (QA n°30) : le gain a SA PROPRE ligne, juste avant les autres pastilles. Avant,
+            // il partageait la rangée des pastilles : quand elle débordait, il passait à la
+            // ligne et chevauchait les petites mentions (gain illisible = règle d'or touchée).
+            var gainRow = Box("recap-gain-row", card);
+            pillGain = Pill(gainRow, "recap-pill recap-pill--gain", out _);
             pillsRow = Box("recap-pills", card);
             pillChests = Pill(pillsRow, "recap-pill", out _);
             pillRarity = Pill(pillsRow, "recap-pill", out pillRarityBox);
-            pillGain = Pill(pillsRow, "recap-pill recap-pill--gain", out _);
             mentions = Text_("recap-mentions", card);
             layer.Add(card);
 
@@ -132,7 +136,11 @@ namespace TourDeLaChance
             // La phrase drôle de montée (v3 §11) ; étage 1 : « C'est parti ! ».
             bool newTier = floor > 1 && GameManager.TierForFloor(floor) != GameManager.TierForFloor(floor - 1);
             string tierName = newTier && decor != null ? decor.TierName(GameManager.TierForFloor(floor)) : "";
-            phrase.text = floor <= 1 ? "C'est parti !" : TextPicker.ClimbLine(floor, "", game.Pot, game.LastGain);
+            // v6 (QA n°42) : après une reprise, on n'est PAS monté (on rejoue l'étage) : pas de
+            // phrase de montée, la ligne « Reprise réussie » suffit.
+            phrase.text = floor <= 1 ? "C'est parti !"
+                        : game.RevivedThisFloor ? ""
+                        : TextPicker.ClimbLine(floor, "", game.Pot, game.LastGain);
             Show(phrase, !string.IsNullOrEmpty(phrase.text));
 
             // Ce que tu viens de gagner (après un trésor / une reprise).
@@ -153,6 +161,9 @@ namespace TourDeLaChance
             if (!string.IsNullOrEmpty(tierName)) lines.Add(tierName);
             banner.text = string.Join(" · ", lines);
             Show(banner, banner.text.Length > 0);
+            // v6 (QA n°30) : carte moins chargée. Avec une bannière (record, palier), la phrase
+            // drôle s'efface : la bannière est plus importante et la carte reste lisible.
+            if (banner.text.Length > 0) Show(phrase, false);
 
             // Ce qui t'attend.
             pillChests.text = $"{setup.ChestCount} coffres · 1 piège";
@@ -163,8 +174,8 @@ namespace TourDeLaChance
 
             // Petites mentions (seulement si non nulles / actives).
             var m = new List<string>();
-            if (setup.DiamondChancePermille > 0) m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
-            if (setup.OutfitBonusPercent > 0) m.Add($"Tenue +{setup.OutfitBonusPercent} %");
+            if (setup.DiamondChancePermille > 0) m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%");
+            if (setup.OutfitBonusPercent > 0) m.Add($"Tenue +{setup.OutfitBonusPercent}\u00A0%");
             if (setup.RebirthMultiplier > 1) m.Add($"Renaissance ×{setup.RebirthMultiplier}");
             mentions.text = string.Join("   ·   ", m);
             Show(mentions, m.Count > 0);
@@ -175,7 +186,7 @@ namespace TourDeLaChance
             // La barre compacte : « Trésor +150 · 5 coffres · Or ×3 · ◆ 3 % ».
             var b = new List<string> { $"Trésor +{setup.Gain}", $"{setup.ChestCount} coffres" };
             if (precious) b.Add($"{setup.Rarity.shortName} ×{ShopUi.Number(setup.Rarity.multiplier)}");
-            if (setup.DiamondChancePermille > 0) b.Add($"{ShopUi.Diamant} {ShopUi.Number(setup.DiamondChancePermille / 10f)} %");
+            if (setup.DiamondChancePermille > 0) b.Add($"{ShopUi.Diamant} {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%");
             barText.text = string.Join(" · ", b);
 
             bigDuration = banner.text.Length > 0 ? BigTimeBanner : BigTime;

@@ -26,3 +26,15 @@ MonoBehaviour:
   smoothness: 0.8
   accessoryPrefab: {fileID: 0}
   animation: 0
+  attachOffset: {x: 0, y: 0, z: 0}
+  attachScale: 1
+  flavorText: "Des milliards d'\xE9toiles\u2026 dans un seul cheval."
+  baseTexture: {fileID: 0}
+  textureTiling: {x: 1, y: 1}
+  skinFx: 0
+  skinExtrasPrefab: {fileID: 0}
+  pattern: 0
+  accentColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 1, g: 1, b: 1, a: 1}
+  patternCount: 0
+  emissionStrength: 0

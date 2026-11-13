@@ -77,13 +77,13 @@ namespace TourDeLaChance
             bool title = game.State == GameState.Title;
             counter.style.display = !title && Diamonds.CounterUnlocked ? DisplayStyle.Flex : DisplayStyle.None;
             rebirthBadge.style.display = !title && Rebirth.IsDone ? DisplayStyle.Flex : DisplayStyle.None;
-            label.text = rolling.Displayed.ToString();
+            label.text = ShopUi.Thousands(rolling.Displayed);
         }
 
         void Update()
         {
             rolling.Tick(Time.deltaTime);
-            label.text = rolling.Displayed.ToString();
+            label.text = ShopUi.Thousands(rolling.Displayed);
             // Un « tink » par diamant ajouté, répartis sur les 0,4 s du défilement.
             if (ticksToPlay > 0)
             {

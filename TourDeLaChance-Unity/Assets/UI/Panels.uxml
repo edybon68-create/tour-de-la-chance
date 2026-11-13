@@ -53,8 +53,9 @@
                                     <ui:VisualElement class="inv-buttons">
                                         <ui:Button name="inv-equip" text="Équiper" class="btn btn--vert action-btn action-btn--equip" />
                                         <ui:Button name="inv-sell" text="Vendre 1 doublon" class="btn btn--sombre action-btn action-btn--sell" />
+                                        <!-- v6 (QA n°38) : sur la même ligne, pour laisser plus de place à la grille. -->
+                                        <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="btn btn--sombre action-btn action-btn--sellall" />
                                     </ui:VisualElement>
-                                    <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="btn btn--sombre action-btn action-btn--sellall" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -115,7 +116,7 @@
                                     <ui:VisualElement class="switch-knob" picking-mode="Ignore" />
                                 </ui:Button>
                             </ui:VisualElement>
-                            <ui:Label text="Tour de la Chance · version 5" class="settings-footer" picking-mode="Ignore" />
+                            <ui:Label text="Tour de la Chance · version 5.1" class="settings-footer" picking-mode="Ignore" />
                         </ui:VisualElement>
 
                         <!-- Choisis ton pseudo (§12.7) -->

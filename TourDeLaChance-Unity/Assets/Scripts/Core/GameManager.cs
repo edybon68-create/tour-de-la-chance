@@ -106,7 +106,7 @@ namespace TourDeLaChance
         /// Le palier de décor (1 à 4) correspondant à l'étage actuel.
         public int Tier => TierForFloor(Floor);
 
-        /// Le plus haut étage atteint (sauvegardé).
+        /// Le plus haut étage atteint dans une partie TERMINÉE (sauvegardé).
         public int Record => Mathf.Max(0, PlayerPrefs.GetInt(RecordKey, 0));
 
         /// Vrai si l'étage qu'on vient de préparer bat le record pour la première fois de la
@@ -138,8 +138,13 @@ namespace TourDeLaChance
         /// Peut-on encaisser ? Pendant le choix, à partir de l'étage 2 (avant, la cagnotte
         /// vaut 0), panneau fermé, hors verrou de transition.
         public bool CanCashOut =>
-            !IsPanelOpen && !TransitionLocked &&
-            State == GameState.Choosing && Floor >= 2 && Pot > 0;
+            !IsPanelOpen && !TransitionLocked && CashOutOffered;
+
+        /// v6 (QA n°33) : faut-il PROPOSER « Encaisser » à cet étage ? Seulement pendant le
+        /// choix, à partir de l'étage 2, et s'il y a quelque chose à encaisser (après un trésor
+        /// en diamants à l'étage 1, on est à l'étage 2 avec une cagnotte vide : pas de bouton).
+        /// L'interface lit cette règle ; elle ne la recalcule pas elle-même.
+        public bool CashOutOffered => State == GameState.Choosing && Floor >= 2 && Pot > 0;
 
         // ---------- v5 : diamants, reprise, renaissance ----------
 
@@ -268,6 +273,7 @@ namespace TourDeLaChance
             Wallet.Add(Pot);
             Pot = 0;
             SetState(GameState.CashedOut);
+            SaveRecord(); // AVANT RunEnded : le classement lit le record à ce moment-là
             RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = LastGain, Lost = false, UsedRevive = ReviveUsed });
         }
 
@@ -381,7 +387,8 @@ namespace TourDeLaChance
             recordAnnounced = false;
         }
 
-        /// Le record est mis à jour à chaque étage préparé, s'il est battu (spec v3 §17).
+        /// Le record est vérifié à chaque étage préparé, s'il est battu (spec v3 §17) : la
+        /// bannière « Nouveau record ! » et le badge s'affichent pendant la partie.
         void UpdateRecord()
         {
             NewRecordThisFloor = false;
@@ -391,6 +398,15 @@ namespace TourDeLaChance
                 NewRecordThisFloor = true;
                 recordAnnounced = true; // une seule fois par partie
             }
+        }
+
+        /// v6 (QA n°46) : le record n'est SAUVEGARDÉ qu'à la fin de la partie (perdue ou
+        /// encaissée), juste avant que le classement ajoute la ligne de cette partie. Avant, il
+        /// était écrit dès l'arrivée à l'étage : une partie pas terminée (jeu fermé en cours de
+        /// route) donnait « Ton record : étage 8 » alors que la meilleure ligne était l'étage 7.
+        void SaveRecord()
+        {
+            if (Floor <= Record) return;
             PlayerPrefs.SetInt(RecordKey, Floor);
             PlayerPrefs.Save();
         }
@@ -409,6 +425,7 @@ namespace TourDeLaChance
             // La cagnotte qu'on aurait gagnée jusqu'ici : 10 × (1 + 2 + … + étage).
             Pot = coinsPerFloor * Floor * (Floor + 1) / 2;
             LastGain = coinsPerFloor * Floor;
+            LastDiamonds = 0; // comme après un trésor en pièces
             SetLock(true);
             SetState(GameState.Climbing);
             RunTransition(ClimbRoutine());
@@ -508,6 +525,7 @@ namespace TourDeLaChance
             Pot = 0;
             savedPot = 0;
             SetState(GameState.Lost);
+            SaveRecord(); // AVANT RunEnded : le classement lit le record à ce moment-là
             RunEnded?.Invoke(new RunResult { Floor = Floor, CashedOut = 0, Lost = true, UsedRevive = ReviveUsed });
         }
 

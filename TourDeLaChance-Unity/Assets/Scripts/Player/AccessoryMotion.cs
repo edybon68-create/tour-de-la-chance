@@ -142,6 +142,8 @@ namespace TourDeLaChance
             // …2. et il y va avec un lissage (ressort) : sur un saut, il traîne puis rattrape.
             if (!hasSmoothed || Time.deltaTime <= 0f) { smoothedRing = target; hasSmoothed = true; }
             else smoothedRing = Vector3.Lerp(smoothedRing, target, 1f - Mathf.Exp(-FollowSharpness * Time.deltaTime));
+            // v6 (QA n°32) : protection anti-NaN, comme pour les ressorts d'AccessoryRig.
+            if (float.IsNaN(smoothedRing.x) || float.IsNaN(smoothedRing.y) || float.IsNaN(smoothedRing.z)) smoothedRing = target;
             ring.position = smoothedRing;
             ring.localRotation = ringRest * Quaternion.Euler(0f, 30f * t, 0f);
 

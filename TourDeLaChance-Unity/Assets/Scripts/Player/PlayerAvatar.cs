@@ -77,9 +77,15 @@ namespace TourDeLaChance
 
         void Start()
         {
-            if (showcaseMode) ShowOnly(null); // couleur plâtre, aucun objet
+            // v6 (QA n°29) : Start() s'exécute à la PREMIÈRE activation de l'objet, parfois
+            // APRÈS qu'on lui a déjà demandé d'afficher un skin (studio d'ouverture : ShowOnly
+            // est appelé pendant que le mini-cheval est encore désactivé). On ne remet donc le
+            // plâtre que si personne n'a encore rien demandé, sinon on écraserait le skin gagné.
+            if (showcaseMode) { if (!showOnlyCalled) ShowOnly(null); } // plâtre, aucun objet
             else ShowEquipped();
         }
+
+        bool showOnlyCalled; // vrai dès que ShowOnly a été appelé une fois
 
         /// v5 §8.5 : la couleur « plâtre » du cheval vierge (#E6E1EE, mat 0,35).
         static ShopItem plaster;
@@ -91,6 +97,7 @@ namespace TourDeLaChance
         /// seulement cet accessoire. null : plâtre, rien du tout. Rien n'est sauvegardé.
         public void ShowOnly(ShopItem item)
         {
+            showOnlyCalled = true;
             Prepare();
             ApplySkin(item != null && item.Category == ShopCategory.Skin ? item : PlasterSkin);
             for (int s = 0; s < 4; s++)

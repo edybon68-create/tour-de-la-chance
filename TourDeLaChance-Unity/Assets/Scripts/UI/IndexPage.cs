@@ -112,20 +112,20 @@ namespace TourDeLaChance
             switch (lastTab)
             {
                 case Tab.Tous:
-                    foreach (var box in Shop.Boxes)
+                    foreach (var box in Shop.BoxesInShopOrder) // v6 (QA n°43) : l'ordre de la Boutique
                         Section(BoxTitle(box), box.items.Where(i => i != null).ToList(), null);
                     break;
                 case Tab.ParRarete:
                     if (Shop.Catalog == null) break;
                     foreach (var rarity in Shop.Catalog.Rarities.Reverse())
                     {
-                        var items = Shop.Boxes.SelectMany(b => b.items).Where(i => i != null && i.RarityId == rarity.id).ToList();
+                        var items = Shop.BoxesInShopOrder.SelectMany(b => b.items).Where(i => i != null && i.RarityId == rarity.id).ToList();
                         if (items.Count == 0) continue;
                         Section(rarity.displayName, items, rarity);
                     }
                     break;
                 case Tab.ParCategorie:
-                    var boxOrder = Shop.Boxes.ToList();
+                    var boxOrder = Shop.BoxesInShopOrder.ToList();
                     IEnumerable<ShopItem> Sorted(Func<ShopItem, bool> filter) => Shop.Boxes.SelectMany(b => b.items)
                         .Where(i => i != null && filter(i))
                         .OrderByDescending(Shop.RarityRank)
@@ -152,7 +152,9 @@ namespace TourDeLaChance
             var head = new VisualElement { pickingMode = PickingMode.Ignore };
             head.AddToClassList("idx-section-head");
             var t = ShopUi.NewLabel(title, "idx-section-title");
-            if (rarity != null) ShopUi.ColorText(t, rarity);
+            // v6 (QA n°40) : sur le fond blanc, un titre sans rareté s'écrit en encre foncée ; un
+            // titre de rareté garde sa couleur, avec un contour noir pour rester lisible.
+            if (rarity != null) { ShopUi.ColorText(t, rarity); t.AddToClassList("idx-section-title--rarete"); }
             head.Add(t);
             int found = items.Count(i => Shop.CountOf(i) >= 1);
             head.Add(ShopUi.NewLabel($"{found} / {items.Count}", "idx-section-count"));

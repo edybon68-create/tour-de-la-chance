@@ -154,8 +154,16 @@ namespace TourDeLaChance
             var label = ShopUi.NewLabel(text, "up-effect");
             label.AddToClassList("up-effect--strong");
             card.Add(label);
-            card.Add(ShopUi.NewLabel(Upgrades.GainText(max ? level : level + 1), "up-effect"));
+            // v6 (QA n°36) : cette ligne décrit le niveau SUIVANT : on le dit (« Au prochain
+            // niveau : … »). Au niveau max, elle décrit le niveau actuel.
+            string effect = Upgrades.GainText(max ? level : level + 1);
+            if (!string.IsNullOrEmpty(effect))
+                card.Add(ShopUi.NewLabel(max ? effect : $"Au prochain niveau : {LowerFirst(effect)}", "up-effect"));
         }
+
+        /// « Trésors +60 % » → « trésors +60 % » (pour l'écrire au milieu d'une phrase).
+        static string LowerFirst(string text) =>
+            string.IsNullOrEmpty(text) ? text : char.ToLowerInvariant(text[0]) + text.Substring(1);
 
         static void AddChestsEffect(VisualElement card, int level, bool max)
         {
@@ -170,7 +178,7 @@ namespace TourDeLaChance
                 if (a == 0 && b == 0) continue; // rareté pas encore possible : on ne la montre pas
                 var rarity = Upgrades.Rarity(i);
                 table.Add(Row(rarity.icon, $"{rarity.shortName} ×{ShopUi.Number(rarity.multiplier)}",
-                              $"{a} %", max ? "" : $"{b} %", header: false));
+                              $"{a}\u00A0%", max ? "" : $"{b}\u00A0%", header: false));
             }
             card.Add(table);
             string avg = $"Gain moyen ×{ShopUi.Number(Round2(Upgrades.AverageChestMultiplier(level)))}";
@@ -189,12 +197,12 @@ namespace TourDeLaChance
             {
                 int a = i < now.Length ? now[i] : 0, b = i < next.Length ? next[i] : 0;
                 if (a == 0 && b == 0) continue;
-                string text = max ? $"{baseCount + i} coffres : {a} % des étages"
-                                  : $"{baseCount + i} coffres : {a} % → {b} % des étages";
+                string text = max ? $"{baseCount + i} coffres : {a}\u00A0% des étages"
+                                  : $"{baseCount + i} coffres : {a}\u00A0% → {b}\u00A0% des étages";
                 card.Add(ShopUi.NewLabel(text, "up-effect"));
             }
-            string risk = $"Risque moyen : {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level))} %";
-            if (!max) risk += $" → {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level + 1))} %";
+            string risk = $"Risque moyen : {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level))}\u00A0%";
+            if (!max) risk += $" → {Mathf.RoundToInt(Upgrades.AverageRiskPercent(level + 1))}\u00A0%";
             var label = ShopUi.NewLabel(risk, "up-effect");
             label.AddToClassList("up-effect--strong");
             card.Add(label);

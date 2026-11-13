@@ -69,6 +69,11 @@ namespace TourDeLaChance
         public static IReadOnlyList<LootBox> Boxes =>
             Catalog != null ? Catalog.Boxes : (IReadOnlyList<LootBox>)Array.Empty<LootBox>();
 
+        /// v6 (QA n°43) : les boîtes dans l'ORDRE DE LA BOUTIQUE (classiques, puis Pirates, puis
+        /// Animaux ; dans une famille, l'ordre du catalogue). L'Index suit cet ordre.
+        public static IReadOnlyList<LootBox> BoxesInShopOrder =>
+            Boxes.Select((b, i) => (b, i)).OrderBy(p => (int)p.b.family).ThenBy(p => p.i).Select(p => p.b).ToList();
+
         public static LootBox FindBox(string id) => Boxes.FirstOrDefault(b => b.id == id);
 
         /// Retrouve un objet par son identifiant (null s'il n'existe pas ou plus).

@@ -51,6 +51,9 @@ namespace TourDeLaChance
         /// Clic sur « Ouvrir » : PanelsController transmet à Shop.TryOpenBox.
         public event Action<LootBox> OpenRequested;
 
+        /// « Voir dans l'inventaire » (fiche agrandie d'un objet de « Contenu et taux »).
+        public event Action<ShopItem> ShowInInventoryRequested;
+
         public Tab CurrentTab => lastTab;
         public LootBox ContentBox => contentBox;
         public ItemDetailView Detail => detail;
@@ -93,7 +96,9 @@ namespace TourDeLaChance
 
             detail = new ItemDetailView(page, horse);
             detail.ShowBoxRequested += box => Open(box);
-            detail.ShowInInventoryRequested += _ => { }; // depuis la Boutique : rien de plus
+            // v6 (QA n°34) : « Voir dans l'inventaire » depuis la fiche de « Contenu et taux » :
+            // on transmet à PanelsController, qui ouvre l'Inventaire sur l'objet (comme l'Index).
+            detail.ShowInInventoryRequested += item => ShowInInventoryRequested?.Invoke(item);
         }
 
         public void Dispose() { }
@@ -181,7 +186,7 @@ namespace TourDeLaChance
         {
             var r = Upgrades.Catalog != null ? Upgrades.Catalog.ChestRarities : null;
             string range = r != null && r.Count > 0
-                ? $" ({ShopUi.Number(r.Min(x => x.diamondChancePermille) / 10f)} % à {ShopUi.Number(r.Max(x => x.diamondChancePermille) / 10f)} %)" : "";
+                ? $" ({ShopUi.Number(r.Min(x => x.diamondChancePermille) / 10f)}\u00A0% à {ShopUi.Number(r.Max(x => x.diamondChancePermille) / 10f)}\u00A0%)" : "";
             return "Parfois, un trésor contient des diamants à la place des pièces : plus les coffres sont précieux, plus c'est fréquent" + range + ".";
         }
 
@@ -368,12 +373,19 @@ namespace TourDeLaChance
             if (Shop.IsComplete(box)) card.Add(ShopUi.NewLabel("Collection complète !", "complete-banner btq-complete"));
             if (locked)
             {
+                // v6 (QA n°37) : avant, le cadenas était au CENTRE de la carte et cachait
+                // « Collection : 0 / 16 ». Maintenant il est posé sur l'image de la boîte, et la
+                // phrase « Débloquée après… » s'écrit sous la barre de collection.
+                // Le voile sombre est placé EN PREMIER (index 0) : il assombrit le fond de la carte
+                // mais reste sous les textes, qui restent lisibles, et sous « Contenu et taux »,
+                // qui reste cliquable. (BringToFront changerait l'ordre de la mise en page.)
                 var veil = new VisualElement { pickingMode = PickingMode.Ignore };
                 veil.AddToClassList("btq-lock");
-                veil.Add(Lock());
-                veil.Add(ShopUi.NewLabel("Débloquée après ta première renaissance", "btq-lock__texte"));
-                card.Add(veil);
-                buttons.BringToFront(); // « Contenu et taux » reste cliquable au-dessus du voile
+                card.Insert(0, veil);
+                var padlock = Lock();
+                padlock.AddToClassList("btq-lock__cadenas");
+                illu.Add(padlock);
+                desc.Add(ShopUi.NewLabel("Débloquée après ta première renaissance", "btq-lock__texte"));
             }
             return card;
         }
@@ -494,7 +506,7 @@ namespace TourDeLaChance
         /// SANS plafond (plus de « 50 % maximum »).
         static string OutfitBonusLine(LootBox box)
         {
-            var parts = Shop.RaritiesIn(box).Select(r => $"{r.displayName} +{r.coinBonusPercent} %");
+            var parts = Shop.RaritiesIn(box).Select(r => $"{r.displayName} +{r.coinBonusPercent}\u00A0%");
             return "Chaque objet équipé donne un bonus de pièces sur les trésors : " + string.Join(", ", parts) + ".";
         }
 

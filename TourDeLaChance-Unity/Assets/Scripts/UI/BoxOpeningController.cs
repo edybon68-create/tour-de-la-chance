@@ -45,6 +45,8 @@ namespace TourDeLaChance
         /// Les tailles de la spec sont écrites pour 1280 × 720 ; notre interface est réglée
         /// pour 1920 × 1080 : on multiplie donc les pixels de la spec par 1,5.
         const float Px = 1.5f;
+        const float WordAboveReward = 165f; // v6 : écart (px) entre le centre de l'objet 3D et le bas du mot
+        const float WordTopMargin = 18f;    // v6 : le mot reste au moins à 18 px du haut de l'écran
 
         // Les moments de l'animation commune (spec §7.6), en secondes depuis le clic.
         const float ArriveEnd = 0.3f;     // la boîte est arrivée
@@ -589,7 +591,12 @@ namespace TourDeLaChance
             if (float.IsNaN(local.x)) return;
             stage.style.left = local.x;
             stage.style.top = local.y;
-            card.style.top = 120f; // le mot « Rare ! » sous l'objet (la carte 2D est cachée)
+            // v6 (QA n°35) : le mot « Rare ! » passe AU-DESSUS de l'objet (la carte 2D est
+            // cachée). En dessous, il tombait dans le faisceau, sur le couvercle de la boîte.
+            float cardHeight = card.resolvedStyle.height;
+            if (float.IsNaN(cardHeight) || cardHeight <= 0f) cardHeight = look.wordSize * Px * 1.6f;
+            // …sans jamais sortir par le haut de l'écran (le mot du Secret est très grand).
+            card.style.top = Mathf.Max(-WordAboveReward - cardHeight, WordTopMargin - local.y);
         }
 
         /// v5 §6.6 : la touche thématique, pendant 1,2 s après l'impact de la carte du Secret.
@@ -722,7 +729,7 @@ namespace TourDeLaChance
             rarityLabel.style.color = current.Rarity != null ? current.Rarity.textColor : Color.white;
             // v4 §9.4 : sous la rareté, le bonus de tenue que donne l'objet une fois équipé.
             int bonus = Shop.BonusPercent(item);
-            if (bonus > 0) rarityLabel.text += $"\nÉquipé, il donne +{bonus} % de pièces";
+            if (bonus > 0) rarityLabel.text += $"\nÉquipé, il donne +{bonus}\u00A0% de pièces";
             boxLine.text = $"{current.Box.displayName} · n°{Shop.NumberOf(item):00}";
             badge.RemoveFromClassList("ov-badge--new");
             badge.RemoveFromClassList("ov-badge--dup");

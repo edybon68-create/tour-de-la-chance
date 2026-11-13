@@ -183,7 +183,7 @@ namespace TourDeLaChance
             slotLabel.text = item.Category == ShopCategory.Accessoire ? SlotPhrase(item.Slot) : "Skin : la couleur du cheval";
             chanceLabel.text = $"Chance à chaque ouverture : {ShopUi.Percent(Shop.ItemChance(item))}";
             int bonus = Shop.BonusPercent(item);
-            bonusLabel.text = $"Équipé, il donne +{bonus} % de pièces sur les trésors";
+            bonusLabel.text = $"Équipé, il donne +{bonus}\u00A0% de pièces sur les trésors";
             countLabel.text = owned ? $"Tu en as : {count}" : "Pas encore obtenu";
             flavorLabel.text = mystery ? "???" : (string.IsNullOrEmpty(item.FlavorText) ? "" : $"« {item.FlavorText} »");
             flavorLabel.style.display = flavorLabel.text.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;

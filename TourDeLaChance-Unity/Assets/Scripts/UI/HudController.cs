@@ -110,6 +110,10 @@ namespace TourDeLaChance
             // Écran titre : le HUD entier est caché (l'écran titre est affiché par-dessus).
             bool title = game.State == GameState.Title;
             hudRoot.style.display = title ? DisplayStyle.None : DisplayStyle.Flex;
+            // v6 (QA n°35) : pendant l'ouverture d'une boîte, le studio filme tout l'écran : le HUD
+            // (badge d'étage, compteurs) est caché. « visibility » plutôt que « display » : la mise
+            // en page reste en place, les compteurs reprennent exactement là où ils étaient.
+            hudRoot.style.visibility = game.BoxOpeningActive ? Visibility.Hidden : Visibility.Visible;
             GameState state = game.State;
             bool stateChanged = state != lastState;
             if (title)
@@ -168,8 +172,9 @@ namespace TourDeLaChance
 
         void DrawCounters()
         {
-            potLabel.text = $"Cagnotte : {pot.Displayed}";
-            walletLabel.text = $"Porte-monnaie : {wallet.Displayed}";
+            // v6 (QA n°47) : séparateur de milliers (« 11 992 » au lieu de « 11992 »).
+            potLabel.text = $"Cagnotte : {ShopUi.Thousands(pot.Displayed)}";
+            walletLabel.text = $"Porte-monnaie : {ShopUi.Thousands(wallet.Displayed)}";
         }
 
         /// Les boutons : chacun apparaît avec son animation quand il devient utile (§3.10).
@@ -179,9 +184,10 @@ namespace TourDeLaChance
             bool locked = game.TransitionLocked;
             bool over = state == GameState.Lost || state == GameState.CashedOut;
 
-            // « Encaisser X » : pendant le choix, à partir de l'étage 2, panneau fermé.
-            bool showCashOut = !shop && state == GameState.Choosing && game.Floor >= 2;
-            cashOutText.text = $"Encaisser {game.Pot}";
+            // « Encaisser X » : quand le jeu le propose (choix, étage 2 ou plus, cagnotte non
+            // vide : règle dans GameManager.CashOutOffered), panneau fermé.
+            bool showCashOut = !shop && game.CashOutOffered;
+            cashOutText.text = $"Encaisser {ShopUi.Thousands(game.Pot)}";
             if (showCashOut && !shown.Contains(cashOutButton))
             {
                 cashOutReady = false;
@@ -220,8 +226,8 @@ namespace TourDeLaChance
 
             messageLabel.text = state switch
             {
-                GameState.Choosing => game.Floor >= 2
-                    ? $"Choisis un coffre pour monter… ou encaisse tes {game.Pot} pièces !"
+                GameState.Choosing => game.CashOutOffered
+                    ? $"Choisis un coffre pour monter… ou encaisse tes {ShopUi.Thousands(game.Pot)} pièces !"
                     : "Choisis un coffre ! Un seul est piégé…",
                 GameState.Revealing => "…",
                 GameState.Climbing => game.LastDiamonds > 0

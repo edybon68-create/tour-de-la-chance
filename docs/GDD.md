@@ -17,7 +17,7 @@ pièces à temps… ou risque tout pour aller plus haut.
 | Moteur | Unity 6.3 LTS, rendu URP |
 | Plateforme | Mac / PC (desktop) |
 | Joueurs | 1 joueur, hors ligne ; classement local (v4), prévu en ligne plus tard (`docs/specs/v4.md` §12) |
-| Monnaie | **Deux monnaies virtuelles gagnées en jouant** (v5) : les **pièces** et les **diamants** (rares, trouvés dans les trésors). **Aucun paiement en argent réel actif ni intégré** (`docs/specs/v5.md` §2, §15.5, §16) |
+| Monnaie | **Deux monnaies virtuelles gagnées en jouant** (v5) : les **pièces** et les **diamants** (rares, trouvés dans les trésors ; v6 : aussi aux paliers de la route et aux collections complètes). v6 : les diamants s'**échangent contre des pièces** (1 ◆ = 200), jamais l'inverse. **Aucun paiement en argent réel actif ni intégré** (`docs/specs/v5.md` §2, §15.5, §16 ; `v6.md` §2) |
 
 ## 3. La boucle de jeu
 ```
@@ -54,6 +54,13 @@ diamant, on lui propose **une fois par partie** une **reprise** : 1 diamant pour
 cagnotte et rejouer l'étage (nouveau tirage), sans compte à rebours. La **renaissance** (une
 seule en v5) remet pièces et améliorations à zéro contre un ×2 permanent.
 
+**v6** (`docs/specs/v6.md`) : après un piège, plus de pop-up : l'écran du bas montre **« Rejouer »**
+et **« Continuer — N ◆ »** ; la reprise coûte **1, 2, 4, 8, 16 ◆** dans une même partie (**5 au
+plus**), et n'apparaît que si le joueur a assez de diamants. « Rejouer » à côté de Continuer
+demande « Tu es sûr ? ». Un clic sur l'étage (badge ou barre compacte) ouvre la **route des
+trophées** : la tour étage par étage, le record, la position, ce qui change en montant, et des
+**paliers** (étages 5, 10, 15, 20, 25, 30…) qui donnent quelques diamants la première fois.
+
 **Le décor change avec l'altitude** (pur affichage) — **v3 : on commence de jour** : étages
 1-3 en plein jour (ciel bleu clair), 4-6 dans les nuages au coucher du soleil, 7-9 au-dessus
 des nuages au crépuscule, 10 et plus dans les étoiles. Détails : `docs/specs/v3.md` §9
@@ -86,8 +93,16 @@ Plus on monte, plus les épreuves risquées apparaissent souvent.
   pièces** : 1 % (bois), 1,5 % (bronze), 2 % (argent), 3 % (or), 5 % (diamant), tirée à la
   préparation de l'étage. 1 diamant (étages 1-5), 2 (6-9), 3 (10 et plus), ×2 après la
   renaissance. Ils vont directement dans le compteur de diamants, **jamais dans la cagnotte**,
-  et ne se perdent jamais. Usages : reprise (1), Boîtes Pirates (5). Repères : ~2,6 diamants
-  par heure au départ, ~15 au maximum, ~30 avec la renaissance.
+  et ne se perdent jamais. Usages : reprise (v6 : 1, 2, 4, 8, 16 ◆ dans une partie, 5 au plus),
+  Boîtes Pirates (5), **échange contre des pièces** (v6 : 1 ◆ = 200 pièces, sans plafond ;
+  jouer rapporte toujours 5 à 20 fois plus, `v6.md` §5.5). Repères : ~2,6 diamants par heure au
+  départ, ~15 au maximum, ~30 avec la renaissance.
+- **Bonus de diamants (v6)** : les objets Pirates équipés Légendaires (+15 %) et Secrets (+30 %)
+  augmentent le **nombre** de diamants d'un trésor en diamants (jamais leur chance), plafond
+  **+50 %**, multiplié avec le ×2 de la renaissance ; les fractions sont gardées en « éclats ».
+- **Récompenses uniques (v6)** : paliers de la route des trophées (1, 2, 3, 5, 5, 10 ◆ aux étages
+  5 à 30, puis 10 ◆ tous les 10 étages) ; collection complète d'une boîte (5 ◆ boîtes n°1, 8 ◆
+  Animaux, 10 ◆ Pirates).
 - **Rareté des coffres** (même rareté pour tous les coffres d'un étage, tirée et affichée avant
   le choix) : Bois ×1, Bronze ×1,5, Argent ×2, Or ×3, Diamant ×5.
 - **Cagnotte** : la somme des gains de la partie en cours, perdue si on échoue.
@@ -95,8 +110,9 @@ Plus on monte, plus les épreuves risquées apparaissent souvent.
 - **Paliers de sécurité** : tous les 5 étages, une partie de la cagnotte est mise à l'abri
   (toujours prévu, pas encore fait).
 - Repères : au départ ~15 pièces par partie (~41 par minute) ; tout au niveau 5 ~143 par
-  partie (~293 par minute) ; tout au niveau 10 ~565 par partie (~924 par minute). Niveaux 1 à 5 :
-  ~3 h (26 300 pièces) ; tout au niveau 10 : ~10 h 40 sans boîte (286 800 pièces).
+  partie (~293 par minute) ; tout au niveau 10 ~565 par partie (~924 par minute). **v6** (prix
+  baissés, §6 ter) : niveaux 1 à 5 ~2 h 15 (19 710 pièces) ; tout au niveau 10 ~7 h 15 sans
+  renaissance (188 910 pièces), **~6 h 30 avec la renaissance** (v5 : 3 h, 10 h 40 et 8 h 50).
 
 ## 6. Le shop : boîtes à surprises (cosmétiques uniquement)
 Aucun objet ne change les chances de gagner. **v4** : équipés, ils donnent un petit bonus de
@@ -140,7 +156,15 @@ les taux visibles ; « Contenu et taux » montre une boîte en détail. L'**Inde
 tous les objets en couleurs (sauf les Secrets non obtenus, « ? »), rangés Tous / Par rareté / Par
 catégorie, et une **fiche agrandie** avec l'objet en 3D sur un **cheval vierge**. L'ouverture des
 boîtes se joue **en 3D** (boîte qui tombe, tremble, s'ouvre, objet qui sort), toujours identique
-jusqu'à la révélation. Catalogue des 56 nouveaux objets : `docs/specs/v5-catalogue.md`.
+jusqu'à la révélation (**R = 1,75 s**, v6). Catalogue des 56 nouveaux objets : `docs/specs/v5-catalogue.md`.
+
+**v6** (`docs/specs/v6.md` §5 à §7) : l'**Index** montre le **nom** des objets non obtenus mais
+**pas leur visuel** (on le voit dans « Contenu et taux » de la Boutique, sauf les Secrets) ; la
+fiche agrandie se tourne au glisser et a ses deux flèches ; une **collection complète** donne une
+fois quelques diamants. La Boutique a 4 onglets sur toute la largeur (Classiques, Pirates,
+Animaux, **Échanges**) et range les raretés **de Commun à Secret partout**. L'**Inventaire** gagne
+« **Équiper le meilleur** » (plus gros bonus de pièces, puis de diamants) et « **Mes skins** » (5
+tenues sauvegardées avec un nom).
 
 | Rareté | Taux de drop | Objets par boîte | Revente d'un doublon (v3) |
 |---|---|---|---|
@@ -185,11 +209,14 @@ Achetées avec le porte-monnaie, **10 niveaux** chacune (5 en v3, niveaux 1 à 5
 prix croissants, effet à partir du prochain étage, affiché en chiffres dans la pop-up et sur
 l'étiquette d'étage du HUD. Détails : `docs/specs/v3.md` §5 et `docs/specs/v4.md` §10.
 
-| Amélioration | Effet niveau 1 → 5 → 10 | Prix des niveaux 1 à 5 | Prix des niveaux 6 à 10 |
+**v6** (`docs/specs/v6.md` §10) : prix baissés de 25 % (niveaux 1-5) et 35 % (niveaux 6-10),
+effets inchangés.
+
+| Amélioration | Effet niveau 1 → 5 → 10 | Prix des niveaux 1 à 5 (v6) | Prix des niveaux 6 à 10 (v6) |
 |---|---|---|---|
-| **Bourse magique** | Trésors ×1,2 → ×2,0 → ×3,0 (+20 % par niveau) | 150 · 400 · 900 · 1 800 · 3 500 | 6 000 · 9 000 · 13 000 · 18 000 · 25 000 |
-| **Coffres précieux** | Gain moyen ×1,13 → ×2,01 → ×2,79 (plus de bois au niveau 10) | 200 · 500 · 1 100 · 2 200 · 4 000 | 7 000 · 10 500 · 15 000 · 21 000 · 29 000 |
-| **Coffre en plus** | 4, 5 puis 6 coffres, toujours 1 seul piégé ; risque moyen 31 % → 22,5 % → 16,7 % | 300 · 750 · 1 500 · 3 000 · 6 000 | 9 000 · 13 500 · 19 500 · 27 000 · 38 000 |
+| **Bourse magique** | Trésors ×1,2 → ×2,0 → ×3,0 (+20 % par niveau) | 120 · 300 · 680 · 1 350 · 2 600 | 4 000 · 6 000 · 8 500 · 11 500 · 16 000 |
+| **Coffres précieux** | Gain moyen ×1,13 → ×2,01 → ×2,79 (plus de bois au niveau 10) | 150 · 380 · 820 · 1 650 · 3 000 | 4 500 · 6 800 · 9 800 · 13 500 · 19 000 |
+| **Coffre en plus** | 4, 5 puis 6 coffres, toujours 1 seul piégé ; risque moyen 31 % → 22,5 % → 16,7 % | 220 · 560 · 1 130 · 2 250 · 4 500 | 5 800 · 8 800 · 12 500 · 17 500 · 25 000 |
 
 Garde-fous : toujours exactement 1 piège par étage, risque jamais sous **1 sur 6 (16,7 %)**
 (v4 ; 20 % en v3, à valider par l'auteur), un piège fait toujours perdre toute la cagnotte,
@@ -201,7 +228,8 @@ pièces**, remet à zéro le porte-monnaie et les 3 améliorations, garde les ob
 diamants, les records et le classement, et donne **pour toujours ×2 pièces** sur les trésors,
 **×2 diamants** et l'accès aux **Boîtes Animaux**. Seulement sans cagnotte en jeu (Perdu,
 Encaissé ou étage 1), avec une pop-up claire « Tu perds / Tu gardes / Tu gagnes », une
-confirmation et une animation de 4,2 s. Rentable après ~3 h de jeu si on la fait vers le niveau 5.
+confirmation et une animation de 4,2 s. Rentable après ~2 h 45 de jeu (v6, améliorations moins
+chères ; ~3 h en v5) si on la fait vers le niveau 5. v6 : onglet Renaissance redessiné (art bible).
 
 ## 6 quater. Le classement (v4)
 Trois classements : **étage le plus haut**, **total des pièces encaissées** (pas le
@@ -270,8 +298,28 @@ interface.
    modernisés, carte d'étage, diamants et reprise, Boîtes Pirates (diamants) et Animaux (après
    la renaissance), renaissance, Boutique à onglets (packs de diamants désactivés), Index refait
    avec fiche 3D, ouverture des boîtes en 3D.
+10. **Version 6** (`docs/specs/v6.md`) : correctifs du QA, interface retouchée (bulles, colonnes,
+    icônes, Renaissance), route des trophées, reprise à coût croissant avec bouton Continuer,
+    échange diamants → pièces, améliorations moins chères, bonus de diamants Pirates, récompenses
+    de collection, Index aux visuels cachés, « Équiper le meilleur » et « Mes skins », réglages
+    graphiques Faible / Moyen / Élevé.
 
-## 9. Règle d'or (mise à jour v5, **à valider par l'auteur** ; détails : `docs/specs/v5.md` §2)
+## 9. Règle d'or (mise à jour v5 puis v6, **à valider par l'auteur** ; détails : `docs/specs/v5.md` §2, `v6.md` §2)
+
+**Changements v6** (ils priment sur les lignes plus bas) :
+- Les diamants restent **gagnés uniquement en jouant** (trésors, paliers de la route, collections
+  complètes). Ils peuvent s'**échanger contre des pièces** dans la Boutique, à taux fixe (1 ◆ =
+  200 pièces), **sans plafond** ; **on n'achète jamais de diamants**, ni avec des pièces ni avec
+  de l'argent.
+- **Reprise** : jusqu'à **5 par partie**, au coût **1, 2, 4, 8, 16 ◆**, toujours sans compte à
+  rebours, jamais montrée si le joueur n'a pas assez de diamants ; « Rejouer » demande une
+  confirmation quand une reprise est possible.
+- Les objets **Pirates Légendaires et Secrets** équipés donnent un **bonus sur le nombre de
+  diamants** d'un trésor en diamants (+15 % / +30 %, plafond **+50 %**, affiché) ; il ne change
+  **jamais** la chance qu'un trésor soit en diamants, ni aucune autre chance.
+- Les récompenses (paliers, collections) sont données **automatiquement** : ni pastille, ni
+  récompense quotidienne, ni limite par jour.
+
 Le jeu reste un jeu : **aucun paiement en argent réel n'est actif ni intégré** (aucun code,
 aucun paquet, aucun lien de paiement). Il y a **deux monnaies virtuelles**, gagnées uniquement en
 jouant : les **pièces** (trésors, revente des doublons) et les **diamants** (rares, trouvés à la

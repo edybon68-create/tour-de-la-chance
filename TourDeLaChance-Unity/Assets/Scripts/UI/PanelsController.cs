@@ -172,6 +172,7 @@ namespace TourDeLaChance
             foreach (var sv in doc.Query<ScrollView>().ToList()) SetupScroll(sv);
 
             boutique.OpenRequested += OnOpenClicked;
+            boutique.ShowInInventoryRequested += ShowInInventory;
             index.ShowInInventoryRequested += ShowInInventory;
             index.ShowBoxRequested += ShowBoxContent;
             inventory.PreviewRequested += Preview;
@@ -225,6 +226,7 @@ namespace TourDeLaChance
         void OnDisable()
         {
             boutique.OpenRequested -= OnOpenClicked;
+            boutique.ShowInInventoryRequested -= ShowInInventory;
             index.ShowInInventoryRequested -= ShowInInventory;
             index.ShowBoxRequested -= ShowBoxContent;
             inventory.PreviewRequested -= Preview;
@@ -386,7 +388,7 @@ namespace TourDeLaChance
             TickToasts(Time.deltaTime);
 
             wallet.Tick(Time.deltaTime);
-            walletLabel.text = wallet.Displayed.ToString();
+            walletLabel.text = ShopUi.Thousands(wallet.Displayed); // v6 (QA n°47) : « 11 992 »
             AnimatePopup();
         }
 
@@ -530,7 +532,8 @@ namespace TourDeLaChance
                 case PanelId.Ameliorations: size = new Vector2(1000f, 840f); key = "ameliorations"; text = "Améliorations"; break;
                 case PanelId.Classement: size = new Vector2(920f, 840f); key = "classement"; text = "Classement"; break;
                 case PanelId.Renaissance: size = new Vector2(1080f, 800f); key = "renaissance"; text = "Renaissance"; break;
-                default: size = new Vector2(560f, 440f); key = "reglages"; text = "Réglages"; break;
+                // v6 (QA n°48) : moins haute (440 → 370) : deux lignes et la version, sans grand vide.
+                default: size = new Vector2(560f, 370f); key = "reglages"; text = "Réglages"; break;
             }
             frame.style.width = size.x;
             frame.style.height = size.y;

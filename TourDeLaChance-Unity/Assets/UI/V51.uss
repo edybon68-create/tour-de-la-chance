@@ -157,7 +157,7 @@
 .btq-card .progress-text { color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
 .btq-card .progress-bar { height: 14px; border-radius: 7px; border-width: 2px; border-color: #110D1F; background-color: rgba(17, 13, 31, 0.45); }
 .btq-card-buttons { justify-content: center; margin-top: 10px; }
-.btq-card .missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #8A1A1E; -unity-text-align: middle-center; margin: 4px 0 0 0; }
+.btq-card .missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; -unity-text-align: middle-center; margin: 4px 0 0 0; }
 .btq-complete {
     color: #3A2200;
     background-color: #FFD54A;
@@ -252,7 +252,7 @@
 .up-table { background-color: rgba(17, 13, 31, 0.28); }
 .up-dot { border-color: #110D1F; background-color: rgba(255, 255, 255, 0.4); }
 .up-dot--full { background-color: #FFD54A; border-color: #110D1F; }
-.up-missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #8A1A1E; }
+.up-missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
 .up-max { border-color: #110D1F; }
 
 /* =====================================================================
@@ -315,7 +315,15 @@
 
 /* Les voiles des confirmations et de la fiche agrandie couvrent tout le corps, y compris la
    marge haute laissée au titre qui déborde (padding du corps : 60 32 26 32). */
-.v5-confirm, .lb-confirm, .detail-overlay { left: -32px; right: -32px; top: -60px; bottom: -26px; }
+/* v6 (QA n°39) : la page commence SOUS la ligne du porte-monnaie : -60 px ne suffisait pas à
+   remonter jusqu'au haut de la fenêtre. On déborde largement : la fenêtre (overflow: hidden)
+   découpe le voile pile sur ses bords arrondis. */
+/* Les marges intérieures (padding) remettent la zone de centrage là où elle était : la fiche
+   et les boîtes de confirmation ne bougent pas, seul le voile s'agrandit. */
+.v5-confirm, .lb-confirm, .detail-overlay {
+    left: -200px; right: -200px; top: -400px; bottom: -200px;
+    padding: 340px 168px 174px 168px;
+}
 
 /* « Contenu et taux » : la colonne de gauche un peu plus large pour le tableau complet. */
 .btq-content-left { width: 440px; }
@@ -324,3 +332,42 @@
 
 /* La rangée des onglets de la Boutique : plus serrée, pour laisser la place aux deux soldes. */
 .btq-top .btn.v5-tab { min-width: 0; padding: 0 18px; margin-right: 8px; }
+
+/* ---------- v6 : corrections du QA ---------- */
+/* QA n°40 : « Il te manque X » en BLANC contouré de noir partout (le rouge se lisait mal sur
+   les cartes colorées), y compris dans « Contenu et taux ». */
+.missing { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+/* QA n°36 : sur la carte OR, les pastilles pleines (or) disparaissaient dans le fond or :
+   on les met en violet foncé, bien visibles. */
+.carte--or .up-dot { background-color: rgba(255, 255, 255, 0.55); }
+.carte--or .up-dot.up-dot--full { background-color: #5B3FC4; border-color: #110D1F; }
+/* QA n°37 : boîtes verrouillées. Le cadenas est posé sur l'image de la boîte (et non plus au
+   centre de la carte, où il cachait « Collection : 0 / 16 ») ; la phrase est sous la barre. */
+.btq-lock__cadenas { position: absolute; left: 50%; top: 50%; margin-left: -28px; margin-top: -26px; }
+.btq-card .btq-lock__texte { font-size: 18px; margin: 6px 0 0 0; white-space: normal; }
+/* QA n°38 : Inventaire. La zone d'action tient sur UNE ligne (Équiper, Vendre 1, Vendre tout)
+   et les boutons sont moins hauts : la grille gagne de la place, on voit des rangées entières.
+   Les cartes font 1/5 de la largeur : 5 colonnes, plus de grand vide à droite. */
+#page-inventaire .inv-buttons { margin-bottom: 4px; }
+#page-inventaire .btn.action-btn { height: 56px; font-size: 22px; padding: 0 14px; }
+#page-inventaire .btn.action-btn--equip { font-size: 26px; height: 56px; }
+#page-inventaire .btn.action-btn--sellall { flex-grow: 1; margin: 0; }
+#page-inventaire .inv-selected { margin-bottom: 4px; }
+#page-inventaire .inv-slot { height: 96px; }
+#inv-list .item-frame { width: 19%; margin: 0 1% 8px 0; }
+#inv-list .item-extra--remplace { white-space: normal; }
+/* QA n°40 : textes clairs sur fond blanc. Titres de l'Index, nom de la boîte et en-tête du
+   tableau de « Contenu et taux », lignes des Réglages : encre foncée, sans contour. */
+.popup-window .idx-section-title { color: #2A2440; -unity-text-outline-width: 0; }
+.popup-window .idx-section-title--rarete { -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.popup-window .btq-content-left .btq-card-name { color: #2A2440; -unity-text-outline-width: 0; margin-top: 6px; }
+.popup-window .rate-row--header .rate-name { -unity-text-outline-width: 0; color: #6E6A80; }
+.popup-window .settings-label { color: #2A2440; -unity-text-outline-width: 0; }
+/* QA n°41 : la puce de rareté gardait mal sa place quand le nom était long (« Peu commun ») :
+   la colonne de la puce et les colonnes de chiffres ne rétrécissent plus. */
+.rate-dot-cell { flex-shrink: 0; }
+.rate-name { flex-shrink: 1; min-width: 0; }
+.rate-chance, .rate-count { flex-shrink: 0; }
+/* (QA n°38, suite) des cartes plus compactes dans l'Inventaire : on voit plus de rangées. */
+#inv-list .item-visual { width: 80px; height: 80px; }
+#inv-list .item-card { min-height: 0; flex-grow: 1; } /* la carte remplit son cadre (contour de sélection net) */

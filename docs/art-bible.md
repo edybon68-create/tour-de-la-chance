@@ -60,6 +60,18 @@
 > vif, pilule de prix verte, badges de taux, messages importants, Boutique en une seule page.
 > Elle remplace les lignes « Cadre », « En-tête », « Icône d'en-tête » et « Titre » du §12.6.
 
+>
+> **Mise à jour « v6 » (chantiers visuels)** — nouvelle section **§15 « Interface v6 »** :
+> les **bulles des boutons** deviennent des **images rendues dans Blender** (boutons ronds des
+> colonnes, croix de fermeture, roue dentée, Rejouer / Continuer / Encaisser en 9-slice), une
+> **couleur de face par fonction** (elle remplace l'anneau du §12.17), le placement des colonnes
+> et de la barre du haut, les onglets de la Boutique, les nouvelles icônes Boutique et
+> Paramètres, la **refonte de la Renaissance**, la **Route des trophées**, les flèches et l'indice
+> « glisse pour tourner » de la fiche agrandie, et le choix **Graphismes** des Paramètres.
+> Elle remplace les §12.17.1, §12.17.2, §12.17.5 (aspect des boutons ronds) et le §12.18.2
+> (croix « inchangée » : sa forme reste, son rendu change). Nouvelles images :
+> `art/prompts/lot7.md`.
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -824,7 +836,9 @@ ciel ; `lot2.md` : icônes des boîtes, boîtes, ciels des paliers ; `lot3.md` :
 ciels du jour à la nuit, coffres de rareté, améliorations, icônes des panneaux, masque de héros
 v3 ; `lot4.md` : icône Classement, roue dentée, médailles du podium, icônes Musique et Effets ;
 `lot5.md` : icône Diamant, icône Rebirth, packs de diamants ; `lot6.md` : icônes des 56 objets
-des boîtes Pirates et Animaux et images des 4 boîtes, prompts autonomes sans image jointe).
+des boîtes Pirates et Animaux et images des 4 boîtes, prompts autonomes sans image jointe ;
+`lot7.md` : v6, icônes Boutique, Paramètres, Graphismes, rotation, Route des trophées,
+illustration et macaron de la Renaissance, plus le plan B des bulles, §15).
 Le **premier prompt de chaque
 conversation Gemini** commence par le **bloc de style commun** ci-dessous, recopié mot pour mot.
 On ne le modifie pas d'un lot à l'autre sans mettre à jour cette section.
@@ -2935,3 +2949,514 @@ objet en place qui tourne, textes ; **pas** d'étincelles, de confettis ni de se
   d'un tirage à l'autre (à part les trajectoires aléatoires du nœud et du couvercle).
 - Vérifier qu'avant R aucune couleur autre que le blanc neutre n'apparaît (faisceau, lueur, flash).
 - Vérifier que l'objet gagné est invisible (désactivé) avant R, même par la fente du couvercle.
+
+---
+
+## 15. Interface v6
+
+> **Pourquoi cette section ?** L'auteur a testé la v5.1 (`docs/specs/v6-a-faire.md`, points 1 à
+> 6, 8, 14, 18 et 24). Il trouve les bulles des boutons « dégueu »
+> (`docs/references/v6_ref_bulles_colonne.png`), la Renaissance « vraiment moche »
+> (`docs/captures/v5_1_renaissance.png`) et la barre du haut collée au bord
+> (`v6_ref_barre_haut.png`). Ici, toutes les **valeurs exactes** pour le programmeur.
+> Les tailles sont en **pixels de référence 1920 × 1080**, comme partout dans le §12.
+> Le style reste celui du §12.18 : contour d'encre **`#110D1F`** (la valeur du code), couleurs
+> franches, tout en relief, rien de copié d'un jeu existant (§12.1).
+
+### 15.1 Les bulles des boutons
+
+#### 15.1.1 Pourquoi elles font « sale » aujourd'hui (capture de l'auteur)
+
+1. La **face est violet sombre et plate** : on dirait un trou, pas un bonbon.
+2. Le **reflet** est un rectangle gris à 18 % aux bords nets, qui **dépasse sur l'anneau** en
+   haut : il fait tache au lieu de briller.
+3. L'**épaisseur** (bordure basse de 10 px d'une autre couleur) dessine un croissant qui ne
+   suit pas le cercle : on dirait un défaut d'impression.
+4. L'**ombre** est un disque dur, décalé, sans flou.
+5. UI Toolkit ne sait faire ni dégradé rond, ni flou, ni lumière : en USS pur, on ne peut pas
+   aller beaucoup plus loin que ce résultat.
+
+#### 15.1.2 La méthode retenue : des images rendues dans Blender
+
+**Décision : les bulles sont des images PNG à fond transparent, rendues par un script Blender
+(`blender/rendu_bulles.py`, à écrire par l'artiste 3D), sans icône dedans.** L'icône (ou la
+croix, ou le texte) est posée **par-dessus** par l'interface, comme aujourd'hui.
+
+Pourquoi Blender plutôt que Gemini ou le USS :
+- **Mesures au pixel près** : obligatoire pour le 9-slice (Rejouer, Continuer, Encaisser) et
+  pour que l'icône tombe pile au centre de la face.
+- **La même bulle dans toutes les couleurs** : on change un paramètre, pas un prompt. Gemini
+  dessinerait 8 bulles légèrement différentes (taille, reflet, angle).
+- **Fond déjà transparent** : pas de détourage. C'est justement le détourage qui a abîmé la
+  roue dentée (point 6).
+- **Même lumière que les icônes** rendues dans Blender au lot 6 (`blender/rendu_icones.py`) : la
+  bulle et l'icône semblent sortir de la même boîte de jouets.
+- Aucune limite de génération, aucun changement de compte (règle de l'auteur).
+
+**Plan B** (si le rendu Blender ne plaît pas à l'auteur) : les prompts Gemini du
+`art/prompts/lot7.md` §5. Dans ce cas, les variantes « appuyé » sont faites en USS (§15.1.7) et les
+bords du 9-slice sont mesurés sur l'image obtenue.
+
+#### 15.1.3 Anatomie commune (vue de face, en couches, de l'arrière vers l'avant)
+
+| Couche | Rendu | Pourquoi |
+|---|---|---|
+| 1. Ombre portée | la silhouette du contour, décalée vers le bas, **floutée**, `#110D1F` à 35 % | le bouton flotte au-dessus du ciel, même sur le bleu clair du palier 1 |
+| 2. Contour | `#110D1F` **opaque**, autour de la face **et** du socle réunis | le trait d'encre du style |
+| 3. Socle (épaisseur) | même forme que la face, **décalée vers le bas**, couleur « épaisseur » de la famille | c'est l'épaisseur du jeton : elle suit exactement la courbe, plus de croissant bancal |
+| 4. Face | **dégradé vertical** clair (haut) → face (55 %) → mi (bas), légèrement bombée (bord plus sombre de 8 %) | un bonbon, pas un trou |
+| 5. Biseau intérieur | anneau de **4 px** collé au bord de la face : moitié haute « clair » à 70 %, moitié basse « mi » à 60 % | l'arête qui accroche la lumière |
+| 6. Lueur centrale | disque flou blanc à **14 %** derrière l'emplacement de l'icône | détache l'icône de la face |
+| 7. Reflet | ovale **entièrement dans la face** (≥ 8 px du bord), blanc **60 % en haut → 0 % en bas**, bords doux | le vernis ; il ne touche jamais le contour |
+| 8. Éclat | petit point blanc à **90 %**, en haut à gauche du reflet | l'étincelle de la lampe |
+| 9. Lumière renvoyée | arc de **3 px** « clair » à 40 % le long du bas de la face | le bas ne fait pas « sale » |
+
+Lumière : celle du §9.1 (clé chaude `#FFF1D6` en haut à gauche, remplissage violet). Gestion des
+couleurs **Standard** (pas AgX ni Filmic), sinon les codes hex dérivent.
+
+#### 15.1.4 Couleurs par fonction (la face entière prend la couleur)
+
+La couleur n'est plus un anneau autour d'une face sombre : **toute la bulle** prend la couleur
+de la fonction. Les icônes ont maintenant leur propre contour noir (v5.1) : elles se lisent sur
+une face colorée. Deux couleurs changent par rapport au §12.17.2, pour que l'icône ne disparaisse
+pas dans sa bulle :
+- **Améliorations** passe de l'or au **vert** (la flèche est dorée : or sur or, on ne la voyait plus) ;
+- **Renaissance** passe de l'orange « flamme » à la **nuit étoilée** (l'icône est orange).
+
+| Bulle | Clair (haut) | Face | Mi (bas) | Épaisseur | Contour du texte posé dessus |
+|---|---|---|---|---|---|
+| Boutique (rose) | `#FF8FB8` | `#FF4F8B` | `#E0336F` | `#A3214F` | — |
+| Inventaire (bleu) | `#7DB5FF` | `#3B7DD8` | `#2F68BE` | `#1F4A8C` | — |
+| Index (turquoise) | `#5FE0CF` | `#1FB5A3` | `#17998A` | `#0F6B61` | — |
+| Améliorations (vert) | `#8BEA6B` | `#3DBE4F` | `#2EA040` | `#1E7030` | — |
+| Classement (violet) | `#B49CFF` | `#7B5BF0` | `#6545D6` | `#4530A8` | — |
+| Renaissance (nuit étoilée) | `#6A5AD8` | `#3A2C9A` | `#2A1F78` | `#17104A` | — (+ 6 étoiles, ci-dessous) |
+| Paramètres, flèches (ardoise) | `#8A84B8` | `#5A5488` | `#4A4472` | `#2E2A4E` | `#1E1A33` |
+| Fermer (rouge, inchangé) | `#FF8A8A` | `#F0484E` | `#D83A40` | `#9A2228` | `#5E1013` |
+| Route : palier atteint (or) | `#FFE66B` | `#FFC83A` | `#F0A820` | `#B87410` | `#6B4300` |
+| Encaisser (vert) | `#7BE38F` | `#2FB85A` | `#26A04D` | `#1A6E36` | `#0E3D21` |
+| Rejouer (violet) | `#A08CFF` | `#6C4FE0` | `#5A3FCC` | `#3F2A9E` | `#21155E` |
+| Continuer (aqua « diamant ») | `#8FEAFF` | `#29B6E8` | `#1E9BD0` | `#12689A` | `#0B4A6E` |
+| Désactivé (gris) | `#A8A4BC` | `#7E7A94` | `#6E6A84` | `#4E4A64` | `#45425A` |
+
+- **Nuit étoilée** : 6 petites étoiles à 4 branches `#FFF1D6` à 70 %, de 6 à 10 px, réparties
+  dans la couronne extérieure de la face (entre 8 et 20 px du bord), jamais au centre (l'icône
+  les cacherait).
+- **Continuer** est aqua parce qu'il se paie en diamants (`#4FD8F0`, lot 5) : la couleur dit le
+  prix avant même de lire. Il se distingue du vert Encaisser et du violet Rejouer posés à côté.
+- **Rouge** : réservé à la croix (règle du §12.2). L'or est réservé à la Route (palier atteint).
+- L'info-bulle (§12.17.4) prend la couleur « Face » de la bulle pour sa bordure haute.
+
+#### 15.1.5 Les fichiers et leurs mesures
+
+Rendus à **2 fois la taille d'affichage** (net sur les grands écrans), affichés à la taille
+indiquée. Dossier : `art/bulles/`, copiés dans `TourDeLaChance-Unity/Assets/Art/bulles/`.
+Import Unity : *Texture Type* Default, *Alpha Is Transparency* coché, *Wrap Mode* Clamp,
+*Generate Mip Maps* coché, *Filter* Bilinear.
+
+**A. Grande bulle ronde (colonnes)** : `bulle_rond_<fonction>.png` et `bulle_rond_<fonction>_appui.png`,
+avec `<fonction>` = `boutique`, `inventaire`, `index`, `ameliorations`, `classement`,
+`renaissance` (12 images). Image **320 × 320**, affichée **160 × 160**.
+
+| Mesure (affichage) | Repos | Appuyé |
+|---|---|---|
+| Face | disque Ø **112**, centre (80, **70**) | disque Ø 112, centre (80, **76**) |
+| Socle | disque Ø 112, centre (80, 80) : **10 px** d'épaisseur visible | même socle : **4 px** visibles |
+| Contour | **6 px** autour de face + socle : de x 18 à 142, de y 8 à 142 | de y 14 à 142 |
+| Ombre | décalée de **+6 px**, flou **8 px** | décalée de +3 px, flou 4 px |
+| Reflet | ovale 76 × 34, centre (80, 38) | même forme, **40 %** au lieu de 60 %, centre (80, 44) |
+| Éclat | Ø 10, centre (52, 34) | Ø 8, centre (52, 40) |
+| Face entière | couleurs du tableau | **assombries de 6 %** |
+| Place de l'icône | carré **92 × 92**, coin à (34, 24) | coin à (34, **30**) |
+
+**B. Petite bulle ronde** (croix, roue dentée, flèches de la fiche, nœuds de la Route) :
+`bulle_petit_<couleur>.png` et `_appui`, avec `<couleur>` = `rouge`, `ardoise`, `or`
+(6 images). Image **192 × 192**, affichée **96 × 96** (ou 120 × 120 pour les flèches, même image).
+
+| Mesure (affichage 96) | Repos | Appuyé |
+|---|---|---|
+| Face | Ø **62**, centre (48, **40**) | centre (48, **45**) |
+| Socle | Ø 62, centre (48, 48) : **8 px** visibles | **3 px** visibles |
+| Contour | **5 px** : de x 12 à 84, de y 4 à 84 | de y 9 à 84 |
+| Ombre | +5 px, flou 6 px, 30 % | +2 px, flou 3 px |
+| Reflet | ovale 42 × 18, centre (48, 23) | 40 %, centre (48, 28) |
+| Éclat | Ø 6, centre (33, 22) | centre (33, 27) |
+
+**C. Bulle rectangulaire en 9-slice** (Encaisser, Rejouer, Continuer, et tout gros bouton
+d'action qui voudra ce rendu) : `bulle_rect_vert.png`, `bulle_rect_violet.png`,
+`bulle_rect_aqua.png` (+ `_appui` pour chacune) et `bulle_rect_gris.png` (désactivé, sans
+variante) : 7 images. Image **400 × 240**, affichée **200 × 120**, étirée **en largeur seulement**.
+
+| Mesure (affichage) | Repos | Appuyé |
+|---|---|---|
+| Face | rectangle x 12 → 188, y 9 → 95, coins **24 px** | y 15 → 101 |
+| Socle | même rectangle, y 19 → 105 : **10 px** visibles | **4 px** visibles |
+| Contour | **5 px** : x 7 → 193, y 4 → 110 | y 10 → 110 |
+| Ombre | +6 px, flou 6 px, 35 % | +3 px, flou 3 px |
+| Reflet | bande x 22 → 178, y 13 → 44, coins 16 px, blanc 50 % → 6 % | 35 %, y 19 → 50 |
+| Éclat | gélule 16 × 7 entre x **22 et 38**, y 17 → 24 | y 23 → 30 |
+| Lumière renvoyée | trait de 3 px, y 91 → 94, x 30 → 170 | y 97 → 100 |
+
+**Règle du 9-slice** (à respecter au rendu, sinon l'étirement déforme) : tout ce qui n'est pas
+**identique d'une colonne à l'autre** (coins, bouts arrondis du reflet, éclat) doit rester dans
+les 40 px de gauche ou de droite (affichage). Entre x = 40 et x = 160, chaque colonne de pixels
+doit être la même. Bords de découpe, en pixels **de l'image** : gauche **80**, droite **80**,
+haut **80**, bas **100**.
+
+#### 15.1.6 La croix de fermeture : même forme, plus belle
+
+- **Bulle** : `bulle_petit_rouge.png` (rond rouge, comme aujourd'hui, mais en relief et brillant).
+- **Croix** : on garde les deux barres en USS (`.croix-barre`), en les **embellissant** :
+  barres **36 × 11 px**, coins 5,5 px, blanc `#FFFFFF`, contour **3 px `#7A1A1F`** ; sous chaque
+  barre, une copie « épaisseur » `#9A2228` décalée de **0 / +3 px** (deux éléments
+  `.croix-barre--ombre` placés **avant** les barres blanches). Résultat : une croix d'autocollant
+  en relief.
+- Centrée sur la face : centre (48, 40) de l'élément de 96 px ; appuyé : (48, 45).
+- Survol : la croix tourne de **90°** (inchangé) et la bulle grossit à 1,08.
+- Place : `.popup-close { top: -24px; right: -32px; width: 96px; height: 96px; }` (le centre de
+  la face reste là où était le centre du rond de 72 px).
+
+#### 15.1.7 Les états
+
+| État | Bulles rondes | Bulles rectangulaires |
+|---|---|---|
+| Repos | image de repos | image de repos |
+| Survol | `scale 1.08`, 0,18 s `ease-out-back` ; icône `scale 1.12` + dandinement (inchangé) | `scale 1.05`, 0,18 s `ease-out-back` |
+| Appui | **image `_appui`**, `scale 0.96`, **pas de `translate`** (l'image montre déjà l'enfoncement) ; l'icône descend de **6 px** (grande) ou **5 px** (petite) | image `_appui`, `scale 0.97` ; le texte descend de **6 px** |
+| Relâché | rebond 1,12 (`.btn--rebond`, inchangé) | idem |
+| Pop-up ouverte (colonnes) | **cercle or** posé sur la bulle : élément `.col-btn-actif`, `left 14px; top 4px; width 132px; height 132px; border-radius 66px; border-width 6px; border-color #FFD54A` + icône `scale 1.1` | — |
+| Interdit | `opacity 0.45` + icône `-unity-background-image-tint-color: #B8B4C8` (inchangé) | image `bulle_rect_gris.png`, texte `#E6E2F0` contour 3 px `#45425A` |
+
+**Plan B seulement** (pas d'image `_appui`) : appui = `scale 0.94`, `translate 0 4px`,
+`-unity-background-image-tint-color: #E6E6E6`.
+
+#### 15.1.8 Extrait USS (remplace le bloc « colonnes » de `Popups.uss` et le style des boutons d'action)
+
+```css
+/* ---------- v6 : les bulles sont des IMAGES (art bible §15.1). Le bouton n'a plus ni
+   bordure ni couleur de fond : toute l'apparence est dans le PNG. ---------- */
+.btn.bulle {
+    border-width: 0;
+    border-radius: 0;
+    background-color: rgba(0, 0, 0, 0);
+    -unity-background-scale-mode: stretch-to-fill;
+    padding: 0;
+}
+.btn.bulle:active { translate: 0 0; scale: 0.96 0.96; border-bottom-width: 0; }
+
+/* Les colonnes : grande bulle de 160 px (dont 18 px de marge transparente sur les côtés). */
+.col { position: absolute; top: 232px; width: 160px; }
+.col--gauche { left: 14px; }
+.col--droite { right: 14px; top: 232px; }   /* même hauteur que la gauche (§15.2) */
+.btn-holder { width: 160px; height: 160px; margin: 0 0 -4px 0; }   /* pas de 156 px */
+.btn.col-btn { width: 160px; height: 160px; }
+.col-btn-icon { position: absolute; left: 34px; top: 24px; width: 92px; height: 92px; }
+.btn.col-btn:active > .col-btn-icon { translate: 0 6px; scale: 1 1; }
+
+.btn.col-btn--boutique      { background-image: url("../Art/bulles/bulle_rond_boutique.png"); }
+.btn.col-btn--boutique:active { background-image: url("../Art/bulles/bulle_rond_boutique_appui.png"); }
+/* … même chose pour inventaire, index, ameliorations, classement, renaissance … */
+
+/* Pop-up ouverte : le cercle or (élément ajouté par le code, caché par défaut). */
+.col-btn-actif { display: none; position: absolute; left: 14px; top: 4px; width: 132px; height: 132px;
+    border-radius: 66px; border-width: 6px; border-color: #FFD54A; }
+.col-btn--active .col-btn-actif { display: flex; }
+
+/* Petites bulles : fermer et roue dentée. */
+.btn.bulle-petit { width: 96px; height: 96px; }
+.btn.bulle-petit--rouge   { background-image: url("../Art/bulles/bulle_petit_rouge.png"); }
+.btn.bulle-petit--rouge:active   { background-image: url("../Art/bulles/bulle_petit_rouge_appui.png"); }
+.btn.bulle-petit--ardoise { background-image: url("../Art/bulles/bulle_petit_ardoise.png"); }
+.btn.bulle-petit--ardoise:active { background-image: url("../Art/bulles/bulle_petit_ardoise_appui.png"); }
+.bulle-petit .croix, .bulle-petit .roue-icone { position: absolute; }
+.bulle-petit .croix { left: 28px; top: 20px; }               /* centre (48, 40) */
+.bulle-petit .roue-icone { left: 16px; top: 8px; width: 64px; height: 64px; }
+.btn.bulle-petit:active .croix, .btn.bulle-petit:active .roue-icone { translate: 0 5px; }
+.croix-barre { width: 36px; height: 11px; border-radius: 5.5px; border-width: 3px; border-color: #7A1A1F; }
+.croix-barre--ombre { background-color: #9A2228; border-color: #9A2228; translate: 0 3px; }
+
+/* Bulles rectangulaires en 9-slice (Encaisser, Rejouer, Continuer). */
+.btn.bulle-rect {
+    height: 120px;
+    min-width: 300px;
+    margin: 0 12px;
+    padding: 0 36px 16px 36px;      /* le texte se centre sur la FACE, pas sur le socle */
+    flex-direction: row; align-items: center; justify-content: center;
+    -unity-slice-left: 80; -unity-slice-right: 80; -unity-slice-top: 80; -unity-slice-bottom: 100;
+    -unity-slice-scale: 0.5px;      /* l'image est rendue en ×2 */
+}
+.btn.bulle-rect:hover  { scale: 1.05 1.05; }
+.btn.bulle-rect:active { scale: 0.97 0.97; }
+.btn.bulle-rect:active > * { translate: 0 6px; }
+.btn.bulle-rect--vert   { background-image: url("../Art/bulles/bulle_rect_vert.png");   --contour: #0E3D21; }
+.btn.bulle-rect--vert:active   { background-image: url("../Art/bulles/bulle_rect_vert_appui.png"); }
+.btn.bulle-rect--violet { background-image: url("../Art/bulles/bulle_rect_violet.png"); --contour: #21155E; }
+.btn.bulle-rect--violet:active { background-image: url("../Art/bulles/bulle_rect_violet_appui.png"); }
+.btn.bulle-rect--aqua   { background-image: url("../Art/bulles/bulle_rect_aqua.png");   --contour: #0B4A6E; }
+.btn.bulle-rect--aqua:active   { background-image: url("../Art/bulles/bulle_rect_aqua_appui.png"); }
+.btn.bulle-rect:disabled { background-image: url("../Art/bulles/bulle_rect_gris.png"); --contour: #45425A; color: #E6E2F0; }
+.bulle-rect__texte { font-size: 38px; color: #FFFFFF; -unity-font-style: bold;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: var(--contour); margin: 0; padding: 0; }
+```
+
+Notes pour le programmeur :
+- `ButtonStyler` ne doit **plus** ajouter de reflet ni d'ombre aux boutons qui ont la classe
+  `.bulle` (tout est dans l'image) : sinon le défaut de la v3 revient (reflet par-dessus).
+- Les éléments `.col-btn-anneau`, `.col-btn-reflet` et `.btn-shadow--rond` sont **supprimés**.
+- Si cette version de Unity refuse `-unity-slice-scale: 0.5px`, mettre les bords à 40 / 40 / 40 /
+  50 et demander à l'artiste un rendu en ×1 (200 × 120) : moins net en 1440p, mais correct.
+- Contenu des boutons du bas : « Encaisser » + montant + pièce 40 px ; « Rejouer » ;
+  « Continuer » + diamant 40 px + prix (1, 2, 4…). Largeurs minimales : Encaisser **300**,
+  Rejouer **280**, Continuer **340**. Écart entre deux boutons : **24 px**.
+
+#### 15.1.9 Fiche pour l'artiste 3D (`blender/rendu_bulles.py`)
+
+- **Une seule fonction paramétrée** `rendre_bulle(forme, couleurs, appui, chemin)` ; `forme` =
+  `rond`, `petit` ou `rect`. Les 25 images sortent d'une seule exécution.
+- Caméra **orthographique de face**, *Film → Transparent*, Eevee, *View Transform* **Standard**,
+  résolution du §15.1.5.
+- Ombre, contour et socle : plaques plates en **émission** (couleur exacte, aucune lumière).
+  Face : disque légèrement bombé (calotte de hauteur 20 % du rayon), *Principled* (rugosité 0,25,
+  *Coat* 0,6), éclairé par la clé `#FFF1D6` en haut à gauche ; contrôler à la pipette que le haut
+  de la face est à ± 8 % du « clair » et le bas à ± 8 % du « mi ». Reflet et éclat : plaques en
+  émission blanche avec un dégradé de transparence (forme garantie). Flou de l'ombre : nœud *Blur*
+  du compositeur, ou plaque à dégradé radial.
+- Contrôle : poser chaque bulle sur `#6EC3FF` (ciel du palier 1) et sur `#140F33` (nuit), avec
+  l'icône par-dessus : le contour et l'ombre détachent la bulle dans les deux cas.
+- Dans le 9-slice, vérifier par script que les colonnes x = 80 à 320 (image) sont identiques.
+
+### 15.2 Placement
+
+#### 15.2.1 Les deux colonnes à la même hauteur
+
+Aujourd'hui la gauche commence à y = 170 et la droite à y = 200, juste sous le compteur de
+diamants (qui finit vers y = 204) : les bulles le touchent presque.
+
+| | Valeur |
+|---|---|
+| Haut visible de la 1re bulle (les deux colonnes) | **y = 240** (élément à `top: 232px`, 8 px de marge dans l'image) |
+| Bord visible gauche / droit | **32 px** du bord (élément à 14 px, 18 px de marge dans l'image) |
+| Pas d'une bulle à la suivante | **156 px** (bulle visible de 134 px + **22 px** d'écart) |
+| Colonne gauche (haut visible) | Boutique 240, Inventaire 396, Index 552, Améliorations 708 (fin : 842) |
+| Colonne droite (haut visible) | Classement 240, Renaissance 396 |
+| Écart minimal avec le compteur de diamants | **28 px**. Si le compteur finit plus bas que y = 212 (badge ×2, autre taille de police), on descend **les deux colonnes ensemble** : elles restent alignées |
+
+#### 15.2.2 La barre du haut (carte d'étage compacte) décollée du bord
+
+| Partie | Valeur |
+|---|---|
+| Bord haut | **y = 40** à l'écran (aujourd'hui ~24 et l'œil la croit collée). `.recap-bar` est dans le HUD qui a 32 px de marge : `top: 8px`. Vérifier en capture ; si elle est placée par rapport au bord de l'écran, `top: 40px` |
+| Taille | hauteur **64 px**, `padding: 0 28px`, coins **24 px** |
+| Contour | **5 px `#110D1F`** (au lieu de 4 px `#1F1730`) |
+| Ombre | élément frère placé avant, même forme, `rgba(17, 13, 31, 0.35)`, `translate: 0 6px` |
+| Fond | `rgba(31, 23, 48, 0.88)` (inchangé) |
+
+#### 15.2.3 Les onglets de la Boutique sur toute la largeur
+
+La rangée `.btq-top` = **[onglets, qui prennent toute la place] + [soldes, à droite]**.
+
+```css
+.btq-top { flex-direction: row; align-items: center; }
+.btq-tabs { flex-direction: row; flex-grow: 1; flex-shrink: 1; }
+.btq-top .btn.v5-tab {
+    flex-grow: 1; flex-basis: 0; min-width: 0;   /* 4 onglets de même largeur */
+    height: 64px; padding: 0 8px; margin-right: 10px;
+    flex-direction: row; justify-content: center; align-items: center;
+}
+.btq-top .btn.v5-tab:last-child { margin-right: 0; }
+.btq-soldes { flex-shrink: 0; margin-left: 18px; }
+.v5-tab__texte { font-size: 26px; }
+/* « Diamants · Bientôt » devient « Diamants » + une étiquette penchée sur le coin. */
+.v5-tab__bientot {
+    position: absolute; top: -12px; right: -8px; rotate: 8deg;
+    font-size: 15px; color: #3A2200; -unity-font-style: bold;
+    background-color: #FFD54A; border-width: 3px; border-color: #110D1F; border-radius: 10px;
+    padding: 1px 8px;
+}
+```
+L'icône de monnaie de chaque onglet reste (30 px, à gauche du mot).
+
+### 15.3 Nouvelles icônes Boutique et Paramètres
+
+**Boutique : une échoppe de fête foraine** (`art/icones/icone_boutique.png`, prompt : lot 7, image 1).
+- Un petit stand en bois vu de 3/4, avec un **grand auvent festonné à rayures turquoise `#2EC4C4`
+  et crème `#FFF4DC`** qui occupe toute la moitié haute : c'est lui qui dit « magasin » au premier
+  coup d'œil, même à 92 px. Sur le comptoir (bois `#8C5933`) : le **petit cadeau violet à ruban
+  doré** (rappel de l'ancienne icône), un mini haut-de-forme et une sucette étoile dorée ; une
+  étiquette de prix **vierge** pend au bord.
+- Turquoise et crème ressortent sur la bulle **rose** de la Boutique.
+- On **évite** : le panier rouge (c'est l'icône du jeu de référence de l'auteur), le chariot de
+  supermarché, le sac à logo, tout symbole d'argent réel.
+- Variante facultative (image 2) : un sac de courses en papier rose dont dépassent des objets.
+
+**Paramètres : une roue dentée propre** (`art/icones/icone_reglages.png`, image 3).
+- **8 dents épaisses** aux coins arrondis, métal argent-lavande (`#C9CDE0` éclairé,
+  `#8A90B0` ombre), **moyeu doré `#FFC83A` plein au centre**.
+- **Pas de trou au centre** : le trou était la cause du mauvais détourage (le fond lavande restait
+  coincé dedans). Un moyeu plein = un détourage propre d'un seul trait.
+- Posée sur la bulle ardoise (§15.1.4) : argent clair sur ardoise foncée, bon contraste.
+
+### 15.4 Refonte de la Renaissance
+
+**Le problème** (capture v5.1) : trois cartes identiques remplies de petits textes, une phrase
+grise, un bouton moyen, et la moitié basse de la fenêtre vide. Rien ne donne envie : on lit un
+contrat. **L'idée** : une grande image au centre, ce qu'on gagne **au milieu et plus gros**, des
+icônes au lieu des phrases, et un énorme bouton.
+
+**Fenêtre** : **1100 × 840** (le cadre standard du §12.18, un peu plus large). Titre « Renaissance »
+avec `icone_rebirth.png` qui déborde (inchangé).
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ [icône] Renaissance                                   (×) │
+│                     ✦   rayons dorés   ✦                  │
+│                  ┌───────────────┐  ╭────╮                │
+│                  │  ILLUSTRATION │  │ ×2 │ ← macaron or   │
+│                  │  (cheval doré │  ╰────╯                │
+│                  │   qui renaît) │                         │
+│                  └───────────────┘                         │
+│ ┌ Tu perds ──┐  ┌══ Tu gagnes ════┐  ┌ Tu gardes ─┐       │
+│ │ pièce  amé.│  │ pièce×2 diam.×2 │  │ skin diam. │       │
+│ │            │  │ boîtes          │  │ records    │       │
+│ └────────────┘  └═════════════════┘  └────────────┘       │
+│   Pièces et améliorations reviennent à zéro. Tu gardes tout le reste !
+│            ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓               │
+│            ┃   Renaître !   ●  10 000      ┃               │
+│            ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛               │
+└──────────────────────────────────────────────────────────┘
+```
+
+**A. La scène centrale** (hauteur **300 px**, en haut du corps)
+| Élément | Valeur |
+|---|---|
+| Lueur | disque flou `#FFE9A0` → transparent, Ø **460** |
+| Rayons | `RaysElement` Ø **520**, 12 rayons `#FFD54A` à 55 %, **un tour en 24 s** |
+| Illustration | `art/illustrations/renaissance_heros.png` (lot 7, image 8), **300 × 300**, centrée ; flotte de ±6 px en 2,4 s (`ease-in-out`, aller-retour) |
+| Étincelles | 8 petites étoiles dessinées par le code, qui montent lentement et s'effacent |
+| **Macaron ×2** | `art/ui/macaron_or.png` (image 9) **170 × 170**, collé en haut à droite de l'illustration (centre décalé de +200 / −40 px), `rotate -8deg` ; dedans « **×2** » **76 px** Bold blanc, contour 5 px `#8A4B00`, `text-shadow 0 5px 0 #8A4B00` ; dessous, une pièce et un diamant de 34 px côte à côte. Pulsation `scale 1 → 1.08 → 1` en **1,4 s**, en boucle |
+
+**B. Les trois cartes** (hauteur **230 px**, sous la scène ; ordre **perds · gagnes · gardes**)
+| | Tu perds | **Tu gagnes** (au centre) | Tu gardes |
+|---|---|---|---|
+| Largeur | 300 | **380**, remontée de 14 px (`translate 0 -14px`), contour **6 px** | 300 |
+| Fond | `carte_rouge` (`#FFA08A → #E0404A`) | `carte_or` (`#FFE66B → #FF9F1C`) + rayonnement léger derrière les icônes | `carte_bleue` (`#62E6FF → #3B5BDB`) |
+| Titre | 32 px Bold blanc, contour 4 px encre | **36 px** | 32 px |
+| Icônes (64 px, 72 px au centre), légende dessous 20 px Bold blanc contour 3 px | pièce « 20 247 » ; `icone_ameliorations` « Améliorations » | pièce avec « **×2** » ; diamant avec « **×2** » ; boîte Animaux « Nouvelles boîtes » | skin équipé « 16 objets » ; diamant « 12 » ; `icone_classement` « Records » |
+| Pastille sur chaque icône (Ø 34, en bas à droite, contour 3 px encre) | rouge `#E0404A`, un **−** blanc (barre 16 × 5 px) | « ×2 » écrit **sur** l'icône : 34 px Bold `#FFD54A`, contour 4 px `#3A2200` | verte `#6BE34A`, une **coche** blanche (deux barres USS) |
+
+Les nombres sont lus dans la sauvegarde (vrais), comme aujourd'hui.
+
+**C. La phrase** : style « message important » du §12.18.6 (26 px Bold blanc contour 4 px, la
+fin en vert `#6BE34A`) : « Pièces et améliorations reviennent à zéro. **Tu gardes tout le reste !** »
+
+**D. Le gros bouton** : `bulle_rect_vert`, **560 × 120**, « Renaître ! » **46 px** + pièce 44 px +
+« 10 000 » 46 px, contour 4 px `#0E3D21`. L'**éclat** qui passe (comme Jouer) toutes les **2,5 s**.
+- Pas assez de pièces : bouton gris (`bulle_rect_gris`) et, juste au-dessus, une **jauge**
+  560 × 26 : piste `rgba(17, 13, 31, 0.15)`, contour 3 px encre, coins 13 px, remplissage
+  dégradé `#FFE66B → #FF9F1C`, texte centré « 6 420 / 10 000 » 20 px Bold `#2A2440`.
+- Dessous, la note de rentabilité en petit (18 px `#6E6A80`), une seule ligne.
+
+**E. Après la renaissance** (elle n'arrive qu'une fois) : la scène reste (illustration, rayons),
+le macaron porte une étiquette « Fait ! » ; les trois cartes sont remplacées par **une** carte or
+de 760 px : « Renaissance faite ! ×2 pièces et ×2 diamants, pour toujours » ; pas de bouton.
+
+**F. Le moment de renaître** (après la confirmation) : flash blanc 0,15 s, l'illustration grossit
+à 1,3 et les rayons tournent 4 fois plus vite pendant 0,8 s, pluie de pièces dorées dessinées par
+le code, puis la fenêtre passe à l'état E.
+
+### 15.5 La Route des trophées (clic sur le badge d'étage)
+
+**L'idée** : un chemin qui **monte dans le ciel**, comme la tour : en bas l'étage 1 sous un ciel de
+jour, en haut la nuit étoilée. On voit où on est, son record, et ce qui change aux étages suivants.
+
+**Fenêtre** : 1000 × 840, titre « Route des trophées » avec `art/icones/icone_route.png`
+(lot 7, image 6) qui déborde.
+
+| Zone | Valeur |
+|---|---|
+| Bandeau résumé (haut, 64 px) | 3 pilules côte à côte (hauteur 56, coins 28, contour 4 px encre, texte 24 px Bold blanc contour 3 px) : « Étage **12** » bleu `#3B7DD8` ; « Record **23** » or `#FFC83A` texte `#3A2200` avec `drapeau_record` 40 px ; « Prochain palier : étage **15** » violet `#6C4FE0` |
+| Fenêtre de la route | tout le reste du corps, coins **22 px**, contour **5 px** encre, `overflow: hidden`, défile **verticalement** (barre de défilement du §12.18.1 sur toute la hauteur) |
+| Fond | un long dégradé vertical qui traverse les 4 paliers du décor : jour `#6EC3FF → #3B7DD8`, coucher `#FFB08A → #E0705A`, crépuscule `#8E7BFF → #6C4FE0`, nuit `#2E2366 → #140F33` + petites étoiles ; fondu de **120 px** entre deux paliers, chaque palier couvrant ses étages (§2.9) |
+| Le chemin | tracé par le code (`Painter2D`) : une **sinusoïde douce** autour du centre, amplitude **110 px**, une vague tous les **12 étages** ; trait **34 px** encre, puis trait **26 px** par-dessus : **dégradé or** `#FFE66B → #FFB020` de l'étage 1 à l'étage actuel, **blanc à 35 %** au-delà ; bouts arrondis |
+| Hauteur d'un étage | **70 px** ; étage 1 à 120 px du bas |
+| Étage ordinaire | point Ø 22 sur le chemin (blanc, or si passé), contour 4 px encre ; numéro **20 px** Bold blanc contour 3 px, du côté extérieur de la courbe |
+| **Palier** (un étage où quelque chose change : décor, coffre en plus, nouvelle rareté de coffre, chance de diamants… liste et textes : game designer) | bulle `bulle_petit_or` (atteint) ou `bulle_petit_ardoise` (pas encore) de 96 px, avec l'icône du changement (56 px : coffre de rareté, diamant, ciel…) ; à côté, une **carte** 330 × 96, coins 18, contour 4 px encre, fond dégradé des cartes v5.1 (or : gains, violette : coffres, bleue : diamants, verte : décor), « Étage 15 » 24 px + « 4 coffres ! » 20 px, blancs contourés ; les cartes alternent à gauche et à droite, du côté opposé à la courbe |
+| Palier pas encore atteint | même carte à **70 %** d'opacité, icône désaturée (`#B8B4C8`) ; le texte reste **vrai et lisible** (on montre ce qui attend le joueur, sans rien promettre de faux) |
+| **Position actuelle** | `bulle_petit_or` affichée à **120 px** avec l'icône du **skin équipé** (80 px) ; halo `#FFD54A` qui pulse (Ø 100 → 150, 40 % → 0 %, 1,6 s) ; au-dessus, pilule « Tu es ici » 22 px Bold `#3A2200` sur `#FFD54A`, contour 3 px encre, coins 14, avec une petite pointe vers le bas |
+| **Record** | `drapeau_record.png` 64 px planté à côté du chemin + pilule « Record : 23 » (même style que « Tu es ici ») ; une **ligne en tirets** traverse la route à cet étage (tirets 16 / 10 px, 4 px, `#FFD54A`). Si l'étage actuel est le record, le drapeau se met à côté du cheval |
+| Plus haut | on affiche jusqu'au plus grand de (record, étage actuel) + **15 étages** ; au-delà, un nuage blanc dessiné et « Et plus haut… ? » 26 px Bold blanc contour 4 px |
+| Ouverture | la route s'ouvre **centrée sur l'étage actuel** (il est à 40 % du bas), après un court glissé de 200 px vers le haut en **0,5 s `ease-out`** ; si on s'éloigne en défilant, un bouton rond `bulle_petit_or` avec l'icône du skin apparaît en bas à droite (« Ma position »), qui y ramène en 0,3 s |
+
+### 15.6 La fiche agrandie : flèches et « glisse pour tourner »
+
+**Flèches gauche et droite** (la droite manquait)
+| Partie | Valeur |
+|---|---|
+| Bulle | `bulle_petit_ardoise` affichée à **120 × 120** |
+| Place | à cheval sur les bords gauche et droit de la fiche (`left: -60px` / `right: -60px`), centrées en hauteur sur la vue 3D (`top: 284px`, comme aujourd'hui) |
+| Chevron | deux barres USS **34 × 12 px**, coins 6 px, blanches, contour 3 px `#1E1A33`, tournées de ±40° autour de leur bout pointu (`transform-origin`) ; copie « épaisseur » `#2E2A4E` décalée de 0 / +3 px dessous ; centré sur la face (centre à 50 % / 42 % de l'élément) |
+| Survol | bulle 1,08 ; le chevron avance de **4 px** dans sa direction |
+| Bout de la liste | la flèche **disparaît** (`opacity 0`, non cliquable, 0,15 s) plutôt que d'être grisée |
+| Clavier | ← et → font la même chose (à confirmer par le game designer) |
+
+**Indice « glisse pour tourner »**
+| Partie | Valeur |
+|---|---|
+| Place | sous le modèle, centré, à 16 px au-dessus du bas de la vue 3D |
+| Pilule | hauteur 48, `padding 0 18px 0 8px`, fond `rgba(17, 13, 31, 0.75)`, coins 24 |
+| Contenu | `icone_rotation.png` (lot 7, image 5) **40 px** + « Glisse pour tourner » **22 px** Bold blanc |
+| Animation | l'icône se balance de −10° à +10° en 1,2 s (aller-retour) ; la pilule glisse de ±8 px dans le même rythme |
+| Disparition | fondu de **0,3 s** dès que le joueur a fait tourner le modèle. Quand la réafficher (chaque ouverture, ou jusqu'à la première fois) : game designer |
+| Socle tournant | un disque plat lavande `#D9D2F0` à 50 % sous le modèle (ellipse 220 × 50), qui tourne avec lui : on comprend que c'est un plateau |
+
+### 15.7 Paramètres : le choix Graphismes
+
+La fenêtre Réglages (taille S, **640 × 600** au lieu de la hauteur actuelle, trop grande) a
+3 rangées : Musique, Effets, puis **Graphismes**.
+
+| Partie | Valeur |
+|---|---|
+| Rangée | `icone_graphismes.png` (lot 7, image 4) 64 px + « Graphismes » 30 px Bold `#2A2440` |
+| Sélecteur | une barre **560 × 84** sous le titre : fond creusé `#E9E3D6`, contour 4 px encre, coins 22, `padding 8px` ; **3 segments de même largeur** (`flex-grow 1`), 6 px d'écart, hauteur 68, coins 16 |
+| Segment au repos | fond transparent, texte **26 px** Bold `#3A3358` ; à gauche du mot, **3 petites barres montantes** (8 px de large, 14 / 22 / 30 px de haut, coins 3, 4 px d'écart) : autant de barres pleines `#3A3358` que le niveau (Faible 1, Moyen 2, Élevé 3), les autres `rgba(17, 13, 31, 0.18)` |
+| Segment choisi | famille **or** : dégradé `bouton_or.png`, contour 4 px `#6B4300`, bas 6 px `#D99A1A`, texte et barres `#3A2200` ; `scale 1.04`, 0,15 s `ease-out-back` |
+| Survol d'un segment non choisi | fond `rgba(17, 13, 31, 0.06)` |
+| Phrase dessous | 20 px `#6E6A80`, centrée, qui change selon le choix : Faible « Pour les appareils peu puissants : plus fluide, moins d'effets. » ; Moyen « Résolution classique : le bon équilibre. » ; Élevé « Tous les détails et les effets au maximum. » (textes définitifs : game designer) |
+| Effet du clic | immédiat, petit toast « Graphismes : Élevé » ; ce que change chaque niveau (résolution, ombres, particules) : spec v6 |
+| Pied de fenêtre | « version 6 » (corrige le point 48 du QA) |
+
+### 15.8 Images de la v6 (récapitulatif)
+
+| Fichier | Fait par | Où |
+|---|---|---|
+| 25 bulles `art/bulles/bulle_*.png` (§15.1.5 : 12 rondes, 6 petites, 7 rectangulaires) | **artiste 3D**, `blender/rendu_bulles.py` | colonnes, croix, roue, flèches, Route, boutons du bas, Renaissance |
+| `art/icones/icone_boutique.png` (+ variante `_b` facultative) | Gemini, lot 7 | bulle Boutique, titre de la pop-up |
+| `art/icones/icone_reglages.png` | Gemini, lot 7 | roue dentée |
+| `art/icones/icone_graphismes.png` | Gemini, lot 7 | rangée Graphismes |
+| `art/icones/icone_rotation.png` | Gemini, lot 7 | indice de la fiche agrandie |
+| `art/icones/icone_route.png`, `art/icones/drapeau_record.png` | Gemini, lot 7 | Route des trophées |
+| `art/illustrations/renaissance_heros.png` | Gemini, lot 7 | scène de la Renaissance |
+| `art/ui/macaron_or.png` | Gemini, lot 7 | macaron ×2 |
+
+Tout le reste (rayons, lueurs, jauges, chemin de la Route, chevrons, croix, coches, étoiles,
+segments) est **dessiné par le code ou en USS**.
+
+### 15.9 À éviter (v6)
+
+- Un reflet ou une ombre ajoutés **par le code** sur une bulle en image (double reflet).
+- Étirer une bulle ronde (elle doit garder **exactement** son format carré) ou étirer une bulle
+  rectangulaire en hauteur.
+- Une icône de la même couleur que sa bulle (or sur or, orange sur orange).
+- Du rouge ailleurs que sur la croix ; de l'or ailleurs que sur ce qui est atteint ou gagné.
+- Un palier « pas encore atteint » qui annonce quelque chose de faux ou d'arrangé.
+- Le panier rouge ou tout autre symbole tiré du jeu de référence.
+
+### 15.10 À vérifier en capture (1920 × 1080 et 1280 × 720)
+
+- Les deux colonnes commencent à la même hauteur et ne touchent pas le compteur de diamants
+  (≥ 28 px), même avec le badge ×2.
+- Chaque icône se reconnaît sur sa bulle, sur le ciel de jour **et** sur la nuit.
+- La barre du haut a de l'air au-dessus (≈ 40 px) et ne touche pas le titre d'une pop-up.
+- Les 4 onglets de la Boutique vont jusqu'aux soldes, sans texte coupé.
+- Rejouer, Continuer et Encaisser : coins nets et reflet non déformé quelle que soit la largeur.
+- Appui sur une bulle : l'icône (ou le texte) descend **avec** la face, sans saut.

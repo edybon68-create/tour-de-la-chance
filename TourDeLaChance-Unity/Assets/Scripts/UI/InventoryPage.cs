@@ -155,7 +155,7 @@ namespace TourDeLaChance
                     inner.Add(ShopUi.Visual(item, ShopUi.Look.Normal, "inv-slot__visuel"));
                     var texts = new VisualElement { pickingMode = PickingMode.Ignore };
                     texts.Add(ShopUi.NewLabel(item.DisplayName, "inv-slot__nom"));
-                    texts.Add(ShopUi.NewLabel($"{SlotName(item.Slot)} · +{Shop.BonusPercent(item)} %", "inv-slot__detail"));
+                    texts.Add(ShopUi.NewLabel($"{SlotName(item.Slot)} · +{Shop.BonusPercent(item)}\u00A0%", "inv-slot__detail"));
                     inner.Add(texts);
                     slot.Add(inner);
                     var remove = new Button(() => { if (Shop.Unequip(item.Slot)) Equipped?.Invoke(item); }) { text = "Retirer" };
@@ -194,7 +194,7 @@ namespace TourDeLaChance
             int count = Shop.CountOf(item);
             if (count >= 2) inner.Add(ShopUi.NewLabel("×" + count, "item-badge"));
             int bonus = Shop.BonusPercent(item);
-            if (bonus > 0) inner.Add(ShopUi.NewLabel($"+{bonus} %", "bonus-badge"));
+            if (bonus > 0) inner.Add(ShopUi.NewLabel($"+{bonus}\u00A0%", "bonus-badge"));
             if (Shop.IsEquipped(item) && !item.IsFree)
             {
                 var equipped = ShopUi.NewLabel("Équipé ✓", "item-extra");
@@ -216,9 +216,9 @@ namespace TourDeLaChance
             // v5 §4.5 : le bonus de la tenue SAUVEGARDÉE (sans plafond) ; en aperçu, ce qu'il
             // deviendrait (calcul seulement, rien n'est sauvegardé).
             int now = Shop.OutfitBonusPercent;
-            string line = $"Bonus de ta tenue : +{now} % sur les trésors (skin + 2 accessoires)";
+            string line = $"Bonus de ta tenue : +{now}\u00A0% sur les trésors (skin + 2 accessoires)";
             if (selected != null && !Shop.IsEquipped(selected))
-                line += $"\nAvec cet objet : +{Shop.OutfitBonusPercentWith(selected)} %";
+                line += $"\nAvec cet objet : +{Shop.OutfitBonusPercentWith(selected)}\u00A0%";
             bonusLabel.text = line;
 
             if (selected == null)

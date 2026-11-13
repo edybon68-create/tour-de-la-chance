@@ -25,7 +25,7 @@ namespace TourDeLaChance
         public const string Piece = "<sprite name=\"piece\">";
 
         /// Un pourcentage avec 2 décimales au plus, sans zéros inutiles : 10 %, 6,25 %, 4,67 %.
-        public static string Percent(double value) => value.ToString("0.##", French) + " %";
+        public static string Percent(double value) => value.ToString("0.##", French) + "\u00A0%"; // v6 (QA n°41) : espace INSÉCABLE, « % » ne part jamais seul à la ligne
 
         /// Un nombre « à la française », sans zéros inutiles : 1,5 ; 3 ; 1,13.
         public static string Number(float value) => value.ToString("0.##", French);
@@ -60,9 +60,15 @@ namespace TourDeLaChance
             else element.RemoveFromClassList(className);
         }
 
+        /// v6 (QA n°41) : remplace l'espace ordinaire avant « % » par une espace INSÉCABLE
+        /// (U+00A0, présente dans la police Fredoka) : le retour à la ligne ne sépare plus
+        /// « +4 » de « % ». Sert aussi pour les textes qui viennent des catalogues.
+        public static string NoBreakPercent(string text) =>
+            string.IsNullOrEmpty(text) ? text : text.Replace(" %", "\u00A0%");
+
         public static Label NewLabel(string text, string className)
         {
-            var label = new Label(text) { pickingMode = PickingMode.Ignore };
+            var label = new Label(NoBreakPercent(text)) { pickingMode = PickingMode.Ignore };
             // Plusieurs classes possibles, séparées par une espace (« missing btq-missing »).
             foreach (var c in className.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)) label.AddToClassList(c);
             return label;
@@ -118,7 +124,7 @@ namespace TourDeLaChance
             inner.Add(NewLabel(mystery ? "???" : item.DisplayName, "item-name"));
             inner.Add(NewLabel(Percent(Shop.ItemChance(item)), "item-extra"));
             int bonus = Shop.BonusPercent(item);
-            if (bonus > 0) inner.Add(NewLabel($"+{bonus} %", "bonus-badge"));
+            if (bonus > 0) inner.Add(NewLabel($"+{bonus}\u00A0%", "bonus-badge"));
             if (count >= 2) inner.Add(NewLabel("×" + count, "item-badge"));
             if (owned) inner.Add(NewLabel("✓", "tile-check"));
             else inner.Add(NewLabel("Pas encore", "tile-ribbon"));
@@ -199,11 +205,18 @@ namespace TourDeLaChance
             }
             else
             {
-                // Secours pour un skin sans icône : un carré de sa couleur.
-                var swatch = new VisualElement { pickingMode = PickingMode.Ignore };
-                swatch.AddToClassList("item-swatch");
-                swatch.style.backgroundColor = look == Look.Silhouette ? new Color(0.08f, 0.07f, 0.12f) : item.Color;
-                box.Add(swatch);
+                // v6 (QA n°49) : secours pour un skin sans icône. Avant : un carré uni. Maintenant
+                // un vrai substitut, comme pour les accessoires : un jeton rond « autocollant »
+                // (contour d'encre) rempli de la couleur du skin, avec l'initiale du skin.
+                var token = Placeholder(item);
+                token.AddToClassList("item-placeholder--skin");
+                token.style.backgroundColor = look == Look.Silhouette ? new Color(0.08f, 0.07f, 0.12f) : item.Color;
+                var ink = new Color(0.067f, 0.051f, 0.122f); // #110D1F
+                token.style.borderTopColor = ink;
+                token.style.borderLeftColor = ink;
+                token.style.borderRightColor = ink;
+                token.style.borderBottomColor = ink;
+                box.Add(token);
             }
             return box;
         }

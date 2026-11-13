@@ -46,13 +46,17 @@ namespace TourDeLaChance
             if (!string.IsNullOrEmpty(tierName)) return tierName;           // 1. nouveau palier
             var t = Texts;
             if (t == null) return "";
+            // v6 (QA n°42) : après un trésor en diamants, le gain en pièces vaut 0. Une phrase
+            // qui cite {gain} afficherait « +0 ! » : on saute donc ces phrases-là.
+            bool noGain = gain <= 0;
             foreach (var special in t.floorTexts)                           // 2. texte de l'étage
-                if (special.floor == floor) return Fill(special.text, floor, pot, gain, 0);
-            if (t.repeatEvery > 0 && floor >= t.repeatFromFloor && (floor - t.repeatFromFloor) % t.repeatEvery == 0)
+                if (special.floor == floor && !(noGain && UsesGain(special.text))) return Fill(special.text, floor, pot, gain, 0);
+            if (t.repeatEvery > 0 && floor >= t.repeatFromFloor && (floor - t.repeatFromFloor) % t.repeatEvery == 0
+                && !(noGain && UsesGain(t.repeatText)))
                 return Fill(t.repeatText, floor, pot, gain, 0);
             if (t.climbLines.Count == 0) return "";                         // 3. phrase au hasard
-            int index = PickAvoiding(t.climbLines.Count, recentClimb, 3);
-            return Fill(t.climbLines[index], floor, pot, gain, 0);
+            int index = PickAvoiding(t.climbLines.Count, recentClimb, 3, i => !(noGain && UsesGain(t.climbLines[i])));
+            return index < 0 ? "" : Fill(t.climbLines[index], floor, pot, gain, 0);
         }
 
         /// La 1re ligne du message de piège.
@@ -94,12 +98,23 @@ namespace TourDeLaChance
             return i >= last && last >= 0 ? i + 1 : i;
         }
 
+        /// La phrase cite-t-elle le gain ({gain}) ?
+        static bool UsesGain(string text) => !string.IsNullOrEmpty(text) && text.Contains("{gain}");
+
         /// Un indice au hasard qui n'est pas dans les "window" derniers, puis on le retient.
-        static int PickAvoiding(int count, List<int> recent, int window)
+        /// usable (facultatif) écarte certaines phrases ; −1 si aucune ne convient.
+        static int PickAvoiding(int count, List<int> recent, int window, System.Func<int, bool> usable = null)
         {
             var allowed = new List<int>();
-            for (int i = 0; i < count; i++) if (!recent.Contains(i)) allowed.Add(i);
-            int pick = allowed.Count > 0 ? allowed[random.Next(allowed.Count)] : random.Next(count);
+            var fallback = new List<int>();
+            for (int i = 0; i < count; i++)
+            {
+                if (usable != null && !usable(i)) continue;
+                fallback.Add(i);
+                if (!recent.Contains(i)) allowed.Add(i);
+            }
+            if (fallback.Count == 0) return -1;
+            int pick = allowed.Count > 0 ? allowed[random.Next(allowed.Count)] : fallback[random.Next(fallback.Count)];
             recent.Add(pick);
             while (recent.Count > Mathf.Min(window, count - 1)) recent.RemoveAt(0);
             return pick;

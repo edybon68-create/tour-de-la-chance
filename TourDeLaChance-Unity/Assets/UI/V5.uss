@@ -42,7 +42,8 @@
 .recap-card {
     margin-top: 108px;   /* y ≈ 140 avec la marge du HUD */
     width: 720px;
-    max-height: 320px;
+    /* v6 (QA n°30) : plus de hauteur maximale. Avec max-height, les lignes étaient écrasées
+       les unes sur les autres quand la carte était chargée. */
     padding: 14px 24px 16px 24px;
     border-width: 5px;
     border-color: #1F1730;
@@ -60,12 +61,14 @@
 .recap-won { font-size: 28px; color: #FFD54A; -unity-font-style: bold; -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200; margin: 2px 0; }
 .recap-won--diamants { color: #9FE3FF; -unity-text-outline-color: #0E2D6B; }
 .recap-banner { font-size: 22px; color: #3A2200; background-color: #FFD54A; border-radius: 12px; padding: 2px 14px; -unity-font-style: bold; margin: 4px 0; }
+.recap-card > * { flex-shrink: 0; } /* aucune ligne ne se fait écraser */
+.recap-gain-row { flex-direction: row; justify-content: center; margin-top: 6px; }
 .recap-pills { flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
 .recap-pill { background-color: rgba(31, 23, 48, 0.8); border-radius: 14px; padding: 4px 14px; margin: 3px 5px; }
 .recap-pill--gain { background-color: rgba(58, 34, 0, 0.85); border-width: 2px; border-color: #FFD54A; }
 .recap-pill-text { font-size: 24px; color: #F4EEE6; -unity-font-style: bold; margin: 0; padding: 0; }
 .recap-pill--gain .recap-pill-text { font-size: 30px; color: #FFD54A; }
-.recap-mentions { font-size: 19px; color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; margin-top: 6px; }
+.recap-mentions { font-size: 19px; color: #FFFFFF; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; margin-top: 4px; white-space: normal; -unity-text-align: middle-center; }
 .recap-bar {
     position: absolute;
     top: -8px;          /* y ≈ 24 avec la marge du HUD */
@@ -321,8 +324,11 @@
 
 /* ---------- Écran de résultat de l'ouverture 3D (§6.5) : les textes sur un cartouche sombre,
    sous l'objet qui flotte, pour rester lisibles devant la boîte. ---------- */
+/* v6 (QA n°35) : le cartouche est collé en BAS de l'écran (sous la boîte et son socle, que la
+   caméra du studio cadre plus haut) au lieu de commencer à 68 % : il ne recouvre plus la boîte. */
 .ov-result {
-    top: 68%;
+    top: auto;
+    bottom: 14px;
     left: 22%;
     right: 22%;
     padding: 10px 16px 14px 16px;
@@ -331,3 +337,19 @@
     border-width: 4px;
     border-color: #110D1F;
 }
+
+/* v6 (QA n°35) : toutes les lignes du résultat sont centrées (la ligne du bonus, ajoutée après
+   un retour à la ligne, partait à gauche) ; textes un peu plus serrés pour tenir sous la boîte. */
+.ov-result .ov-name { font-size: 40px; margin: 0; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.ov-result .ov-rarity { -unity-text-align: middle-center; white-space: normal; font-size: 26px; margin: 0; -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F; }
+.ov-result .ov-boxline { -unity-text-align: middle-center; margin: 0; }
+.ov-result .ov-badge { margin: 6px 0 10px 0; }
+
+/* v6 (QA n°35) : le mot de rareté (« Rare ! ») sur un cartouche sombre, contour épais : il reste
+   lisible même devant le faisceau lumineux de la boîte. */
+.ov-rarity-word {
+    background-color: rgba(17, 13, 31, 0.78);
+    border-radius: 18px;
+    padding: 2px 18px;
+}
+.ov-letter { -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }

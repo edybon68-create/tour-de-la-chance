@@ -202,11 +202,17 @@ namespace TourDeLaChance
             joyTime += dt;
 
             // Le ressort suit l'accélération de l'objet (la tête du cheval qui saute).
-            Vector3 vel = (transform.position - lastPos) / dt;
-            Vector3 accel = (vel - lastVel) / dt;
+            // v6 (QA n°32) : on calcule l'accélération avec un pas de temps BORNÉ (1/30 s au
+            // plus) : après une image très longue (chargement, fenêtre en arrière-plan) ou un
+            // saut de position (téléportation), une division par un dt farfelu donnait des
+            // valeurs énormes, et le ressort finissait en NaN (« pas un nombre »).
+            float springDt = Mathf.Min(dt, MaxSpringDt);
+            Vector3 vel = (transform.position - lastPos) / springDt;
+            Vector3 accel = (vel - lastVel) / springDt;
             lastPos = transform.position;
-            lastVel = vel;
+            lastVel = IsFinite(vel) ? vel : Vector3.zero;
             Vector3 localAccel = transform.InverseTransformDirection(accel);
+            if (!IsFinite(localAccel)) localAccel = Vector3.zero;
 
             foreach (var p in parts) Animate(p, dt, localAccel);
 
@@ -219,6 +225,16 @@ namespace TourDeLaChance
             }
         }
 
+        // v6 (QA n°32) : bornes du ressort. Au-delà de 1/30 s, une image est « trop longue » :
+        // on fait comme si elle avait duré 1/30 s (le ressort ralentit, mais ne s'emballe pas).
+        const float MaxSpringDt = 1f / 30f;
+        const float SpringSubStep = 1f / 60f;
+
+        /// Vrai si le nombre est « normal » (ni infini, ni NaN).
+        static bool IsFinite(float v) => !float.IsNaN(v) && !float.IsInfinity(v);
+        static bool IsFinite(Vector2 v) => IsFinite(v.x) && IsFinite(v.y);
+        static bool IsFinite(Vector3 v) => IsFinite(v.x) && IsFinite(v.y) && IsFinite(v.z);
+
         static float Wave(float t, float period) => Mathf.Sin(t * Mathf.PI * 2f / Mathf.Max(0.01f, period));
 
         void Animate(Part p, float dt, Vector3 localAccel)
@@ -230,8 +246,23 @@ namespace TourDeLaChance
                 {
                     Vector2 target = new Vector2(Mathf.Clamp(localAccel.z * 2.5f, -25f, 25f), Mathf.Clamp(-localAccel.x * 2.5f, -25f, 25f));
                     target += new Vector2(2f * Mathf.Sin(time * 2.1f), 1.5f * Mathf.Sin(time * 1.7f + 1f));
-                    p.speed += (60f * (target - p.angle) - 7f * p.speed) * dt; // raideur 60, amortissement 7
-                    p.angle += p.speed * dt;
+                    // v6 (QA n°32) : le ressort est calculé par petits pas d'au plus 1/60 s.
+                    // Avec un grand pas (image de 200 ms…), le calcul « explicite » s'emballe
+                    // (il dépasse la cible, de plus en plus fort) jusqu'à l'infini puis NaN.
+                    float left = Mathf.Min(dt, MaxSpringDt);
+                    while (left > 0f)
+                    {
+                        float h = Mathf.Min(left, SpringSubStep);
+                        p.speed += (60f * (target - p.angle) - 7f * p.speed) * h; // raideur 60, amortissement 7
+                        p.angle += p.speed * h;
+                        left -= h;
+                    }
+                    // Filet de sécurité : si malgré tout le ressort devient fou, on le remet au repos.
+                    if (!IsFinite(p.angle) || !IsFinite(p.speed) || p.angle.sqrMagnitude > 90f * 90f)
+                    {
+                        p.angle = Vector2.zero;
+                        p.speed = Vector2.zero;
+                    }
                     p.t.localRotation = p.restRot * Quaternion.Euler(p.angle.x, 0f, p.angle.y);
                     break;
                 }

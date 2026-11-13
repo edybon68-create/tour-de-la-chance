@@ -76,6 +76,11 @@ namespace TourDeLaChance
 
         public bool Active => studioCam != null && studioCam.enabled;
         public Camera Camera => studioCam;
+
+        // v6 (QA n°35) : le cadrage de la caméra du studio. Avant : (0 ; 2,1 ; −6,2) visant 1,45 m,
+        // ce qui coupait le socle en bas et faisait passer le cartouche du résultat sur la boîte.
+        static readonly Vector3 CameraPosition = new Vector3(0f, 1.75f, -7.4f);
+        const float CameraAimHeight = 0.55f;
         /// La position 3D de l'objet gagné (pour centrer les effets de l'interface dessus).
         public Vector3 RewardWorldPosition => rewardPivot != null ? rewardPivot.position : transform.position + Vector3.up * 1.55f;
 
@@ -153,8 +158,11 @@ namespace TourDeLaChance
             // et les textes du résultat tiennent ensemble à l'écran.
             var camGo = new GameObject("CameraBoite");
             camGo.transform.SetParent(transform, false);
-            camGo.transform.localPosition = new Vector3(0f, 2.1f, -6.2f);
-            camGo.transform.LookAt(transform.position + Vector3.up * 1.45f);
+            // v6 (QA n°35) : la caméra recule et vise plus bas (0,55 m) : toute la scène (socle,
+            // boîte, objet qui flotte) tient dans les deux tiers HAUTS de l'écran, et le cartouche
+            // du résultat se place dessous, sans rien recouvrir ni couper le socle.
+            camGo.transform.localPosition = CameraPosition;
+            camGo.transform.LookAt(transform.position + Vector3.up * CameraAimHeight);
             studioCam = camGo.AddComponent<Camera>();
             studioCam.fieldOfView = 34f;
             studioCam.clearFlags = CameraClearFlags.SolidColor;
