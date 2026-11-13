@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -216,6 +217,101 @@ namespace TourDeLaChance
                 row.Add(slot);
             }
             return row;
+        }
+
+        /// v6.5 §2 : la vitrine des Boîtes Pirates, avec 6 aperçus au lieu de 3 : 2 objets par
+        /// rareté (Super rare, Légendaire, Secret). Les deux objets d'une même rareté sont collés
+        /// l'un à l'autre et partagent UN badge de taux (le taux de la rareté, pas de l'objet) :
+        /// on voit tout de suite qu'il y a beaucoup de bons objets dedans, sans grands vides.
+        /// Les Secrets sont TOUJOURS des « ? » ici (spec : « 2 points d'interrogation »), même
+        /// déjà obtenus : la vitrine garde la surprise.
+        /// Pur affichage : le choix des objets montrés ne change aucune chance.
+        public static VisualElement RateBadgesPairs(LootBox box, int perRarity = 2)
+        {
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("taux-rangee");
+            row.AddToClassList("taux-rangee--paires");
+            foreach (var rarity in Shop.RaritiesIn(box))
+            {
+                bool secret = rarity.id == "secret";
+                var shownItems = ShowcaseItems(box, rarity.id, perRarity);
+                var group = new VisualElement { pickingMode = PickingMode.Ignore };
+                group.AddToClassList("taux-groupe");
+                var frames = new VisualElement { pickingMode = PickingMode.Ignore };
+                frames.AddToClassList("taux-groupe__cadres");
+                foreach (var item in shownItems)
+                {
+                    var frame = new VisualElement { pickingMode = PickingMode.Ignore };
+                    frame.AddToClassList("taux-objet__cadre");
+                    frame.AddToClassList("taux-objet__cadre--petit");
+                    ShopUi.ColorBorder(frame, rarity);
+                    frame.Add(ShopUi.Visual(item, secret ? ShopUi.Look.Mystery : ShopUi.Look.Normal, "taux-objet__visuel"));
+                    frames.Add(frame);
+                }
+                group.Add(frames);
+                var badge = ShopUi.NewLabel(ShopUi.Percent(Shop.RarityChance(box, rarity)), "taux-badge");
+                badge.style.backgroundColor = rarity.color;
+                group.Add(badge);
+                row.Add(group);
+            }
+            // v6.5 (retouche) : les aperçus prennent TOUTE la largeur de la carte. Une feuille USS
+            // ne sait pas faire « un carré dont le côté dépend de la largeur » : on attend donc que
+            // la rangée connaisse sa largeur (GeometryChangedEvent), puis on calcule le côté.
+            row.RegisterCallback<GeometryChangedEvent>(_ => FitPairs(row));
+            return row;
+        }
+
+        // Écarts fixes de la vitrine Pirates (pixels de référence) : entre les deux cadres d'une
+        // paire (serrés), et entre deux paires.
+        const float PairGap = 4f, GroupGap = 14f;
+
+        /// Donne à chaque cadre le même côté, pour que les 3 paires remplissent la rangée.
+        static void FitPairs(VisualElement row)
+        {
+            float width = row.contentRect.width;
+            if (float.IsNaN(width) || width <= 0f) return;
+            var groups = row.Query<VisualElement>(className: "taux-groupe").ToList();
+            int frames = 0;
+            foreach (var g in groups) frames += g.Query<VisualElement>(className: "taux-objet__cadre").ToList().Count;
+            if (frames == 0) return;
+            // largeur = côtés des cadres + écarts dans les paires + écarts entre les paires
+            float gaps = PairGap * Mathf.Max(0, frames - groups.Count) + GroupGap * Mathf.Max(0, groups.Count - 1);
+            float side = Mathf.Floor(Mathf.Min(110f, (width - gaps) / frames));
+            for (int gi = 0; gi < groups.Count; gi++)
+            {
+                groups[gi].style.marginLeft = gi == 0 ? 0f : GroupGap;
+                groups[gi].style.marginRight = 0f;
+                var list = groups[gi].Query<VisualElement>(className: "taux-objet__cadre").ToList();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var f = list[i];
+                    if (Mathf.Approximately(f.resolvedStyle.width, side)) continue; // déjà à la bonne taille
+                    f.style.width = side;
+                    f.style.height = side;
+                    f.style.marginLeft = i == 0 ? 0f : PairGap;
+                    f.style.marginRight = 0f;
+                    var visual = f.Q<VisualElement>(className: "taux-objet__visuel");
+                    if (visual != null) { visual.style.width = side * 0.82f; visual.style.height = side * 0.82f; }
+                    var question = f.Q<Label>(className: "item-question");
+                    if (question != null) question.style.fontSize = side * 0.6f;
+                }
+            }
+        }
+
+        /// Les objets à montrer pour une rareté : les « meilleurs », c'est-à-dire les plus
+        /// spectaculaires (ceux qui ont une image, puis ceux qui ont un effet animé), et à
+        /// égalité l'ordre de la boîte. Jamais plus que ce que la boîte contient.
+        static List<ShopItem> ShowcaseItems(LootBox box, string rarityId, int count)
+        {
+            var items = Shop.ItemsOfRarity(box, rarityId);
+            return items
+                .Select((item, index) => (item, index))
+                .OrderByDescending(x => x.item.Icon != null)
+                .ThenByDescending(x => x.item.SkinFx != SkinFx.Aucun || x.item.Animation != AccessoryAnimation.Aucune)
+                .ThenBy(x => x.index)
+                .Take(count)
+                .Select(x => x.item)
+                .ToList();
         }
     }
 }

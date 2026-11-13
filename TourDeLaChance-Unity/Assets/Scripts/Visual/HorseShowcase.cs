@@ -11,11 +11,13 @@ namespace TourDeLaChance
     /// La caméra n'est allumée que pendant que l'une de ces deux pop-ups est ouverte : le reste
     /// du temps, elle ne coûte rien.
     /// v6 §12 : la taille de l'image suit le niveau graphique (×0,75 en Faible, ×1,5 en Élevé).
+    /// v6.5 (art bible §16.1.7) : l'image fait 440 × 500, comme la scène de l'Inventaire
+    /// « Casier », et son fond est TRANSPARENT : on voit le dégradé bleu de la vitrine derrière.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class HorseShowcase : MonoBehaviour
     {
-        const int Width = 512, Height = 640;
+        const int Width = 440, Height = 500;
 
         Camera cam;
         RenderTexture target;
@@ -47,6 +49,9 @@ namespace TourDeLaChance
             };
             target.Create();
             cam.targetTexture = target;
+            // Fond transparent (alpha 0) : seule la couleur du cheval s'imprime dans l'image.
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            var bg = cam.backgroundColor; bg.a = 0f; cam.backgroundColor = bg;
         }
 
         /// Allume (pop-up Inventaire / Index ouverte) ou éteint la caméra.

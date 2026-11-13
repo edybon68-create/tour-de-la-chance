@@ -322,6 +322,11 @@ namespace TourDeLaChance
         /// le montant des trésors, jamais le piège, le nombre de coffres, leur rareté ni les boîtes.
         public static int OutfitBonusPercent => OutfitBonusPercentWith(null);
 
+        /// v6.5 (art bible §16.1.3) : le haut de la jauge « Bonus de tenue » de l'Inventaire, en %.
+        /// C'est le plafond annoncé par la règle d'or (+50 % au plus) ; une tenue en donne au plus
+        /// 3 × 15 = 45 aujourd'hui. Sert seulement à l'affichage.
+        public const int OutfitBonusGauge = 50;
+
         /// Le bonus qu'aurait la tenue si on équipait « tryItem » (calcul seulement, rien n'est
         /// sauvegardé) : sert à l'Inventaire, « Avec cet objet : +16 % ». Si 2 accessoires sont
         /// déjà portés sur d'autres emplacements, on suppose qu'il remplace « replace » (ou, à

@@ -18,7 +18,8 @@ namespace TourDeLaChance
     ///
     /// v6 §9.2 : après un piège, quand la reprise est possible, l'écran du bas montre (0,8 s
     /// après la révélation) « Oh non, un piège ! », la cagnotte qui peut être sauvée, et deux
-    /// boutons côte à côte : « Rejouer » (qui demande « Tu es sûr ? ») et « Continuer — N ◆ ».
+    /// boutons côte à côte : « Rejouer » et « Continuer — N ◆ » (qui demande « Continuer ? »,
+    /// v6.5 §1 ; « Rejouer » relance tout de suite, sans question).
     /// Les boutons du bas sont des bulles en image (art bible §15.1).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -27,7 +28,7 @@ namespace TourDeLaChance
         [SerializeField] GameManager game;
         [SerializeField] ChestTrial chestTrial;
         [SerializeField] GameTexts texts; // les phrases (Assets/Data/Textes.asset)
-        [Tooltip("v6 §9.3 : la confirmation « Tu es sûr ? » (sur le document des pop-ups).")]
+        [Tooltip("v6.5 §1 : la confirmation « Continuer ? » (sur le document des pop-ups).")]
         [SerializeField] ReviveOfferView reviveView;
 
         const float ReviveShowDelay = 0.8f; // v6 §9.2 : on voit d'abord le piège
@@ -252,23 +253,27 @@ namespace TourDeLaChance
             reviveOfferTime = 0f;
         }
 
-        /// « Rejouer » : sur l'écran Perdu, nouvelle partie tout de suite ; à côté de
-        /// « Continuer », d'abord la question « Tu es sûr ? » (§9.3).
+        /// « Rejouer » : nouvelle partie tout de suite, sans question (v6.5 §1). Si la reprise
+        /// était proposée, on la refuse d'abord (la partie piégée se termine), puis on rejoue.
         void OnReplay()
         {
+            if (reviveView != null && reviveView.ConfirmOpen) return; // la pop-up « Continuer ? » est devant
             if (game.State == GameState.ReviveOffer)
             {
-                if (reviveView != null) reviveView.OpenConfirm();
+                game.DeclineReviveAndReplay();
                 return;
             }
             game.NewRun();
         }
 
-        /// « Continuer — N ◆ » : le GameManager vérifie et paie (un double-clic ne paie qu'une fois).
+        /// « Continuer — N ◆ » : ouvre d'abord la confirmation « Continuer ? » (v6.5 §1). C'est
+        /// son bouton « Oui, continuer » qui demande au GameManager de payer (un double-clic ne
+        /// paie qu'une fois : le GameManager refuse dès qu'on n'est plus en ReviveOffer).
         void OnContinue()
         {
-            if (reviveView != null && reviveView.ConfirmOpen) return;
-            game.AcceptRevive();
+            if (reviveView == null) { game.AcceptRevive(); return; } // filet de sécurité : pas de pop-up branchée
+            if (reviveView.ConfirmOpen) return;
+            reviveView.OpenConfirm();
         }
 
         /// OUTILS DE TEST : clics sur les boutons du bas, et ce qu'ils affichent.

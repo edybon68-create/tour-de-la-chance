@@ -7,9 +7,11 @@ namespace TourDeLaChance
     /// v6 §9.2 : la fenêtre de reprise au centre a DISPARU. L'offre est maintenant sur l'écran du
     /// bas (boutons « Rejouer » et « Continuer — N ◆ », dans HudController). Ce script ne garde
     /// que la petite SPIRALE bleutée « retour en arrière » (0,4 s) quand la reprise est acceptée,
-    /// et la confirmation « Tu es sûr ? » (§9.3) que « Rejouer » ouvre quand « Continuer » est
-    /// proposé. Elle est ici (document des pop-ups) pour que son voile couvre TOUTE la fenêtre,
-    /// colonnes comprises. Pur affichage : les décisions sont dans le GameManager.
+    /// et la confirmation « Continuer ? » (v6.5 §1) que « Continuer — N ◆ » ouvre, pour ne pas
+    /// dépenser de diamants sur un clic raté. (En v6, c'était « Rejouer » qui demandait
+    /// « Tu es sûr ? » : v6.5 a déplacé la question.) Elle est ici (document des pop-ups) pour que
+    /// son voile couvre TOUTE la fenêtre, colonnes comprises. Pur affichage : les décisions sont
+    /// dans le GameManager.
     /// (Le nom de la classe est gardé pour ne pas débrancher la scène.)
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -50,7 +52,7 @@ namespace TourDeLaChance
         }
 
         // =====================================================================
-        // v6 §9.3 : « Tu es sûr ? »
+        // v6.5 §1 : « Continuer ? » (même pop-up que la v6, autres textes)
         // =====================================================================
 
         void BuildConfirm()
@@ -59,13 +61,13 @@ namespace TourDeLaChance
             sureVeil.AddToClassList("sur-voile");
             var box = new VisualElement();
             box.AddToClassList("sur-boite");
-            box.Add(ShopUi.NewLabel("Tu es sûr ?", "sur-titre"));
+            box.Add(ShopUi.NewLabel("Continuer ?", "sur-titre"));
             sureText = ShopUi.NewLabel("", "sur-texte");
             box.Add(sureText);
             var buttons = new VisualElement();
             buttons.AddToClassList("sur-boutons");
-            var yes = new Button(OnYes) { text = "Oui, rejouer" };
-            yes.AddToClassList("btn"); yes.AddToClassList("btn--rouge-vif"); yes.AddToClassList("sur-btn");
+            var yes = new Button(OnYes) { text = "Oui, continuer" };
+            yes.AddToClassList("btn"); yes.AddToClassList("btn--vert"); yes.AddToClassList("sur-btn");
             // « Annuler » est le bouton PAR DÉFAUT (liseré or) : Entrée et Échap annulent.
             var no = new Button(CloseConfirm) { text = "Annuler" };
             no.AddToClassList("btn"); no.AddToClassList("btn--sombre"); no.AddToClassList("sur-btn"); no.AddToClassList("sur-btn--defaut");
@@ -79,21 +81,23 @@ namespace TourDeLaChance
             ButtonStyler.Register(sureVeil);
         }
 
-        /// Ouvre la confirmation (seulement quand la reprise est proposée).
+        /// Ouvre la confirmation (seulement quand la reprise est proposée, et pas pendant la
+        /// transition de la reprise déjà payée : un double-clic ne rouvre pas la pop-up).
         public void OpenConfirm()
         {
-            if (game.State != GameState.ReviveOffer) return;
-            sureText.text = $"Tu vas perdre ta cagnotte de {ShopUi.Thousands(game.Pot)} pièces. Tu peux encore la sauver pour {game.NextReviveCost} {ShopUi.Diamant}.";
+            if (game.State != GameState.ReviveOffer || game.TransitionLocked) return;
+            sureText.text = $"Tu vas dépenser {game.NextReviveCost} {ShopUi.Diamant} pour sauver ta cagnotte de {ShopUi.Thousands(game.Pot)} pièces.";
             sureVeil.style.display = DisplayStyle.Flex;
         }
 
         public void CloseConfirm() => sureVeil.style.display = DisplayStyle.None;
 
-        /// « Oui, rejouer » : la partie se termine et la nouvelle commence (GameManager).
+        /// « Oui, continuer » : le GameManager vérifie et paie. Il refuse un 2e paiement (on
+        /// n'est plus en ReviveOffer après le 1er) : la protection anti double-clic de la v6 reste.
         void OnYes()
         {
             CloseConfirm();
-            game.DeclineReviveAndReplay();
+            game.AcceptRevive();
         }
 
         void OnGameChanged()
@@ -107,7 +111,7 @@ namespace TourDeLaChance
 
         void Update()
         {
-            // Entrée = Annuler, Échap = Annuler (on ne perd jamais une partie par erreur).
+            // Entrée = Annuler, Échap = Annuler (on ne dépense jamais de diamants par erreur).
             if (ConfirmOpen)
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;

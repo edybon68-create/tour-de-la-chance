@@ -29,6 +29,10 @@ namespace TourDeLaChance
         float spinY;                         // tour sur soi-même (°)
         float lookY, lookFrom, lookTo, lookTime = 1f; // regard vers un coffre (°)
 
+        /// v6.5 §5 : l'angle de vue autour de l'axe vertical (°), réglé par PlayerSpinner quand on
+        /// fait tourner le cheval dans l'Inventaire. 0 = pose de jeu (de face).
+        public float ViewYaw { get; set; }
+
         // Respiration
         bool breathing = true;
         float breathWeight = 1f;
@@ -62,7 +66,7 @@ namespace TourDeLaChance
             float swayZ = 1.5f * amplitude * breathWeight * Mathf.Sin(2f * Mathf.PI * breathTime / (period * 2f));
 
             transform.localPosition = restPosition + Vector3.up * offsetY;
-            transform.localRotation = restRotation * Quaternion.Euler(leanX, lookY + spinY, swayZ);
+            transform.localRotation = restRotation * Quaternion.Euler(leanX, lookY + spinY + ViewYaw, swayZ);
             transform.localScale = Vector3.Scale(restScale, Vector3.Scale(actionScale, breathScale));
         }
 

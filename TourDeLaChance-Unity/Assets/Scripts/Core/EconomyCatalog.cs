@@ -56,7 +56,7 @@ namespace TourDeLaChance
         [Tooltip("Les lots, dans l'ordre d'affichage. Tous au même taux (1 ◆ = 200 pièces).")]
         [SerializeField] List<CoinPackDef> coinPacks = new List<CoinPackDef>();
 
-        [Header("Route des trophées (v6 §8.4)")]
+        [Header("L'Ascension, ex-route des trophées (v6 §8.4)")]
         [Tooltip("Les paliers, dans l'ordre croissant : 5 → 1 ◆, 10 → 2, 15 → 3, 20 → 5, 25 → 5, 30 → 10.")]
         [SerializeField] List<TrophyMilestone> trophyMilestones = new List<TrophyMilestone>();
         [Tooltip("Au-delà du dernier palier : un palier tous les N étages (10)…")]
@@ -159,7 +159,7 @@ namespace TourDeLaChance
                     Error($"le lot d'échange « {coinPacks[i].displayName} » n'a pas le même taux que « {coinPacks[0].displayName} ».");
             for (int i = 1; i < trophyMilestones.Count; i++)
                 if (trophyMilestones[i].floor <= trophyMilestones[i - 1].floor)
-                    Error("les paliers de la route des trophées doivent être dans l'ordre croissant.");
+                    Error("les paliers de L'Ascension doivent être dans l'ordre croissant.");
             return ok;
         }
     }

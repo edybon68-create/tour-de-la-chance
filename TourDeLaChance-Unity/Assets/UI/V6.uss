@@ -389,3 +389,15 @@
 .rn-fait__texte { font-size: 34px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; -unity-text-align: middle-center; white-space: normal; }
 
 .btn.detail-close.bulle-petit { position: absolute; top: -28px; right: -32px; }
+
+/* =====================================================================
+   v6.5 §2 : vitrine des Boîtes Pirates, 6 aperçus (2 par rareté), serrés
+   Les deux cadres d'une rareté se touchent presque et partagent un badge de taux.
+   Les 3 groupes sont centrés, avec un petit espace égal entre eux (pas de grands vides).
+   ===================================================================== */
+.taux-rangee--paires { justify-content: center; }
+.taux-groupe { align-items: center; margin: 0 8px; }
+.taux-groupe__cadres { flex-direction: row; }
+.taux-objet__cadre.taux-objet__cadre--petit { width: 58px; height: 58px; border-radius: 14px; margin: 0 2px; }
+.taux-objet__cadre--petit .taux-objet__visuel { width: 48px; height: 48px; }
+.taux-objet__cadre--petit .item-question { font-size: 36px; }

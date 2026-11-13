@@ -14,7 +14,7 @@ namespace TourDeLaChance
     ///   - « pop » du nombre (1 → 1,35 → 1 en 0,3 s) quand le nouvel étage se montre ;
     ///   - record battu pendant la partie : contour or et étiquette « RECORD » ;
     ///   - au tout premier étage (fin du fondu de « Jouer »), le badge apparaît (0,6 → 1,08 → 1) ;
-    ///   - v6 §8.3 : un CLIC sur le badge ouvre la route des trophées (le GameManager décide si
+    ///   - v6 §8.3 : un CLIC sur le badge ouvre L'Ascension (le GameManager décide si
     ///     c'est permis : jamais pendant une épreuve, une transition ou une reprise proposée).
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
@@ -64,7 +64,7 @@ namespace TourDeLaChance
             game.FloorShown -= OnFloorShown;
         }
 
-        /// Clic sur le badge : la route des trophées (ou la ferme si elle est déjà ouverte).
+        /// Clic sur le badge : L'Ascension (ou la ferme si elle est déjà ouverte).
         void OnBadgeClicked(ClickEvent evt)
         {
             if (game.PanelOpen != PanelId.Route && !game.CanOpen(PanelId.Route)) { UiSounds.PlayRefus(); return; }

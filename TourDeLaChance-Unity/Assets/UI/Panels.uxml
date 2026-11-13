@@ -19,6 +19,7 @@
     <Style src="V5.uss" />
     <Style src="V51.uss" />
     <Style src="V6.uss" />
+    <Style src="V65.uss" />
     <ui:VisualElement name="panels-root" class="panels-root" picking-mode="Ignore">
         <ui:VisualElement name="popup-dim" class="popup-dim" />
         <ui:VisualElement name="popup-layer" class="popup-layer" picking-mode="Ignore">
@@ -39,32 +40,9 @@
                              Tout est construit par BoutiquePage. -->
                         <ui:VisualElement name="page-boutique" class="shop-page boutique-page" />
 
-                        <!-- Inventaire : vitrine du cheval à gauche + grille -->
-                        <ui:VisualElement name="page-inventaire" class="shop-page page-split">
-                            <ui:VisualElement name="inv-showcase" class="showcase" picking-mode="Ignore" />
-                            <ui:VisualElement class="page-split-main">
-                                <ui:Label name="inv-bonus" text="" class="bonus-line" picking-mode="Ignore" />
-                                <!-- v6 §7 : 3 onglets et « Équiper le meilleur » en haut à droite. -->
-                                <ui:VisualElement class="inv-haut">
-                                    <ui:VisualElement class="subtabs">
-                                        <ui:Button name="inv-skins" text="Skins" class="btn btn--sombre subtab" />
-                                        <ui:Button name="inv-accessoires" text="Accessoires" class="btn btn--sombre subtab" />
-                                        <ui:Button name="inv-tenues" text="Mes skins" class="btn btn--sombre subtab" />
-                                    </ui:VisualElement>
-                                    <ui:Button name="inv-best" text="Équiper le meilleur" class="btn btn--vert inv-meilleur" />
-                                </ui:VisualElement>
-                                <ui:ScrollView name="inv-list" class="shop-scroll" />
-                                <ui:VisualElement class="inv-actions">
-                                    <ui:Label name="inv-selected" text="" class="inv-selected" picking-mode="Ignore" />
-                                    <ui:VisualElement class="inv-buttons">
-                                        <ui:Button name="inv-equip" text="Équiper" class="btn btn--vert action-btn action-btn--equip" />
-                                        <ui:Button name="inv-sell" text="Vendre 1 doublon" class="btn btn--sombre action-btn action-btn--sell" />
-                                        <!-- v6 (QA n°38) : sur la même ligne, pour laisser plus de place à la grille. -->
-                                        <ui:Button name="inv-sellall" text="Vendre tous les doublons" class="btn btn--sombre action-btn action-btn--sellall" />
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
+                        <!-- Inventaire v6.5 « Casier » (art bible §16.1) : menu à gauche, grille au milieu,
+                             grand cheval 3D à droite. Tout est construit par InventoryPage (styles : V65.uss). -->
+                        <ui:VisualElement name="page-inventaire" class="shop-page casier" />
 
                         <!-- Index v5 (§8) : onglets Tous / Par rareté / Par catégorie, grille de cartes,
                              fiche agrandie au clic. Plus de vitrine du cheval du joueur. Construit par IndexPage. -->
@@ -73,7 +51,7 @@
                         <!-- Renaissance v5 (§13.3) : Tu perds / Tu gardes / Tu gagnes. Construit par RebirthPage. -->
                         <ui:VisualElement name="page-renaissance" class="shop-page rebirth-page" />
 
-                        <!-- v6 §8 : la route des trophées. Construite par TrophyRoadPage. -->
+                        <!-- v6.5 §6 : L'Ascension (ex-route des trophées). Construite par TrophyRoadPage, styles dans V65.uss. -->
                         <ui:VisualElement name="page-route" class="shop-page route-page" />
 
                         <!-- Améliorations : une carte par amélioration (créées par le code) -->

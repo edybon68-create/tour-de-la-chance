@@ -23,7 +23,7 @@ namespace TourDeLaChance
         public Sprite iconeGraphismes;
         [Tooltip("icone_rotation.png : l'indice « Glisse pour tourner » de la fiche agrandie.")]
         public Sprite iconeRotation;
-        [Tooltip("icone_route.png : le titre de la Route des trophées.")]
+        [Tooltip("icone_route.png : le titre de L'Ascension (ex-route des trophées).")]
         public Sprite iconeRoute;
         [Tooltip("drapeau_record.png : le drapeau doré du record sur la route.")]
         public Sprite drapeauRecord;

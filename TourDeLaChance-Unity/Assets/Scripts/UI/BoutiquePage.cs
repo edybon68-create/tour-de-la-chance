@@ -367,7 +367,8 @@ namespace TourDeLaChance
             card.Add(middle);
 
             // 3. Les taux, toujours visibles : un objet par rareté et son taux en badge.
-            card.Add(PopupDecor.RateBadges(box));
+            // v6.5 §2 : les Boîtes Pirates en montrent 2 par rareté (6 aperçus, serrés).
+            card.Add(box.family == BoxFamily.Pirates ? PopupDecor.RateBadgesPairs(box) : PopupDecor.RateBadges(box));
 
             // 4. La pilule de prix « Ouvrir » et « Contenu et taux ».
             var buttons = new VisualElement();

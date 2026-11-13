@@ -6,7 +6,7 @@ namespace TourDeLaChance
 {
     /// <summary>
     /// L'onglet « MES SKINS » de l'Inventaire (spec v6 §7.2) : les 5 tenues sauvegardées, en
-    /// colonne. Une case vide : « Emplacement libre » + « Sauver ma tenue actuelle ». Une case
+    /// colonne (v6.5 : lignes du « Casier », art bible §16.1.6 ; textes et règles inchangés). Une case vide : « Emplacement libre » + « Sauver ma tenue actuelle ». Une case
     /// remplie : le nom, 3 mini-icônes, les bonus, « Portée ✓ », et les boutons Mettre / Renommer /
     /// Remplacer par ma tenue / Supprimer. Les petites fenêtres (nom, confirmations) sont posées
     /// sur la page.
@@ -36,57 +36,105 @@ namespace TourDeLaChance
             return list;
         }
 
+        /// Une ligne de tenue (v6.5, art bible §16.1.6) : le rond du numéro, puis le nom, le
+        /// bonus et 3 mini-cases (skin + 2 accessoires), puis « Mettre » et les petits boutons.
+        /// La tenue portée a l'anneau or autour de la ligne et le badge vert sur son numéro.
         VisualElement Slot(int slot, SavedOutfits.Entry e)
         {
             var box = new VisualElement();
             box.AddToClassList("tenue");
+            bool worn = !e.IsEmpty && SavedOutfits.IsWorn(e);
+            if (worn)
+            {
+                box.AddToClassList("tenue--portee");
+                box.Add(Ignored("tenue__anneau-encre"));
+                box.Add(Ignored("tenue__anneau"));
+            }
+
+            var number = Ignored("tenue__numero");
+            number.Add(ShopUi.NewLabel((slot + 1).ToString(), "tenue__numero-texte"));
+            if (worn)
+            {
+                var badge = Ignored("casier-badge-equipe tenue__numero-badge");
+                badge.Add(Ignored("casier-coche__court"));
+                badge.Add(Ignored("casier-coche__long"));
+                number.Add(badge);
+            }
+            box.Add(number);
+
             if (e.IsEmpty)
             {
                 box.AddToClassList("tenue--vide");
                 box.Add(ShopUi.NewLabel("Emplacement libre", "tenue__libre"));
-                box.Add(NewButton("Sauver ma tenue actuelle", "btn--vert", () => AskName(SavedOutfits.DefaultName(slot), n => SavedOutfits.SaveCurrent(slot, n))));
+                box.Add(BubbleButton("Sauver ma tenue actuelle", "bulle-rect--violet", "tenue__sauver",
+                    () => AskName(SavedOutfits.DefaultName(slot), n => SavedOutfits.SaveCurrent(slot, n))));
                 return box;
             }
 
-            // Les 3 mini-icônes : skin + 2 accessoires (case vide si pas d'accessoire, « ? » gris
-            // si l'objet n'est plus possédé).
-            var icons = new VisualElement { pickingMode = PickingMode.Ignore };
-            icons.AddToClassList("tenue__icones");
-            foreach (var id in new[] { e.skin, e.acc1, e.acc2 }) icons.Add(MiniIcon(id));
-            box.Add(icons);
-
-            var infos = new VisualElement { pickingMode = PickingMode.Ignore };
-            infos.AddToClassList("tenue__infos");
-            infos.Add(ShopUi.NewLabel(e.nom, "tenue__nom"));
+            var middle = Ignored("tenue__milieu");
+            var top = Ignored("tenue__haut");
+            top.Add(ShopUi.NewLabel(e.nom, "tenue__nom"));
             int coins = SavedOutfits.CoinBonus(e), diamonds = SavedOutfits.DiamondBonus(e);
-            infos.Add(ShopUi.NewLabel($"+{coins} % pièces" + (diamonds > 0 ? $" · +{diamonds} % {ShopUi.Diamant}" : ""), "tenue__bonus"));
+            top.Add(InventoryPage.BonusBadge(coins, "casier-badge-bonus tenue__bonus-badge"));
+            if (diamonds > 0) top.Add(ShopUi.NewLabel($"{ShopUi.Diamant} +{diamonds} %", "tenue__diamants"));
+            middle.Add(top);
+            // Les 3 mini-cases : skin + 2 accessoires (place vide = « + », « ? » si l'objet
+            // n'est plus possédé).
+            var icons = Ignored("tenue__icones");
+            foreach (var id in new[] { e.skin, e.acc1, e.acc2 }) icons.Add(MiniIcon(id));
+            middle.Add(icons);
             int missing = SavedOutfits.MissingCount(e);
-            if (missing > 0) infos.Add(ShopUi.NewLabel(missing == 1 ? "1 objet manquant" : $"{missing} objets manquants", "tenue__manque"));
-            bool worn = SavedOutfits.IsWorn(e);
-            if (worn) infos.Add(ShopUi.NewLabel("Portée ✓", "tenue__portee"));
-            box.Add(infos);
+            if (missing > 0) middle.Add(ShopUi.NewLabel(missing == 1 ? "1 objet manquant" : $"{missing} objets manquants", "tenue__manque"));
+            box.Add(middle);
 
-            var buttons = new VisualElement();
-            buttons.AddToClassList("tenue__boutons");
-            var wear = NewButton("Mettre", "btn--vert", () => Wear(slot));
+            var wear = BubbleButton("Mettre", "bulle-rect--vert", "tenue__mettre", () => Wear(slot));
             wear.SetEnabled(!worn);
-            buttons.Add(wear);
-            buttons.Add(NewButton("Renommer", "btn--sombre", () => AskName(e.nom, n => SavedOutfits.Rename(slot, n))));
-            buttons.Add(NewButton("Remplacer par ma tenue", "btn--sombre", () => Confirm($"Remplacer « {e.nom} » par ta tenue actuelle ?", "Oui", () => SavedOutfits.ReplaceWithCurrent(slot))));
-            buttons.Add(NewButton("Supprimer", "btn--sombre", () => Confirm($"Supprimer « {e.nom} » ?", "Supprimer", () => SavedOutfits.Delete(slot))));
-            box.Add(buttons);
+            box.Add(wear);
+            var small = new VisualElement();
+            small.AddToClassList("tenue__petits");
+            small.Add(NewButton("Renommer", "btn--sombre", () => AskName(e.nom, n => SavedOutfits.Rename(slot, n))));
+            small.Add(NewButton("Remplacer par ma tenue", "btn--sombre", () => Confirm($"Remplacer « {e.nom} » par ta tenue actuelle ?", "Oui", () => SavedOutfits.ReplaceWithCurrent(slot))));
+            small.Add(NewButton("Supprimer", "btn--sombre", () => Confirm($"Supprimer « {e.nom} » ?", "Supprimer", () => SavedOutfits.Delete(slot))));
+            box.Add(small);
             return box;
         }
 
+        static VisualElement Ignored(string classes)
+        {
+            var v = new VisualElement { pickingMode = PickingMode.Ignore };
+            foreach (var c in classes.Split(' ')) v.AddToClassList(c);
+            return v;
+        }
+
+        /// Une mini-case de 76 px, même anatomie que les cases de la grille (sans badge bonus).
         static VisualElement MiniIcon(string id)
         {
-            var cell = new VisualElement { pickingMode = PickingMode.Ignore };
-            cell.AddToClassList("tenue__icone");
-            if (string.IsNullOrEmpty(id)) return cell;
-            var item = Shop.Find(id);
-            if (item == null || !Shop.IsOwned(item)) { cell.Add(ShopUi.NewLabel("?", "tenue__icone-manque")); return cell; }
-            cell.Add(ShopUi.Visual(item, ShopUi.Look.Normal));
+            var item = string.IsNullOrEmpty(id) ? null : Shop.Find(id);
+            if (string.IsNullOrEmpty(id))
+            {
+                var empty = Ignored("tenue__mini tenue__mini--vide");
+                empty.Add(Ignored("tenue__plus tenue__plus--h"));
+                empty.Add(Ignored("tenue__plus tenue__plus--v"));
+                return empty;
+            }
+            if (item == null || !Shop.IsOwned(item))
+            {
+                var lost = Ignored("tenue__mini tenue__mini--vide");
+                lost.Add(ShopUi.NewLabel("?", "tenue__icone-manque"));
+                return lost;
+            }
+            var cell = Ignored("tenue__mini casier-case case--" + InventoryPage.RarityClass(item));
+            cell.Add(ShopUi.Visual(item, ShopUi.Look.Normal, "tenue__mini-visuel"));
             return cell;
+        }
+
+        /// Un bouton « bulle » rectangulaire (image rendue dans Blender, 9-slice).
+        static Button BubbleButton(string text, string color, string extra, Action click)
+        {
+            var b = new Button(click);
+            foreach (var c in new[] { "btn", "bulle", "bulle-rect", color, extra }) b.AddToClassList(c);
+            b.Add(ShopUi.NewLabel(text, "bulle-rect__texte"));
+            return b;
         }
 
         static Button NewButton(string text, string color, Action click)

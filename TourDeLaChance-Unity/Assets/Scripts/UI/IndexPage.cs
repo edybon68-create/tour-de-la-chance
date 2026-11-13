@@ -13,7 +13,7 @@ namespace TourDeLaChance
     /// de Commun à Secret partout (§5.3) ; chaque boîte de l'onglet Tous dit sa récompense de
     /// collection (§6.3).
     /// Trois onglets : Tous (une section par boîte), Par rareté (Commun en haut), Par catégorie
-    /// (Skins, Tête, Visage, Cou, Dos). Tout est visible en couleurs, SAUF les Secrets non
+    /// (v6.5 §3 : seulement Skins et Accessoires, sans le détail tête, cou, dos…). Tout est visible en couleurs, SAUF les Secrets non
     /// obtenus (« ? » et « ??? ») ; un objet non obtenu porte le ruban « Pas encore ». Chaque
     /// carte montre la chance par objet, le bonus de tenue et la mini-image de sa boîte.
     /// Un clic ouvre la FICHE AGRANDIE (ItemDetailView) avec l'objet sur le cheval vierge.
@@ -138,9 +138,10 @@ namespace TourDeLaChance
                         .OrderBy(Shop.RarityRank)   // v6 §5.3 : du plus commun au plus rare
                         .ThenBy(i => boxOrder.IndexOf(Shop.BoxOf(i)))
                         .ThenBy(Shop.NumberOf);
+                    // v6.5 §3 : deux catégories seulement. Tous les accessoires sont ensemble,
+                    // quel que soit leur emplacement (tête, cou, dos…), triés par rareté.
                     Section("Skins", Sorted(i => i.Category == ShopCategory.Skin).ToList(), null);
-                    foreach (AccessorySlot slot in Enum.GetValues(typeof(AccessorySlot)))
-                        Section(InventoryPage.SlotName(slot), Sorted(i => i.Category == ShopCategory.Accessoire && i.Slot == slot).ToList(), null);
+                    Section("Accessoires", Sorted(i => i.Category == ShopCategory.Accessoire).ToList(), null);
                     break;
             }
             ButtonStyler.Apply(grid);

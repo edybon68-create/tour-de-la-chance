@@ -56,7 +56,17 @@
   - Renaissance refaite, 25 bulles rendues dans Blender, graphismes Faible / Moyen / Élevé.
   - Nouvelles icônes Boutique (échoppe) et Réglages.
 
+- **v6.5** (13/11/2026). Liste et décisions dans `docs/specs/v6.5.md`, design dans l'art bible §16.
+  - La confirmation passe de Rejouer (direct) à « Continuer — X diamants ».
+  - 6 aperçus sur les boîtes Pirates (2 Super rares, 2 Légendaires, 2 « ? »).
+  - Index par catégorie : Skins et Accessoires seulement.
+  - Inventaire refait façon « Casier » de Fortnite : menu à gauche, grille au milieu, cheval qu'on fait tourner à droite (`DragToRotate`).
+  - « L'Ascension » remplace la route des trophées : 12 dalles Blender (`blender/rendu_dalles.py`), qui sont le vrai étage de la tour entouré du ciel de chaque palier (`TierForFloor` : 1-3, 4-6, 7-9, 10+). Presque pas de texte, détail dans le bouton « i ».
+  - Petits textes de la Boutique allégés (ombre au lieu du contour épais), diamant 3D définitif (`blender/diamant.py`, `.fbx`, le projet n'a pas d'importeur glTF).
+  - Leçons : chaque décor doit correspondre à ce qu'on voit en jeu au même étage ; l'auteur joue souvent dans l'éditeur, il ne faut jamais compiler pendant son mode Play.
+
 ## En cours / prochaine étape (v6, au 13/11/2026)
+- V6.5 livrée, en attente des tests de l'auteur. Petits restes : « Ma position » chevauche un peu le « i » du bas, rayons de « Récupérer » discrets sur le fond rose.
 - V6 livrée, en attente des tests de l'auteur.
 - À surveiller : retouches USS non recapturées (route, renaissance), mesure des performances au Profiler, animation de l'échange (pièces volantes) non faite.
 

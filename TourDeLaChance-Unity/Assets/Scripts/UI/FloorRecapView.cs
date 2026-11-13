@@ -251,7 +251,7 @@ namespace TourDeLaChance
             SetPhase(Phase.Folding);
         }
 
-        /// v6 §8.3 : la barre compacte ouvre la route des trophées (le GameManager décide si
+        /// v6 §8.3 : la barre compacte ouvre L'Ascension (le GameManager décide si
         /// c'est permis). L'ancien « rouvrir la carte 2 s » est remplacé.
         void OnBarClicked(ClickEvent evt)
         {

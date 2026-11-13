@@ -1,0 +1,518 @@
+/* =====================================================================
+   V6.5 : l'Inventaire « Casier » (art bible §16.1). Construit par InventoryPage.cs.
+   Tailles en pixels de référence 1920 × 1080 (Unity réduit tout ensemble en 1280 × 720).
+   Trois zones : menu à gauche (280), grille au milieu (776), vitrine à droite (440).
+   Le bleu « Inventaire » n'apparaît qu'à deux endroits : l'entrée active et la vitrine.
+   ===================================================================== */
+
+.casier.shop-page--active { display: flex; flex-direction: row; }
+
+/* ---------------------------------------------------------------------
+   1. Colonne de gauche
+   --------------------------------------------------------------------- */
+.casier-gauche { width: 280px; flex-shrink: 0; margin-right: 14px; }
+
+/* Le menu, dans un « puits » clair creusé (même matière que le sélecteur Graphismes). */
+.casier-menu {
+    background-color: #E9E3D6;
+    border-width: 4px; border-color: #110D1F; border-radius: 24px;
+    padding: 12px;
+}
+
+/* La face bleue de l'entrée active et sa pointe : UN élément qui glisse (0,18 s, ease-out-back). */
+.casier-menu__curseur {
+    position: absolute; left: 8px; top: 8px; width: 256px; height: 96px;
+    transition-property: translate; transition-duration: 0.18s; transition-timing-function: ease-out-back;
+}
+.casier-menu__pointe {
+    position: absolute; right: -13px; top: 34px; width: 22px; height: 22px;
+    background-color: #3B7DD8;
+    border-right-width: 4px; border-top-width: 4px; border-color: #110D1F;
+    rotate: 45deg;
+}
+.casier-menu__face {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: #3B7DD8; background-image: url("Degrades/bouton_bleu.png");
+    border-width: 4px; border-bottom-width: 6px; border-color: #110D1F; border-bottom-color: #1F4A8C;
+    border-radius: 18px;
+}
+
+/* Une entrée du menu : un bouton sans fond (c'est la face bleue qui se glisse dessous). */
+.casier .casier-entree {
+    width: 256px; height: 96px; margin: 0 0 10px 0; padding: 0 10px 0 12px;
+    flex-direction: row; align-items: center;
+    background-color: rgba(0, 0, 0, 0); background-image: none;
+    border-width: 0; border-radius: 18px;
+    transition-property: background-color; transition-duration: 0.1s;
+}
+.casier .casier-entree:last-child { margin-bottom: 0; }
+.casier .casier-entree:hover { background-color: rgba(17, 13, 31, 0.06); }
+.casier .casier-entree:active { background-color: rgba(17, 13, 31, 0.12); }
+.casier .casier-entree.casier-entree--active,
+.casier .casier-entree.casier-entree--active:hover { background-color: rgba(0, 0, 0, 0); }
+
+.casier-entree__icone {
+    width: 56px; height: 56px; flex-shrink: 0; margin-right: 10px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale, rotate, width, height, margin-top; transition-duration: 0.2s; transition-timing-function: ease-out-back;
+}
+/* Survol : l'icône grossit et se penche (le dandinement est simplifié en une inclinaison). */
+.casier-entree:hover .casier-entree__icone { scale: 1.1 1.1; rotate: 6deg; }
+.casier-entree:active .casier-entree__icone { scale: 0.95 0.95; rotate: 0deg; }
+.casier-entree--active .casier-entree__icone { width: 64px; height: 64px; margin-top: -12px; margin-right: 2px; }
+.casier-icone--skins { background-image: url("../Art/icones_detourees/couleur_bleu.png"); }
+.casier-icone--accessoires { background-image: url("../Art/icones_detourees/chapeau_haut_de_forme.png"); }
+/* icone_mes_skins.png : la petite armoire (lot 8). */
+.casier-icone--tenues { background-image: url("../Art/icones_detourees/icone_mes_skins.png"); }
+
+.casier-entree__texte {
+    /* 26 px au lieu de 28 : « Accessoires » et son compteur tiennent dans les 256 px de l'entrée. */
+    flex-grow: 1; flex-shrink: 1; font-size: 26px; -unity-font-style: bold; color: #3A3358; margin: 0; padding: 0;
+    -unity-text-outline-width: 0; -unity-text-align: middle-left;
+}
+.casier-entree--active .casier-entree__texte { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #1F4A8C; }
+.casier-entree__compteur {
+    height: 32px; padding: 0 9px; border-radius: 16px; margin: 0; flex-shrink: 0;
+    background-color: rgba(17, 13, 31, 0.10);
+    font-size: 20px; -unity-font-style: bold; color: #3A3358; -unity-text-align: middle-center;
+}
+.casier-entree--active .casier-entree__compteur { background-color: #1F4A8C; color: #FFFFFF; }
+
+/* La carte « Bonus de tenue » (obligatoire : le bonus est AFFICHÉ). */
+.casier-bonus {
+    margin-top: 16px; padding: 14px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F; border-radius: 24px;
+}
+.casier-bonus__titre { font-size: 20px; -unity-font-style: bold; color: #3A3358; margin: 0; padding: 0; }
+.casier-bonus__rangee { flex-direction: row; align-items: center; margin: 2px 0 6px 0; }
+.casier-bonus__valeur { font-size: 44px; -unity-font-style: bold; color: #2A2440; margin: 0 0 0 10px; padding: 0; }
+.casier-piece { background-image: url("../Art/icones_detourees/piece.png"); -unity-background-scale-mode: scale-to-fit; flex-shrink: 0; }
+.casier-piece--40 { width: 40px; height: 40px; }
+.casier-piece--26 { width: 26px; height: 26px; margin-right: 6px; }
+.casier-jauge-rangee { flex-direction: row; align-items: center; }
+.casier-jauge {
+    flex-grow: 1; height: 22px; border-width: 3px; border-color: #110D1F; border-radius: 11px;
+    background-color: rgba(17, 13, 31, 0.12); overflow: hidden;
+}
+.casier-jauge__plein { position: absolute; left: 0; top: 0; bottom: 0; background-color: #FFB020; background-image: url("Degrades/bouton_or.png"); }
+.casier-jauge__coche {
+    width: 26px; height: 26px; margin-left: -14px; border-radius: 13px;
+    background-color: #6BE34A; border-width: 3px; border-color: #110D1F;
+}
+.casier-jauge__max { font-size: 18px; color: #6E6A80; margin: 0 0 0 8px; padding: 0; }
+.casier-bonus__essai { font-size: 18px; -unity-font-style: bold; color: #2E8E48; margin: 6px 0 0 0; padding: 0; white-space: normal; }
+.casier-bonus__diamants { font-size: 16px; color: #3A3358; margin: 4px 0 0 0; padding: 0; white-space: normal; }
+
+/* « Équiper le meilleur » : collé en bas de la colonne. */
+.btn.bulle-rect.casier-meilleur {
+    margin: auto 0 0 0; width: 280px; min-width: 280px; height: 130px;
+    padding: 0 20px 18px 20px; overflow: hidden;
+}
+.casier-meilleur__medaille {
+    width: 52px; height: 52px; flex-shrink: 0; margin-right: 10px;
+    background-image: url("../Art/icones_detourees/medaille_or.png"); -unity-background-scale-mode: scale-to-fit;
+}
+.bulle-rect__texte.casier-meilleur__texte { font-size: 28px; -unity-paragraph-spacing: 0; -unity-text-align: middle-left; white-space: normal; }
+.btn.bulle-rect.casier-meilleur:disabled .casier-meilleur__medaille { -unity-background-image-tint-color: rgba(255, 255, 255, 0.55); }
+.casier-meilleur .btn-eclat { top: -10px; bottom: -10px; rotate: 20deg; }
+
+/* ---------------------------------------------------------------------
+   2. Milieu : titre, compteur, grille
+   --------------------------------------------------------------------- */
+.casier-milieu { flex-grow: 1; flex-shrink: 1; width: 776px; margin-right: 14px; }
+.casier-entete { height: 84px; flex-direction: row; align-items: center; flex-shrink: 0; }
+.casier-titre {
+    font-size: 54px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F;
+    text-shadow: 0 5px 0 #110D1F;
+}
+.casier-compteur {
+    height: 44px; padding: 0 16px; margin: 0 0 0 16px; border-radius: 22px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F;
+    font-size: 24px; -unity-font-style: bold; color: #2A2440; -unity-text-align: middle-center;
+}
+.casier-entete__vide { flex-grow: 1; }
+.casier-ronds { flex-direction: row; }
+.casier-rond {
+    width: 30px; height: 30px; margin-left: 8px; border-radius: 15px;
+    border-width: 3px; border-color: #110D1F; background-color: rgba(17, 13, 31, 0.10);
+}
+.casier-rond.casier-rond--plein { background-color: #3B7DD8; }
+.casier-filet { height: 3px; border-radius: 2px; background-color: rgba(17, 13, 31, 0.12); margin-bottom: 16px; flex-shrink: 0; }
+
+/* La grille : la liste s'efface puis réapparaît en remontant de 12 px quand on change de section. */
+.casier-liste { transition-property: opacity, translate; transition-duration: 0.15s; transition-timing-function: ease-out; }
+.casier-liste.casier-liste--entree { opacity: 0; translate: 0 12px; transition-duration: 0s; }
+.casier-liste .unity-scroll-view__content-container { padding: 14px 10px 14px 12px; }
+/* 5 cases de 136 px + 4 écarts de 15 px = 740 px. Chaque case a sa marge droite : la grille fait
+   755 px et « rend » les 15 px de trop par une marge négative (USS n'a pas de :nth-child). */
+.casier-grille { flex-direction: row; flex-wrap: wrap; width: 755px; margin-right: -15px; }
+.casier-grille__vide { font-size: 24px; color: #6E6A80; margin: 20px 0; white-space: normal; }
+
+/* La « place » d'une case : un bouton sans fond, qui ne coupe rien (anneau et badge dépassent). */
+.casier .casier-place {
+    width: 136px; height: 136px; margin: 0 15px 15px 0; padding: 0;
+    background-color: rgba(0, 0, 0, 0); background-image: none; border-width: 0; border-radius: 20px;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.casier .casier-place:hover { scale: 1.06 1.06; }
+.casier .casier-place:active { scale: 0.96 0.96; transition-duration: 0.06s; }
+.casier .casier-place.casier-place--choisie { scale: 1.04 1.04; }
+
+/* La case elle-même : fond de la rareté (dégradé cuit par UiFxTextures), contour d'encre. */
+.casier-case {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    border-width: 5px; border-color: #110D1F; border-radius: 20px; overflow: hidden;
+    -unity-background-scale-mode: stretch-to-fill;
+    -unity-background-image-tint-color: #F2F2F2;
+    align-items: center; justify-content: center;
+}
+.casier-place:hover .casier-case { -unity-background-image-tint-color: #FFFFFF; }
+.case--commun { background-color: #9AA0B0; background-image: url("Degrades/case_commun.png"); }
+.case--peu_commun { background-color: #4CC26A; background-image: url("Degrades/case_peu_commun.png"); }
+.case--rare { background-color: #3B8BEB; background-image: url("Degrades/case_rare.png"); }
+.case--super_rare { background-color: #A35CE0; background-image: url("Degrades/case_super_rare.png"); }
+.case--legendaire { background-color: #FF9F1C; background-image: url("Degrades/case_legendaire.png"); }
+.case--secret { background-color: #FF4FD8; background-image: url("Degrades/case_secret.png"); }
+
+.casier-case__visuel { width: 108px; height: 108px; translate: 0 -4px; align-items: center; justify-content: center; }
+.casier-case__visuel .item-icon { width: 108px; height: 108px; }
+.casier-case__visuel .item-placeholder { width: 80px; height: 80px; border-radius: 40px; }
+.casier-case__reflet { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.casier-case__nombre {
+    position: absolute; left: 6px; top: 6px; height: 24px; padding: 0 7px; border-radius: 12px; margin: 0;
+    background-color: rgba(17, 13, 31, 0.78); font-size: 16px; -unity-font-style: bold; color: #FFFFFF;
+}
+.casier-case__diamant {
+    position: absolute; right: 6px; bottom: 10px; height: 24px; padding: 0 6px; border-radius: 12px; margin: 0;
+    background-color: rgba(17, 13, 31, 0.78); font-size: 15px; -unity-font-style: bold; color: #9FE3FF;
+}
+
+/* Le badge bonus : pièce + « +5 % », en bas à gauche. */
+.casier-badge-bonus {
+    position: absolute; left: 6px; bottom: 10px; height: 28px; padding: 0 8px 0 4px; border-radius: 14px;
+    flex-direction: row; align-items: center; background-color: rgba(17, 13, 31, 0.78);
+}
+.casier-badge-bonus__piece { width: 20px; height: 20px; margin-right: 3px; }
+.casier-badge-bonus__texte { font-size: 18px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0; -unity-text-outline-width: 0; }
+
+/* Le badge « équipé » : rond vert qui dépasse en haut à droite, coche faite de deux barres. */
+.casier-badge-equipe {
+    position: absolute; top: -8px; right: -8px; width: 40px; height: 40px; border-radius: 20px;
+    background-color: #6BE34A; border-width: 3px; border-color: #110D1F;
+}
+.casier-coche__court, .casier-coche__long {
+    position: absolute; width: 6px; border-radius: 3px; background-color: #FFFFFF;
+    border-width: 2px; border-color: #1E6E3E;
+}
+.casier-coche__court { height: 13px; left: 9px; top: 14px; rotate: -45deg; }
+.casier-coche__long { height: 24px; left: 18px; top: 5px; rotate: 45deg; }
+/* La coche de la jauge est plus petite (26 px) : on réduit tout le dessin. */
+.casier-jauge__coche .casier-coche__court, .casier-jauge__coche .casier-coche__long { scale: 0.6 0.6; }
+.casier-jauge__coche .casier-coche__court { left: 3px; top: 5px; }
+.casier-jauge__coche .casier-coche__long { left: 8px; top: -1px; }
+
+/* L'anneau or de la case sélectionnée, doublé d'un anneau d'encre (pour se voir sur le blanc). */
+.casier-anneau-encre {
+    position: absolute; left: -14px; top: -14px; right: -14px; bottom: -14px;
+    border-width: 3px; border-color: #110D1F; border-radius: 33px;
+}
+.casier-anneau {
+    position: absolute; left: -11px; top: -11px; right: -11px; bottom: -11px;
+    border-width: 6px; border-color: #FFD54A; border-radius: 30px;
+}
+
+/* La vente des doublons, sous la grille (fonction gardée de la v5). */
+.casier-vente { flex-direction: row; justify-content: flex-end; margin-top: 8px; flex-shrink: 0; }
+.btn.casier-vente__btn { height: 46px; font-size: 18px; padding: 0 16px; margin: 0 0 0 10px; border-radius: 16px; }
+
+/* ---------------------------------------------------------------------
+   3. Droite : la vitrine (scène 440 × 500 + fiche)
+   --------------------------------------------------------------------- */
+.casier-vitrine {
+    width: 440px; flex-shrink: 0;
+    border-width: 6px; border-color: #110D1F; border-radius: 28px; overflow: hidden;
+    background-color: #2F68BE;
+}
+.casier-scene {
+    height: 500px; flex-shrink: 1; overflow: hidden;
+    background-color: #3B7DD8; background-image: url("Degrades/vitrine_bleue.png");
+    -unity-background-scale-mode: stretch-to-fill;
+}
+.casier-scene__lueur {
+    position: absolute; width: 380px; height: 380px; left: 24px; top: 40px;
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.35);
+    -unity-background-scale-mode: stretch-to-fill;
+}
+.casier-scene__rayons { position: absolute; width: 420px; height: 420px; left: 4px; top: 20px; }
+.casier-scene__socle { position: absolute; width: 240px; height: 54px; left: 94px; top: 403px; }
+.casier-scene__cheval {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.casier-fiche {
+    flex-grow: 1; flex-shrink: 0; min-height: 262px;
+    background-color: #2F68BE; border-top-width: 4px; border-color: #110D1F;
+    padding: 18px 24px 22px 24px;
+}
+.casier-fiche__nom {
+    font-size: 40px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 4px 0 #110D1F;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.casier-fiche__pilules { flex-direction: row; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.casier-pilule {
+    height: 38px; padding: 0 14px; margin: 0 10px 6px 0; border-radius: 19px;
+    border-width: 3px; border-color: #110D1F;
+    flex-direction: row; align-items: center;
+    font-size: 22px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px;
+}
+.casier-pilule--bonus { background-color: rgba(17, 13, 31, 0.55); padding: 0 12px 0 8px; }
+.casier-pilule__texte { font-size: 22px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0; -unity-text-outline-width: 0; }
+.casier-pilule--diamant { background-color: rgba(17, 13, 31, 0.55); color: #9FE3FF; -unity-text-outline-width: 0; }
+/* La pilule de rareté : fond = base de la rareté, contour du texte = sa « bande ». */
+.casier-pilule--commun { background-color: #9AA0B0; -unity-text-outline-color: #4F5468; }
+.casier-pilule--peu_commun { background-color: #4CC26A; -unity-text-outline-color: #1F6A34; }
+.casier-pilule--rare { background-color: #3B8BEB; -unity-text-outline-color: #184585; }
+.casier-pilule--super_rare { background-color: #A35CE0; -unity-text-outline-color: #522383; }
+.casier-pilule--legendaire { background-color: #FF9F1C; -unity-text-outline-color: #9E4E05; }
+.casier-pilule--secret { background-color: #FF4FD8; -unity-text-outline-color: #8A1A78; }
+.casier-fiche__note { font-size: 18px; color: #DCE8FF; margin: 0; padding: 0; }
+.casier-fiche__vide {
+    font-size: 26px; -unity-font-style: bold; color: #FFFFFF; margin: 40px 0 0 0;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; -unity-text-align: middle-center;
+}
+.casier-fiche__ressort { flex-grow: 1; }
+.btn.bulle-rect.casier-action { width: 392px; min-width: 392px; height: 110px; margin: 0; align-self: center; padding: 0 30px 14px 30px; }
+.casier-action .bulle-rect__texte { font-size: 36px; }
+
+/* ---------------------------------------------------------------------
+   4. « Mes skins » : 5 lignes (art bible §16.1.6)
+   --------------------------------------------------------------------- */
+.casier .tenues { width: auto; }
+.casier .tenue {
+    flex-direction: row; align-items: center; height: 124px; margin: 0 0 14px 0; padding: 0 16px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F; border-radius: 22px;
+    background-image: none;
+}
+.tenue__anneau-encre { position: absolute; left: -15px; top: -15px; right: -15px; bottom: -15px; border-width: 3px; border-color: #110D1F; border-radius: 35px; }
+.tenue__anneau { position: absolute; left: -12px; top: -12px; right: -12px; bottom: -12px; border-width: 6px; border-color: #FFD54A; border-radius: 32px; }
+.tenue__numero {
+    width: 56px; height: 56px; border-radius: 28px; flex-shrink: 0; margin-right: 12px;
+    background-color: #3B7DD8; border-width: 4px; border-color: #110D1F;
+    align-items: center; justify-content: center;
+}
+.tenue__numero-texte { font-size: 30px; -unity-font-style: bold; color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; margin: 0; padding: 0; }
+.casier-badge-equipe.tenue__numero-badge { top: -14px; right: -16px; scale: 0.8 0.8; }
+.casier .tenue__libre { flex-grow: 1; font-size: 24px; -unity-font-style: bold; color: #6E6A80; margin: 0; }
+.btn.bulle-rect.tenue__sauver { height: 100px; min-width: 300px; margin: 0; padding: 0 24px 14px 24px; }
+.tenue__sauver .bulle-rect__texte { font-size: 24px; }
+
+.tenue__milieu { flex-grow: 1; flex-shrink: 1; justify-content: center; }
+.tenue__haut { flex-direction: row; align-items: center; height: 30px; margin-bottom: 4px; }
+.casier .tenue__nom { font-size: 20px; -unity-font-style: bold; color: #2A2440; margin: 0 8px 0 0; padding: 0; }
+.casier-badge-bonus.tenue__bonus-badge { position: relative; left: 0; bottom: 0; height: 30px; }
+.casier .tenue__diamants { font-size: 16px; color: #3A3358; margin: 0 0 0 6px; }
+.casier .tenue__manque { font-size: 14px; color: #D64545; margin: 0; padding: 0; }
+.casier .tenue__icones { flex-direction: row; }
+.tenue__mini { width: 76px; height: 76px; margin-right: 6px; }
+.tenue__mini.casier-case { position: relative; left: auto; top: auto; right: auto; bottom: auto; border-width: 4px; border-radius: 16px; }
+.tenue__mini--vide {
+    background-color: rgba(17, 13, 31, 0.08); border-width: 4px; border-color: #C9C2B2; border-radius: 16px;
+    align-items: center; justify-content: center;
+}
+.tenue__plus { position: absolute; background-color: #B5AD9C; border-radius: 3px; }
+.tenue__plus--h { width: 28px; height: 6px; }
+.tenue__plus--v { width: 6px; height: 28px; }
+.tenue__mini-visuel { width: 62px; height: 62px; align-items: center; justify-content: center; }
+.tenue__mini-visuel .item-icon { width: 62px; height: 62px; }
+.casier .tenue__icone-manque { font-size: 30px; color: #B5AD9C; -unity-font-style: bold; }
+.btn.bulle-rect.tenue__mettre { width: 140px; min-width: 140px; height: 100px; margin: 0 8px 0 0; padding: 0 16px 14px 16px; }
+.tenue__mettre .bulle-rect__texte { font-size: 28px; }
+.tenue__petits { width: 200px; flex-shrink: 0; }
+.casier .btn.tenue__btn { height: 32px; font-size: 17px; margin: 2px 0; padding: 0 8px; border-radius: 12px; min-width: 0; }
+
+/* La croix de l'Inventaire (fenêtre très large) rentre de 24 px : en 1280 × 720, elle ne touche
+   plus le compteur de diamants du HUD. */
+.popup-close.bulle-petit.popup-close--interieur { right: -8px; }
+
+/* =====================================================================
+   V6.5 : L'Ascension (art bible §16.2 et §16.3). Construite par TrophyRoadPage.cs.
+   Une colonne de dalles 3D (rendues dans Blender) qu'on fait défiler ; presque rien d'écrit.
+   Tout est placé en position absolue par le code, avec les repères du §16.3.6.
+   ===================================================================== */
+.asc-zone {
+    flex-grow: 1; border-width: 5px; border-color: #110D1F; border-radius: 22px; overflow: hidden;
+    background-color: #17112F;
+}
+.asc-scroll { flex-grow: 1; }
+.asc-contenu { width: 1032px; }
+.asc-plein { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+/* Les losanges : une tuile de 224 px affichée en 112 px, répétée (damier sans couture). */
+.asc-losanges { background-image: url("Degrades/motif_losanges.png"); background-repeat: repeat; background-size: 112px 112px; }
+.asc-etoiles { position: absolute; left: 0; top: 0; right: 0; }
+
+/* La barre de progression : piste sombre, remplissage or jusqu'au record. */
+.asc-barre {
+    position: absolute; left: 26px; width: 28px;
+    background-color: rgba(17, 13, 31, 0.55); border-width: 4px; border-color: #110D1F; border-radius: 14px;
+}
+.asc-barre__plein {
+    position: absolute; left: 30px; width: 20px; border-radius: 10px;
+    background-color: #FFB020; background-image: url("Degrades/bouton_or.png");
+}
+.asc-barre__reflet { position: absolute; left: 4px; top: 4px; bottom: 4px; width: 6px; border-radius: 3px; background-color: rgba(255, 255, 255, 0.35); }
+
+/* Le repère du record : pilule or, drapeau, numéro, petite pointe vers la droite. */
+.asc-record {
+    position: absolute; left: 8px; height: 52px; flex-direction: row; align-items: center;
+    padding: 0 14px 0 6px; background-color: #FFC83A; border-width: 4px; border-color: #110D1F; border-radius: 26px;
+}
+.asc-record__pointe {
+    position: absolute; right: -10px; top: 14px; width: 16px; height: 16px; rotate: 45deg;
+    background-color: #FFC83A; border-top-width: 4px; border-right-width: 4px; border-color: #110D1F;
+}
+.asc-record__drapeau { width: 40px; height: 40px; background-image: url("../Art/icones_detourees/drapeau_record.png"); -unity-background-scale-mode: scale-to-fit; }
+.asc-record__texte { font-size: 28px; -unity-font-style: bold; color: #3A2200; margin: 0 0 0 4px; padding: 0; -unity-text-outline-width: 0; }
+
+/* Les numéros d'étage (le seul texte de la colonne). */
+.asc-numero {
+    position: absolute; left: 70px; width: 80px; height: 48px; margin: 0; padding: 0;
+    font-size: 34px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 3px 0 #110D1F;
+}
+.asc-numero.asc-numero--palier { font-size: 46px; height: 64px; }
+.asc-numero.asc-numero--or { color: #FFD54A; -unity-text-outline-width: 5px; -unity-text-outline-color: #3A2200; text-shadow: 0 4px 0 #110D1F; }
+.asc-numero.asc-numero--inexplore { color: #D9D2F0; opacity: 0.7; }
+
+/* Les dalles (images rendues dans Blender, affichées à la moitié de leur taille). */
+.asc-dalle { position: absolute; -unity-background-scale-mode: scale-to-fit; }
+.asc-dalle.asc-dalle--sombre { -unity-background-image-tint-color: #A8A4BC; }
+.asc-dalle--herbe-a { background-image: url("Dalles/dalle_herbe_a.png"); }
+.asc-dalle--herbe-b { background-image: url("Dalles/dalle_herbe_b.png"); }
+.asc-dalle--herbe-palier { background-image: url("Dalles/dalle_herbe_palier.png"); }
+.asc-dalle--pierre-a { background-image: url("Dalles/dalle_pierre_a.png"); }
+.asc-dalle--pierre-b { background-image: url("Dalles/dalle_pierre_b.png"); }
+.asc-dalle--pierre-palier { background-image: url("Dalles/dalle_pierre_palier.png"); }
+.asc-dalle--nuages-a { background-image: url("Dalles/dalle_nuages_a.png"); }
+.asc-dalle--nuages-b { background-image: url("Dalles/dalle_nuages_b.png"); }
+.asc-dalle--nuages-palier { background-image: url("Dalles/dalle_nuages_palier.png"); }
+.asc-dalle--galaxie-a { background-image: url("Dalles/dalle_galaxie_a.png"); }
+.asc-dalle--galaxie-b { background-image: url("Dalles/dalle_galaxie_b.png"); }
+.asc-dalle--galaxie-palier { background-image: url("Dalles/dalle_galaxie_palier.png"); }
+
+/* Ce qui est posé sur les dalles. */
+.asc-piece { position: absolute; width: 64px; height: 64px; background-image: url("../Art/icones_detourees/piece.png"); -unity-background-scale-mode: scale-to-fit; }
+.asc-diamant { position: absolute; width: 56px; height: 56px; background-image: url("../Art/icones_detourees/diamant.png"); -unity-background-scale-mode: scale-to-fit; }
+.asc-pose--sombre { opacity: 0.75; }
+.asc-x2 {
+    position: absolute; font-size: 24px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200;
+}
+.asc-toi { position: absolute; width: 100px; height: 100px; -unity-background-scale-mode: scale-to-fit; }
+.asc-toi__lueur { position: absolute; width: 110px; height: 34px; border-radius: 17px; background-color: #FFD54A; }
+.asc-drapeau {
+    position: absolute; width: 96px; height: 96px; transform-origin: 37% 84%;
+    background-image: url("../Art/icones_detourees/drapeau_record.png"); -unity-background-scale-mode: scale-to-fit;
+}
+
+/* La carte de la récompense d'un palier. */
+.asc-carte {
+    position: absolute; width: 200px; height: 230px; align-items: center;
+    background-color: #3B5BDB; background-image: url("Degrades/carte_bleue.png"); -unity-background-scale-mode: stretch-to-fill;
+    border-width: 5px; border-color: #110D1F; border-radius: 22px;
+}
+.asc-carte.asc-carte--verrou { -unity-background-image-tint-color: #B8B4C8; background-color: #B8B4C8; opacity: 0.85; }
+.asc-carte__lueur { position: absolute; left: 30px; top: 14px; width: 130px; height: 130px; border-radius: 65px; background-color: rgba(255, 255, 255, 0.35); }
+.asc-carte__diamant { width: 120px; height: 120px; margin-top: 18px; background-image: url("../Art/icones_detourees/diamant.png"); -unity-background-scale-mode: scale-to-fit; }
+.asc-carte__nombre {
+    font-size: 46px; -unity-font-style: bold; color: #FFFFFF; margin: 4px 0 0 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F;
+}
+.asc-carte .cadenas { position: absolute; right: 10px; bottom: 10px; }
+.asc-carte__coche {
+    position: absolute; top: -14px; right: -14px; width: 48px; height: 48px; border-radius: 24px;
+    background-color: #6BE34A; border-width: 3px; border-color: #110D1F;
+}
+.asc-carte__coche .casier-coche__court { left: 12px; top: 18px; }
+.asc-carte__coche .casier-coche__long { left: 22px; top: 8px; height: 28px; }
+.asc-carte__rayons { position: absolute; width: 300px; height: 300px; }
+.btn.bulle-rect.asc-recuperer { position: absolute; width: 260px; min-width: 260px; height: 104px; margin: 0; padding: 0 20px 14px 20px; overflow: hidden; }
+.asc-recuperer .bulle-rect__texte { font-size: 32px; }
+.asc-envol { position: absolute; width: 36px; height: 36px; background-image: url("../Art/icones_detourees/diamant.png"); -unity-background-scale-mode: scale-to-fit; }
+
+/* Les boutons « i » (couloir de droite) et « Ma position ». */
+.btn.bulle-petit.asc-info { position: absolute; left: 924px; width: 64px; height: 64px; }
+.asc-info__texte {
+    position: absolute; left: 0; right: 0; top: 2px; height: 50px; margin: 0; padding: 0;
+    font-size: 38px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1E1A33;
+}
+.btn.bulle-petit.asc-info:active .asc-info__texte { translate: 0 3px; }
+.btn.bulle-petit.asc-ma-position { position: absolute; right: 40px; bottom: 16px; }
+.asc-ma-position__icone { position: absolute; left: 18px; top: 10px; width: 60px; height: 60px; -unity-background-scale-mode: scale-to-fit; }
+
+/* La petite fenêtre « i » (détail de l'étage). */
+.asc-info-voile {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(17, 13, 31, 0.45); align-items: center; justify-content: center;
+}
+.asc-info-boite {
+    width: 600px; min-height: 360px; padding: 26px 30px 22px 30px;
+    background-color: #FBF8F2; background-image: url("Degrades/popup_corps.png");
+    border-width: 6px; border-color: #110D1F; border-radius: 28px;
+}
+.asc-info-vignette { position: absolute; left: -70px; top: -60px; width: 160px; height: 100px; -unity-background-scale-mode: scale-to-fit; }
+.asc-info-titre {
+    font-size: 44px; -unity-font-style: bold; color: #FFFFFF; margin: 0 0 10px 90px; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F; text-shadow: 0 4px 0 #110D1F;
+}
+.asc-info-ligne { flex-direction: row; align-items: center; margin: 4px 0; }
+.asc-info-icone { width: 40px; height: 40px; margin-right: 12px; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; }
+.asc-info-icone--piece { background-image: url("../Art/icones_detourees/piece.png"); }
+.asc-info-icone--diamant { background-image: url("../Art/icones_detourees/diamant.png"); }
+.asc-info-icone--chemin { background-image: url("../Art/icones_detourees/icone_route.png"); }
+.asc-info-texte { font-size: 28px; -unity-font-style: bold; color: #2A2440; margin: 0; padding: 0; white-space: normal; -unity-text-outline-width: 0; flex-shrink: 1; }
+.asc-info-petit { font-size: 19px; color: #6E6A80; margin: 4px 0 0 0; padding: 0; white-space: normal; -unity-text-outline-width: 0; }
+.btn.asc-info-ok { align-self: center; height: 60px; min-width: 180px; font-size: 26px; margin-top: 14px; border-radius: 20px; }
+
+/* =====================================================================
+   V6.5 (remarque de l'auteur) : les PETITS textes de la Boutique étaient trop gras.
+   Pourquoi : la police est déjà une SemiBold, et un contour sombre de 2 à 3 px sur des lettres
+   de 17 à 22 px « mange » l'intérieur blanc : le texte paraît sombre et épais.
+   Règle : petits textes SANS contour et sans gras ; sur les fonds de couleur, une petite ombre
+   portée (2 px vers le bas) suffit à les détacher. Les gros titres et les boutons gardent leur
+   contour épais façon Roblox (carte__titre, ech-nom, section-titre, onglets, prix).
+   ===================================================================== */
+/* Sur les cartes colorées (texte blanc) : ombre portée fine. */
+.boutique-page .carte__texte,
+.boutique-page .progress-text,
+.boutique-page .btq-card .progress-text,
+.boutique-page .collection-recompense,
+.boutique-page .missing,
+.boutique-page .btq-missing,
+.boutique-page .btq-card .missing,
+.boutique-page .btq-lock__texte,
+.boutique-page .ech-manque,
+.boutique-page .btq-pack-amount {
+    -unity-font-style: normal;
+    -unity-text-outline-width: 0;
+    text-shadow: 0 2px 0 #110D1F;
+}
+/* « Collection : X / N » sur les cartes : blanc (une règle .popup-window le rendait sombre). */
+.boutique-page .btq-card .progress-text { color: #FFFFFF; }
+/* Le taux d'Échange, sur une carte jaune : brun foncé, sans contour ni ombre (le jaune pâle ne se lisait pas). */
+.boutique-page .ech-taux { -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: none; color: #3A2200; }
+/* Les badges de taux sous les objets : fond de la couleur de la rareté, texte blanc fin. */
+.boutique-page .taux-badge { -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: 0 1px 0 #110D1F; }
+/* « Contenu et taux » : la liste des taux (texte sombre sur le blanc : aucun contour). */
+.boutique-page .rate-name,
+.boutique-page .rate-cell,
+.boutique-page .rates-note,
+.boutique-page .btq-note__texte,
+.boutique-page .btq-packs-intro { -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: none; }
+/* Les cartes d'objets de « Contenu et taux » (fond sombre) : nom fin, ombre légère. */
+.boutique-page .item-name { -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: 0 2px 0 #110D1F; }
+.boutique-page .item-rarity { -unity-font-style: normal; }

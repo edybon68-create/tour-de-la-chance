@@ -612,7 +612,7 @@ namespace TourDeLaChance
             return true;
         }
 
-        /// « Oui, rejouer » (v6 §9.3, après la confirmation « Tu es sûr ? ») : la partie se
+        /// « Rejouer » pendant la reprise proposée (v6.5 §1 : tout de suite, sans confirmation) : la partie se
         /// termine (cagnotte perdue, RunEnded, ligne au classement), puis la NOUVELLE partie
         /// commence directement (redescente), sans repasser par l'écran Perdu.
         public void DeclineReviveAndReplay()

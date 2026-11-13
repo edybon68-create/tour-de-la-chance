@@ -12,8 +12,10 @@ namespace TourDeLaChance
     /// coffre. Pur affichage : il arrive APRÈS la révélation (le coffre est déjà ouvert), et
     /// les diamants sont déjà comptés par le GameManager.
     ///
-    /// Le diamant est un petit modèle « taillé » FABRIQUÉ PAR LE CODE (16 facettes) en attendant
-    /// le modèle de l'artiste (spec §17.1). Une réserve de 12 diamants est créée au démarrage
+    /// Le diamant est le modèle de l'artiste (Assets/Models/diamant.fbx, branché dans
+    /// diamondPrefab en v6.5, matériaux URP Lit dans Assets/Materials/Diamant avec la même légère
+    /// émission bleue). Sans modèle, un diamant « taillé » FABRIQUÉ PAR LE CODE (16 facettes)
+    /// le remplace. Une réserve de 12 diamants est créée au démarrage
     /// et dessinée une fois (préchargement §5.2) : rien n'est créé pendant le jeu.
     /// </summary>
     public class DiamondBurst : MonoBehaviour

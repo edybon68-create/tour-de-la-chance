@@ -592,6 +592,7 @@ MonoBehaviour:
   opening: {fileID: 31033392}
   showcase: {fileID: 1744661683}
   blankHorse: {fileID: 1212207091}
+  playerSpinner: {fileID: 1912642493}
   iconBoutique: {fileID: 21300000, guid: 692533eba890a41999f20728a1dbb477, type: 3}
   iconInventaire: {fileID: 21300000, guid: 0e8c972db51b546c991613892e8f4086, type: 3}
   iconIndex: {fileID: 21300000, guid: 946d54e6cfe8e4614b177832d3c3e85f, type: 3}
@@ -3048,7 +3049,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8255c88a7dcd049cd9a114613b0d0914, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.DiamondBurst
-  diamondPrefab: {fileID: 0}
+  diamondPrefab: {fileID: 919132149155446097, guid: f1f84c6c65c2f4aac87038e582430f39, type: 3}
   hud: {fileID: 865624840}
   counter: {fileID: 865624846}
 --- !u!4 &756196855
@@ -7600,7 +7601,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 20
-  field of view: 35
+  field of view: 41.5
   orthographic: 0
   orthographic size: 5
   m_Depth: -5
@@ -7627,7 +7628,7 @@ Transform:
   m_GameObject: {fileID: 1744661682}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.55, z: -1.35}
+  m_LocalPosition: {x: 0, y: 1.42, z: -1.35}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8308,6 +8309,7 @@ GameObject:
   - component: {fileID: 1912642489}
   - component: {fileID: 1912642491}
   - component: {fileID: 1912642492}
+  - component: {fileID: 1912642493}
   m_Layer: 6
   m_Name: Joueur
   m_TagString: Untagged
@@ -8379,6 +8381,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.RainbowSparkles
   avatar: {fileID: 1912642489}
   emissiveTemplate: {fileID: 2100000, guid: 3b202cd6945ea4a03a3a1c50f0c49299, type: 2}
+--- !u!114 &1912642493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912642488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d35c045ac793944829ae95f89261072c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TourDeLaChance.PlayerSpinner
 --- !u!1 &1913795487
 GameObject:
   m_ObjectHideFlags: 0

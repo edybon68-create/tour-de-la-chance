@@ -72,6 +72,13 @@
 > (croix « inchangée » : sa forme reste, son rendu change). Nouvelles images :
 > `art/prompts/lot7.md`.
 
+>
+> **Mise à jour « v6.5 »** — nouvelle section **§16** : l'**Inventaire « Casier »** (menu à
+> gauche, grille au milieu, grand cheval à droite), **L'Ascension** (ancienne Route des trophées,
+> façon Clash Royale, presque sans texte) et la **fiche de rendu Blender des dalles** (4 décors :
+> herbe, pierre, nuages, galaxie). Elle remplace le §15.5. Nouvelle image : `art/prompts/lot8.md`
+> (icône « Mes skins ») ; les 12 dalles sont rendues dans Blender.
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -838,7 +845,8 @@ v3 ; `lot4.md` : icône Classement, roue dentée, médailles du podium, icônes 
 `lot5.md` : icône Diamant, icône Rebirth, packs de diamants ; `lot6.md` : icônes des 56 objets
 des boîtes Pirates et Animaux et images des 4 boîtes, prompts autonomes sans image jointe ;
 `lot7.md` : v6, icônes Boutique, Paramètres, Graphismes, rotation, Route des trophées,
-illustration et macaron de la Renaissance, plus le plan B des bulles, §15).
+illustration et macaron de la Renaissance, plus le plan B des bulles, §15 ; `lot8.md` : v6.5,
+icône « Mes skins » de l'Inventaire, §16).
 Le **premier prompt de chaque
 conversation Gemini** commence par le **bloc de style commun** ci-dessous, recopié mot pour mot.
 On ne le modifie pas d'un lot à l'autre sans mettre à jour cette section.
@@ -3366,6 +3374,8 @@ le code, puis la fenêtre passe à l'état E.
 
 ### 15.5 La Route des trophées (clic sur le badge d'étage)
 
+> **Remplacé en v6.5 par « L'Ascension » (§16.2 et §16.3).** Gardé pour mémoire.
+
 **L'idée** : un chemin qui **monte dans le ciel**, comme la tour : en bas l'étage 1 sous un ciel de
 jour, en haut la nuit étoilée. On voit où on est, son record, et ce qui change aux étages suivants.
 
@@ -3460,3 +3470,552 @@ segments) est **dessiné par le code ou en USS**.
 - Les 4 onglets de la Boutique vont jusqu'aux soldes, sans texte coupé.
 - Rejouer, Continuer et Encaisser : coins nets et reflet non déformé quelle que soit la largeur.
 - Appui sur une bulle : l'icône (ou le texte) descend **avec** la face, sans saut.
+
+---
+
+## 16. V6.5 : Inventaire « Casier » et L'Ascension
+
+> **Pourquoi cette section ?** L'auteur a dicté la v6.5 (`docs/specs/v6.5.md`, points 4 à 6)
+> avec quatre références : `docs/references/v65_fortnite_casier.png` (disposition retenue, menu à
+> gauche), `v65_fortnite_outfit.png`, `v65_clash_route.png` et `v65_clash_ligue.png`.
+> On reprend de ces jeux des **idées de mise en page très répandues** (menu à gauche, grille de
+> cases carrées, grand personnage à droite ; colonne de dalles qui défile, barre de progression
+> verticale) et **rien d'autre** : ni leur bleu, ni leurs icônes, ni leurs polices, ni leurs
+> formes de dalles exactes. Le style reste le nôtre : panneau blanc cassé du §12.18, contour
+> d'encre **`#110D1F`**, Fredoka, bulles rendues dans Blender (§15.1), couleurs de rareté du §2.7.
+>
+> Tailles en **pixels de référence 1920 × 1080**. Les bulles existantes sont dans
+> **`TourDeLaChance-Unity/Assets/UI/Bulles/`** (c'est leur vrai dossier : le §15.1.5 parlait
+> de `Assets/Art/bulles/`). Les dalles iront à côté, dans `Assets/UI/Dalles/`.
+
+### 16.1 Inventaire « Casier »
+
+**L'idée** : Fortnite est clair parce que chaque zone a **un seul rôle** et qu'on voit tout de
+suite où l'on est : un menu, une grille, un personnage. On garde cette clarté, avec nos couleurs.
+Le bleu de l'Inventaire (famille « Inventaire » du §15.1.4) n'apparaît qu'à deux endroits :
+l'entrée active du menu et la vitrine du cheval. Comme ça, l'œil relie les deux.
+
+#### 16.1.1 La fenêtre et les 3 zones
+
+Fenêtre **1600 × 860** (plus large que la taille L, pour loger le grand cheval), panneau blanc
+cassé et filigrane du §12.18.1, titre « Inventaire » avec `icone_inventaire.png` qui déborde
+(§12.18.2), croix inchangée. Corps : `padding: 60px 32px 26px 32px` → zone utile **1536 × 774**.
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│[icône] Inventaire                                                         (×) │
+│ ┌ MENU ──────┐  ┌ GRILLE ────────────────────────────────┐  ┌ VITRINE ──────┐ │
+│ │▶ Skins   12│  │ Skins                         [ 12/28 ]│  │               │ │
+│ │  Access.  9│  │ ┌──┐┌──┐┌──┐┌──┐┌──┐                  ▌│  │   (cheval 3D  │ │
+│ │  Mes skins │  │ │  ││✓ ││  ││  ││  │                  ▌│  │    qui tourne)│ │
+│ └────────────┘  │ └──┘└──┘└──┘└──┘└──┘                  ▌│  │   ═socle═     │ │
+│ ┌ Bonus ─────┐  │ ┌──┐┌──┐┌──┐┌──┐┌──┐                   │  ├───────────────┤ │
+│ │ ● +35 %    │  │ │  ││  ││  ││  ││  │                   │  │ Jaune citron  │ │
+│ │ ▓▓▓▓▓░ 50 %│  │ └──┘└──┘└──┘└──┘└──┘                   │  │ [Rare] ●+10 % │ │
+│ └────────────┘  │  …                                     │  │ ┏━ Équiper ━┓ │ │
+│ ┏ Équiper le ┓  │                                        │  │               │ │
+│ ┗ meilleur   ┛  └────────────────────────────────────────┘  └───────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+| Zone | Largeur | Part | Contenu |
+|---|---|---|---|
+| Gauche : menu | **280 px** | 18 % | menu (3 entrées), carte « Bonus de tenue », bouton « Équiper le meilleur » en bas |
+| Écart | 20 px | | |
+| Milieu : grille | **776 px** | 50 % | titre de section, compteur, grille qui défile (740 px de cases + 12 px d'écart + barre de 24 px) |
+| Écart | 20 px | | |
+| Droite : vitrine | **440 px** | 29 % | le cheval 3D (500 px de haut) puis la fiche (274 px) |
+
+Les trois zones font toute la hauteur (774 px). En 1280 × 720, Unity réduit tout ensemble
+(`HudPanelSettings`) : rien à faire de plus.
+
+#### 16.1.2 Le fond
+
+- **Le panneau** : blanc cassé `#FFFDF8 → #F1ECE2` + filigrane à 6 % (§12.18.1), inchangé :
+  l'Inventaire ressemble à la Boutique et à l'Index.
+- **La grille est posée directement sur le blanc**, sans cadre : c'est ce qui donne l'air
+  « aéré » de Fortnite.
+- **Le menu** est dans un **puits clair** : fond `#E9E3D6`, contour **4 px `#110D1F`**, coins
+  **24 px**, `padding: 12px` (la même matière creusée que le sélecteur Graphismes, §15.7).
+- **La vitrine** est la seule grande surface colorée (§16.1.7).
+
+#### 16.1.3 Le menu de gauche
+
+Trois entrées de **256 × 96 px**, 10 px d'écart, coins **18 px**, `flex-direction: row`,
+`align-items: center`, `padding: 0 14px`. Dans chaque entrée : icône **60 px**, 14 px d'écart, mot
+**28 px Bold**, et à droite un petit compteur (pilule h 32, `padding 0 10px`, coins 16, 20 px Bold).
+
+| Entrée | Icône (déjà détourée, sauf la 3e) | Compteur |
+|---|---|---|
+| Skins | `couleur_bleu.png` (le cheval bleu : « les couleurs du cheval ») | nombre de skins possédés |
+| Accessoires | `chapeau_haut_de_forme.png` | nombre d'accessoires possédés |
+| Mes skins | **`icone_mes_skins.png`** (nouvelle : petite armoire, `art/prompts/lot8.md`). En attendant : `boite_skins_1.png` | « 3/5 » (tenues enregistrées) |
+
+| État | Fond | Contour | Texte | Icône | Compteur |
+|---|---|---|---|---|---|
+| **Normal** | transparent | aucun | `#3A3358` | 60 px | fond `rgba(17,13,31,0.10)`, texte `#3A3358` |
+| **Survol** | `rgba(17,13,31,0.06)` | aucun | `#2A2440` | `scale 1.1` + dandinement ±6° en 0,4 s | idem |
+| **Appui** | `rgba(17,13,31,0.12)` | aucun | idem | `scale 0.95` | idem |
+| **Actif** | face bleue « Inventaire » : dégradé haut `#7DB5FF` → `#3B7DD8` (55 %) → bas `#2F68BE` (image `bouton_bleu` de `UiFxTextures`, ou `background-color: #3B7DD8` + `border-top 3px #7DB5FF`) | **4 px `#110D1F`** + **bas 6 px `#1F4A8C`** (l'épaisseur du jouet) | **blanc**, contour **3 px `#1F4A8C`** | **68 px**, déborde de 6 px vers le haut (`margin-top: -12px`) | fond `#1F4A8C`, texte blanc |
+
+- **Pointe de l'entrée active** : un carré de 22 × 22 tourné de 45°, couleur `#3B7DD8`, contour
+  4 px `#110D1F` sur les côtés droit et haut seulement, collé au bord droit de l'entrée
+  (`right: -13px`, centré en hauteur), dessiné **sous** l'entrée (élément placé avant). Elle
+  « pointe » vers la grille : on sait quelle liste on regarde.
+- Changement d'entrée : la face bleue glisse de l'ancienne à la nouvelle position en **0,18 s
+  `ease-out-back`** (un seul élément `.casier-menu__surbrillance` en `position: absolute` qu'on
+  déplace avec `translate`) ; la grille s'efface en 0,08 s puis réapparaît en remontant de 12 px
+  en 0,15 s.
+
+**Carte « Bonus de tenue »** (sous le menu, 16 px d'écart ; 256 × 150, même puits `#E9E3D6`,
+contour 4 px, coins 24, `padding 14px`) : obligatoire, car la règle d'or veut que le bonus soit
+**affiché**.
+- « Bonus de tenue » 20 px Bold `#3A3358` ;
+- pièce **40 px** + « **+35 %** » **44 px** Bold `#2A2440` ;
+- jauge **228 × 22** : piste `rgba(17,13,31,0.12)`, contour 3 px `#110D1F`, coins 11, remplissage
+  dégradé or `#FFE66B → #FFB020` (de 0 à 50 %) ; à droite, « max 50 % » 18 px `#6E6A80`.
+  Quand le plafond est atteint, la jauge est pleine et une petite coche verte `#6BE34A` (Ø 26,
+  contour 3 px) se pose au bout.
+
+#### 16.1.4 Le bouton « Équiper le meilleur »
+
+- Collé en bas de la colonne (`margin-top: auto`), **280 × 130**, `bulle_rect_vert` en 9-slice
+  (§15.1.8, classe `.bulle-rect--vert`).
+- Contenu : `medaille_or.png` **52 px** à gauche, puis le texte sur **deux lignes** « Équiper /
+  le meilleur », **28 px** Bold blanc, contour 4 px `#0E3D21`, interligne serré (`-unity-paragraph-spacing: 0`).
+- **Éclat qui passe** (comme Jouer) toutes les **4 s** quand ce bouton changerait quelque chose ;
+  sinon `bulle_rect_gris` sans éclat (texte `#E6E2F0`, contour 3 px `#45425A`). Le texte affiché
+  dans ce cas (« Déjà le meilleur ! ») : game designer.
+- Après le clic : les cases qui changent font un petit rebond (1 → 1,12 → 1, 0,25 s), l'une après
+  l'autre (0,06 s d'écart), et le cheval de la vitrine saute de 20 px.
+
+#### 16.1.5 Le titre de section
+
+Rangée de **84 px** en haut de la zone du milieu, `flex-direction: row`, `align-items: center` :
+- **Titre** « Skins » / « Accessoires » / « Mes skins » : **54 px** Bold blanc,
+  `-unity-text-outline-width: 5px`, `-unity-text-outline-color: #110D1F`,
+  `text-shadow: 0 5px 0 #110D1F` (le même autocollant que le titre de la fenêtre, un cran plus petit) ;
+- à 16 px à droite, **compteur** « 12 / 28 » : pilule h 44, `padding 0 16px`, fond `#E9E3D6`,
+  contour 4 px `#110D1F`, coins 22, **24 px** Bold `#2A2440` (possédés / total du catalogue) ;
+- sous la rangée, un **filet** de 3 px `rgba(17,13,31,0.12)` sur toute la largeur, coins 2, puis
+  16 px avant la grille.
+- **Accessoires seulement** : à droite de la rangée, rappel « 2 au maximum » en deux petits
+  ronds (Ø 30, contour 3 px encre) : pleins `#3B7DD8` pour chaque accessoire porté, vides
+  `rgba(17,13,31,0.10)` sinon. Pas de texte.
+
+#### 16.1.6 Les cases de la grille
+
+**Taille et place** : cases **136 × 136**, **15 px** d'écart, **5 par rangée** (740 px), défilement
+vertical avec la barre du §12.18.1. Quatre rangées pleines sont visibles (zone de 626 px).
+Fondus haut/bas de 24 px couleur du fond (`#F8F4ED` / `#F4F0E8`).
+
+**Anatomie d'une case** (de l'arrière vers l'avant) :
+
+| Couche | Valeur |
+|---|---|
+| Fond | image **`case_<rarete>.png`** (272 × 272, cuite par `UiFxTextures.BakeAll()` comme les `carte_*.png`) : **dégradé en diagonale** clair (haut gauche) → base (milieu) → sombre (bas droite), **lueur blanche** ronde à 30 % centrée à 45 % de la hauteur, et en bas une **bande de 12 px** (soit 6 px affichés) couleur « bande » : l'épaisseur du jouet |
+| Cadre | contour **5 px `#110D1F`**, coins **20 px**, `overflow: hidden` |
+| Icône | **108 × 108**, centrée, remontée de 4 px (`translate 0 -4px`), `scale-to-fit` ; elle a déjà son contour noir (v5.1), donc elle se lit sur toutes les couleurs |
+| Badge « équipé » | rond **Ø 40**, coin haut droit, **dépasse** de 8 px (`top: -8px; right: -8px`), fond `#6BE34A`, contour **3 px `#110D1F`**, coche blanche dessinée par deux barres USS (6 × 13 et 6 × 24 px, coins 3, contour 2 px `#1E6E3E`, tournées de −45° / +45°) ; apparition par rebond 0 → 1,2 → 1 en 0,2 s |
+| Badge « bonus » | pilule en bas à gauche (`left: 6px; bottom: 10px`), h **28**, `padding 0 8px 0 4px`, coins 14, fond `rgba(17,13,31,0.78)` ; pièce **20 px** + « +5 % » **18 px** Bold `#FFD54A` (pas de contour : le fond sombre suffit) |
+
+**Couleurs par rareté** (les bases sont celles du §2.7, le reste est dérivé pour le dégradé) :
+
+| Rareté | Clair (haut gauche) | Base (milieu) | Sombre (bas droite) | Bande (épaisseur) |
+|---|---|---|---|---|
+| Commun | `#C9CDD8` | `#9AA0B0` | `#6E7488` | `#4F5468` |
+| Peu commun | `#9BEA8A` | `#4CC26A` | `#2E8E48` | `#1F6A34` |
+| Rare | `#8CC4FF` | `#3B8BEB` | `#2462B8` | `#184585` |
+| Super rare | `#D6A8FF` | `#A35CE0` | `#7236B0` | `#522383` |
+| Légendaire | `#FFD27A` | `#FF9F1C` | `#D9700A` | `#9E4E05` |
+| Secret | `#FFA8EE` | `#FF4FD8` | `#C02AA6` | `#8A1A78` |
+
+- Le **Secret** a en plus un reflet arc-en-ciel qui traverse la case en diagonale toutes les
+  **3 s** (bande blanche à 35 % de 30 px, dessinée par le code) : c'est la rareté la plus haute,
+  elle bouge un peu (§13.6).
+- **Pourquoi des cases colorées alors que le §12.18.3 voulait des tuiles sombres ?** L'auteur
+  demande des cases « colorées selon la rareté » (spec v6.5 §4), comme dans sa référence. Les
+  icônes ont maintenant leur contour noir : elles se lisent sur ces fonds vifs. Le §12.18.3 reste
+  valable pour l'**Index**.
+
+| État de la case | Changement | Durée |
+|---|---|---|
+| Normal | — | — |
+| **Survol** | `scale 1.06`, lueur un peu plus forte (`-unity-background-image-tint-color: #FFFFFF` au lieu de `#F2F2F2` au repos) | 0,15 s `ease-out-back` |
+| **Appui** | `scale 0.96` | 0,06 s |
+| **Sélectionnée** (c'est elle que montre la fiche) | **anneau or** : élément `.case__selection`, `position: absolute; left: -11px; top: -11px; right: -11px; bottom: -11px`, `border-width: 6px; border-color: #FFD54A; border-radius: 30px`, plus un 2e anneau fin de 3 px `#110D1F` juste autour (pour qu'il se voie sur le blanc) ; la case reste à `scale 1.04` ; l'anneau « respire » (opacité 1 → 0,7 → 1 en 1,4 s) | 0,15 s |
+| Équipée **et** sélectionnée | les deux à la fois (le badge vert dépasse par-dessus l'anneau) | — |
+
+**Mes skins** (5 tenues) : la grille est remplacée par **5 lignes** de **740 × 124**, 14 px
+d'écart : fond `#E9E3D6`, contour 4 px `#110D1F`, coins 22, `padding 0 16px`.
+- à gauche, un rond Ø 56 (contour 4 px) avec le numéro 1 à 5 (30 px Bold blanc, contour 3 px
+  encre) sur `#3B7DD8` ;
+- puis **3 mini-cases de 92 px** (même anatomie que les cases, sans badge bonus) : skin + 2
+  accessoires ; une place vide = fond `rgba(17,13,31,0.08)`, contour 4 px `#C9C2B2`, « + »
+  dessiné en `#B5AD9C` (deux barres 28 × 6) ;
+- puis le badge bonus de la tenue (même pilule, en plus grand : h 36, pièce 26, 22 px) ;
+- à droite, les boutons existants de la v6 (Porter : `bulle_rect_vert` 200 × 100 ; Enregistrer :
+  `bulle_rect_violet` 220 × 100) ; textes et règles : spec v6, inchangés.
+- La tenue portée a l'**anneau or** autour de la ligne et le badge vert sur le rond du numéro.
+
+#### 16.1.7 La vitrine : le cheval qui tourne et sa fiche
+
+Un seul panneau **440 × 774**, coins **28 px**, contour **6 px `#110D1F`**, `overflow: hidden`.
+
+**A. La scène (haut, 440 × 500)**
+
+| Élément | Valeur |
+|---|---|
+| Fond | dégradé vertical bleu « Inventaire » **`#8CC8FF` (haut) → `#3B7DD8` (bas)** (image cuite `vitrine_bleue.png`, 256 × 512) |
+| Lueur | disque flou blanc à **35 %**, Ø 380, centré à (220, 230) : le cheval se détache |
+| Rayons (Super rare et plus) | `RaysElement` Ø 420 derrière le cheval, 12 rayons de la **couleur de base** de la rareté de l'objet sélectionné à 40 %, un tour en 30 s ; rien pour Commun à Rare (§13.6 : plus c'est rare, plus il y en a) |
+| Cheval 3D | `RenderTexture` **440 × 500** (fond transparent), caméra et lumière **identiques à la fiche agrandie de l'Index** (§15.6) ; cheval cadré à **75 %** de la hauteur, pieds du socle à y = 430 |
+| Socle tournant | ellipse 240 × 54 `#1F4A8C` à 45 % sous le cheval (centre (220, 440)), qui tourne avec lui |
+| Rotation | cliquer-glisser horizontal sur toute la scène : **aucun texte ni icône d'aide** (spec v6.5 §5) ; même sensibilité et même retour doux que dans l'Index |
+
+Ce que porte le cheval : la tenue en cours, avec l'objet sélectionné **essayé** dessus s'il n'est
+pas équipé (on voit ce qu'on va mettre). Si le game designer préfère ne pas faire d'essayage, on
+garde seulement la tenue en cours.
+
+**B. La fiche (bas, 440 × 274)**, fond **`#2F68BE`** (le bas du dégradé, un ton plus foncé),
+séparée de la scène par un filet de 4 px `#110D1F` ; `padding: 18px 24px 22px 24px`.
+
+| Ligne | Valeur |
+|---|---|
+| Nom | « Jaune citron » **40 px** Bold blanc, contour **4 px `#110D1F`**, ombre `0 4px 0 #110D1F` ; une seule ligne, réduit jusqu'à 30 px s'il est long |
+| Rareté + bonus (rangée, 10 px d'écart) | pilule de rareté h **38**, `padding 0 14px`, coins 19, fond = **base** de la rareté, contour 3 px `#110D1F`, texte **22 px** Bold blanc contour 3 px de la couleur « bande » ; puis pilule bonus : même forme, fond `rgba(17,13,31,0.55)`, pièce 26 px + « +10 % de pièces » 22 px Bold `#FFD54A` |
+| Bouton (en bas, pleine largeur) | **392 × 110**, 9-slice : **Équiper** = `bulle_rect_vert` ; **Enlever** = `bulle_rect_violet` ; objet déjà porté qu'on ne peut pas enlever (le skin) = `bulle_rect_gris` « Équipé » ; texte **36 px** Bold blanc, contour 4 px de la famille (§15.1.8) |
+
+Rien n'est sélectionné (liste vide) : la scène montre la tenue en cours, la fiche dit « Choisis
+un objet » 26 px Bold blanc contour 4 px encre, et le bouton est caché.
+
+#### 16.1.8 Les couleurs de l'Inventaire (récapitulatif)
+
+| Rôle | Hex |
+|---|---|
+| Encre (tous les contours) | `#110D1F` |
+| Panneau | `#FFFDF8 → #F1ECE2`, fondus `#F8F4ED` / `#F4F0E8` |
+| Puits clair (menu, bonus, Mes skins) | `#E9E3D6`, place vide contour `#C9C2B2`, « + » `#B5AD9C` |
+| Textes sur le clair | `#2A2440` (fort), `#3A3358` (normal), `#6E6A80` (discret) |
+| Bleu « Inventaire » (entrée active, vitrine) | clair `#7DB5FF`, face `#3B7DD8`, mi `#2F68BE`, épaisseur et contour de texte `#1F4A8C` ; haut de vitrine `#8CC8FF` |
+| Sélection | `#FFD54A` (anneau), doublé de `#110D1F` |
+| Équipé | `#6BE34A`, coche blanche contour `#1E6E3E` |
+| Bonus | fond `rgba(17,13,31,0.78)`, texte `#FFD54A` ; jauge `#FFE66B → #FFB020` |
+| Raretés | tableau du §16.1.6 |
+
+### 16.2 L'Ascension : l'interface
+
+**L'idée** : une colonne de petites dalles en relief qu'on fait défiler, comme une tour qu'on
+gravit. **On regarde au lieu de lire** : le numéro d'étage, des images de récompenses, un
+drapeau pour le record, un cheval pour « toi ». Tous les chiffres détaillés restent à un clic,
+derrière le bouton « i » (règle d'or : l'information reste accessible et vraie).
+
+#### 16.2.1 La fenêtre
+
+- Fenêtre **1120 × 860**, panneau blanc cassé (§12.18.1), titre « **L'Ascension** » avec
+  `icone_route.png` qui déborde, croix inchangée.
+- Corps : `padding: 60px 32px 26px 32px` → une seule **zone de route** de **1056 × 774**, coins
+  **22 px**, contour **5 px `#110D1F`**, `overflow: hidden`, défilement **vertical** (barre du
+  §12.18.1, pleine hauteur, collée à droite à l'intérieur : x 1032 → 1056).
+- Le bandeau « Tes coffres en ce moment » de la v6 **n'est plus affiché en permanence** : ses
+  informations passent dans le détail du « i » (contenu exact : game designer).
+- Ouverture et bouton « Ma position » : comme au §15.5 (dalle « toi » au tiers bas, glissé de
+  200 px en 0,5 s ; bulle or avec l'icône du skin en bas à droite si on s'en éloigne).
+
+**Les couloirs** dans la zone de route (coordonnées x depuis le bord gauche de la zone) :
+
+| Couloir | x | Contenu |
+|---|---|---|
+| Barre de progression | 26 → 54 (centre **40**) | §16.2.3 |
+| Numéros d'étage | 70 → 150 (centre **110**) | §16.2.4 |
+| Dalles | centrées sur **x = 590** (normale 310 → 870 ; palier 232 → 948) | §16.3 |
+| Boutons « i » | centre **x = 990** | §16.2.6 |
+| Barre de défilement | 1032 → 1056 | — |
+
+#### 16.2.2 Le fond : losanges aux couleurs du jeu
+
+Un fond sombre et calme à grands losanges, qui **change de teinte avec le décor** des dalles :
+on sent qu'on monte, de l'eau-bleu du jour au noir étoilé.
+
+| Couche | Valeur |
+|---|---|
+| 1. Bandes de couleur | dessinées par le code (comme le dégradé du §15.5) : une couleur unie par décor, **fondu de 320 px** centré sur le passage d'un décor à l'autre (entre les étages 9 et 10, 19 et 20, 29 et 30) |
+| 2. Motif | `motif_losanges.png` (cuite par `UiFxTextures.BakeAll()` dans `Assets/UI/Degrades/`) : tuile **224 × 224**, affichée **112 × 112**, répétée ; un losange qui touche le milieu des 4 bords, **intérieur blanc à 6 %**, extérieur transparent, **arêtes de 2 px blanches à 10 %**. En se répétant, cela fait un damier de losanges, sans couture |
+| 3. Ombre du couloir gauche | dégradé horizontal `rgba(17,13,31,0.35)` (x = 0) → transparent (x = 170) : numéros et barre ressortent |
+| 4. Étoiles (galaxie seulement) | points `#FFF1D6` Ø 2 à 4 px, 1 pour 9 000 px², opacité 40 à 90 %, scintillement lent (1,5 à 3 s) |
+
+| Décor | Couleur des bandes | Teinte obtenue avec le motif (contrôle à la pipette) |
+|---|---|---|
+| Herbe (1 – 9) | **`#2C5AA0`** (bleu jour assombri) | losange `#3363AE`, arête `#4A7BC4` |
+| Pierre (10 – 19) | **`#403A66`** (ardoise de la tour) | `#47406F`, `#5A5288` |
+| Nuages (20 – 29) | **`#5D4FA6`** (lavande du crépuscule) | `#6557AE`, `#7A6CC2` |
+| Galaxie (30 et +) | **`#17112F`** (nuit) + étoiles | `#1D1639`, `#2C2350` |
+
+#### 16.2.3 La barre de progression verticale
+
+- **Piste** : x 26 → 54 (28 px), du **centre de la dalle de l'étage 1** jusqu'en haut du contenu ;
+  fond `rgba(17,13,31,0.55)`, contour **4 px `#110D1F`**, coins 14.
+- **Remplissage** : de l'étage 1 jusqu'au **centre de la dalle du record** (le plus haut étage
+  jamais atteint) ; dégradé vertical or **`#FFE66B` (haut) → `#FFB020` (bas)**, coins 10, avec
+  un reflet : bande blanche à 35 %, 6 px de large, à 4 px du bord gauche. L'or = « atteint »
+  (§15.9).
+- **Repère du record** (au bout du remplissage) : pilule h **52**, `left: 8px`, centrée sur
+  l'étage du record ; fond `#FFC83A`, contour **4 px `#110D1F`**, coins 26, `padding 0 14px 0 6px` ;
+  dedans `drapeau_record.png` **40 px** + le numéro du record **28 px** Bold `#3A2200`. Une petite
+  pointe vers la droite (carré de 16 px tourné de 45°, même or, contour sur 2 côtés). Le numéro
+  de cet étage dans le couloir des numéros est **caché** (la pilule le montre déjà).
+- Ouverture : le remplissage monte de 0 jusqu'au record en **0,6 s `ease-out`**, la pilule
+  arrive avec un petit rebond.
+
+#### 16.2.4 Les numéros d'étage
+
+- Centrés sur x = 110, alignés sur le **milieu du dessus de la dalle** (dalle normale : haut de
+  l'image + 166 px ; palier : + 210 px).
+- **Étage ordinaire** : **34 px** Bold blanc, contour **4 px `#110D1F`**, `text-shadow 0 3px 0 #110D1F`.
+- **Palier** : **46 px** Bold **`#FFD54A`**, contour **5 px `#3A2200`**, ombre `0 4px 0 #110D1F`
+  s'il est atteint ; blanc (style ordinaire, en 46 px) sinon.
+- **Au-dessus du record** (pas encore exploré) : `#D9D2F0` à **70 %** d'opacité.
+- Aucun autre texte dans le couloir.
+
+#### 16.2.5 Ce qui est posé sur les dalles
+
+Toutes les places sont données en pixels **dans l'image de la dalle affichée** (§16.3.6). Les
+dalles ont des marges transparentes : `picking-mode="Ignore"` sur les images de dalles, sinon
+elles volent les clics de la dalle voisine. **Tout ce qui est posé** (pièces, diamants, cartes,
+cheval, drapeau, bouton Récupérer) va dans **un calque au-dessus de toutes les dalles**, placé
+avec les mêmes coordonnées : sinon la dalle du dessous, dessinée après, recouvrirait le drapeau
+ou le bouton qui dépasse de la dalle du dessus.
+
+| Objet | Où | Taille | Rendu |
+|---|---|---|---|
+| **Pièces** (dalle normale, place gauche) | point d'appui gauche | `piece.png` **64 px** ; 1 pièce (étages 1 – 9), 2 (10 – 19), 3 (20 et +), en pile décalée de 18 px vers le haut | le gain augmente avec l'étage : la pile aussi. Le chiffre exact est dans le « i » |
+| **Diamants** (dalle normale, place droite) | point d'appui droit | `diamant.png` **56 px** ; **1** (étages 1 – 5), **2** (6 – 9), **3** (10 et +), côte à côte serrés (−12 px) | c'est la vraie règle des trésors en diamants (spec v6 §8.2) ; doublée visuellement (petit « ×2 » 24 px or contour `#3A2200` sur le coin) après la renaissance |
+| **Récompense du palier** | point d'appui du piédestal | carte **200 × 230** : `carte_bleue.png` (`#62E6FF → #3B5BDB`), contour **5 px `#110D1F`**, coins 22 ; `diamant.png` **120 px** sur un petit rayonnement blanc ; dessous « +2 » **46 px** Bold blanc, contour 5 px `#110D1F` (le seul chiffre de la dalle : la quantité, comme le « x1 » de la référence) | voir les 3 états ci-dessous |
+| **Toi** (le cheval) | point « cheval » | icône du **skin équipé**, **100 px** | à ses pieds, ellipse or `#FFD54A` 110 × 34 qui pulse (opacité 60 % → 0 %, taille 1 → 1,4, en 1,6 s) ; pas de pilule « Tu es ici » |
+| **Record** | point « drapeau » | `drapeau_record.png` **96 px**, placé pour que **le pied du mât** (37 % de la largeur, 84 % de la hauteur de l'image) tombe sur le point | se balance de ±4° autour du pied en 2 s. Si « toi » est aussi sur cette dalle, le drapeau reste à sa place (les deux points sont séparés) |
+
+**États de la récompense d'un palier**
+
+| État | Rendu |
+|---|---|
+| Pas encore atteint | carte teintée **`#B8B4C8`**, opacité **85 %** ; petit cadenas dessiné en bas à droite (corps 26 × 20 `#6E6A84`, anse 18 px, contour 3 px encre). La récompense reste **vraie et lisible** |
+| **Gagné, pas encore pris** | carte en couleurs, `RaysElement` blanc Ø 300 qui tourne derrière (un tour en 12 s), la carte **sautille** (`translate 0 → -8px → 0` en 1,2 s) ; bouton **Récupérer** dessous (§16.2.6) ; le numéro du palier clignote doucement en or |
+| Pris | carte en couleurs, immobile ; **coche verte** Ø **48** en haut à droite qui dépasse de 10 px (`#6BE34A`, contour 3 px encre, coche blanche) |
+
+Le game designer décide quand une récompense passe de « gagné » à « pris » (la v6 la donnait
+tout de suite) ; l'aspect ci-dessus vaut dans tous les cas.
+
+**Dalles au-dessus du record** : image de la dalle teintée **`#A8A4BC`**
+(`-unity-background-image-tint-color`), pièces et diamants à 75 % : on voit le chemin qui attend,
+un peu dans l'ombre. Aucune image de dalle en plus à rendre.
+
+#### 16.2.6 Les boutons « i » et « Récupérer »
+
+**Bouton « i »** (un par dalle, dans le couloir de droite, aligné sur le numéro d'étage) :
+- `bulle_petit_ardoise` affichée **64 × 64** (`_appui` à l'appui) ;
+- un « i » écrit **38 px** Bold blanc, contour **3 px `#1E1A33`**, centré sur la face (centre à
+  50 % / 42 % de l'élément ; il descend de 3 px à l'appui) ;
+- survol `scale 1.08`, 0,18 s `ease-out-back` ;
+- il ouvre une **petite fenêtre** (panneau blanc cassé, 560 × 360, titre « Étage 12 » 44 px avec
+  la dalle en vignette 160 px qui déborde à gauche) : pièce 40 px + gain possible, puis une
+  petite icône de chemin + chance d'arriver à l'étage, en 28 px Bold `#2A2440`, les nombres en
+  `#3B7DD8`. Textes exacts et calculs : game designer (mêmes fonctions que le jeu, rien en dur).
+
+**Bouton « Récupérer »** (paliers « gagné, pas encore pris » seulement) :
+- `bulle_rect_vert` 9-slice, **260 × 104**, centré sur le **point du bouton** de la dalle de palier
+  (il chevauche le bord avant, comme dans la référence) ;
+- « Récupérer » **32 px** Bold blanc, contour 4 px `#0E3D21` ;
+- **pulsation** 1 → 1,06 → 1 en 1 s, en boucle, et l'éclat qui passe toutes les 2,5 s ;
+- au clic : la carte saute (1,25), 6 diamants dessinés par le code s'envolent vers le compteur de
+  diamants en 0,7 s, la coche verte arrive avec un rebond, le bouton disparaît (fondu 0,15 s).
+
+### 16.3 Fiche de rendu Blender des dalles (pour l'artiste 3D)
+
+Script à écrire : **`blender/rendu_dalles.py`**, même principe que `rendu_bulles.py` (une
+fonction paramétrée, toutes les images en une exécution, fond transparent). Images dans
+**`art/dalles/`**, copiées dans **`TourDeLaChance-Unity/Assets/UI/Dalles/`**.
+
+#### 16.3.1 Les 4 paliers d'altitude et leurs étages (v2, refaite à la demande de l'auteur)
+
+> **Direction v2.** Chaque dalle montre **exactement l'étage du jeu** à cette altitude : le même
+> étage de pierre partout, et autour de lui le ciel du palier d'altitude où l'on se trouve. Au
+> 1er étage, on est déjà dans le ciel : **pas d'herbe, pas de sol**. La v1 (plaques d'herbe, de
+> pierre, de nuages blancs, de galaxie) est abandonnée : les nuages blancs posés sur le sol se
+> lisaient comme de la neige, et les dalles ne ressemblaient pas à la tour.
+
+Les décors suivent les **4 paliers du jeu** (`Assets/Data/Paliers/Palier1..4.asset`,
+`Scripts/Visual/AltitudeDecor.cs`) et leurs plages d'étages suivent **`GameManager.TierForFloor`**
+(l'écran de L'Ascension doit utiliser cette fonction, pas des plages en dur).
+
+| Palier du jeu | Étages | Fichiers (noms inchangés, déjà utilisés par le code) | Dalles de palier |
+|---|---|---|---|
+| 1 « En plein jour » | **1 – 3** | `dalle_herbe_a.png`, `dalle_herbe_b.png`, `dalle_herbe_palier.png` | selon la spec |
+| 2 « Dans les nuages ! » | **4 – 6** | `dalle_pierre_a.png`, `dalle_pierre_b.png`, `dalle_pierre_palier.png` | selon la spec |
+| 3 « Au-dessus des nuages ! » | **7 – 9** | `dalle_nuages_a.png`, `dalle_nuages_b.png`, `dalle_nuages_palier.png` | selon la spec |
+| 4 « Dans les étoiles ! » | **10 et +** | `dalle_galaxie_a.png`, `dalle_galaxie_b.png`, `dalle_galaxie_palier.png` | 10, 15, 20… |
+
+- **Correspondance des noms** : `herbe` = palier 1, `pierre` = palier 2, `nuages` = palier 3,
+  `galaxie` = palier 4. Les noms de fichiers ne disent plus le décor ; on les garde pour ne pas
+  casser le code.
+- **12 images**, variante **A** aux étages impairs, **B** aux étages pairs (les coffres et le
+  dallage tournent un peu, les nuages et étoiles changent de côté).
+- Quels étages reçoivent la grande dalle de palier : décision du game designer (spec v6.5) ; les
+  images ne changent pas.
+- Les couleurs des bandes du fond (§16.2.2) peuvent être recalées sur la `cameraColor` de chaque
+  palier : ciel `#7DBDEC`, crépuscule `#C98A96`, violet `#3E3668`, nuit `#1F1730`.
+
+#### 16.3.2 Forme commune : l'étage de la tour
+
+- **Disque** de pierre vu en 3/4 (le même que le sol du jeu, `blender/sol.py`, en réduction) :
+  **Ø 2 m** (dalle normale), **Ø 2,6 m** (palier) ; dessus à z = 0 ; épaisseur **0,18 m**.
+  Le disque touche les **mêmes pixels** que l'ancienne plaque carrée (bords gauche, droit,
+  arrière et avant au niveau du sol) : les points d'ancrage du §16.3.6 et l'empilement ne
+  changent pas.
+- **Dallage en rayons** : dalle centrale + 2 couronnes décalées (8 + 16 dalles ; palier 10 + 20),
+  `#5B6380` et 1 sur 3 en `#535A75`, joints `#3C4258`.
+- **Margelle** : 16 blocs clairs `#8A90B0` (20 au palier), 8 cm de large, 3,5 cm plus hauts que
+  le dallage, qui débordent de 4 cm sur le flanc.
+- **Flanc** : la muraille de la tour, 2 rangées de gros blocs décalés `#434A63`.
+- **Étoile violette** `#6A4C9C` à 8 branches incrustée **à plat** au centre (Ø 0,6 m ; au palier
+  Ø 1,3 m autour de l'estrade).
+- **Coffres** du jeu (bois `#6B4226`, cerclages `#3C4258`, serrure laiton `#C99A1E`) : **2 au
+  fond** de chaque dalle (x ±0,56 ; y +0,54), hors des places libres ; au palier, 2 coffres aux
+  coins arrière.
+- **Palier** : l'**estrade** du cheval (Ø 0,9 m, haut 0,12 m, dessus `#8A90B0`, filet violet),
+  centrée en y = +0,10 m : c'est le piédestal de la récompense.
+- La pierre est **la même sur les 12 images** ; seule la lumière du palier la teinte légèrement.
+
+#### 16.3.3 Caméra, lumière et rendu (identiques pour les 12 images)
+
+| Réglage | Valeur |
+|---|---|
+| Caméra | **orthographique** (toutes les dalles s'empilent pile, les places des récompenses sont exactes) ; rotation X **62°** = vue plongeante de **28°** au-dessus de l'horizon, **face à la dalle** (bord avant parallèle au bas de l'image, rotation Z = 0) |
+| Échelle | **520 px d'image par mètre** pour toutes les dalles : *Orthographic Scale* **2,154** (normale), **2,754** (palier) |
+| Résolution (rendu ×2) | normale **1120 × 680**, affichée **560 × 340** ; palier **1432 × 860**, affiché **716 × 430** |
+| Cadrage | disque centré en x (20 px affichés de marge de chaque côté) ; **bord avant du dessus** à y = **288** (normale) / **369** (palier) en pixels affichés. Le script vérifie (`world_to_camera_view`) que les 4 bords du disque (gauche, droit, arrière, avant) tombent sur les valeurs du §16.3.6 à ± 2 px |
+| Lumière | même placement que les icônes et les bulles (clé en haut à gauche et un peu devant, remplissage, liseré derrière) ; **couleurs reprises de chaque palier** (`lightColor`, `ambientSky`, `ambientEquator` des assets Palier1..4), adoucies pour que la pierre reste la même ; ombres douces, jamais noires |
+| Rendu | Eevee, *Film → Transparent*, *View Transform* **Standard**, 64 échantillons, ombres douces activées |
+| Contour | **contour extérieur** de la silhouette seulement, **4 px affichés (8 px image) `#110D1F`** : compositeur, alpha dilaté de 8 px rempli d'encre, placé derrière. Aucun trait intérieur |
+| Ombre portée | silhouette décalée de **+10 px affichés** vers le bas, floutée 12 px, `#110D1F` à **35 %** (la dalle flotte au-dessus des losanges) |
+| Marges du haut | ce qui dépasse au-dessus du dessus doit rester dans l'image : objets du **fond** de la dalle hauts de **0,18 m** au plus, objets de l'**avant** de **0,45 m** au plus |
+
+#### 16.3.4 Les places à garder libres (pour le programmeur)
+
+Ce que l'interface pose par-dessus **ne doit rien cacher, et rien ne doit le cacher** : dans ces
+zones, le rendu ne montre que le sol (au plus quelques brins d'herbe de 0,03 m).
+
+| Zone libre (coordonnées du monde, dessus à z = 0) | Dalle normale | Palier |
+|---|---|---|
+| Place gauche (pièces) | x −0,95 → −0,25 ; y −0,60 → +0,40 | — |
+| Place droite (diamants) | x +0,25 → +0,95 ; y −0,60 → +0,40 | — |
+| Chemin (cheval, drapeau) | tout le chemin | tout le chemin et la place ronde |
+| Piédestal (récompense) | — | le piédestal et 0,15 m autour |
+| Pied du drapeau | disque Ø 0,25 m autour de (−0,29 ; +0,46) | disque Ø 0,25 m autour de (−0,32 ; +0,95) |
+
+v2 : sur le disque, seuls les 2 coffres du fond dépassent du sol (hors des places libres) ;
+l'étoile violette est à plat. Le décor d'altitude est hors du disque, dans les coins de l'image.
+
+#### 16.3.5 Le décor autour de l'étage, palier par palier (v2)
+
+**Règle absolue : rien n'est posé sur le sol de l'étage** (sauf les coffres et l'estrade, qui
+font partie de l'étage du jeu). Le décor est dans les **coins vides de l'image**, derrière le
+disque et dessous. Le script ramène automatiquement dans l'image tout élément qui en dépasserait
+(fonction `caser`) : jamais de nuage coupé net par le bord.
+
+| Palier | Lumière (clé / ciel) | Autour de l'étage |
+|---|---|---|
+| 1 « En plein jour » (`herbe`) | `#FFF4E0` / `#BFDDF5` | 2 à 3 **petits nuages lointains** blanc-lavande (`#F2EEF8`, ventre `#D8CCE6`) dans les coins arrière, un petit en bas |
+| 2 « Dans les nuages ! » (`pierre`) | `#FFEAD4` / `#E0D4D8`, fin de journée | **nuages pêche** (`#FFF2EA`, ventre `#F0C0B4` / `#F7D3C2`) aux coins avant, **sous** le bord, et un derrière |
+| 3 « Au-dessus des nuages ! » (`nuages`) | `#EEEAFF` / `#C0B8E0` | **mer de nuages lavande** (`#E4DAF0`, ventre `#B8A8D8`) tout autour du **bas du flanc** ; 2-3 premières étoiles en haut |
+| 4 « Dans les étoiles ! » (`galaxie`) | `#F2ECFF` / `#A098D0`, liseré `#B48CFF` fort | **étoiles** `#FFF1D6` / `#D9C8FF` qui flottent autour, **petite planète** violette à anneau or (et turquoise au palier), nuages sombres très loin dessous (`#8A80B0`) |
+
+Règles communes : aucun nuage **sur** le sol (on croirait à de la neige) ; pas de rouge vif, pas
+d'or en grande surface, aucun texte ni personnage. Les pièces, diamants, drapeau et cheval ne
+sont pas rendus : l'interface les pose.
+
+#### 16.3.6 Les places en pixels (dans l'image affichée)
+
+**Dalle normale** (affichée **560 × 340**)
+| Repère | Pixels (x, y) |
+|---|---|
+| Dessus de la plaque | x 20 → 540, y **44** (arrière) → **288** (avant) ; centre (280, 166) |
+| Côté visible | y 288 → 329 ; ombre jusqu'à 340 |
+| Chemin | x 225 → 335 |
+| **Point d'appui gauche** (bas des pièces) | **(124, 206)** — images de 140 × 140 au plus |
+| **Point d'appui droit** (bas des diamants) | **(436, 206)** — 140 × 140 au plus |
+| **Point « cheval »** (pieds) | **(280, 236)** |
+| **Point « drapeau »** (pied du mât) | **(205, 110)** |
+| Marges transparentes | haut **44**, bas **11** |
+
+**Dalle de palier** (affichée **716 × 430**)
+| Repère | Pixels (x, y) |
+|---|---|
+| Dessus de la plaque | x 20 → 696, y **52** → **369** ; centre (358, 210) |
+| Côté visible | y 369 → 410 ; ombre jusqu'à 430 |
+| Chemin | x 303 → 413 ; place ronde Ø 364 autour de (358, 198) |
+| **Point d'appui du piédestal** (bas de la carte récompense) | **(358, 182)** — carte de 200 × 230 au plus |
+| **Point « cheval »** | **(358, 326)** |
+| **Point « drapeau »** | **(275, 94)** |
+| **Point du bouton Récupérer** (centre) | **(358, 400)** |
+| Marges transparentes | haut **52**, bas **20** |
+
+**Empilement** (liste de haut en bas : l'étage le plus haut en premier, donc les dalles du bas se
+dessinent **par-dessus** celles du haut, ce qui est juste : elles sont plus près) : on veut **36 px**
+de vide entre le bas du côté d'une dalle et l'arrière du dessus de la dalle qu'elle surmonte.
+Marge négative à mettre entre deux dalles = 36 − (marge basse de celle du dessus + marge haute
+de celle du dessous) :
+| Dessus / dessous | Marge |
+|---|---|
+| normale / normale | **−19 px** (un étage = 321 px) |
+| normale / palier | **−36 px** |
+| palier / normale | **−28 px** |
+
+#### 16.3.7 Import dans Unity et contrôles
+
+- Import : *Texture Type* Default, *Alpha Is Transparency* coché, *Wrap Mode* Clamp, *Mip Maps*
+  coché, *Filter* Bilinear (comme les bulles). Affichage en `scale-to-fit` à la taille affichée.
+- Contrôle 1 : poser chaque dalle sur la couleur de son décor (§16.2.2) : le contour et l'ombre
+  la détachent ; les places libres sont bien vides.
+- Contrôle 2 : poser `piece.png`, `diamant.png`, `drapeau_record.png` et l'icône du cheval sur
+  leurs points : tout se lit, rien n'est coupé par un décor.
+- Contrôle 3 : empiler herbe A, herbe B, palier pierre : les plaques ont exactement la même
+  largeur par mètre, l'écart est régulier.
+- Contrôle 4 : la dalle teintée `#A8A4BC` (au-dessus du record) reste lisible, la galaxie aussi.
+
+### 16.4 Images de la v6.5 (récapitulatif)
+
+| Fichier | Fait par | Où |
+|---|---|---|
+| 12 dalles `art/dalles/dalle_<decor>_a.png`, `_b.png` et `_palier.png` | **artiste 3D**, `blender/rendu_dalles.py` | L'Ascension |
+| `art/icones/icone_mes_skins.png` | Gemini, `art/prompts/lot8.md` | menu de l'Inventaire |
+| `case_<rarete>.png` (6), `vitrine_bleue.png`, `motif_losanges.png` | **code**, `UiFxTextures.BakeAll()` | cases, vitrine, fond de L'Ascension |
+
+Réutilisés sans changement : `couleur_bleu.png`, `chapeau_haut_de_forme.png`, `medaille_or.png`,
+`piece.png`, `diamant.png`, `drapeau_record.png`, `icone_route.png`, `icone_inventaire.png`,
+`carte_bleue.png`, les bulles `bulle_rect_*` et `bulle_petit_*`. Tout le reste (pointes,
+coches, cadenas, jauges, anneaux, rayons, étoiles, barre de progression) est **dessiné par le
+code ou en USS**.
+
+### 16.5 À éviter (v6.5)
+
+- Le **bleu de Fortnite** en fond d'écran, ses polices italiques, ses icônes de menu ; le tapis
+  rouge, les épées, les coffres et les écussons de Clash Royale.
+- Une indication « glisse pour tourner » dans l'Inventaire (c'est un secret à découvrir).
+- Du texte en plus sur les dalles : un seul chiffre par récompense de palier, rien sur les dalles
+  normales. Le détail va dans le « i ».
+- Une récompense, une chance ou un gain affichés qui ne viennent pas des données du jeu.
+- Un décor de dalle qui empiète sur une place libre, ou qui dépasse en haut de l'image.
+- Mélanger les couleurs de rareté avec autre chose que les cases, la pilule de rareté et les
+  rayons de la vitrine.
+
+### 16.6 À vérifier en capture (1920 × 1080 et 1280 × 720)
+
+- Inventaire : les 3 zones tiennent sans chevauchement ; on comprend en 1 seconde quelle section
+  est ouverte (entrée bleue + pointe + titre).
+- Les 6 couleurs de case se distinguent, l'icône se lit sur chacune, le badge vert et l'anneau or
+  se voient sur toutes.
+- Le bonus total est visible sans rien ouvrir, et la fiche donne le bonus de l'objet.
+- L'Ascension : les dalles sont alignées, régulières, sans trou ni chevauchement visible ; le
+  numéro tombe au milieu de sa dalle ; le « i » est aligné avec lui.
+- Le fond change de teinte aux étages 10, 20 et 30, en douceur.
+- La pilule du record, le drapeau et le cheval ne se cachent pas l'un l'autre.

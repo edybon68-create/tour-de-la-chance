@@ -19,7 +19,7 @@ namespace TourDeLaChance
     /// cheval tourne lentement (25°/s) et fait un petit saut de joie quand on lui montre un objet.
     /// Pur affichage.
     /// </summary>
-    public class ShowcaseHorse : MonoBehaviour
+    public class ShowcaseHorse : MonoBehaviour, ISpinnable // v6.5 : se fait tourner via DragToRotate
     {
         const int Width = 512, Height = 680;   // taille « Moyen » (v6 §12.2)
         const float TurnSpeed = 25f; // °/s

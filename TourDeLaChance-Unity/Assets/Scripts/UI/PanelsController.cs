@@ -33,7 +33,7 @@ namespace TourDeLaChance
     /// vitrine (§8), Boutique à onglets (§15), page Renaissance (§13.3), petits messages
     /// (toasts), et application de la règle « 2 accessoires » au démarrage (§4.4).
     ///
-    /// v6 : la Route des trophées (TrophyRoadPage, clic sur le badge d'étage) ; les petits
+    /// v6 : la Route des trophées, devenue « L'Ascension » en v6.5 (TrophyRoadPage, clic sur le badge d'étage) ; les petits
     /// messages des récompenses (collection complète, rattrapage des paliers), 1,5 s d'écart ;
     /// la vérification des collections après chaque ouverture (« OK ») ; les bulles en image.
     /// </summary>
@@ -47,6 +47,8 @@ namespace TourDeLaChance
         [SerializeField] HorseShowcase showcase;        // la caméra de la vitrine (facultative)
         [Tooltip("v5 §8.5 : le cheval vierge (fiche agrandie de l'Index, « Contenu et taux »).")]
         [SerializeField] ShowcaseHorse blankHorse;
+        [Tooltip("v6.5 §5 : fait tourner le cheval du joueur quand on le glisse dans la vitrine de l'Inventaire.")]
+        [SerializeField] PlayerSpinner playerSpinner;
 
         [Header("Icônes des pop-ups (colonnes et bandeau)")]
         [SerializeField] Sprite iconBoutique;
@@ -158,7 +160,6 @@ namespace TourDeLaChance
             // v6 : les nouvelles icônes (échoppe, roue sans trou), chargées par leur nom.
             if (UiImages.Boutique != null) iconBoutique = UiImages.Boutique;
             if (UiImages.Reglages != null) iconReglages = UiImages.Reglages;
-            invShowcase = doc.Q<VisualElement>("inv-showcase");
 
             SetIcon(colBoutique, iconBoutique);
             SetIcon(colInventaire, iconInventaire);
@@ -172,6 +173,11 @@ namespace TourDeLaChance
 
             boutique = new BoutiquePage(pageBoutique, blankHorse);
             inventory = new InventoryPage(pageInventaire, this);
+            // v6.5 : la vitrine du cheval est construite par l'Inventaire « Casier ». On y pose
+            // l'image de la caméra, et on peut faire tourner le cheval en glissant sur toute la
+            // scène (§5 : aucune indication à l'écran).
+            invShowcase = inventory.Showcase;
+            inventory.ShowcaseArea.AddManipulator(new DragToRotate(() => playerSpinner));
             index = new IndexPage(pageIndex, blankHorse);
             upgrades = new UpgradesPage(doc.Q<ScrollView>("page-ameliorations"), this);
             leaderboard = new LeaderboardPopup(pageClassement);
@@ -404,6 +410,7 @@ namespace TourDeLaChance
                              || (shownPanel == PanelId.Boutique && boutique.HandleEscape())
                              || (shownPanel == PanelId.Inventaire && inventory.HandleEscape())
                              || (shownPanel == PanelId.Renaissance && rebirthPage.HandleEscape())
+                             || (shownPanel == PanelId.Route && routePage.HandleEscape())
                              || (shownPanel == PanelId.Inventaire && inventory.HandleEscape());
                 if (!consumed) game.ClosePanel();
             }
@@ -438,6 +445,7 @@ namespace TourDeLaChance
             shownPanel = game.PanelOpen;
             showingName = false;
             avatar.ShowEquipped(); // fin de l'aperçu à chaque changement
+            if (playerSpinner != null) playerSpinner.ResetView(); // v6.5 §5 : le cheval revient de face
 
             if (shownPanel == PanelId.None)
             {
@@ -557,12 +565,12 @@ namespace TourDeLaChance
             else switch (panel)
             {
                 case PanelId.Boutique: size = new Vector2(1160f, 820f); key = "boutique"; text = "Boutique"; break;
-                case PanelId.Inventaire: size = new Vector2(1240f, 840f); key = "inventaire"; text = "Inventaire"; break;
+                case PanelId.Inventaire: size = new Vector2(1600f, 860f); key = "inventaire"; text = "Inventaire"; break; // v6.5 : « Casier » (art bible §16.1.1)
                 case PanelId.Index: size = new Vector2(1360f, 820f); key = "index"; text = "Index"; break;
                 case PanelId.Ameliorations: size = new Vector2(1000f, 840f); key = "ameliorations"; text = "Améliorations"; break;
                 case PanelId.Classement: size = new Vector2(920f, 840f); key = "classement"; text = "Classement"; break;
                 case PanelId.Renaissance: size = new Vector2(1100f, 840f); key = "renaissance"; text = "Renaissance"; break;  // v6 §15.4
-                case PanelId.Route: size = new Vector2(1360f, 860f); key = "route"; text = "Route des trophées"; break;      // v6 §8.3 : taille L
+                case PanelId.Route: size = new Vector2(1120f, 860f); key = "route"; text = "L'Ascension"; break;      // v6.5 : art bible §16.2.1
                 // v6 (art bible §15.7) : 640 × 600 avec la nouvelle ligne Graphismes.
                 default: size = new Vector2(640f, 600f); key = "reglages"; text = "Réglages"; break;
             }
@@ -572,10 +580,14 @@ namespace TourDeLaChance
             foreach (var k in new[] { "boutique", "inventaire", "index", "ameliorations", "classement", "reglages", "pseudo", "renaissance", "route" })
                 ShopUi.SetClass(header, "popup-header--" + k, k == key);
             SetHeaderIcon(panel);
+            // v6.5 : la croix de l'Inventaire (fenêtre de 1600 px) rentre un peu, pour ne pas
+            // toucher le compteur de diamants du HUD en 1280 × 720.
+            ShopUi.SetClass(closeButton, "popup-close--interieur", panel == PanelId.Inventaire);
 
             // Le porte-monnaie et la note de la cagnotte : Inventaire, Index, Améliorations (la
             // Boutique et la Renaissance affichent leurs propres soldes).
-            bool shopPopup = panel == PanelId.Inventaire || panel == PanelId.Index || panel == PanelId.Ameliorations;
+            // v6.5 : plus dans l'Inventaire « Casier », dont les 3 zones prennent toute la hauteur.
+            bool shopPopup = panel == PanelId.Index || panel == PanelId.Ameliorations;
             walletRow.style.display = shopPopup ? DisplayStyle.Flex : DisplayStyle.None;
             potNote.style.display = (shopPopup || panel == PanelId.Boutique) && game.Pot > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
@@ -828,6 +840,7 @@ namespace TourDeLaChance
         void Preview(ShopItem item)
         {
             avatar.ShowEquipped();
+            if (item == null) return; // v6.5 : rien à essayer, le cheval garde sa tenue
             if (Shop.NeedsReplaceChoice(item))
             {
                 var removed = Shop.LeastRare(Shop.EquippedAccessories());
@@ -925,7 +938,7 @@ namespace TourDeLaChance
 
         void OnTrophyCatchUp(int diamonds, int record)
         {
-            QueueToast($"Route des trophées : +{diamonds} {ShopUi.Diamant} pour ton record (étage {record})");
+            QueueToast($"L'Ascension : +{diamonds} {ShopUi.Diamant} pour ton record (étage {record})");
             if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.DiamantGain1);
         }
 

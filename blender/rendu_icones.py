@@ -65,7 +65,9 @@ def construire(source):
     """`source` = ("animal", "oreilles_chat") ou ("boite", "boite_skins_pirates").
     Renvoie la racine du modèle, dans une scène neuve."""
     genre, nom = source
-    if genre == "animal":
+    if genre == "module":              # un script qui a sa propre fonction construire()
+        racine = importlib.import_module(nom).construire()
+    elif genre == "animal":
         module = importlib.import_module(f"animal_{nom}")
         racine = module.construire()
         import commun_animaux as A
@@ -346,6 +348,8 @@ ICONES = {
     "boite_pirates_accessoires": dict(source=("boite", "boite_accessoires_pirates")),
     "boite_animaux_skins": dict(source=("boite", "boite_skins_animaux")),
     "boite_animaux_accessoires": dict(source=("boite", "boite_accessoires_animaux")),
+    # v6.5 : icône « Mes skins » du menu de l'Inventaire (art/prompts/lot8.md)
+    "icone_mes_skins": dict(source=("module", "armoire_skins")),
 }
 
 

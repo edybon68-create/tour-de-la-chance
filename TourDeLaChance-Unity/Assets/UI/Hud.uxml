@@ -13,7 +13,7 @@
                  est écrit par le code (FloorBadgeView) d'après l'état du jeu. La roue dentée
                  des Réglages se place à sa droite (Panels.uxml). -->
             <ui:VisualElement name="badge-holder" class="badge-holder" picking-mode="Ignore">
-                <!-- v6 §8.3 : le badge se clique (il ouvre la route des trophées). -->
+                <!-- v6 §8.3 : le badge se clique (il ouvre L'Ascension). -->
                 <ui:VisualElement name="badge" class="badge badge--palier1 badge--cliquable" picking-mode="Position">
                     <ui:VisualElement name="badge-stars" class="badge-stars" picking-mode="Ignore" />
                     <ui:Label text="ÉTAGE" class="badge-word" picking-mode="Ignore" />

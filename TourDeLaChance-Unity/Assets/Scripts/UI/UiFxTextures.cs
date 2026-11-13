@@ -144,6 +144,72 @@ namespace TourDeLaChance
             return t;
         }
 
+        // =====================================================================
+        // v6.5 (art bible §16.1.6 et §16.1.7) : les cases de l'Inventaire « Casier » et sa vitrine
+        // =====================================================================
+
+        /// Les fonds des cases, un par rareté : (fichier, clair en haut à gauche, base au milieu,
+        /// sombre en bas à droite, « bande » = l'épaisseur du jouet tout en bas).
+        public static readonly (string file, string light, string mid, string dark, string band)[] CaseGradients =
+        {
+            ("case_commun", "#C9CDD8", "#9AA0B0", "#6E7488", "#4F5468"),
+            ("case_peu_commun", "#9BEA8A", "#4CC26A", "#2E8E48", "#1F6A34"),
+            ("case_rare", "#8CC4FF", "#3B8BEB", "#2462B8", "#184585"),
+            ("case_super_rare", "#D6A8FF", "#A35CE0", "#7236B0", "#522383"),
+            ("case_legendaire", "#FFD27A", "#FF9F1C", "#D9700A", "#9E4E05"),
+            ("case_secret", "#FFA8EE", "#FF4FD8", "#C02AA6", "#8A1A78"),
+        };
+
+        /// Un fond de case size × size : dégradé en diagonale clair → base → sombre, lueur
+        /// blanche ronde (30 %) centrée à 45 % de la hauteur, et une bande de 12 px en bas.
+        public static Texture2D CaseGradient(Color light, Color mid, Color dark, Color band, int size = 272)
+        {
+            var t = NewTexture("Case", size);
+            const int bandHeight = 12;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    // Dans une texture, y = 0 est EN BAS : la bande, ce sont les 12 premières lignes.
+                    if (y < bandHeight) { t.SetPixel(x, y, band); continue; }
+                    float u = (x + 0.5f) / size, v = 1f - (y + 0.5f) / size; // v = 0 en HAUT
+                    float k = Mathf.Clamp01((u + v) * 0.5f);                 // 0 en haut à gauche, 1 en bas à droite
+                    var c = k < 0.5f ? Color.Lerp(light, mid, k * 2f) : Color.Lerp(mid, dark, (k - 0.5f) * 2f);
+                    float dx = u - 0.5f, dy = v - 0.45f;
+                    float d = Mathf.Clamp01(Mathf.Sqrt(dx * dx + dy * dy) / 0.5f);
+                    c = Color.Lerp(c, Color.white, 0.30f * (1f - d) * (1f - d));
+                    c.a = 1f;
+                    t.SetPixel(x, y, c);
+                }
+            t.Apply();
+            return t;
+        }
+
+        /// v6.5 (art bible §16.2.2) : la tuile des losanges du fond de L'Ascension, 224 × 224
+        /// (affichée 112 × 112, répétée). Un losange touche le milieu des 4 bords : en se
+        /// répétant, cela fait un damier sans couture. Intérieur blanc à 6 %, extérieur
+        /// transparent, arêtes de 4 px (2 px affichés) blanches à 10 %.
+        public static Texture2D LozengeTile(int size = 224)
+        {
+            var t = NewTexture("Losanges", size);
+            float half = size * 0.5f;
+            for (int y = 0; y < size; y++)
+                for (int x = 0; x < size; x++)
+                {
+                    float a = 0f;
+                    for (int sy = 0; sy < 4; sy++)
+                        for (int sx = 0; sx < 4; sx++)
+                        {
+                            float px = x + (sx + 0.5f) / 4f - half, py = y + (sy + 0.5f) / 4f - half;
+                            float d = (Mathf.Abs(px) + Mathf.Abs(py) - half) / 1.41421f; // distance (signée) à l'arête
+                            if (Mathf.Abs(d) <= 2f) a += 0.10f;      // l'arête
+                            else if (d < 0f) a += 0.06f;             // l'intérieur
+                        }
+                    t.SetPixel(x, y, new Color(1f, 1f, 1f, a / 16f));
+                }
+            t.Apply();
+            return t;
+        }
+
         /// Le motif répété en filigrane du fond des pop-ups (192 × 192, répété par le USS) :
         /// une étoile, une pièce et un diamant, en encre, sur fond transparent. Le USS le pose
         /// à ~6 % d'opacité. Chaque pixel est échantillonné 4 × 4 fois : des bords lisses.
@@ -233,11 +299,16 @@ namespace TourDeLaChance
             // v5.1 : les fonds de cartes et le motif en filigrane.
             foreach (var g in CardGradients) Save(CardGradient(Hex(g.from), Hex(g.to)), $"{folder}/{g.file}.png");
             Save(PatternTile(), $"{folder}/motif_popup.png");
-            return $"{Gradients.Length + CardGradients.Length + 1} images enregistrées dans {folder}";
+            // v6.5 : les 6 fonds de cases de l'Inventaire et le fond bleu de sa vitrine.
+            foreach (var g in CaseGradients) Save(CaseGradient(Hex(g.light), Hex(g.mid), Hex(g.dark), Hex(g.band)), $"{folder}/{g.file}.png");
+            Save(VerticalGradient(Hex("#8CC8FF"), Hex("#3B7DD8"), 512), $"{folder}/vitrine_bleue.png");
+            // v6.5 : la tuile des losanges du fond de L'Ascension (elle se répète : wrap Repeat).
+            Save(LozengeTile(), $"{folder}/motif_losanges.png", repeat: true);
+            return $"{Gradients.Length + CardGradients.Length + CaseGradients.Length + 3} images enregistrées dans {folder}";
         }
 
         /// Enregistre une texture en PNG et règle son import (pas de compression ni de mipmaps).
-        static void Save(Texture2D tex, string path)
+        static void Save(Texture2D tex, string path, bool repeat = false)
         {
             System.IO.File.WriteAllBytes(path, tex.EncodeToPNG());
             Object.DestroyImmediate(tex);
@@ -246,7 +317,7 @@ namespace TourDeLaChance
             {
                 imp.textureType = UnityEditor.TextureImporterType.Default;
                 imp.mipmapEnabled = false;
-                imp.wrapMode = TextureWrapMode.Clamp;
+                imp.wrapMode = repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
                 imp.filterMode = FilterMode.Bilinear;
                 imp.alphaIsTransparency = true;
                 imp.npotScale = UnityEditor.TextureImporterNPOTScale.None;
