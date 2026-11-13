@@ -29,7 +29,7 @@ SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
     "matiere_arc_en_ciel.png", "matiere_cristal.png", "matiere_argent.png", "boite_skins_1.png",
     "boite_accessoires_1.png", "chapeau_bonnet.png",
     "icone_inventaire.png", "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png",
-    "chapeau_capitaine.png", "bocal_poisson.png", "icone_reglages.png", "icone_effets.png"]}
+    "chapeau_capitaine.png", "bocal_poisson.png", "icone_reglages.png", "icone_effets.png", "icone_rotation.png"]}
 # Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
 # de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
 # les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
@@ -44,7 +44,7 @@ CONTOUR_PX = 30
 SEUIL_OMBRE = 0.06
 # Objets gris clair ou argentés : leur côté éclairé ressemble à une « ombre du fond ».
 # Pour eux, on désactive la détection des ombres (sinon des morceaux de l'objet disparaissent).
-SANS_OMBRE = {"icone_reglages.png", "icone_effets.png", "matiere_argent.png", "couleur_nacre.png"}
+SANS_OMBRE = {"icone_reglages.png", "icone_effets.png", "icone_rotation.png", "matiere_argent.png", "couleur_nacre.png"}
 COULEUR_CONTOUR = np.array([0x11, 0x0D, 0x1F], dtype=np.float32) / 255.0
 # Images qui ne sont pas des icônes du shop : on les laisse de côté.
 IGNORER = set()
