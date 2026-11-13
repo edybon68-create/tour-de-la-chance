@@ -101,7 +101,7 @@ def construire():
     for p, d in P.tour_cou(hauteur, 0.04, n=1, depart=A_ACCROCHE):
         p_acc, d_acc = p, d
     # 3 maillons qui pendent vers l'arrière et le bas
-    descente = (d_acc * 1.0 + Vector((0, 0, -0.35))).normalized()
+    descente = (d_acc * 0.25 + Vector((0, 0, -1.0))).normalized()   # V7 : pend presque droit (avant : partait loin derrière)
     parent = chaine
     pos = p_acc
     plans = [Vector((1, 0, 0)), Vector((0, 1, 0)), Vector((1, 0, 0))]
@@ -116,7 +116,10 @@ def construire():
         pos = pos + descente * 0.10
     # --- l'ancre : anneau accroché au dernier maillon, verge vers le bas à GAUCHE de
     # l'image (+X Blender), plan de l'ancre face à la caméra (un peu tourné)
-    axe = Vector((0.86, 0.0, -0.51)).normalized()          # anneau -> croisée
+    # V7 : (0,86 ; 0 ; −0,51) la tenait presque à l'horizontale, loin à gauche du cou : vue
+    # du jeu, elle semblait flotter. Plus verticale, collée contre le dos (un peu vers −Y),
+    # elle pend comme une épée en bandoulière ; seules les pattes dépassent en bas à gauche.
+    axe = Vector((0.64, 0.0, -0.77)).normalized()        # anneau -> croisée
     bm = bmesh.new()
     v = ancre(bm)
     z = -axe                                                # Z local de l'ancre = vers l'anneau

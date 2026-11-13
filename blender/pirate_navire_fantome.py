@@ -59,10 +59,10 @@ import commun_pirates as P  # noqa: E402
 NOM = "navire_fantome"
 POINT = "PointDos"
 MATS = ["M5_PirSpectre", "M5_PirVoile", "M5_PirLanterne", "M5_PirBrume"]   # 0..3
-CENTRE_ORBITE = (0.0, 1.15, 0.02)
+CENTRE_ORBITE = (0.0, 1.02, 0.02)   # V7 : 1,15 -> 1,02 (le navire, plus gros, ne doit pas cacher les yeux)
 RAYON = 1.0
 INCLINAISON = 12.0
-ECHELLE = 1.2        # 0,55 m de la fiche × 1,2 = 0,66 m (exagéré, bible §13.2)
+ECHELLE = 1.65       # V7 : 1,2 -> 1,65 (0,91 m) : le QA le trouvait minuscule vu du jeu
 
 
 # ---------------------------------------------------------------------------------------
@@ -183,8 +183,10 @@ def navire():
 
 def anneau_brume():
     bm = bmesh.new()
-    C.bm_tore(bm, RAYON, 0.035, segments=32, segments_tube=4, mat=3,
-              rayon_fn=lambda a: 0.03 + 0.012 * math.sin(5 * a))
+    # V7 : sillage bien plus fin (avant : tube de 3,5 cm, lu comme « un anneau autour de la
+    # taille ») ; 48 segments pour un cercle bien rond.
+    C.bm_tore(bm, RAYON, 0.014, segments=48, segments_tube=4, mat=3,
+              rayon_fn=lambda a: 0.010 + 0.006 * math.sin(5 * a))
     return bm
 
 

@@ -43,14 +43,17 @@ NOM = "longue_vue"
 POINT = "PointDos"
 MATS = ["M5_PirLaiton", "M5_PirCuir", "M5_PirVerre"]   # 0, 1, 2
 N = 28
-ANGLE = math.radians(25)        # la longue-vue penche : gauche de l'image plus haute
+ANGLE = math.radians(40)        # la longue-vue penche : gauche de l'image plus haute
+# V7 : 25° la faisait passer à plat derrière la tête, à hauteur des yeux : vue du jeu, elle
+# semblait traverser le crâne « comme une broche ». Plus penchée et plus basse, elle se lit
+# comme une longue-vue sanglée dans le dos (le haut dépasse à gauche du cou, le bas à droite).
 
 
 def hauteur(a):
-    """La sangle : basse devant (0,53), haute derrière (1,05), gauche (+) plus haute.
+    """La sangle : basse devant (0,52), haute derrière (0,90), gauche (+) plus haute.
     Devant, elle passe SOUS le médaillon de la boussole (bas à 0,61) et la pointe du
     foulard (0,74) : on peut porter les deux ensemble."""
-    return 0.79 - 0.26 * math.cos(a) + 0.07 * math.sin(a)
+    return 0.71 - 0.19 * math.cos(a) + 0.05 * math.sin(a)
 
 
 # Profil de la longue-vue le long de son axe : (rayon, position), du gros bout (+0,62,
@@ -86,11 +89,11 @@ def construire():
     # --- la longue-vue, dans le dos
     i_dos = N // 2
     p_dos, d_dos = tour[i_dos]
-    centre = p_dos + d_dos * 0.11
+    centre = p_dos + d_dos * 0.09
     # axe : le long du dos (gauche-droite), penché de 25° (gauche de l'image = +X Blender)
     axe = Vector((-math.cos(ANGLE), 0.0, -math.sin(ANGLE)))   # vers le gros bout (droite, bas)
     bm = bmesh.new()
-    C.bm_revolution(bm, [(r, z) for r, z in PROFIL], 12, mats=MAT_PROFIL)
+    C.bm_revolution(bm, [(r, z) for r, z in PROFIL], 16, mats=MAT_PROFIL)   # V7 : 12 -> 16 côtés
     m = P.matrice_vers(centre, axe, haut=d_dos)
     bmesh.ops.transform(bm, matrix=m, verts=bm.verts)
     # deux passants de cuir autour du gros tube (ils la tiennent contre la sangle)

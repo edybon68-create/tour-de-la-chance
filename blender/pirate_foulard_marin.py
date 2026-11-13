@@ -48,7 +48,10 @@ Y_MILIEU, PENTE = 1.00, 0.06
 # Section de la bande (vers l'extérieur, hauteur) ; matériau de chaque côté de la section
 SECTION = [(-0.012, -0.065), (0.03, -0.072), (0.06, -0.05), (0.068, -0.02),
            (0.068, 0.02), (0.06, 0.05), (0.03, 0.072), (-0.012, 0.065)]
-MAT_SECTION = [1, 1, 0, 0, 0, 1, 1, 0]       # liseré blanc en haut et en bas
+# V7 : le liseré blanc couvrait tout le dessus de la bande ; vu d'en haut (caméra du jeu), le
+# foulard ressemblait à un anneau BLANC, alors que l'icône est bleu marine. Le liseré n'est
+# plus qu'un filet sur l'arête extérieure, en haut et en bas.
+MAT_SECTION = [0, 0, 1, 0, 1, 0, 0, 0]
 
 
 def hauteur(a):
