@@ -4,6 +4,8 @@ Jeu 3D « quitte ou double » sous Unity. L'auteur débute en programmation : **
 écrit pour lui (commentaires, docs, messages) est en français et pédagogique.**
 
 ## Où est quoi
+- `docs/JOURNAL.md` : le résumé de toutes nos conversations, version par version. **À lire en premier
+  à chaque session**, à la place de l'historique. À compléter à la fin de chaque version.
 - `docs/GDD.md` : la bible du jeu. À lire avant toute tâche. On ne contredit pas le GDD sans le mettre à jour.
 - `docs/specs/` : les spécifications détaillées des fonctionnalités (écrites par le game-designer).
 - `TourDeLaChance-Unity/` : le projet Unity 6000.3.28f1, URP 3D, Input System uniquement.
