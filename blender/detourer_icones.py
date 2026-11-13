@@ -29,11 +29,11 @@ SEUILS_SPECIAUX = {n: (0.035, 0.07) for n in [
     "matiere_arc_en_ciel.png", "matiere_cristal.png", "matiere_argent.png", "boite_skins_1.png",
     "boite_accessoires_1.png", "chapeau_bonnet.png",
     "icone_inventaire.png", "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png",
-    "chapeau_capitaine.png", "bocal_poisson.png"]}
+    "chapeau_capitaine.png", "bocal_poisson.png", "icone_reglages.png", "icone_effets.png"]}
 # Objets en anneau ou troués : le fond visible AU MILIEU (trou de l'écharpe, du collier,
 # de l'auréole, yeux du masque) n'est pas relié au bord. Pour eux, on rend aussi transparents
 # les pixels très proches du fond situés à l'intérieur (seuil serré pour ne pas trouer l'objet).
-OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png", "icone_reglages.png",
+OBJETS_TROUES = {"echarpe.png", "collier_fleurs.png", "aureole.png", "masque_heros.png",
                  "icone_rebirth.png"}
 SEUIL_TROU = 0.035
 # v5.1 : épaisseur du contour noir (en pixels, pour une image de 1024 px) et sa couleur
@@ -42,6 +42,9 @@ SEUIL_TROU = 0.035
 CONTOUR_PX = 30
 # Écart de teinte maximal pour qu'un pixel plus sombre que le fond soit pris pour une ombre portée.
 SEUIL_OMBRE = 0.06
+# Objets gris clair ou argentés : leur côté éclairé ressemble à une « ombre du fond ».
+# Pour eux, on désactive la détection des ombres (sinon des morceaux de l'objet disparaissent).
+SANS_OMBRE = {"icone_reglages.png", "icone_effets.png", "matiere_argent.png", "couleur_nacre.png"}
 COULEUR_CONTOUR = np.array([0x11, 0x0D, 0x1F], dtype=np.float32) / 255.0
 # Images qui ne sont pas des icônes du shop : on les laisse de côté.
 IGNORER = set()
@@ -80,6 +83,8 @@ def detourer(chemin_entree, chemin_sortie):
     lum_fond = float(fond.mean()) + 1e-4
     teinte = px[:, :, :3] / lum[:, :, None] - fond / lum_fond
     ombre = (np.sqrt((teinte ** 2).sum(axis=2)) < SEUIL_OMBRE) & (lum < lum_fond) & (lum > 0.55 * lum_fond)
+    if os.path.basename(chemin_entree) in SANS_OMBRE:
+        ombre[:] = False
     candidat |= ombre
 
     # 3. Remplissage depuis les bords, limité aux pixels candidats.
@@ -155,6 +160,7 @@ def detourer(chemin_entree, chemin_sortie):
 
 
 os.makedirs(SORTIE, exist_ok=True)
+SEULES = set((n + ".png") for n in os.environ.get("ICONES", "").split())
 for nom in sorted(os.listdir(SOURCE)):
-    if nom.endswith(".png"):
+    if nom.endswith(".png") and (not SEULES or nom in SEULES):
         detourer(os.path.join(SOURCE, nom), os.path.join(SORTIE, nom))

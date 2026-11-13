@@ -48,6 +48,10 @@
   - 49 icônes du lot 6 sur 60, dont 20 rendues dans Blender (`blender/rendu_icones.py`).
 - **v6** : à faire. Liste complète dans `docs/specs/v6-a-faire.md` (dictée par l'auteur le 13/11/2026). D'abord une inspection QA, puis ajout de ses trouvailles à cette liste.
 
-## En cours / prochaine étape
+## En cours / prochaine étape (v6, au 13/11/2026)
+- Spec v6 écrite (`docs/specs/v6.md`), design v6 dans l'art bible §15, prompts dans `art/prompts/lot7.md`.
+- Nouvelles icônes Boutique (échoppe) et Réglages (roue sans trou) générées dans Gemini (conversation `9ad2ff149e58f7d8`). Images 4 à 9 du lot 7 restantes : Gemini était bloqué.
+- En cours au moment de la coupure : le programmeur corrige les bugs QA (points 29-53), l'artiste 3D rend les 25 bulles (`blender/rendu_bulles.py`). Ensuite : fonctionnalités v6 par le programmeur.
+
 - Lot 6 terminé (60/60 icônes, commit 4d60aac). Si on doit refaire des images : conversation Gemini des skins Animaux `7c4b360605bc4139`, ou ChatGPT avec une image de référence jointe.
 - Inspection QA en cours, puis spec v6 par le game designer à partir de `docs/specs/v6-a-faire.md`.
