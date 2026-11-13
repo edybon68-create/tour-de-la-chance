@@ -48,6 +48,7 @@
 11. [ ] **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
 
 ## Règles de sécurité (toujours)
+- **Ne JAMAIS activer le son de l'ordinateur** (demande expresse de l'auteur) : ne pas toucher au volume du Mac (`osascript`, `afplay`, etc.), ne pas désactiver le « Mute Audio » de Unity, ne jouer aucun son à voix haute. Les sons se vérifient par le code ou les fichiers, pas en les écoutant.
 - Sauvegarde de l'auteur : la copier avant tout test, la restaurer après, et vérifier qu'elle est identique.
 - Ne jamais compiler, ni modifier un script, pendant un mode Play que nous n'avons pas lancé.
 - Ne jamais changer de compte Gemini ou ChatGPT, ne jamais saisir de mot de passe.
