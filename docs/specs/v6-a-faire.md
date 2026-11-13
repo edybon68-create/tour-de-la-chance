@@ -63,6 +63,51 @@
 27. Petites traînées violettes encore entourées de noir sous quelques icônes (Perroquet, Capitaine, Petit Kraken, Renaissance).
 28. Paiement réel des diamants : **toujours inactif** (voir la v5 §16 avant toute activation).
 
-## Trouvé par le QA
+## Trouvé par le QA (inspection du 13/11/2026)
 
-_(à compléter après l'inspection)_
+Verdict : aucun problème bloquant. Les captures sont dans `docs/captures/qa_v6_*.png`.
+Contrôlés et conformes :
+- équité des tirages ;
+- taux affichés égaux aux taux réels ;
+- 2 accessoires au maximum ;
+- reprise protégée contre le double-clic ;
+- Renaissance ;
+- aucun paiement réel actif.
+
+### Important
+29. **Première ouverture d'une boîte de skins dans une session** : le mini-cheval s'affiche en plâtre blanc au lieu du skin gagné. Cause : `BoxStudio.cs:373` appelle `ShowOnly` alors que le cheval est encore désactivé, puis `PlayerAvatar.Start()` écrase le skin (`qa_v6_ouverture_skin_platre.png`).
+30. **Carte d'étage trop chargée** : la pastille « Trésor : +X » chevauche les petites mentions (bannière de record, tenue, Renaissance), et le gain devient illisible. La règle d'or est touchée : le gain doit être lisible avant le choix (`qa_v6_carte_etage_chevauchement.png`).
+31. ~~10 icônes d'accessoires Pirates non branchées~~ : **corrigé le 13/11** (branchement automatique relancé).
+32. **Console** : des milliers d'erreurs NaN dans `AccessoryRig.cs:235` (antennes des Ailes de papillon). Le ressort devient instable quand des images sont longues. Il faut limiter `dt` et ajouter une protection anti-NaN.
+33. **Bouton « Encaisser 0 »** affiché quand la cagnotte est vide (après un trésor en diamants à l'étage 1). Il ne doit pas apparaître sans cagnotte (`HudController.cs:183` et `:224`).
+34. **« Voir dans l'inventaire »** ne fait rien depuis la Boutique (« Contenu et taux » › fiche). Le gestionnaire est vide dans `BoutiquePage.cs:96`.
+35. **Résultat d'ouverture mal cadré** :
+    - le socle de la boîte est coupé en bas ;
+    - le panneau de résultat recouvre la boîte ;
+    - la rareté est illisible dans le faisceau ;
+    - certaines lignes sont alignées à gauche ;
+    - le HUD reste visible.
+
+    Attendu : les textes sous l'objet et le HUD caché (`qa_v6_ouverture_*.png`).
+
+### Mineur
+36. **Améliorations** : les points de la jauge or sont invisibles sur la carte or. La ligne « Trésors +60 % » décrit le niveau suivant sans le dire.
+37. **Boîtes Animaux verrouillées** : le cadenas cache « Collection : 0 / 16 ».
+38. **Inventaire** :
+    - une seule rangée visible, et les cartes coupées (« Remplace : … », rareté, badge de bonus) ;
+    - les grilles n'utilisent que 3 à 4 colonnes et laissent un grand vide à droite.
+39. **Voiles sombres** (fiche agrandie, « Lequel enlever ? », confirmations) : ils ne couvrent pas le haut de la fenêtre.
+40. **Texte clair sur fond blanc** : titres de l'Index, Contenu et taux, Réglages. « Il te manque X » est en rouge, peu lisible sur les cartes colorées : à mettre en blanc contouré.
+41. **Retour à la ligne avant « % »** (il faut une espace insécable). La puce de « Peu commun » est décalée dans le tableau des taux.
+42. **Phrase de la carte d'étage** après un trésor en diamants ou une reprise : elle affiche « +0 ! » ou une phrase de montée alors qu'on n'est pas monté.
+43. **L'Index range Animaux avant Pirates** : il doit suivre l'ordre de la Boutique (Pirates puis Animaux).
+44. **Les 32 objets des boîtes n°1 n'ont pas de phrase de fiche** dans l'Index.
+45. **Casquette mal placée sur le cheval vierge** de la fiche : elle cache un œil.
+46. **Classement** : « Ton record : étage 8 » alors que la meilleure ligne est l'étage 7 (le record est enregistré avant que la ligne de la partie soit ajoutée).
+47. **Porte-monnaie du HUD** sans séparateur de milliers (« 11992 » au lieu de « 11 992 »).
+48. **Réglages** : la fenêtre affiche encore « version 5 » et elle est trop haute.
+49. **Skins sans icône** : la vignette de secours est un carré uni. Mettre un vrai substitut.
+50. **Rayons 3D de la révélation** : on voit des marches (blocs carrés).
+51. **Vitrine de l'Inventaire** : l'Auréole est coupée en haut.
+52. **Moment de la révélation** : la v5 §21 dit 1,90 s, l'art bible dit 1,75 s, et le code suit 1,75 s. À trancher dans la spec v6.
+53. **Performances** : à mesurer au Profiler, fenêtre au premier plan (aucune image de plus de 50 ms au premier étage à 6 coffres).
