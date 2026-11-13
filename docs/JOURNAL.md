@@ -49,5 +49,5 @@
 - **v6** : à faire. Liste complète dans `docs/specs/v6-a-faire.md` (dictée par l'auteur le 13/11/2026). D'abord une inspection QA, puis ajout de ses trouvailles à cette liste.
 
 ## En cours / prochaine étape
-- Générer les 11 skins Animaux restants. Conversation Gemini `7c4b360605bc4139` ; ChatGPT est utilisable avec une image de référence jointe.
-- Inspection QA, puis spec v6 par le game designer.
+- Lot 6 terminé (60/60 icônes, commit 4d60aac). Si on doit refaire des images : conversation Gemini des skins Animaux `7c4b360605bc4139`, ou ChatGPT avec une image de référence jointe.
+- Inspection QA en cours, puis spec v6 par le game designer à partir de `docs/specs/v6-a-faire.md`.
