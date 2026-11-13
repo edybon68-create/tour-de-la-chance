@@ -1129,7 +1129,124 @@ def planche(decors):
     print(f"PLANCHE -> {PLANCHE}")
 
 
+# ---------------------------------------------------------------------------------------
+# 11. V7 : les 3 nuages qui dérivent dans L'Ascension (art bible §17.2.3 et §17.2.11)
+#     Même caméra orthographique (62°), même lumière que le palier 1, mêmes boules lisses que
+#     les nuages des dalles, contour d'encre de 4 px affichés, PAS d'ombre portée.
+#     Rendus BLANCS : le code les teinte selon le palier.
+#     Lancer seulement eux :  NUAGES=1 .../Blender --background --python blender/rendu_dalles.py
+# ---------------------------------------------------------------------------------------
+DOSSIER_NUAGES = os.environ.get("SORTIE_NUAGES") or os.path.join(C.DOSSIER_PROJET, "art", "ascension")
+NUAGES = {
+    # nom : (taille rendue en px, boules (x, z, rayon) : la plus grosse au milieu, ventre plat)
+    "nuage_1": ((720, 360), ((-1.55, 0.00, 0.55), (-0.80, 0.22, 0.78), (0.0, 0.34, 0.95),
+                             (0.82, 0.20, 0.76), (1.55, 0.02, 0.55))),
+    "nuage_2": ((520, 280), ((-1.05, 0.02, 0.58), (-0.32, 0.28, 0.82), (0.45, 0.22, 0.75),
+                             (1.10, 0.00, 0.52))),
+    "nuage_3": ((360, 200), ((-0.62, 0.04, 0.55), (0.05, 0.25, 0.75), (0.72, 0.02, 0.52))),
+}
+BLANC_NUAGE, VENTRE_NUAGE = "#FFFFFF", "#D8D2E6"
+
+
+def boule_coupee(nom, x, z, r, m_haut, m_bas, z_coupe=0.0):
+    """Boule de nuage aplatie en bas : on coupe tout ce qui est sous z_coupe et on bouche le
+    trou par une face plate (le « ventre plat » de la fiche). Les faces du bas de la boule
+    prennent la couleur du ventre."""
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=24, v_segments=14, radius=r)
+    bmesh.ops.translate(bm, vec=(x, 0, z), verts=bm.verts)
+    res = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:],
+                                 plane_co=(0, 0, z_coupe), plane_no=(0, 0, -1), clear_outer=True)
+    bord = [e for e in res["geom_cut"] if isinstance(e, bmesh.types.BMEdge)]
+    bmesh.ops.holes_fill(bm, edges=bord, sides=0)
+    for f in bm.faces:
+        f.material_index = 1 if f.calc_center_median().z < z_coupe + 0.18 * r else 0
+    o = objet(nom, bm, [m_haut, m_bas], lisse=True, angle=60)
+    return o
+
+
+def rendre_nuage(nom):
+    (w, h), boules = NUAGES[nom]
+    global COLLECTION
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    _MATS.clear()
+    scene = bpy.context.scene
+    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    scene.eevee.taa_render_samples = 64
+    if hasattr(scene.eevee, "use_gtao"):
+        scene.eevee.use_gtao = True
+    scene.render.resolution_x, scene.render.resolution_y = w, h
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = True
+    scene.render.filter_size = 1.2
+    scene.view_settings.view_transform = "Standard"
+    scene.view_settings.look = "None"
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGBA"
+    monde = bpy.data.worlds.new("MondeNuages")
+    monde.use_nodes = True
+    monde.node_tree.nodes["Background"].inputs["Color"].default_value = C.hex_vers_lineaire(AMBIANCES["herbe"][3][0])
+    monde.node_tree.nodes["Background"].inputs["Strength"].default_value = AMBIANCES["herbe"][3][1]
+    scene.world = monde
+    COLLECTION = bpy.data.collections.new("Nuage")
+    scene.collection.children.link(COLLECTION)
+    mh, mb = M(BLANC_NUAGE, 0.7), M(VENTRE_NUAGE, 0.7)
+    for i, (x, z, r) in enumerate(boules):
+        boule_coupee(f"{nom}_{i}", x, z, r, mh, mb)
+    # caméra orthographique inclinée comme celle des dalles (rotation X 62°)
+    cd = bpy.data.cameras.new("CameraNuage")
+    cd.type = "ORTHO"
+    cd.sensor_fit = "HORIZONTAL"
+    cam = bpy.data.objects.new("CameraNuage", cd)
+    a = math.radians(INCLINAISON)
+    vise = Vector((0, math.cos(a), -math.sin(a)))
+    cam.location = -vise * 10
+    cam.rotation_euler = (math.radians(90 - INCLINAISON), 0, 0)
+    scene.collection.objects.link(cam)
+    scene.camera = cam
+    lumieres(scene, "herbe")
+    # cadrage : le nuage remplit l'image en gardant une marge pour le contour (4 px affichés,
+    # donc 8 px rendus) et un peu d'air
+    bpy.context.view_layer.update()
+    pts = []
+    dg = bpy.context.evaluated_depsgraph_get()
+    for o in COLLECTION.objects:
+        me = o.evaluated_get(dg).to_mesh()
+        pts += [o.matrix_world @ v.co for v in me.vertices]
+        o.evaluated_get(dg).to_mesh_clear()
+    inv = cam.matrix_world.inverted()
+    loc = [inv @ p for p in pts]
+    xs, ys = [p.x for p in loc], [p.y for p in loc]
+    marge = 4 * ECHELLE + 6
+    l_utile, h_utile = w - 2 * marge, h - 2 * marge
+    larg, haut = max(xs) - min(xs), max(ys) - min(ys)
+    m_par_px = max(larg / l_utile, haut / h_utile)
+    cd.ortho_scale = m_par_px * w
+    cd.shift_x = ((min(xs) + max(xs)) / 2) / cd.ortho_scale
+    cd.shift_y = ((min(ys) + max(ys)) / 2) / cd.ortho_scale
+    os.makedirs(DOSSIER_NUAGES, exist_ok=True)
+    brut = os.path.join(DOSSIER_NUAGES, f"_brut_{nom}.png")
+    scene.render.filepath = brut
+    bpy.ops.render.render(write_still=True)
+    px = lire_png(brut)
+    os.remove(brut)
+    encre = np.array([int(ENCRE[i:i + 2], 16) / 255 for i in (1, 3, 5)], dtype=np.float32)
+    trait = np.zeros_like(px)
+    trait[..., :3] = encre
+    trait[..., 3] = dilater(px[..., 3], 4 * ECHELLE)
+    px = sur(px, trait)
+    bords = max(px[:2, :, 3].max(), px[-2:, :, 3].max(), px[:, :2, 3].max(), px[:, -2:, 3].max())
+    chemin = os.path.join(DOSSIER_NUAGES, f"{nom}.png")
+    ecrire_png(px, chemin)
+    print(f"NUAGE {nom} : {w} x {h}, bords libres={bords < 0.01} -> {chemin}")
+    return chemin
+
+
 def principal():
+    if os.environ.get("NUAGES"):
+        for nom in NUAGES:
+            rendre_nuage(nom)
+        return
     toutes = [f"{d}_{v}" for d in DECORS for v in ("a", "b", "palier")]
     choix = os.environ.get("DALLES", "").split() or toutes
     for nom in choix:

@@ -358,12 +358,13 @@ def ajouter_marge(couleur, alpha):
     return np.clip(c, 0, 1), np.clip(a, 0, 1), ajout
 
 
-def contour(couleur, alpha):
+def contour(couleur, alpha, epaisseur=None):
     """Contour noir épais : on « grossit » la silhouette de CONTOUR_PX pixels (filtre
     maximum répété, en diagonale une fois sur deux pour un contour presque rond), puis on
-    pose l'objet par-dessus. Le filtre travaille en nombres décimaux : bord anticrénelé."""
+    pose l'objet par-dessus. Le filtre travaille en nombres décimaux : bord anticrénelé.
+    `epaisseur` : autre épaisseur (rendu_lot9.py s'en sert pour les décorations)."""
     grand = alpha.copy()
-    for i in range(CONTOUR_PX):
+    for i in range(CONTOUR_PX if epaisseur is None else epaisseur):
         g = grand.copy()
         g[1:, :] = np.maximum(g[1:, :], grand[:-1, :])
         g[:-1, :] = np.maximum(g[:-1, :], grand[1:, :])
@@ -417,8 +418,15 @@ def detourer(nom):
     print(f"OK {nom} ({mode}{marge}) : {float((alpha < 0.5).mean()) * 100:.0f} % transparent")
 
 
-os.makedirs(SORTIE, exist_ok=True)
-SEULES = set((n + ".png") for n in os.environ.get("ICONES", "").split())
-for nom in sorted(os.listdir(SOURCE)):
-    if nom.endswith(".png") and (not SEULES or nom in SEULES):
-        detourer(nom)
+def principal():
+    os.makedirs(SORTIE, exist_ok=True)
+    seules = set((n + ".png") for n in os.environ.get("ICONES", "").split())
+    for nom in sorted(os.listdir(SOURCE)):
+        if nom.endswith(".png") and (not seules or nom in seules):
+            detourer(nom)
+
+
+# Lancé par Blender (--python) : on détoure. Importé par un autre script : on ne fait rien,
+# on prête seulement ses fonctions (contour, lire, ecrire…).
+if __name__ == "__main__":
+    principal()
