@@ -47,6 +47,8 @@ import commun as C  # noqa: E402
 
 # SORTIE=<dossier> : écrire ailleurs (essais de cadrage sans toucher à art/icones).
 DOSSIER_ICONES = os.environ.get("SORTIE") or os.path.join(C.DOSSIER_PROJET, "art", "icones")
+# Rendus transparents (même nom), relus par detourer_icones.py
+DOSSIER_ALPHA = os.environ.get("SORTIE_ALPHA") or os.path.join(C.DOSSIER_PROJET, "art", "icones_alpha")
 TAILLE = 1024                       # carré 1024 x 1024
 LAVANDE = "#E6E1EE"                 # fond normal (bible §9.2)
 BLEU_GRIS = "#5B6380"               # fond des objets très clairs ou transparents
@@ -229,12 +231,15 @@ def regler_moteur(scene):
 
 
 def poser_sur_fond(chemin_tmp, chemin, fond_hex):
-    """Pose le rendu (RGBA) sur une couleur unie : fond = couleur exacte, partout."""
+    """Pose le rendu (RGBA) sur une couleur unie : fond = couleur exacte, partout.
+    V7 : on GARDE aussi le rendu transparent dans art/icones_alpha/ : detourer_icones.py
+    s'en sert comme transparence exacte (bien meilleure qu'un détourage du fond lavande)."""
     img = bpy.data.images.load(chemin_tmp)
     w, h = img.size
     px = np.array(img.pixels[:], dtype=np.float32).reshape(h, w, 4)
     bpy.data.images.remove(img)
-    os.remove(chemin_tmp)
+    os.makedirs(DOSSIER_ALPHA, exist_ok=True)
+    os.replace(chemin_tmp, os.path.join(DOSSIER_ALPHA, os.path.basename(chemin)))
     hexa = fond_hex.lstrip("#")
     fond = np.array([int(hexa[i:i + 2], 16) / 255 for i in (0, 2, 4)], dtype=np.float32)
     # Les pixels lus sont en sRGB (PNG 8 bits) : on mélange dans le même espace.
@@ -282,6 +287,59 @@ def rapprocher(cible, objets, facteur):
     bpy.context.view_layer.update()
 
 
+def ouvrir_coffre(racine, angle, lueur=None):
+    """V7 : entrouvre un coffre (rotation de sa Charniere, comme dans Unity) et, si `lueur`
+    est une couleur, pose dedans un disque lumineux : la « lueur dorée » de la spec v3 §854.
+    Pour l'icône seulement (le modèle exporté ne change pas)."""
+    import coffre_rarete as R
+    R.ouvrir(racine, angle)
+    if lueur:
+        corps = next(o for o in C.descendants(racine) if o.name == "Corps")
+        bpy.context.view_layer.update()
+        mn = Vector([min((corps.matrix_world @ Vector(b))[i] for b in corps.bound_box) for i in range(3)])
+        mx = Vector([max((corps.matrix_world @ Vector(b))[i] for b in corps.bound_box) for i in range(3)])
+        # un tas de pièces d'or (cylindres un peu penchés, placés de façon fixe : le rendu
+        # est identique à chaque lancement) qui dépasse du bord et brille un peu
+        import random
+        hasard = random.Random(7)
+        cx, cy = (mn.x + mx.x) / 2, (mn.y + mx.y) / 2
+        lx, ly = (mx.x - mn.x) / 2 - 0.12, (mx.y - mn.y) / 2 - 0.12
+        mat = bpy.data.materials.new("LueurIcone")
+        mat.use_nodes = True
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        couleur = C.hex_vers_lineaire(lueur)
+        bsdf.inputs["Base Color"].default_value = couleur
+        bsdf.inputs["Metallic"].default_value = 0.85
+        bsdf.inputs["Roughness"].default_value = 0.28
+        bsdf.inputs["Emission Color"].default_value = couleur
+        bsdf.inputs["Emission Strength"].default_value = 0.35
+        pieces = []
+        for couche, (n, r_rel, dz) in enumerate(((16, 1.0, -0.04), (10, 0.65, 0.02), (5, 0.32, 0.08))):
+            for k in range(n):
+                a = 2 * math.pi * (k + hasard.random() * 0.5) / n
+                rr = r_rel * (0.55 + 0.45 * hasard.random())
+                pos = (cx + math.cos(a) * lx * rr, cy + math.sin(a) * ly * rr,
+                       mx.z + dz + hasard.uniform(-0.01, 0.01))
+                bpy.ops.mesh.primitive_cylinder_add(vertices=14, radius=0.085, depth=0.026,
+                                                    location=pos)
+                p = bpy.context.active_object
+                p.rotation_euler = (hasard.uniform(-0.5, 0.5), hasard.uniform(-0.5, 0.5), 0)
+                p.data.materials.append(mat)
+                pieces.append(p)
+        C.selectionner(pieces, pieces[0])
+        bpy.ops.object.join()
+        disque = bpy.context.active_object
+        disque.name = "LueurIcone"
+        disque.parent = racine
+        disque.matrix_parent_inverse = racine.matrix_world.inverted()
+        lampe = bpy.data.lights.new("LueurIcone", "POINT")
+        lampe.color = couleur[:3]
+        lampe.energy = 60
+        o = bpy.data.objects.new("LueurIconeLampe", lampe)
+        o.location = disque.location + Vector((0, 0, 0.12))
+        bpy.context.scene.collection.objects.link(o)
+
+
 def rendre_icone(nom, reglage, ecraser=False):
     chemin = os.path.join(DOSSIER_ICONES, f"{nom}.png")
     if os.path.exists(chemin) and not ecraser:
@@ -291,6 +349,8 @@ def rendre_icone(nom, reglage, ecraser=False):
     retoucher_matieres(reglage.get("matieres", {}))
     if "rapprocher" in reglage:
         rapprocher(**reglage["rapprocher"])
+    if "ouvrir" in reglage:
+        ouvrir_coffre(racine, reglage["ouvrir"], reglage.get("lueur"))
     objs = maillages(racine)
     tris = sum(C.triangles(o) for o in objs)
     scene = bpy.context.scene
@@ -350,6 +410,16 @@ ICONES = {
     "boite_animaux_accessoires": dict(source=("boite", "boite_accessoires_animaux")),
     # v6.5 : icône « Mes skins » du menu de l'Inventaire (art/prompts/lot8.md)
     "icone_mes_skins": dict(source=("module", "armoire_skins")),
+    # V7 : icônes des Améliorations, rendues à partir des VRAIS modèles de coffres du jeu
+    # (avant : rendus v3 en 512 px sans contour). Même cadrage que les autres icônes.
+    "coffre_bois": dict(source=("module", "coffre"), largeur=0.72),
+    "coffre_bronze": dict(source=("module", "coffre_bronze"), largeur=0.72),
+    "coffre_argent": dict(source=("module", "coffre_argent"), largeur=0.72),
+    "coffre_or": dict(source=("module", "coffre_or"), largeur=0.72),
+    "coffre_diamant": dict(source=("module", "coffre_diamant"), largeur=0.72),
+    # « Coffres précieux » (spec v3 §854) : le coffre de diamant entrouvert, lueur dorée dedans
+    "amelioration_coffres": dict(source=("module", "coffre_diamant"), ouvrir=45,
+                                 lueur="#FFC83D", elevation=32, largeur=0.72),
 }
 
 
