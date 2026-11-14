@@ -43,9 +43,9 @@ import commun as C  # noqa: E402
 NOM = "collier_fleurs"
 POINT = "PointCou"
 MATS = ["M5_PetaleRose", "M5_PetaleBlanc", "M5_JauneVerni", "M5_BlancVerni"]  # 0..3
-NB = 8
-ETENDUE = 2.0          # les fleurs couvrent ±2,0 rad (≈ ±115°) autour du devant
-R_FLEUR = 0.11
+NB = 10
+ETENDUE = 2.3          # les fleurs couvrent ±2,0 rad (≈ ±115°) autour du devant
+R_FLEUR = 0.14          # V7 (lot 5) : fleurs plus grosses, comme l'icône
 AXE_Z = 0.02
 ARBRE = None
 
@@ -77,7 +77,7 @@ def fleur(k, a):
     m = C.repere(p, n)
     bm = bmesh.new()
     C.bm_coussin(bm, contour_fleur(), 0.06, 0.10, m, mat=k % 2, anneaux=1, dos_plat=True)
-    C.bm_coussin(bm, C.contour_ellipse(0.04, 0.04, n=6), 0.05, 0.10,
+    C.bm_coussin(bm, C.contour_ellipse(0.05, 0.05, n=12), 0.05, 0.10,
                  m @ Matrix.Translation((0, 0.025, 0)), mat=2, anneaux=1, dos_plat=True)
     return C.piece(f"Anim_Fleur_{k + 1}", bm, MATS, lissage="tout", pivot=p)
 

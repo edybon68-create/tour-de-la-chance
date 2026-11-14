@@ -63,8 +63,9 @@ AXE_Z = 0.02             # l'axe du cou est 2 cm en arrière (Unity z)
 # Section de l'anneau : (épaisseur vers l'extérieur, hauteur). Un boudin de laine
 # un peu gonflé, 17 cm de haut, 9 cm d'épaisseur ; le premier et le dernier point sont
 # 1,2 cm SOUS la surface du cou (pas de jour).
-SECTION = [(-0.012, -0.07), (0.025, -0.085), (0.062, -0.068), (0.08, -0.025),
-           (0.08, 0.025), (0.062, 0.068), (0.025, 0.085), (-0.012, 0.07)]
+# V7 (lot 5) : boudin plus GROS (12 cm d'épaisseur), comme l'écharpe dodue de l'icône
+SECTION = [(-0.012, -0.075), (0.035, -0.092), (0.085, -0.075), (0.11, -0.03),
+           (0.11, 0.03), (0.085, 0.075), (0.035, 0.092), (-0.012, 0.075)]
 ANGLE_NOEUD = 0.55       # le nœud est devant, un peu à gauche de l'image (radians)
 ARBRE = None
 

@@ -60,7 +60,7 @@
 
 ## Journal de travail autonome
 <!-- Une ligne par session : date, ce qui est fait, commit. -->
-- 14/11 : artiste 3D, points 12 (intérieur des coffres, f6237b2), 15 (3 icônes de catégories + 8 images d'échange) et 17 en cours (planches de comparaison, 13 accessoires refaits en 2 lots, notes skins, lot 10 de prompts) ; commits f6237b2, 1209966, b01ab97 et suivant.
+- 14/11 : artiste 3D, points 12 (intérieur des coffres, f6237b2), 15 (3 icônes de catégories + 8 images d'échange) et 17 (planches de comparaison, 5 lots, 30 accessoires refaits ou repris, notes skins, lot 10 de prompts) ; commits f6237b2, 1209966, b01ab97, 13ba52d, 7da8f23, d5f6281 et lot 5.
 - 14/11 : 17 textures de skins dessinées (point 10), branchement à faire par le programmeur.
 - 14/11 : revue des modèles 3D (point 8 et QA 18) : 12 modèles corrigés, icône kraken rendue dans Blender ; commits 7a188b4, a9bc6ee, a71dff4, be13f17.
 - 13/11 : détourages refaits (QA 1 à 5, 8, 9) et icônes des coffres rendues dans Blender ; mipmaps à faire (Unity en mode Play).
@@ -202,9 +202,103 @@
     - *14/11, en cours* : planches icône | 3/4 | sur le cheval pour les 44 accessoires (`docs/captures/v7_qualite_accessoires_1..6.png`) et les 45 skins (`v7_qualite_skins_1..6.png`), script `blender/planche_qualite.py`.
     - **Classement des accessoires, du pire au meilleur** : masque héros, loup corsaire, auréole, nœud papillon, perroquet, longue-vue, casquette, couronne, ailes d'ange, ancre, bandana, navire fantôme, ailes de papillon, ruche, chaton du sac, planète, cache-œil, moustaches, carapace, baleine, chapeau de fête, boussole, foulard, lunettes de soleil, bonnet, ailes de chauve-souris, truffe, écharpe renard, collier médaille, bocal, poussin, bois de cerf, sorcier, oreilles de lapin, lunettes hibou, tricorne, capitaine, écharpe, collier de fleurs, haut-de-forme, bonnet grenouille, oreilles de chat, lunettes cœur, bébé kraken.
     - **Refaits** : lot 1 (masque héros, loup corsaire, auréole, nœud papillon, perroquet, longue-vue, casquette, couronne : `v7_qualite_lot1_avant_apres.png`), lot 2 (ailes d'ange, ailes de papillon, planète, chapeau de fête, ancre : `v7_qualite_lot2_avant_apres.png`).
-    - **Reste** : bandana (essai raté, annulé : les pois en relief à aplatir sans casser la calotte), navire fantôme (anneau d'orbite), cache-œil, carapace, baleine, puis la suite du classement. Ruche, chaton du sac, moustaches, truffe, bois de cerf et ailes de chauve-souris attendent leurs nouvelles icônes (`art/prompts/lot10.md`, à générer par le chef de projet), puis on refera le modèle d'après elles.
+    - Lot 3 (7da8f23) : retours du chef de projet sur le lot 1 (masques en tissu plein, nœud gonflé, perroquet ×1,7, longue-vue laiton clair et lentille bleue), navire fantôme sans cerceau, bandana à pois peints. Lot 4 (d5f6281) : carapace, cache-œil, baleine, lunettes de soleil, bonnet, tricorne. Lot 5 : poussin ×1,4, collier de fleurs, écharpe plus grosse, boussole. Planches `v7_qualite_lot3..5_avant_apres.png`.
+    - **Reste** : les autres accessoires du classement sont jugés fidèles à leur icône (vérifiés sur planche). À surveiller : la baleine, plus grosse, passe par le centre de la tête sur sa trajectoire en 8 (`AccessoryRig.AnimateWhale`, x = 0 et z = 0,05) : déjà vrai avant, plus visible maintenant (au programmeur). Ruche, chaton du sac, moustaches, truffe, bois de cerf et ailes de chauve-souris attendent leurs nouvelles icônes (`art/prompts/lot10.md`, à générer par le chef de projet), puis on refera le modèle d'après elles.
     - **Skins** : corrections précises pour le programmeur dans `docs/specs/v7-textures-skins.md` (caméléon gris, métaux trop sombres, lagon, lion, grenouille, coccinelle, sucre d'orge, galaxie, tigre).
     - Nouveaux matériaux `M7_*` (or clair, plumes) : Unity créera leurs `.mat` à l'import.
 
 > 14/11 : l'auteur adore L'Ascension et le reste de la V7 (« continue comme ça, on vise la perfection »). Il ne touchera plus à son ordinateur jusqu'à son retour : **ne lui poser aucune question**, tout décider seul, ne jamais attendre une réponse. Son mode Play ne tournera plus : l'éditeur est à nous.
 - 14/11 matin (unity-dev) : points 1-6, 10 (textures, échange, import des icônes), 11, 13-16 compilés, testés en mode Play avec captures `docs/captures/v7_*.png`, sauvegarde de l'auteur restaurée et vérifiée identique.
+
+## Trouvé par le QA (V7, phase 2)
+
+> Inspection en mode Play le 14/11/2026, sur les commits jusqu'à b01ab97, en 1280 × 720 puis en 1920 × 1080.
+> Mute Audio resté activé, aucun son joué. Sauvegarde copiée dans `TourDeLaChance-sauvegardes/qa_20261114_0740/`,
+> puis restaurée par Unity : elle est vérifiée identique (`diff` vide). Play arrêté.
+> Captures : `docs/captures/qa_v7p2_*.png`. La console ne montre aucune erreur venant de nos scripts.
+>
+> **Déjà corrigé depuis la phase 1** :
+> - les « i » de L'Ascension sont entiers ;
+> - « Aucun doublon » est lisible ;
+> - l'Inventaire laisse une marge avec les bulles ;
+> - l'auréole est mieux posée ;
+> - les packs de diamants sont là, grisés ;
+> - la carte d'étage est simplifiée, et son clic ouvre bien les détails.
+
+### Important
+
+1. **Renaissance : le mot « Améliorations » est coupé en « Amélioratio / ns »** sous l'icône de « Tu perds ». « Nouvelles boîtes » tient aussi sur deux lignes, en tout petit.
+   - *Fichier* : `Scripts/UI/RebirthPage.cs:93` (libellé trop long pour la largeur de l'icône).
+   - *Capture* : `qa_v7p2_renaissance_1280.png`, `qa_v7p2_renaissance_1920.png`.
+2. **Boutique : titres de boîtes sur 2 ou 3 lignes, et barre de collection écrasée.**
+   - « Boîte d'accessoires n°1 » occupe 3 lignes, « Pirates : accessoires » et « Animaux : accessoires » 2 lignes. Les deux cartes d'une même rangée n'ont donc plus la même mise en page.
+   - En 1920 × 1080, la barre « 11 / 16 » est aplatie et son texte coupé.
+   - Le texte de la barre, blanc 20 px sur orange ou jaune, est illisible.
+   - *Fichiers* : `UI/V7.uss:334-335` (`.bq7-titre-carte`, 32 px, `white-space: normal`) et `:345` (texte de la barre).
+   - *Piste* : titre court (« Skins n°1 », « Accessoires n°1 ») ou police plus petite sur une seule ligne.
+   - *Capture* : `qa_v7p2_boutique_1920.png`, `qa_v7p2_boutique_classiques_1280.png`, `qa_v7p2_boutique_pirates_1280.png`.
+3. **Classement : « Ton record : étage 8 », alors que la meilleure ligne de la liste est « étage 7 ».** Le record (`record_etage` = 8) n'a jamais été envoyé au classement local, qui plafonne à 7. C'était déjà signalé en v6 (`qa_v6_classement_record_8_liste_7.png`) et ce n'est toujours pas corrigé.
+   - *Fichier* : `Scripts/UI/LeaderboardPopup.cs:115` (titre lu ailleurs que la liste). Il faudrait aussi rattraper le record manquant dans le classement local.
+   - *Capture* : `qa_v7p2_classement_1280.png`.
+4. **Skins métalliques salis** : sur « Argent » et « Or massif », de grosses taches brunes apparaissent au museau, au poitrail et au socle (reflet d'un environnement brun). « Blanc nacré » est blanc uni, sans aucun reflet nacré. Dans le faisceau bleu d'ouverture, « Argent » paraît en verre bleu.
+   - *Cause probable* : la réflexion ou la sonde d'environnement des matériaux métalliques, dans la vitrine comme dans l'ouverture.
+   - *Capture* : `qa_v7p2_vitrine_skins_1280.png` (5e et 6e), `qa_v7p2_ouverture_3_1280.png`.
+5. **Images de catégories et d'échange non branchées.**
+   - Les 3 `categorie_*.png` et les 8 `echange_*.png` sont dans `Art/icones_detourees/`, mais l'en-tête des sections montre encore la 1re boîte, et les échanges des piles de pièces dessinées.
+   - *Cause* : `Resources/EconomyCatalog.asset:31-66` (`icon: {fileID: 0}` pour les 8 lots) et `Resources/UiImages.asset` (aucune entrée `categorie*`). `IconAutoBinder` n'a pas été relancé.
+   - *Capture* : `qa_v7p2_boutique_diamants_1280.png`, `qa_v7p2_boutique_classiques_1280.png`.
+
+### Mineur
+
+6. **L'Ascension** :
+   - la carte du palier 30, tout en haut, est coupée par le bord de la zone (`TopPadding = 40f`, `TrophyRoadPage.cs:52`, trop petit pour une carte de palier) ;
+   - la lueur sous le cheval du joueur ressemble à un cadre jaune vide (`asc-toi__lueur`, `V65.uss:415`) ;
+   - les numéros d'étage normaux (« 3 », « 29 ») sont minuscules à côté de la pastille de l'étage actuel ;
+   - « Ma position » est posée à cheval sur la bordure du haut de la fenêtre.
+
+   *Capture* : `qa_v7p2_ascension_haut_1280.png`, `qa_v7p2_ascension_1280.png`.
+7. **Fenêtre « i » de L'Ascension inchangée** : trois lignes de petit gris, « risque 29,17 % » coupé à la ligne, titre décalé (point 16 de la phase 1).
+   - *Capture* : `qa_v7p2_ascension_info_1280.png`.
+8. **Inventaire, vitrine** : quand la pastille de rareté et celle du bonus ne tiennent pas sur une ligne (« Peu commun » + « +2 % de pièces »), elles passent sur deux lignes et la scène du cheval rétrécit. La vitrine « saute » d'un objet à l'autre.
+   - « Avec cet objet : +16 % » s'affiche en vert alors que c'est une baisse (+29 % → +16 %) : `InventoryPage.cs:389`.
+   - En 1920 × 1080, « Accessoires » et son compteur « 11 » se touchent.
+   - Les deux points bleus à droite du titre « Accessoires » n'ont pas de légende.
+   - *Capture* : `qa_v7p2_vitrine_skins_1280.png`, `qa_v7p2_inventaire_accessoires_1280.png`, `qa_v7p2_inventaire_1920.png`.
+9. **Boutique, petits textes** :
+   - « Ta cagnotte en jeu (34) ne se dépense pas… » en gris minuscule ;
+   - porte-monnaie en double avec le HUD ;
+   - pourcentages sous les aperçus et rubans « +5 % » des échanges en environ 9 px ;
+   - « Bientôt disponible » posé en travers des packs 2 et 3, qui cache leurs images ;
+   - grand vide au-dessus de « Packs de diamants ».
+
+   *Capture* : `qa_v7p2_boutique_*_1280.png`.
+10. **Contenu et taux** :
+    - bouton « Retour » minuscule ;
+    - solde affiché sur une ligne à part ;
+    - pastilles de bonus (« +1 % ») illisibles ;
+    - grille de 4 colonnes avec une grande marge vide à droite.
+
+    *Capture* : `qa_v7p2_contenu_taux_1280.png`.
+11. **Ouverture d'une boîte** : le panneau du résultat recouvre le socle, et « Rare ! » est bleu sur bleu dans le faisceau.
+    - *Capture* : `qa_v7p2_ouverture_3_1280.png`.
+12. **Améliorations** (bien plus épurées) :
+    - la note du bas « Chaque amélioration compte à partir du prochain étage » est quasi invisible (gris très clair sur blanc) ;
+    - les barres « Avant / Après » de Coffres précieux n'ont pas de légende des couleurs ;
+    - l'image de « Coffre en plus » (3 coffres) est plate et sans contour ;
+    - « Risque : 29 % > 27 % » est minuscule.
+
+    *Capture* : `qa_v7p2_ameliorations_1280.png`.
+13. **Partie** :
+    - « Reprise 1 sur 5 · Tu as 4 » en tout petit, peu contrasté (`qa_v7p2_piege_1280.png`) ;
+    - les boutons « Oui, continuer » et « Annuler » ont un texte petit (`qa_v7p2_continuer_confirm_1280.png`) ;
+    - la carte « Reprise réussie » cache entièrement le cheval pendant quelques secondes (`qa_v7p2_apres_reprise_1280.png`), et la carte des détails aussi (`qa_v7p2_carte_details_1280.png`). Cette carte répète « 2 % » et « +29 % » (pastilles, puis ligne du bas) ;
+    - les coffres d'argent fermés sont bleus, mais une fois ouverts, ceux qui contenaient un trésor deviennent jaune or (`qa_v7p2_suspense_1280.png`), ce qui peut faire croire à une autre rareté.
+14. **Réglages : « Tour de la Chance · version 6 »** alors qu'on est en V7 (`UI/Panels.uxml:109`).
+    - *Capture* : `qa_v7p2_reglages_1280.png`.
+15. **Renaissance** : « Tu gardes tout le reste ! » vert contouré de noir sur blanc, peu lisible ; les deux lignes du bas sont en petit gris.
+    - *Capture* : `qa_v7p2_renaissance_1280.png`.
+16. **Index** : textes des cartes toujours minuscules (« 10 % », « Pas encore », « +1 % ») ; « Tout collectionner : 5 » en marron sur fond clair.
+    - *Capture* : `qa_v7p2_index_1280.png`.
+17. **Classement** : « Classement local » écrit deux fois (bandeau du haut et bas de la fenêtre).
+    - *Capture* : `qa_v7p2_classement_1280.png`.
+18. **Avertissement USS** : `:last-child` n'est pas reconnu par UI Toolkit, donc la règle ne fait rien (`UI/V65.uss:48`, « Unknown pseudo class "last-child" » dans la console).

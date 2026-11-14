@@ -124,6 +124,10 @@ def construire():
     for e in C.reperes_effets([eclat_coq, c + Vector((0, R + 0.06, 0.0)),
                                c + Vector((-0.1, 0.05, R * 1.25))]):
         C.parenter(e, corps)
+    # V7 (lot 5) : tout le poussin grandit de 40 % autour de son assise (il était minuscule
+    # sur la tête vue du jeu ; l'icône le montre dodu et bien visible).
+    from pirate_perroquet import grandir
+    grandir(corps, assise, 1.4)
     return C.racine_v5(NOM, POINT, [corps])
 
 

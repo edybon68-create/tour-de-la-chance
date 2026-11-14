@@ -44,9 +44,9 @@ import commun_pirates as P  # noqa: E402
 
 NOM = "boussole"
 POINT = "PointCou"
-MATS = ["M5_DoreDeco", "M5_PirCadran", "M5_PirAiguille"]   # 0, 1, 2
-Y_MEDAILLON = 0.77
-R_MED = 0.15
+MATS = ["M7_OrVif", "M5_PirCadran", "M5_PirAiguille"]   # 0, 1, 2 (V7 : or clair)
+Y_MEDAILLON = 0.79
+R_MED = 0.19          # V7 (lot 5) : médaillon plus gros, bien lisible vu du jeu
 
 
 def repere_medaillon():
@@ -70,7 +70,7 @@ def medaillon(bm, m):
             (R_MED - 0.002, 0.014), (R_MED - 0.02, 0.026), (R_MED - 0.03, 0.012),
             (0.0, 0.012)]
     av = set(bm.verts)
-    C.bm_revolution(bm, prof, 18, mats=[0, 0, 0, 0, 0, 0, 1])
+    C.bm_revolution(bm, prof, 32, mats=[0, 0, 0, 0, 0, 0, 1])   # V7 : bien rond
     v = [x for x in bm.verts if x not in av]
     bmesh.ops.transform(bm, matrix=m, verts=v)
     # rose des vents dorée (4 branches) et 4 plots
