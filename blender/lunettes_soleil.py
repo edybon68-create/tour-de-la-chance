@@ -39,7 +39,8 @@ import commun as C  # noqa: E402
 
 NOM = "lunettes_soleil"
 POINT = "PointVisage"
-MATS = ["M5_MontureSombre", "M5_VerreNuit", "M5_DoreDeco", "M5_Reflet"]  # 0..3
+# V7 (lot 4) : monture noire vernie et verres noirs (l'icône), plus de verres violets
+MATS = ["M7_MontureNoire", "M7_VerreNoir", "M5_DoreDeco", "M5_Reflet"]  # 0..3
 LARGEUR, HAUTEUR = 0.25, 0.22      # verre (couvre l'œil du cheval, 0,17 × 0,21)
 MONTEE = 0.02
 AVANCE = 0.05                      # le verre est 5 cm devant l'œil
@@ -122,7 +123,7 @@ def construire():
         cadre(bm, m)
         verre(bm, m)
         depart = branche(bm, m, cote)
-        C.bm_boite(bm_dur, (0.065, 0.065, 0.065), depart + Vector((0, 0.01, 0)), mat=2)
+        C.bm_boite(bm_dur, (0.065, 0.065, 0.065), depart + Vector((0, 0.01, 0)), mat=0)   # V7 : charnières noires
     # Pont : un arc entre le haut des deux cadres, au-dessus du chanfrein.
     a, b = reperes[0], reperes[1]
     pa = a @ Vector((-(LARGEUR / 2 + BANDE / 2) * 1.0, 0, HAUTEUR / 2 - 0.02))

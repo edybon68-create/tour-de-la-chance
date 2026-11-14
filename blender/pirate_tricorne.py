@@ -125,12 +125,16 @@ def construire():
     p0 = p_mur + n_mur * 0.02
     # V7 : plus large, plus courbée et plus de tranches (le QA : « une simple pointe rouge »),
     # avec une 2e plume plus courte derrière pour le volume « panache ».
-    P.bm_plume(bm, p0, Vector((-0.25, -0.10, 1.0)), 0.58, 0.34,
+    # V7 (lot 4) : panache plus large et plus duveteux (3 plumes), comme l'icône
+    P.bm_plume(bm, p0, Vector((-0.25, -0.10, 1.0)), 0.60, 0.44,
                courbe=Vector((0.12, -0.42, -0.10)), mat=2, cotes=8, n=11,
                haut=Vector((math.cos(a_pl), math.sin(a_pl), 0)), plat=0.35)
     P.bm_plume(bm, p0 + Vector((0, -0.02, -0.01)), Vector((-0.45, -0.25, 0.8)), 0.42, 0.24,
                courbe=Vector((-0.05, -0.30, -0.12)), mat=2, cotes=8, n=9,
                haut=Vector((math.cos(a_pl + 0.5), math.sin(a_pl + 0.5), 0)), plat=0.35)
+    P.bm_plume(bm, p0 + Vector((0.01, -0.01, 0.0)), Vector((0.05, -0.30, 0.9)), 0.48, 0.32,
+               courbe=Vector((0.1, -0.25, -0.10)), mat=2, cotes=8, n=9,
+               haut=Vector((math.cos(a_pl - 0.5), math.sin(a_pl - 0.5), 0)), plat=0.4)
     bmesh.ops.transform(bm, matrix=incl, verts=bm.verts)
     plume = C.piece("Anim_Plume", bm, MATS, lissage="tout", pivot=incl @ p0)
     C.parenter(plume, chapeau)

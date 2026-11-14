@@ -38,10 +38,10 @@ import commun_pirates as P  # noqa: E402
 
 NOM = "cache_oeil"
 POINT = "PointVisage"
-MATS = ["M5_PirCuir", "M5_PirCuirFonce", "M5_DoreDeco"]  # 0, 1, 2
+MATS = ["M5_PirCuir", "M5_PirCuirFonce", "M7_OrVif"]  # 0, 1, 2 (V7 : étoile en or clair)
 CENTRE_TETE = (0.0, 1.68, 0.03)
 OEIL = (0.165, 1.685, -0.268)          # devant de l'œil gauche du cheval (Unity)
-RX, RZ = 0.14, 0.155                  # demi-tailles de la plaque
+RX, RZ = 0.16, 0.17                   # demi-tailles de la plaque (V7 : un peu plus grande, comme l'icône)
 # Le cordon : (angle en degrés vu du dessus, 0 = devant, + = gauche de l'image ; hauteur Unity)
 CORDON = [(-21, 1.775), (-8, 1.795), (8, 1.808), (24, 1.814), (40, 1.808), (58, 1.79),
           (80, 1.76), (105, 1.73), (135, 1.71), (165, 1.70), (195, 1.695), (225, 1.69),
@@ -83,16 +83,16 @@ def construire():
     n = (n.normalized() + Vector((0, 0.9, 0.12))).normalized()   # plus tournée vers l'avant
     centre = p_oeil + n * 0.022
     m = C.repere(centre, n)
-    contour = C.contour_ellipse(RX, RZ, n=14)
-    C.bm_coussin(bm, contour, 0.03, 0.075, m, mat=0, mat_dos=1, anneaux=2)
+    contour = C.contour_ellipse(RX, RZ, n=28)
+    C.bm_coussin(bm, contour, 0.03, 0.085, m, mat=0, mat_dos=1, anneaux=3)   # V7 : lisse et bombée
     # 12 points de couture sur le bord
-    for k in range(12):
+    for k in range(0):   # V7 : points de couture retirés (petites taches sombres)
         t = 2 * math.pi * (k + 0.5) / 12
         q = m @ Vector((RX * 0.82 * math.cos(t), 0.024, RZ * 0.82 * math.sin(t)))
         C.bm_boite(bm, (0.022, 0.012, 0.012), q, mat=1)
     # étoile dorée cousue, un peu au-dessus du centre
-    m_et = m @ Matrix.Translation((0.0, 0.04, 0.012))
-    C.bm_etoile(bm, 0.055, 0.02, m_et, mat=2, bombe=0.01)
+    m_et = m @ Matrix.Translation((0.0, 0.07, 0.0))
+    C.bm_etoile(bm, 0.075, 0.03, m_et, mat=2, bombe=0.018)   # V7 : grosse étoile bombée au centre
     eclats = [m_et @ Vector((0.055 * math.cos(math.pi / 2 + 2 * math.pi * k / 5), 0.02,
                              0.055 * math.sin(math.pi / 2 + 2 * math.pi * k / 5)))
               for k in (0, 1, 4)]
@@ -102,10 +102,10 @@ def construire():
     debut = m @ Vector((RX * 0.55, 0.01, RZ * 0.80))        # haut, côté intérieur
     fin = m @ Vector((-RX * 0.98, 0.0, 0.0))                 # bord extérieur
     chemin = lisser_chemin([debut] + pts + [fin], n=2)
-    C.bm_tube(bm, chemin, 0.02, cotes=5, mat=1)
+    C.bm_tube(bm, chemin, 0.018, cotes=8, mat=1)
     for q in (debut, fin):
         C.bm_disque(bm, 0.022, 0.014, C.repere(q + n * 0.012, n), cotes=6, mat=2, bombe=0.006)
-    obj = C.piece("CacheOeil", bm, MATS, lissage="angle", pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))
+    obj = C.piece("CacheOeil", bm, MATS, lissage="angle", angle=50, pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for e in C.reperes_effets(eclats):
         C.parenter(e, obj)
     return C.racine_v5(NOM, POINT, [obj])

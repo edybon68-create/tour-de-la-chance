@@ -36,15 +36,15 @@ import commun_animaux as A  # noqa: E402
 
 NOM = "carapace"
 POINT = "PointDos"
-MATS = ["M5_Carapace", "M5_BordCarapace", "M5_SangleBrune", "M5_DoreDeco"]  # 0..3
+MATS = ["M5_Carapace", "M5_BordCarapace", "M5_SangleBrune", "M5_DoreDeco", "M7_CarapaceFonce"]  # 0..4
 CENTRE = (0.0, 0.90, 0.37)          # Unity : centre de la face plate (contre le cou)
-RX, RY, RZ = 0.62, 0.50, 0.30      # demi-largeur, demi-hauteur, épaisseur du dôme
+RX, RY, RZ = 0.70, 0.52, 0.40      # V7 (lot 4) : plus large et plus bombée : elle dépasse du cou vue de face
 
 
 def dome(bm):
     """Dôme : demi-ellipsoïde dont la face plate regarde le cheval (vers l'avant, +Y)."""
     c = C.U(*CENTRE)
-    n_a, n_e = 24, 7          # V7 : 18 × 5 -> 24 × 7 (dôme plus rond)
+    n_a, n_e = 28, 7          # V7 : dôme bien rond
     rangs = []
     for j in range(n_e + 1):
         e = (math.pi / 2) * j / n_e         # 0 = le bord, π/2 = le sommet (vers l'arrière)
@@ -83,12 +83,12 @@ def dome(bm):
     # V7 : bourrelet plus mince (il lisait comme le cercle d'un tambourin)
     C.bm_balayage_surface(bm, bord, hauts, [(-0.035, -0.025), (0.035, -0.025), (0.042, 0.0),
                                             (0.035, 0.025), (-0.035, 0.025), (-0.042, 0.0)],
-                          mat=1, ferme=True)
+                          mat=4, ferme=True)   # V7 : bord vert foncé (2e ton), plus de cercle jaune
     # 12 bosses de bord (petites écailles marginales)
-    for k in range(10):
+    for k in range(0):   # V7 (lot 4) : bosses retirées, elles faisaient « grelots de tambourin »
         a = 2 * math.pi * (k + 0.5) / 10
         p = c + Vector(((RX + 0.05) * math.cos(a), -0.05, (RY + 0.05) * math.sin(a)))
-        A.bm_ellipsoide(bm, p, (0.05, 0.035, 0.04), segments=8, anneaux=4, mat=0)
+        A.bm_ellipsoide(bm, p, (0.055, 0.04, 0.045), segments=8, anneaux=5, mat=1)   # V7 : bosses jaunes (icône)
     return c
 
 
@@ -97,8 +97,8 @@ def ecailles(bm, c):
     posées sur le dôme par des rayons."""
     arbre = C.arbre_bm(bm)
     hexa = C.contour_ellipse(1.0, 1.0, n=6, depart=math.pi / 6)
-    positions = [(0.0, 0.0, 0.17)] + [(0.36 * math.cos(math.radians(60 * k + 30)),
-                                       0.30 * math.sin(math.radians(60 * k + 30)), 0.14)
+    positions = [(0.0, 0.0, 0.18)] + [(0.42 * math.cos(math.radians(60 * k + 30)),
+                                       0.32 * math.sin(math.radians(60 * k + 30)), 0.15)
                                       for k in range(6)]
     for x, z, r in positions:
         p, n = C.poser_sur(arbre, c + Vector((x, 0.0, z)), Vector((x * 0.9, -1.0, z * 0.9)), 0.0)
@@ -132,7 +132,19 @@ def construire():
     c = dome(bm)
     ecailles(bm, c)
     bretelles(bm)
-    obj = C.piece("Carapace", bm, MATS, lissage="tout", pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))
+    # V7 (lot 4) : vue du jeu (de face), on voit surtout la face plate tournée vers le cheval.
+    # On y pose aussi des écailles hexagonales bordées de jaune, tout autour du cou : de
+    # n'importe quel côté, l'objet se lit comme la carapace de l'icône (plus un disque uni).
+    c = C.U(*CENTRE)
+    hexa = C.contour_ellipse(1.0, 1.0, n=6, depart=math.pi / 6)
+    for k in range(8):
+        a = 2 * math.pi * (k + 0.5) / 8
+        p = c + Vector((0.47 * math.cos(a), 0.02, 0.34 * math.sin(a)))
+        m = C.repere(p, Vector((0, 1, 0)))
+        C.bm_plaque(bm, [(u * 0.15, v * 0.15) for u, v in hexa], 0.02, m, mat=1)
+        C.bm_coussin(bm, [(u * 0.12, v * 0.12) for u, v in hexa], 0.02, 0.045,
+                     m @ Matrix.Translation((0, 0.015, 0)), mat=0, anneaux=1)
+    obj = C.piece("Carapace", bm, MATS, lissage="angle", angle=45, pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))   # V7 : écailles nettes
     return C.racine_v5(NOM, POINT, [obj])
 
 

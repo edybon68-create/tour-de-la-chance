@@ -37,7 +37,7 @@ MATS = ["M5_LaineTurquoise", "M5_BlancMat", "M5_TurquoiseVerni"]  # 0, 1, 2
 BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.05, C.CHAPEAU_BASE[2]
 R0 = C.CHAPEAU_RAYON + 0.02
 HAUT = 0.46
-REVERS = 0.13           # hauteur du revers
+REVERS = 0.17           # hauteur du revers (V7 : gros revers blanc, comme l'icône)
 
 
 def mou(co):
@@ -50,12 +50,13 @@ def dome(bm):
     profil = [(0.0, HAUT), (0.14, HAUT - 0.02), (0.25, HAUT - 0.08), (0.31, HAUT - 0.15),
               (0.335, 0.30), (0.34, 0.27), (0.345, 0.24), (R0 + 0.03, 0.16), (R0 + 0.02, 0.08),
               (R0 - 0.01, 0.08)]
-    mats = [0, 0, 0, 0, 1, 1, 0, 0, 0]
-    # la bande blanche (6 cm, entre 0,24 et 0,30) ressort de 1,5 cm
+    # V7 (lot 4) : plus de bande blanche au milieu (absente de l'icône) : dôme turquoise uni
+    mats = [0] * 9
+
     def bande(a, i, r, z):
-        return (r + 0.015, z) if i in (5, 6) else (r, z)
+        return (r, z)
     v_avant = set(bm.verts)
-    C.bm_revolution(bm, profil, 20, mats=mats, rayon_fn=bande)
+    C.bm_revolution(bm, profil, 28, mats=mats, rayon_fn=bande)
     v = [x for x in bm.verts if x not in v_avant]
     for x in v:
         x.co = mou(x.co)
@@ -69,10 +70,10 @@ def revers(bm):
 
     def cotes(a, i, r, z):
         if 1 <= i <= 4:
-            return r + 0.025 * (0.5 + 0.5 * math.cos(16 * a)), z
+            return r + 0.012 * (0.5 + 0.5 * math.cos(16 * a)), z   # V7 : côtes plus douces
         return r, z
     v_avant = set(bm.verts)
-    C.bm_revolution(bm, profil, 32, mats=[1] * 5, rayon_fn=cotes)
+    C.bm_revolution(bm, profil, 48, mats=[1] * 5, rayon_fn=cotes)
     return [x for x in bm.verts if x not in v_avant]
 
 
@@ -81,12 +82,7 @@ def construire():
     base = C.U(BX, BY, BZ)
     bm = bmesh.new()
     v = dome(bm) + revers(bm)
-    # Étiquette 8 × 8 cm vernie, à gauche de l'image sur le revers (angle +0,7 rad).
-    a = 0.7
-    d = C.direction_angles(a)
-    p = d * (R0 + 0.085) + Vector((0, 0, REVERS / 2 + 0.005))
-    v += C.bm_plaque(bm, C.contour_rectangle_arrondi(0.08, 0.08, 0.015, par_coin=1), 0.02,
-                     C.repere(p, d), mat=2)
+    # V7 (lot 4) : l'étiquette vernie est retirée (absente de l'icône, plus épuré).
     bmesh.ops.translate(bm, vec=base, verts=list(set(v)))
     bonnet = C.piece("Bonnet", bm, MATS, lissage="tout", pivot=base)
 

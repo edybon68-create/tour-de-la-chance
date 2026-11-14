@@ -65,10 +65,10 @@ CENTRE_8 = (0.0, 1.75, 0.05)
 POSE = (0.92, 1.92, 0.12)          # Unity : où elle est « en pause » (droite de l'écran)
 CAP = Vector((1.0, -0.35, 0.30))   # Blender : elle nage vers la gauche de l'image, en
                                    # s'éloignant un peu (on la voit de 3/4)
-SEG = 14
+SEG = 20              # V7 : corps plus rond
 
 
-ECHELLE_V7 = 1.35
+ECHELLE_V7 = 1.8      # V7 (lot 4) : 1,35 -> 1,8 (elle restait petite et lointaine vue du jeu)
 
 
 def matrice_pose():
