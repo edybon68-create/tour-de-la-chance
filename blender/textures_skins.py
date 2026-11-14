@@ -151,9 +151,16 @@ def zebre(B):
 
 def tigre(B):
     c, _ = rayures(B, 12, hexa("#F28C38"), hexa("#1F1730"), 0.66, 0.16, 0.03, casse=0.45)
-    # ventre et museau un peu plus clairs (crème orangé) devant, vers le bas
-    devant = np.exp(-((B.x - TOUR / 2) / 0.45) ** 2) * doux(0.9, 0.3, B.y)
-    return melange(c, hexa("#FFD8A8"), 0.35 * devant * (c.sum(-1) > 1.2)), None
+    # V7 (point 17) : POITRAIL BLANC devant (comme l'icône), qui monte jusqu'au museau.
+    # Les rayures s'arrêtent net sur le blanc, avec un bord un peu irrégulier.
+    # (retour programmeur) : plastron en GOUTTE, large en haut sous le menton et qui
+    # s'affine vers le bas ; bords doux et irréguliers (plus de bande droite du socle au cou)
+    largeur = 0.08 + 0.18 * doux(0.55, 1.30, B.y)
+    bord = largeur * (1 + 0.25 * (B.fbm(10, 6, 3) - 0.5) * 2)
+    devant = doux(bord + 0.04, bord - 0.04, np.abs(B.x - TOUR / 2)) * doux(1.72, 1.50, B.y) * doux(0.5, 0.75, B.y)
+    museau = doux(0.22, 0.16, np.hypot(B.x - TOUR / 2, (B.y - 1.48) * 1.4))
+    blanc = np.maximum(devant, museau)
+    return melange(c, hexa("#F7F1E8"), blanc), None
 
 
 def chat_roux(B):
@@ -372,6 +379,62 @@ def abysses(B):
     return c, np.clip(lum, 0, 1)
 
 
+# --- V7, point 17 : 5 skins de plus qui ne ressemblaient pas à leur icône ---------------
+def lagon(B):
+    """Eau de lagon : dégradé turquoise (haut) -> bleu profond (bas), réseau de reflets
+    d'eau clairs (caustiques : lignes entre cellules de Worley, déformées)."""
+    t = doux(0.1, 1.8, B.y + 0.15 * (B.fbm(6, 3, 3) - 0.5))
+    base = melange(hexa("#1F5FA8"), hexa("#2BC4C4"), t)
+    F1, F2, _, _, _, _ = B.cellules(22, 7)
+    ligne = F2 - F1 + 0.012 * (B.fbm(40, 26, 2) - 0.5)
+    reflet = doux(0.010, 0.002, ligne) * (0.45 + 0.55 * t)
+    c = melange(base, hexa("#E0FFFF"), 0.7 * reflet)
+    return c, None
+
+
+def grenouille(B):
+    """Grenouille : vert vif, taches vert foncé arrondies sur le dos et la tête, ventre
+    jaune-vert clair devant en bas."""
+    base = melange(hexa("#3CC84A"), hexa("#56D45E"), B.fbm(10, 7, 3))
+    F1, _, _, _, _, R = B.cellules(18, 6, rayon=(0.04, 0.085), presence=0.55)
+    bord = R * (1 + 0.25 * (B.fbm(40, 26, 2) - 0.5) * 2)
+    tache = doux(bord + 0.004, bord - 0.004, F1)
+    ventre = doux(0.55, 0.35, np.abs(B.x - TOUR / 2)) * doux(0.9, 0.45, B.y)
+    tache = tache * (1 - ventre)
+    c = melange(base, hexa("#1E8A3A"), tache)
+    return melange(c, hexa("#D8F08A"), ventre), None
+
+
+def cameleon(B):
+    """Caméléon : dégradé jaune (tête) -> turquoise (milieu) -> vert menthe (socle), petits
+    points clairs en quinconce, plus nombreux vers la crinière (derrière)."""
+    v = B.y / HAUT + 0.05 * (B.fbm(5, 3, 3) - 0.5)
+    c = np.where((v < 0.45)[..., None],
+                 melange(hexa("#5CD6A0"), hexa("#3CC8C8"), doux(0.0, 0.45, v)),
+                 melange(hexa("#3CC8C8"), hexa("#FFD84A"), doux(0.45, 0.85, v)))
+    F1, _, _, _, _, R = B.cellules(40, 13, rayon=(0.012, 0.02), presence=0.6)
+    derriere = doux(0.6, 1.2, np.abs(B.x - TOUR / 2))
+    pois = doux(R + 0.003, R - 0.003, F1) * (0.35 + 0.65 * derriere)
+    return melange(c, hexa("#2FA0B0"), 0.8 * pois), None
+
+
+def coccinelle(B):
+    """Coccinelle : rouge verni et GROS points noirs ronds (≈ 14 visibles), aucun sur le
+    museau ni autour des yeux (devant, en haut)."""
+    base = melange(hexa("#C82030"), hexa("#E03040"), B.fbm(8, 6, 3))
+    F1, _, _, _, _, R = B.cellules(9, 3.2, rayon=(0.09, 0.13), presence=0.75)
+    visage = doux(0.55, 0.35, np.hypot(B.x - TOUR / 2, (B.y - 1.55) * 0.8))
+    point = doux(R + 0.004, R - 0.004, F1) * (1 - visage)
+    return melange(base, hexa("#1F1730"), point), None
+
+
+def sucre_orge(B):
+    """Sucre d'orge : 16 bandes fines rouge / blanc cassé, légèrement en spirale, bords nets."""
+    s = (B.y / HAUT) * 16 + (B.x / TOUR) * 1.0
+    m = doux(0.47, 0.53, 0.5 + 0.5 * np.cos(2 * np.pi * s))
+    return melange(hexa("#F4EEE6"), hexa("#D64545"), m), None
+
+
 SKINS = {
     "animal_zebre": zebre, "animal_tigre": tigre, "animal_chat_roux": chat_roux,
     "animal_dalmatien": dalmatien, "animal_vache": vache, "animal_leopard": leopard,
@@ -379,6 +442,9 @@ SKINS = {
     "pirate_bois_flotte": bois_flotte, "pirate_corail": corail,
     "pirate_vert_de_gris": vert_de_gris, "pirate_carte": carte, "pirate_tempete": tempete,
     "pirate_or_maudit": or_maudit, "pirate_ecailles": ecailles, "pirate_abysses": abysses,
+    # V7, point 17 (à brancher par le programmeur : docs/specs/v7-textures-skins.md)
+    "pirate_lagon": lagon, "animal_grenouille": grenouille, "animal_cameleon": cameleon,
+    "animal_coccinelle": coccinelle, "motif_sucre_orge": sucre_orge,
 }
 
 

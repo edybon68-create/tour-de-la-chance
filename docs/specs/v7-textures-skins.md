@@ -118,3 +118,25 @@ Classement du **pire au meilleur** (seuls les skins qui ne ressemblent pas assez
 Corrects (ressemblent à leur icône) : les 11 couleurs unies, pois, arc-en-ciel, cristal, méduse,
 fantôme, abeille, marinière, chat roux, dalmatien, vache, léopard, girafe, flamant, zèbre, paon,
 panda, kraken, abysses, bois flotté, carte, corail, écailles, tempête, vert-de-gris.
+
+---
+
+## V7, point 17 (suite) : 5 nouvelles textures dessinées et tigre repris (14/11)
+
+> Artiste 3D. Planche avant (motif calculé ou texture actuelle) / après :
+> `docs/captures/v7_qualite_skins_textures_avant_apres.png`. Fichiers 1024 px, sans raccord,
+> dans `Assets/Art/SkinsTextures/` (et `art/skins_textures/`), script `blender/textures_skins.py`.
+> Mêmes réglages d'import que plus haut (sRGB, Repeat, Trilinear, mipmaps, 1024).
+
+| Skin | Fichier | À faire dans la fiche `ShopItem` |
+|---|---|---|
+| `animal_tigre` | `animal_tigre.png` (remplacé) | rien : déjà branché. Le poitrail blanc est maintenant une goutte sous le menton + le museau blanc (plus de bande droite du socle au cou). |
+| `pirate_lagon` | `pirate_lagon.png` (nouveau) | `baseTexture` = cette image. Garder `skinFx` 3 et l'émission actuelle : la texture porte le dégradé et le réseau de reflets d'eau. |
+| `animal_grenouille` | `animal_grenouille.png` (nouveau) | `baseTexture`. Vert vif à taches vert foncé, ventre jaune-vert devant en bas. |
+| `animal_cameleon` | `animal_cameleon.png` (nouveau) | `baseTexture`. Jaune en haut, turquoise, vert menthe au socle, petits points. Remplace le gris de la fiche (`color` peut rester blanc). Vérifier que `SkinFx` 6 ne recolore pas tout le cheval en gris au repos. |
+| `animal_coccinelle` | `animal_coccinelle.png` (nouveau) | `baseTexture`. Gros points noirs, aucun sur le visage. |
+| `motif_sucre_orge` | `motif_sucre_orge.png` (nouveau) | `baseTexture` (et tiling 1 ; 1). Elle doit passer AVANT le cas `SkinStyle.Rayures` dans `PlayerAvatar` (sinon la texture calculée l'écrase). 16 bandes fines. |
+
+Restent des corrections de MATÉRIAU (le programmeur, dans les fiches), déjà décrites plus haut :
+métaux trop sombres (`couleur_or`, `matiere_argent`, `pirate_or_maudit` : metallic 0,6, smoothness
+0,65), `animal_lion_soleil` (metallic 0,2, lueur légère du corps), `matiere_galaxie` (à vérifier en jeu).
