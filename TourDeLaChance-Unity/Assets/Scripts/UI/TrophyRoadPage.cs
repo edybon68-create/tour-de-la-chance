@@ -252,7 +252,21 @@ namespace TourDeLaChance
             var stops = SkyStops(top, height);
             sky.generateVisualContent += ctx => DrawSky(ctx, stops);
             content.Add(sky);
-            content.Add(Layer("asc-losanges"));
+            // V7.1 n°1 : dans la nuit du palier 4, les losanges ressortaient comme un damier : on
+            // coupe le motif en deux, et la partie « nuit » (en haut) est beaucoup plus discrète.
+            float nightY = NightBottom(top);
+            if (nightY > 0f)
+            {
+                var night = Box("asc-losanges asc-losanges--nuit");
+                night.style.position = Position.Absolute; night.style.left = 0f; night.style.right = 0f;
+                night.style.top = 0f; night.style.height = nightY;
+                content.Add(night);
+                var day = Box("asc-losanges");
+                day.style.position = Position.Absolute; day.style.left = 0f; day.style.right = 0f;
+                day.style.top = nightY; day.style.bottom = 0f;
+                content.Add(day);
+            }
+            else content.Add(Layer("asc-losanges"));
             var shade = Layer("asc-ombre-gauche");
             shade.generateVisualContent += DrawLeftShade;
             content.Add(shade);
@@ -337,6 +351,16 @@ namespace TourDeLaChance
         }
 
         static TileShape ShapeOf(int floor) => TrophyRoad.IsMilestone(floor) ? Milestone : Normal;
+
+        /// La hauteur (y) où finit la nuit du palier 4 (0 s'il n'est pas affiché) : le milieu
+        /// entre le premier étage de la nuit et l'étage d'en dessous.
+        float NightBottom(int top)
+        {
+            if (DecorOf(top) != 3) return 0f;
+            for (int f = 2; f <= top; f++)
+                if (DecorOf(f) == 3 && DecorOf(f - 1) != 3) return (floorCenterY[f] + floorCenterY[f - 1]) * 0.5f;
+            return 0f;
+        }
 
         /// Les arrêts de couleur du ciel, de haut en bas : chaque palier a son dégradé (haut plus
         /// profond, bas plus clair), avec un fondu de 320 px entre deux paliers.
@@ -585,10 +609,9 @@ namespace TourDeLaChance
             }
             else
             {
-                var number = ShopUi.NewLabel(f.ToString(), "asc-numero");
-                if (unexplored) number.AddToClassList("asc-numero--inexplore");
-                number.style.left = NumberCenterX - 40f;
-                number.style.top = centerY - 30f; // v7 : numéro de 60 px de haut
+                // V7.1 n°8 : une pastille ronde Ø 58 (même rythme que les médaillons) ; contour or
+                // pour un étage déjà atteint, numéro pâle au-dessus du record.
+                var number = Medal(f, "asc-pastille" + (unexplored ? " asc-pastille--inexplore" : " asc-pastille--atteint"), 58f, centerY);
                 // Caché à l'étage du record : la pilule le montre déjà.
                 if (f == record) number.style.visibility = Visibility.Hidden;
                 numbers.Add(number);
@@ -605,7 +628,7 @@ namespace TourDeLaChance
 
             // Le ruban du palier d'altitude (au 1er étage de chaque palier : 1, 4, 7, 10…).
             bool firstOfTier = f == 1 || DecorOf(f) != DecorOf(f - 1);
-            if (firstOfTier)
+            if (firstOfTier && !milestone)
             {
                 string name = TierName(DecorOf(f) + 1);
                 if (!string.IsNullOrEmpty(name))
@@ -616,8 +639,8 @@ namespace TourDeLaChance
                     ribbon.style.left = TileCenterX;   // centré par « translate: -50% » (V7.uss)
                     // Au-dessus de la dalle ; sur un palier, la carte récompense (220 × 250) dépasse
                     // du dessus : le ruban monte alors au-dessus de la carte (vérifié en capture).
-                    ribbon.style.top = milestone ? tileTop + shape.PedestalPoint.y - 250f - 14f - 88f
-                                                 : tileTop - 36f - 88f + shape.MarginTop;
+                    // V7.1 n°9 : sur le flanc avant de SA dalle (milieu à y = 308 dans l'image).
+                    ribbon.style.top = tileTop + 308f - 40f;
                     overlay.Add(ribbon);
                 }
             }
@@ -708,18 +731,23 @@ namespace TourDeLaChance
         /// sautille (calque 6) ; étincelles qui montent des bords de la dalle (calque 7).
         void BuildSpotlight(Vector2 horse, Vector2 topCenter, float tileTop, TileShape shape, VisualElement lights, VisualElement overlay)
         {
-            beam = new AscensionFx.Beam();
+            // V7.1 n°2 : un socle sombre sous le faisceau (comme « Récupérer ») fait ressortir la
+            // lumière même sur le ciel de jour.
+            var ink = AscensionFx.Hex("#110D1F");
+            lights.Add(AscensionFx.Glow(new Color(ink.r, ink.g, ink.b, 0.14f), 520f, 520f, topCenter.x, topCenter.y));
+            beam = new AscensionFx.Beam(DecorOf(YouFloor) <= 1 ? 0.8f : 0.55f);
             beam.style.width = 420f; beam.style.height = 760f;
             beam.style.left = topCenter.x - 210f;
             beam.style.top = topCenter.y - 760f;
             lights.Add(beam);
-            var rays = AscensionFx.Rays(16, new Color(1f, 0.89f, 0.54f, 0.40f), 640f, topCenter.x, topCenter.y);
+            var rays = AscensionFx.Rays(16, new Color(1f, 0.965f, 0.784f, 0.55f), 640f, topCenter.x, topCenter.y); // #FFF6C8 à 55 %
             youRays = rays;
             lights.Add(rays);
             spinners.Add((rays, 40f));
-            var gc = AscensionFx.Hex("#FFE9A0");
-            youGround = AscensionFx.Glow(new Color(gc.r, gc.g, gc.b, 0.5f), 560f, 220f, topCenter.x, topCenter.y);
-            lights.Add(youGround);
+            // La lueur au sol : une ellipse douce 200 × 64 (plus de « tapis » plein), posée sous le cheval.
+            var gc = AscensionFx.Hex("#FFE38A");
+            youGround = AscensionFx.Glow(new Color(gc.r, gc.g, gc.b, 0.6f), 200f, 64f, horse.x, horse.y);
+            overlay.Add(youGround);
 
             // Deux anneaux or qui s'agrandissent en s'effaçant (le 2e part 0,8 s plus tard).
             youRing1 = Box("asc-toi7__anneau");
@@ -757,7 +785,9 @@ namespace TourDeLaChance
         static VisualElement Garland(bool reached)
         {
             var garland = Box("asc-guirlande");
-            var sprite = UiImages.Guirlande;
+            // V7.1 n°5 : pas encore atteint, la guirlande est dessinée GRISE et immobile (l'image en
+            // couleurs, même teintée, restait trop vive) ; elle prend ses couleurs une fois atteinte.
+            var sprite = reached ? UiImages.Guirlande : null;
             if (sprite != null) garland.style.backgroundImage = new StyleBackground(sprite);
             else garland.generateVisualContent += DrawFlags;
             if (!reached) garland.style.unityBackgroundImageTintColor = AscensionFx.Hex("#A8A4BC");

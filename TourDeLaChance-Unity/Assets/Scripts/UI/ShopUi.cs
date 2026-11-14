@@ -120,7 +120,9 @@ namespace TourDeLaChance
             var box = Shop.BoxOf(item);
             var mini = new VisualElement { pickingMode = PickingMode.Ignore };
             mini.AddToClassList("tile-box");
-            if (box != null && box.icon != null) mini.style.backgroundImage = new StyleBackground(box.icon);
+            // V7.1 n°12 : un objet jamais vu porte, dans ce coin, le pictogramme « pas encore vu ».
+            if (notSeen && UiImages.PasEncoreVu != null) { mini.AddToClassList("tile-box--pas-vu"); mini.style.backgroundImage = new StyleBackground(UiImages.PasEncoreVu); }
+            else if (box != null && box.icon != null) mini.style.backgroundImage = new StyleBackground(box.icon);
             else if (box != null) { mini.AddToClassList("tile-box--vide"); mini.style.backgroundColor = box.openingTint; }
             inner.Add(mini);
 
@@ -139,8 +141,8 @@ namespace TourDeLaChance
             int bonus = Shop.BonusPercent(item);
             if (bonus > 0) inner.Add(NewLabel($"+{bonus}\u00A0%", "bonus-badge"));
             if (count >= 2) inner.Add(NewLabel("×" + count, "item-badge"));
+            // V7.1 n°12 : plus de pilule « Pas encore » (la silhouette et le nom à 75 % le disent).
             if (owned) inner.Add(NewLabel("✓", "tile-check"));
-            else inner.Add(NewLabel("Pas encore", "tile-ribbon"));
             return frame;
         }
 

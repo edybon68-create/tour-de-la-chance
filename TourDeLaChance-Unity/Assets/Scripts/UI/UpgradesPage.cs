@@ -56,7 +56,7 @@ namespace TourDeLaChance
 
         // Les icônes qui flottent et leurs rayons qui tournent (animés par Tick).
         readonly List<(VisualElement icon, RaysElement rays, float phase)> floaters = new List<(VisualElement, RaysElement, float)>();
-        readonly List<VisualElement> nextSegments = new List<VisualElement>();
+        readonly List<VisualElement> nextSegments = new List<VisualElement>(); // (V7.1 : plus de segments, liste gardée vide)
         VisualElement infoVeil;
 
         public void Refresh()
@@ -156,23 +156,34 @@ namespace TourDeLaChance
             // 2. Le nom, puis (v7, retour de l'auteur, point 14) UNE phrase courte qui dit ce que
             //    fait l'amélioration, visible sans ouvrir le « i » (texte des données du catalogue).
             card.Add(ShopUi.NewLabel(def.displayName, "up7-nom"));
-            if (!string.IsNullOrEmpty(def.description)) card.Add(ShopUi.NewLabel(def.description, "up7-phrase"));
+            if (!string.IsNullOrEmpty(def.description))
+            {
+                // V7.1 n°3 : la phrase dans la couleur foncée de la famille de la carte, sans contour.
+                var phrase = ShopUi.NewLabel(def.description, "up7-phrase");
+                phrase.AddToClassList("up7-phrase--" + def.id);
+                card.Add(phrase);
+            }
 
             // 3. Le niveau : 10 segments, et « 2/10 ».
             var levelRow = new VisualElement { pickingMode = PickingMode.Ignore };
             levelRow.AddToClassList("up7-niveau");
+            // V7.1 n°3 : une JAUGE CONTINUE (plus de cases à cocher qui se lisaient à l'envers) :
+            // remplissage blanc jusqu'au niveau acquis, 9 crans qui découpent les 10 niveaux, or au MAX.
             var dots = new List<VisualElement>();
-            var segments = new VisualElement { pickingMode = PickingMode.Ignore };
-            segments.AddToClassList("up7-segments");
-            for (int i = 1; i <= Upgrades_.MaxLevel; i++)
+            var gauge = Icon("up7-jauge");
+            var fill = Icon("up7-jauge__plein" + (max ? " up7-jauge__plein--max" : ""));
+            fill.style.width = Length.Percent(100f * level / Upgrades_.MaxLevel);
+            if (!max) fill.style.backgroundImage = new StyleBackground(GaugeGradient);
+            fill.Add(Icon("up7-jauge__reflet"));
+            gauge.Add(fill);
+            for (int i = 1; i < Upgrades_.MaxLevel; i++)
             {
-                var seg = Icon("up7-segment");
-                if (i <= level) seg.AddToClassList(max ? "up7-segment--or" : "up7-segment--plein");
-                if (i == level + 1) nextSegments.Add(seg);
-                segments.Add(seg);
-                dots.Add(seg);
+                var notch = Icon("up7-jauge__cran");
+                notch.style.left = Length.Percent(100f * i / Upgrades_.MaxLevel);
+                gauge.Add(notch);
             }
-            levelRow.Add(segments);
+            dots.Add(fill); // le « pop » après un achat s'applique au remplissage
+            levelRow.Add(gauge);
             levelRow.Add(ShopUi.NewLabel($"{level}/{Upgrades_.MaxLevel}", "up7-niveau__texte"));
             card.Add(levelRow);
 
@@ -214,7 +225,7 @@ namespace TourDeLaChance
             {
                 flashId = null;
                 host.StartCoroutine(FlashCard(card));
-                if (popLevel >= 1 && popLevel <= dots.Count) host.StartCoroutine(PopDot(dots[popLevel - 1]));
+                if (popLevel >= 1 && dots.Count > 0) host.StartCoroutine(PopDot(dots[0]));
                 host.StartCoroutine(JumpIcon(icon));
             }
             return card;
@@ -266,13 +277,23 @@ namespace TourDeLaChance
                 if (!used) continue;
                 var item = Icon("up7-legende__item");
                 var dot = Icon("up7-legende__pastille");
-                dot.style.backgroundColor = Upgrades.Rarity(i).bodyColor;
+                dot.style.backgroundColor = SignalColor(i);
                 item.Add(dot);
                 item.Add(ShopUi.NewLabel(Upgrades.Rarity(i).shortName, "up7-legende__texte"));
                 legend.Add(item);
             }
             well.Add(legend);
         }
+
+        // V7.1 n°3 : couleurs de SIGNAL des raretés de coffre (bois, bronze, argent, or, diamant) :
+        // les couleurs des modèles 3D se confondaient dans la barre.
+        static readonly Color[] Signal = { new Color32(0xC0, 0x8A, 0x5A, 255), new Color32(0xE8, 0x85, 0x3A, 255), new Color32(0xD6, 0xDE, 0xEA, 255), new Color32(0xFF, 0xD5, 0x4A, 255), new Color32(0x7F, 0xE3, 0xFF, 255) };
+        static Color SignalColor(int rank) => rank >= 0 && rank < Signal.Length ? Signal[rank] : Upgrades.Rarity(rank).bodyColor;
+
+        static Texture2D gaugeGradient;
+        /// Le dégradé du remplissage de la jauge : #FFFFFF en haut → #FFF3B0 en bas.
+        static Texture2D GaugeGradient => gaugeGradient != null ? gaugeGradient
+            : gaugeGradient = UiFxTextures.VerticalGradient(Color.white, new Color32(0xFF, 0xF3, 0xB0, 255));
 
         static VisualElement ChanceBar(string label, int[] weights)
         {
@@ -287,7 +308,7 @@ namespace TourDeLaChance
                 var part = Icon("up7-barre__part");
                 part.style.flexGrow = weights[i];
                 part.style.minWidth = 6f;
-                part.style.backgroundColor = Upgrades.Rarity(i).bodyColor;
+                part.style.backgroundColor = SignalColor(i);
                 bar.Add(part);
             }
             row.Add(bar);

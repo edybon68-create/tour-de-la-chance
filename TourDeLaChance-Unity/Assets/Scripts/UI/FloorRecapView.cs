@@ -53,7 +53,7 @@ namespace TourDeLaChance
         float phaseTime, bigDuration, foldDuration = FoldTime;
 
         VisualElement layer, card, pillsRow, bar, details;
-        Label title, sticker, heroGain, phrase, won, rarityLine, mentions, barGain, barText;
+        Label title, sticker, heroGain, phrase, won, rarityLine, mentions, barGain;
         // Les pastilles v7 : (la pastille, son icône, son texte).
         VisualElement pillChests, pillChestsIcon, pillDiamonds, pillOutfit, pillOutfitIcon, pillRebirth, pillRebirthIcon;
         Label pillChestsText, pillDiamondsText, pillOutfitText, pillRebirthText;
@@ -63,7 +63,9 @@ namespace TourDeLaChance
 
         /// Les textes de la carte (pour les tests).
         public string Text { get; private set; } = "";
-        public string BarText => barText.text;
+        public string BarText => barTextValue;
+        string barTextValue = "";
+        VisualElement barParts; // V7.1 n°10 : « 4 coffres » • « ◆ 2 % », séparés par des points
         public bool IsBig => phase == Phase.Arriving || phase == Phase.Big;
         public bool IsCompact => phase == Phase.Compact;
         /// v7 : la carte montre-t-elle « toutes les infos » (rouverte par un clic) ?
@@ -142,7 +144,7 @@ namespace TourDeLaChance
             bar.AddToClassList("rc7-barre");
             Box("coin rc7-barre__piece", bar);
             barGain = Text_("rc7-barre__gain", bar);
-            barText = Text_("recap-bar-text", bar);
+            barParts = Box("rc7-barre__parties", bar);
             layer.Add(bar);
         }
 
@@ -260,7 +262,15 @@ namespace TourDeLaChance
             barGain.text = $"+{ShopUi.Thousands(setup.Gain)}";
             var b = new List<string> { $"{setup.ChestCount} coffres" };
             if (setup.DiamondChancePermille > 0) b.Add($"{ShopUi.Diamant} {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%");
-            barText.text = " · " + string.Join(" · ", b);
+            barTextValue = " · " + string.Join(" · ", b);
+            // V7.1 n°10 : le gain d'abord (40 px), puis les petites infos (24 px) séparées par un point rond.
+            barParts.Clear();
+            foreach (var part in b)
+            {
+                Box("rc7-barre__point", barParts);
+                var l = Text_("recap-bar-text rc7-barre__texte", barParts);
+                l.text = part;
+            }
 
             bigDuration = sticker.text.Length > 0 ? BigTimeBanner : BigTime;
             Text = string.Join(" | ", new[] { title.text, sticker.text, $"Trésor {heroGain.text}", pillChestsText.text,

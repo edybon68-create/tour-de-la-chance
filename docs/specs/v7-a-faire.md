@@ -63,17 +63,17 @@
 > **Rien ici ne touche aux chances** : on ne crée ni coffre, ni boîte, ni monnaie.
 > Une capture 1280 et une capture 1920 par point avant de cocher.
 
-1. [ ] **L'Ascension, palier 4 (galaxie) : le fond fait damier.** Les losanges ressortent en gris clair sur le noir, comme un échiquier (`qa_v7p3_ascension_haut_1280.png`). C'est l'écran que l'auteur préfère, et c'est le décor le plus haut.
+1. [x] *(14/11 : losanges de la nuit à 15 %, étoiles inchangées ; `v71_ascension_nuit*.png`)* **L'Ascension, palier 4 (galaxie) : le fond fait damier.** Les losanges ressortent en gris clair sur le noir, comme un échiquier (`qa_v7p3_ascension_haut_1280.png`). C'est l'écran que l'auteur préfère, et c'est le décor le plus haut.
    - **Correction** :
      - dans les étages du palier 4 seulement, le motif `motif_losanges.png` passe de 6 % / 10 % à **intérieur 2,5 %, arêtes 4 %** (une 2e tuile cuite `motif_losanges_nuit.png`, ou `opacity: 0.4` sur le calque du motif dans ces bandes) ;
      - recaler le dégradé du palier 4 : `#120D2B` en haut → `#2E2366` en bas. Contrôle à la pipette : losange ≈ `#1A1436`, arête ≈ `#231B45` ;
      - les étoiles restent comme elles sont : c'est elles qui doivent briller, pas le carrelage.
-2. [ ] **L'Ascension : l'étage du joueur ne « brille » pas assez sur le ciel de jour.** La lueur sous le cheval se lit comme un tapis jaune plat, et le projecteur et les rayons se voient à peine sur `#A8DEFF` (`qa_v7p3_ascension_1280.png`, étage 1).
+2. [x] *(14/11 : socle sombre, faisceau 80 % de jour, rayons #FFF6C8 55 %, lueur 200 × 64, anneaux 3 px ; `v71_ascension_joueur*.png`)* **L'Ascension : l'étage du joueur ne « brille » pas assez sur le ciel de jour.** La lueur sous le cheval se lit comme un tapis jaune plat, et le projecteur et les rayons se voient à peine sur `#A8DEFF` (`qa_v7p3_ascension_1280.png`, étage 1).
    - **Correction (lueur)** : la lueur devient `lueur_ronde.png` en ellipse **200 × 64**, `#FFE38A`, opacité **0 % au bord → 60 % au centre**. Pas de forme pleine.
    - **Correction (anneaux)** : deux anneaux de **3 px** `#FFD54A` qui grandissent (1 → 1,5) et s'effacent, en 1,6 s.
    - **Correction (projecteur)** : sur les paliers 1 et 2, opacité maximale **80 %** (au lieu de 55 %). On ajoute sous le faisceau un **socle sombre** comme celui de Récupérer : `lueur_ronde.png` Ø 520, `#110D1F` à **14 %**, centré sur la dalle. Les rayons `#FFF6C8` à **55 %** ressortent alors même en plein jour.
    - **Correction (cheval)** : le cheval garde son sautillement de 6 px.
-3. [ ] **Améliorations : la jauge de niveau se lit à l'envers, et la phrase ne se lit pas** (`v7p2_ameliorations.png`).
+3. [x] *(14/11 : jauge continue à 9 crans, phrase couleur de famille sans contour, couleurs de signal et légende 18 px ; `v71_ameliorations*.png`)* **Améliorations : la jauge de niveau se lit à l'envers, et la phrase ne se lit pas** (`v7p2_ameliorations.png`).
    - **Jauge** : les niveaux acquis (carrés blancs cernés de noir) ressemblent à des cases à cocher vides, et les niveaux à acheter à des cases pleines. Correction :
      - une **jauge continue** de **276 × 26** : piste `rgba(17,13,31,0.30)`, contour 3 px `#110D1F`, coins 13 ;
      - remplissage **blanc** `#FFFFFF` → `#FFF3B0` (de haut en bas), avec un reflet blanc à 50 %, 4 px de haut ;
@@ -87,43 +87,43 @@
      - **2 coffres en bois** au fond et **1 coffre au premier plan**, couvercle entrouvert d'où sort une lueur `#FFE38A` ;
      - une **pastille « + »** dorée (`#FFC83A`, contour encre) au-dessus, en volume, sans aucun texte ;
      - même caméra 3/4 et même lumière que `amelioration_coffres.png`, contour extérieur encre de 8 px dans l'image, fond transparent.
-5. [ ] **L'Ascension : la récompense d'un palier pas encore atteint n'a pas l'air verrouillée** (`qa_v7p3_ascension_haut_1280.png`, palier 30). La carte est en couleurs vives, le cadenas jaune de ~66 px recouvre le « +10 », et la guirlande est en couleurs.
+5. [x] *(14/11 : carte grise, petit cadenas sur le coin, guirlande grise et immobile ; `v71_ascension_nuit*.png`)* **L'Ascension : la récompense d'un palier pas encore atteint n'a pas l'air verrouillée** (`qa_v7p3_ascension_haut_1280.png`, palier 30). La carte est en couleurs vives, le cadenas jaune de ~66 px recouvre le « +10 », et la guirlande est en couleurs.
    - **Correction (carte)** : la carte et le diamant prennent la teinte **`#B8B4C8`** à **85 %**, comme prévu au §16.2.5. Le « +10 » reste blanc, centré, lisible.
    - **Correction (cadenas)** : il passe à **34 × 28**, corps `#6E6A84` et anse de 22 px, contour 3 px `#110D1F`. Il est posé **à cheval sur le coin bas droit** de la carte (`right: -12px; bottom: -12px`), donc plus jamais sur le chiffre.
    - **Correction (guirlande)** : teinte **`#A8A4BC`**, immobile, conformément au §17.2.6. Elle ne se met en couleurs et ne se balance qu'une fois le palier atteint, et ce changement devient alors une petite fête à lui seul.
-6. [ ] **Boutique, cartes de boîtes : le haut de la carte est pâle** (`qa_v7p3_boutique_classiques_1280.png`, `_pirates_1280.png`).
+6. [x] *(14/11 : titre 30 px avec ombre, jauge foncée et texte sur pastille, bouton gris à 85 %, mini-jauge de ce qui manque ; `v71_boutique_pirates*.png`)* **Boutique, cartes de boîtes : le haut de la carte est pâle** (`qa_v7p3_boutique_classiques_1280.png`, `_pirates_1280.png`).
    - Constat : le titre est fin et petit (~24 px), la piste de la jauge est blanchâtre, et la pastille « médaille ◆ 5 » est presque transparente.
    - **Titre** : **30 px** Bold blanc, `text-shadow 0 3px 0 rgba(17,13,31,0.55)`, une ligne.
    - **Jauge** : piste `rgba(17,13,31,0.30)`, contour 3 px `#110D1F`, remplissage `#FFE66B → #FFB020`. Le texte « 5 / 16 » passe à **19 px** Bold `#2A2440` sur une petite pastille blanche à 85 %, centrée.
    - **Pastille de récompense** : fond `rgba(17,13,31,0.50)`, médaille 28 px, diamant 26 px, « 5 » **22 px** blanc.
    - **Bouton gris** (prix gardé, retour 15) : texte « Ouvrir ◆ 5 » **blanc à 85 %**, icône à 70 %. Ajouter dessous une **mini-jauge** de **300 × 10** (`rgba(17,13,31,0.25)`, remplissage `#7FE3FF`, coins 5) : on voit combien il manque, sans phrase.
-7. [ ] **Inventaire : le badge des skins à double bonus déborde de la case.** Sur Or maudit, « ● +10 % ◆ +15 % » est écrasé dans une seule pilule (`v7p5_inventaire_or_maudit.png`).
+7. [x] *(14/11 : deux pilules séparées ; la case de 122 px étant trop étroite, celle des diamants est juste au-dessus de celle des pièces ; `v71_inventaire*.png`)* **Inventaire : le badge des skins à double bonus déborde de la case.** Sur Or maudit, « ● +10 % ◆ +15 % » est écrasé dans une seule pilule (`v7p5_inventaire_or_maudit.png`).
    - **Correction** : deux pilules séparées, h **26**, coins 13, fond `rgba(17,13,31,0.78)`, **16 px** Bold :
      - pièces en bas à **gauche** (`left: 6px; bottom: 8px`), texte `#FFD54A` ;
      - diamants en bas à **droite** (`right: 6px; bottom: 8px`), texte `#7FE3FF`.
    - La règle vaut aussi pour les mini-cases de « Mes skins ».
-8. [ ] **L'Ascension, couloir de gauche : deux styles se mélangent** (`qa_v7p3_ascension_*`).
+8. [x] *(14/11 : pastilles Ø 58, contour or si atteint ; crans et jalons centrés sur la piste)* **L'Ascension, couloir de gauche : deux styles se mélangent** (`qa_v7p3_ascension_*`).
    - Constat : le médaillon bleu de l'étage actuel et le médaillon gris du palier côtoient des numéros nus (« 2 », « 29 »). Des crans en triangle dépassent à gauche de la piste. Le jalon cadenas est posé **à côté** de la piste au lieu de dessus.
    - **Étages ordinaires** : pastille Ø **58**, fond `rgba(17,13,31,0.45)`, contour 3 px `#110D1F`, numéro **30 px** Bold blanc. Étage déjà atteint : contour 3 px `#FFD54A`. Étage au-dessus du record : numéro `#D9D2F0` à 70 %.
    - **Crans** : **dans** la piste (x 26 → 54), 14 × 4 px.
    - **Jalons** : centrés sur **x = 40**.
    - Tout le couloir suit ainsi le même rythme : pastille, médaillon, pastille.
-9. [ ] **L'Ascension : le ruban « En plein jour » flotte entre deux dalles** et mord le flanc de la dalle du dessus (`qa_v7p3_ascension_1280.png`). On ne sait pas à quel étage il appartient.
+9. [x] *(14/11 : ruban sur le flanc avant de sa dalle, 80 px, aucun sur les paliers)* **L'Ascension : le ruban « En plein jour » flotte entre deux dalles** et mord le flanc de la dalle du dessus (`qa_v7p3_ascension_1280.png`). On ne sait pas à quel étage il appartient.
    - **Correction (place)** : sur les dalles **normales** (étages 1, 4, 7), le ruban se pose **sur le flanc avant de sa propre dalle**, centré en x, son milieu à **y = 308** dans l'image de la dalle (côté visible 288 → 329), `rotate -2deg`.
    - **Correction (taille)** : hauteur **80**, texte **32 px** Bold `#3A2200`.
    - Le flanc ne porte aucune information, donc le ruban ne cache rien.
    - Sur les dalles **de palier** (le bouton Récupérer occupe le flanc), pas de ruban : la guirlande marque déjà la fête.
-10. [ ] **Partie : la barre compacte du gain est trop discrète pour la règle d'or.** Dans « +34 · 4 coffres · ◆ 2 % », le « +34 » ne fait que ~26 px en 1920 (`qa_v7p2_jeu_accueil_1280.png`).
+10. [x] *(14/11 : barre de 72 px, gain 48 px or avec ombre, petites infos 24 px séparées par des points ; `v71_barre_compacte*.png`)* **Partie : la barre compacte du gain est trop discrète pour la règle d'or.** Dans « +34 · 4 coffres · ◆ 2 % », le « +34 » ne fait que ~26 px en 1920 (`qa_v7p2_jeu_accueil_1280.png`).
     - **Correction (barre)** : hauteur **72** (au lieu de 64), `padding 0 28px`.
     - **Correction (gain)** : pièce **40 px** + « **+34** » **40 px** Bold `#FFD54A`, `text-shadow 0 3px 0 #3A2200`, sans contour épais.
     - **Correction (pastilles)** : « 4 coffres » et « ◆ 2 % » en **24 px** blanc à 90 %, séparés par un point Ø 6 `rgba(255,255,255,0.5)`.
     - **Contrôle** : le gain doit être deux fois plus haut que le reste de la barre.
-11. [ ] **Boutique, Échanges : la grille est serrée et les rubans de réduction ne se lisent pas** (`qa_v7p3_boutique_diamants_1280.png`).
+11. [x] *(14/11 : 4 colonnes de 257 × 270, écarts 24 px, ruban d'angle vert 150 × 38, gain 40 px ; `v71_boutique_echanges*.png`)* **Boutique, Échanges : la grille est serrée et les rubans de réduction ne se lisent pas** (`qa_v7p3_boutique_diamants_1280.png`).
     - **Grille** : 4 colonnes de **257 × 270**, **24 px** d'écart horizontal et **24 px** vertical. Les deux rangées tiennent quand on défile jusqu'à la section.
     - **Ruban d'angle** : bande de **150 × 38** tournée de 45°, fond `#2FB35A` (bas 3 px `#1E6E3E`), « +10 % » **20 px** Bold blanc, `text-shadow 0 2px 0 #1E6E3E`. Il est découpé par la carte (`overflow: hidden`).
     - **Gain** : **40 px** au lieu de ~36.
     - **Bouton gris** : même traitement qu'au point 6 (texte blanc à 85 %).
-12. [ ] **Index : la pilule « Pas encore » sur chaque carte fait du bruit** (`v7p6_index_pas_encore_vu.png`). Elle se répète sur 15 cartes, alors que la silhouette « ? » dit déjà que l'objet n'est pas obtenu.
+12. [x] *(14/11 : pilule « Pas encore » retirée, nom et taux à 75 %, pictogramme 32 px dans le coin pour les objets jamais vus ; `v71_index*.png`)* **Index : la pilule « Pas encore » sur chaque carte fait du bruit** (`v7p6_index_pas_encore_vu.png`). Elle se répète sur 15 cartes, alors que la silhouette « ? » dit déjà que l'objet n'est pas obtenu.
     - **Correction** : retirer la pilule texte « Pas encore ». Les objets non obtenus gardent la silhouette « ? », plus le nom et le taux à **75 %** d'opacité.
     - Le pictogramme `pas_encore_vu.png` reste seul dans le coin haut gauche (32 px), seulement pour les objets **jamais vus**. C'est l'esprit de la grille du Casier : la case parle, pas le texte.
 

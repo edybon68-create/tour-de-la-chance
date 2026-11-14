@@ -137,8 +137,11 @@ namespace TourDeLaChance
         // =====================================================================
         public class Beam : VisualElement
         {
-            public Beam()
+            readonly float maxAlpha;
+            /// maxAlpha : l'opacité du bas du faisceau (V7.1 : 0,8 sur les ciels de jour).
+            public Beam(float maxAlpha = 0.75f)
             {
+                this.maxAlpha = maxAlpha;
                 pickingMode = PickingMode.Ignore;
                 style.position = Position.Absolute;
                 generateVisualContent += Draw;
@@ -150,7 +153,7 @@ namespace TourDeLaChance
                 float w = r.width, h = r.height;
                 var warm = Hex("#FFF6C8");
                 var top = new Color(warm.r, warm.g, warm.b, 0f);
-                var bottom = new Color(warm.r, warm.g, warm.b, 0.75f); // v7 : 0,55 se voyait à peine sur le ciel de jour
+                var bottom = new Color(warm.r, warm.g, warm.b, maxAlpha);
                 var clear = new Color(warm.r, warm.g, warm.b, 0f);
                 // 3 bandes verticales : bord gauche fondu, centre, bord droit fondu (20 %).
                 float tl = w * 0.30f, tr = w * 0.70f;            // haut : 40 % de la largeur

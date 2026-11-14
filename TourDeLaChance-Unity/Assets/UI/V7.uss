@@ -720,3 +720,98 @@
 .btn.asc-ma-position7 { top: -51px; height: 34px; border-bottom-width: 6px; }
 .asc-ma-position7__icone { top: -10px; width: 40px; height: 40px; }
 .asc-ma-position7__texte { font-size: 20px; }
+
+/* =====================================================================
+   13. Polissage V7.1 (DA)
+   ===================================================================== */
+/* n°1 : la nuit du palier 4 : losanges très discrets (ce sont les étoiles qui doivent briller). */
+.asc-losanges.asc-losanges--nuit { opacity: 0.4; }
+
+/* n°2 : anneaux du joueur : 3 px or, sans remplissage (ils grandissent et s'effacent). */
+.asc-toi7__anneau { border-width: 3px; border-color: #FFD54A; background-color: rgba(0, 0, 0, 0); }
+
+/* n°3 : Améliorations. Jauge continue, phrase de la couleur de la famille, légende plus grande. */
+.up7-jauge {
+    width: 276px; height: 26px; border-radius: 13px; overflow: hidden;
+    background-color: rgba(17, 13, 31, 0.30); border-width: 3px; border-color: #110D1F;
+}
+.up7-jauge__plein { position: absolute; left: 0; top: 0; bottom: 0; background-color: #FFFFFF; -unity-background-scale-mode: stretch-to-fill; }
+.up7-jauge__plein.up7-jauge__plein--max { background-color: #FFD54A; }
+.up7-jauge__reflet { position: absolute; left: 4px; right: 4px; top: 2px; height: 4px; border-radius: 2px; background-color: rgba(255, 255, 255, 0.5); }
+.up7-jauge__cran { position: absolute; top: 0; bottom: 0; width: 2px; background-color: rgba(17, 13, 31, 0.25); }
+.up7-phrase { font-size: 21px; -unity-font-style: bold; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); -unity-paragraph-spacing: 6px; }
+.up7-phrase--gains { color: #7A3E00; }
+.up7-phrase--coffres { color: #3A2390; }
+.up7-phrase--pieges { color: #163A8C; }
+.up7-barre__part { border-right-width: 2px; border-color: #110D1F; }
+.up7-legende__texte { font-size: 18px; }
+.up7-legende__pastille { width: 16px; height: 16px; border-radius: 8px; border-width: 2px; }
+
+/* n°5 : récompense d'un palier pas encore atteint : carte ET diamant grisés, petit cadenas posé
+   à cheval sur le coin bas droit (il ne cache plus le chiffre). */
+.asc-carte.asc-carte--verrou .asc-carte__diamant { -unity-background-image-tint-color: #B8B4C8; }
+.asc-carte .cadenas { width: 34px; height: 40px; right: -12px; bottom: -12px; }
+.asc-carte .cadenas__anse { width: 22px; height: 16px; border-width: 4px; border-color: #6E6A84; }
+.asc-carte .cadenas__corps { width: 34px; height: 28px; margin-top: -2px; border-radius: 6px; background-color: #6E6A84; border-width: 3px; border-color: #110D1F; }
+
+/* n°6 : Boutique, haut des cartes plus franc ; bouton gris lisible ; mini-jauge de ce qui manque. */
+.boutique-page .bq7-titre-carte { font-size: 30px; -unity-text-outline-width: 0; text-shadow: 0 3px 0 rgba(17, 13, 31, 0.55); }
+.bq7-jauge { background-color: rgba(17, 13, 31, 0.30); border-width: 3px; border-color: #110D1F; }
+.boutique-page .bq7-jauge .bq7-jauge__texte {
+    align-self: center; height: 22px; padding: 0 8px; border-radius: 11px; background-color: rgba(255, 255, 255, 0.85);
+    font-size: 19px; color: #2A2440;
+}
+.bq7-recompense { background-color: rgba(17, 13, 31, 0.50); }
+.btn.bulle-rect:disabled .bulle-rect__texte { color: rgba(255, 255, 255, 0.85); }
+.btn.bulle-rect:disabled .coin, .btn.bulle-rect:disabled .diamant { opacity: 0.7; }
+.bq7-manque { width: 300px; height: 10px; border-radius: 5px; align-self: center; margin-top: 6px; background-color: rgba(17, 13, 31, 0.25); overflow: hidden; }
+.bq7-manque__plein { position: absolute; left: 0; top: 0; bottom: 0; background-color: #7FE3FF; border-radius: 5px; }
+.btq-card.bq7-carte { height: 486px; }
+
+/* n°7 : Inventaire, les deux badges de bonus séparés dans la case (pièces à gauche, diamants à droite). */
+.casier-badge-bonus { left: 6px; bottom: 8px; height: 26px; padding: 0 6px 0 4px; border-radius: 13px; background-color: rgba(17, 13, 31, 0.78); }
+.casier-badge-bonus__piece { width: 16px; height: 16px; }
+.casier-badge-bonus__texte { font-size: 15px; }
+.casier-case__diamant { right: 6px; bottom: 8px; height: 26px; padding: 0 6px; border-radius: 13px; font-size: 15px; color: #7FE3FF; background-color: rgba(17, 13, 31, 0.78); -unity-text-align: middle-center; }
+
+/* n°8 : couloir de gauche de L'Ascension : pastilles Ø 58 pour les étages ordinaires. */
+.asc-pastille {
+    position: absolute; align-items: center; justify-content: center; border-radius: 29px;
+    background-color: rgba(17, 13, 31, 0.45); border-width: 3px; border-color: #110D1F;
+}
+.asc-pastille.asc-pastille--atteint { border-color: #FFD54A; }
+.asc-pastille .asc-medaillon__texte { font-size: 30px; color: #FFFFFF; -unity-text-outline-width: 0; text-shadow: 0 2px 0 #110D1F; }
+.asc-pastille.asc-pastille--inexplore .asc-medaillon__texte { color: rgba(217, 210, 240, 0.7); }
+.asc-cran { left: 33px; }
+
+/* n°9 : le ruban sur le flanc de sa dalle : 80 px de haut, texte 32 px. */
+.asc-ruban { height: 80px; }
+.asc-ruban__texte { font-size: 32px; }
+
+/* n°10 : barre compacte de la carte d'étage : gain 40 px, puis petites infos 24 px séparées par un point. */
+.recap-bar.rc7-barre { height: 72px; padding: 0 28px; }
+.coin.rc7-barre__piece { width: 40px; height: 40px; }
+.rc7-barre__gain { font-size: 40px; -unity-text-outline-width: 0; text-shadow: 0 3px 0 #3A2200; }
+.rc7-barre__parties { flex-direction: row; align-items: center; }
+.rc7-barre__point { width: 6px; height: 6px; border-radius: 3px; background-color: rgba(255, 255, 255, 0.5); margin: 0 10px; }
+.rc7-barre .rc7-barre__texte { font-size: 24px; color: rgba(255, 255, 255, 0.9); }
+
+/* n°11 : Échanges, grille plus aérée et rubans d'angle lisibles. */
+.bq7-ech-cartes { justify-content: space-between; }
+.ech-carte.bq7-ech-carte { width: 257px; height: 270px; margin: 0 0 24px 0; padding: 12px; flex-shrink: 1; }
+.ech-image.bq7-ech-image { height: 110px; }
+.bq7-ech-ruban { width: 150px; height: 38px; top: 18px; right: -40px; rotate: 45deg; background-color: #2FB35A; border-width: 0; border-bottom-width: 3px; border-color: #1E6E3E; }
+.boutique-page .bq7-ech-ruban__texte { font-size: 20px; text-shadow: 0 2px 0 #1E6E3E; }
+.boutique-page .bq7-ech-gain__texte { font-size: 40px; }
+
+/* n°12 : Index, plus de pilule « Pas encore » : nom et taux à 75 % pour les objets non obtenus,
+   pictogramme « pas encore vu » 32 px dans le coin pour les objets jamais vus. */
+.tile-card--absent .item-name, .tile-card--absent .item-extra { opacity: 0.75; }
+.tile-box.tile-box--pas-vu { width: 32px; height: 32px; border-width: 0; background-color: rgba(0, 0, 0, 0); -unity-background-scale-mode: scale-to-fit; }
+/* V7.1, réglages après vérification en jeu */
+.asc-losanges.asc-losanges--nuit { opacity: 0.15; }
+.asc-carte.asc-carte--verrou { background-image: none; background-color: #A9A4BD; opacity: 0.9; }
+/* La case de 122 px est trop étroite pour deux pilules côte à côte : celle des diamants monte
+   juste au-dessus de celle des pièces (toujours à droite). */
+.casier-case__diamant { bottom: 38px; }
+.rc7-barre__gain { font-size: 48px; }

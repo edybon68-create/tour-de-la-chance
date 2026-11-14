@@ -509,6 +509,17 @@ namespace TourDeLaChance
             }
             foreach (var c in new[] { "btn", "bulle", "bulle-rect", "bulle-rect--vert", "btq-open", "bq7-ouvrir" }) open.AddToClassList(c);
             card.Add(open);
+            // V7.1 n°6 : pas assez ? une mini-jauge sous le bouton gris montre combien il manque, sans phrase.
+            if (!locked && !Shop.CanOpen(box) && box.price > 0)
+            {
+                var need = new VisualElement { pickingMode = PickingMode.Ignore };
+                need.AddToClassList("bq7-manque");
+                var have = new VisualElement { pickingMode = PickingMode.Ignore };
+                have.AddToClassList("bq7-manque__plein");
+                have.style.width = Length.Percent(100f * Mathf.Clamp01((box.price - Shop.MissingAmount(box)) / (float)box.price));
+                need.Add(have);
+                card.Add(need);
+            }
             return card;
         }
 
