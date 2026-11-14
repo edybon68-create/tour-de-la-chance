@@ -815,3 +815,15 @@
    juste au-dessus de celle des pièces (toujours à droite). */
 .casier-case__diamant { bottom: 38px; }
 .rc7-barre__gain { font-size: 48px; }
+
+/* =====================================================================
+   14. Restes du QA phase 4
+   ===================================================================== */
+/* Inventaire : pilule des diamants en haut à gauche de la case (plus sur le cheval). */
+.casier-case__diamant { top: 6px; left: 6px; right: auto; bottom: auto; }
+.casier-case__nombre.casier-case__nombre--bas { top: 36px; }
+/* L'Ascension : « Ma position » SOUS la bordure, en haut au centre de la route (plus rien à cheval). */
+.btn.asc-ma-position7 { top: 14px; right: auto; left: 50%; translate: -50% 0; }
+/* Améliorations : l'image « Coffre en plus » a moins de marge autour de l'objet : on l'agrandit
+   pour qu'elle pèse autant que la bourse et le coffre précieux. */
+.up7-heros__icone.up7-heros__icone--pieges { scale: 1.35 1.35; }

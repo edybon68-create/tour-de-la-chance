@@ -469,10 +469,17 @@ namespace TourDeLaChance
             var box = Box("casier-case case--" + RarityClass(item), PickingMode.Ignore);
             box.Add(ShopUi.Visual(item, ShopUi.Look.Normal, "casier-case__visuel"));
             int count = Shop.CountOf(item);
-            if (count >= 2) box.Add(ShopUi.NewLabel("×" + count, "casier-case__nombre"));
+            int diamondBonus = Shop.DiamondBonusPercentOf(item);
+            // QA phase 4 : la pilule des diamants passe dans le coin HAUT gauche (elle ne se pose
+            // plus sur le cheval) ; le compteur « ×2 » descend alors juste en dessous.
+            if (count >= 2)
+            {
+                var number = ShopUi.NewLabel("×" + count, "casier-case__nombre");
+                if (diamondBonus > 0) number.AddToClassList("casier-case__nombre--bas");
+                box.Add(number);
+            }
             int bonus = Shop.BonusPercent(item);
             if (bonus > 0) box.Add(BonusBadge(bonus, "casier-badge-bonus"));
-            int diamondBonus = Shop.DiamondBonusPercentOf(item);
             if (diamondBonus > 0) box.Add(ShopUi.NewLabel($"{ShopUi.Diamant}+{diamondBonus} %", "casier-case__diamant"));
             if (item.RarityId == "secret")
             {

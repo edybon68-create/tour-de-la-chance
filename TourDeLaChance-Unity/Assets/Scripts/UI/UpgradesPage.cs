@@ -147,7 +147,7 @@ namespace TourDeLaChance
             rays.AddToClassList("up7-heros__rayons");
             rays.Configure(10, new Color(1f, 1f, 1f, 0.30f));
             hero.Add(rays);
-            var icon = Icon("up7-heros__icone");
+            var icon = Icon("up7-heros__icone up7-heros__icone--" + def.id); // QA phase 4 : réglage de taille par image
             if (def.icon != null) icon.style.backgroundImage = new StyleBackground(def.icon);
             hero.Add(icon);
             floaters.Add((icon, rays, floaters.Count * 0.8f));

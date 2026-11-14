@@ -439,3 +439,25 @@ La V7 est **presque prête**. Les corrections de la phase 2 tiennent, et je n'ai
 **Un seul point bloquant** : le chevauchement des pastilles de la vitrine (n° 1 ci-dessus), une ligne de style à corriger. Le point 9 reste **décoché** jusqu'à cette correction. Le reste est mineur et peut attendre.
 - 14/11 soir (unity-dev) : QA phase 3 corrigée (pastilles de la vitrine, « Ma position », Retour, Index, faisceau moins coloré, baleine dans le cadre, navire plus opaque, nœud papillon et perroquet). Mémoire : le HUD ne refabrique plus ses textes à chaque image ; le reste des allocations mesurées en mode Play (environ 9,5 Ko par image) vient de l'éditeur, pas de nos scripts (mesure identique jeu en pause et scripts coupés un par un).
 - 14/11 22h40 : polissage V7.1 fait (e0597e9 + 779e688). Toute la liste est cochée. Pour les reprises suivantes jusqu'au 15/11 au soir : alterner (1) une passe QA rapide en jeu sur les écrans modifiés (2) une passe DA de polissage → nouvelle petite liste « Polissage V7.x » → unity-dev / artiste-3d. Rester économe en crédits ; si rien de significatif n'est trouvé, ne rien relancer.
+
+## QA phase 4 (polissage V7.1, 14/11/2026)
+
+> En mode Play sur f1c595f, en 1280 × 720 et en 1920 × 1080. Son coupé. Sauvegarde copiée dans
+> `TourDeLaChance-sauvegardes/qa4_20261114_2227/`, puis restaurée et vérifiée identique. Play arrêté.
+> Captures : `docs/captures/qa_v7p4_*.png`.
+
+**Aucune régression.**
+- **Pilules de la vitrine corrigées** : « +10 % de pièces » et « 💎 +15 % » passent proprement à la ligne (`qa_v7p4_invOr_1280.png`, `_1920.png`). Le point bloquant de la phase 3 est levé.
+- **Bons dans les deux tailles** :
+  - L'Ascension : nuit, étage du joueur, paliers verrouillés grisés, couloir, ruban « En plein jour » ;
+  - Améliorations, avec la nouvelle image « Coffre en plus » ;
+  - Boutique : cartes et échanges ;
+  - Index (« ? » pour les objets pas encore vus) ;
+  - barre compacte.
+
+Restes mineurs, qui peuvent attendre :
+1. [x] *(corrigé 14/11 : pilule des diamants en haut à gauche ; `v71_qa4_inventaire.png`)* **Inventaire, case d'un skin à double bonus** : la pastille « 💎 +15 % » est posée sur le cheval de la vignette, au-dessus de « +10 % » (`qa_v7p4_invOr_1280.png`, case Or maudit).
+2. [x] *(corrigé 14/11 : sous la bordure, en haut au centre de la route ; `v71_qa4_ascension_haut*.png`)* **L'Ascension** : « Ma position » est toujours à cheval sur la bordure du haut de la fenêtre (`qa_v7p4_ascHaut_1280.png`).
+3. [x] *(corrigé 14/11 : affichée à 135 % ; `v71_qa4_ameliorations_1920.png`)* **Améliorations** : l'image « Coffre en plus » est petite et se lit moins bien que la bourse et le coffre précieux voisins (`qa_v7p4_amel_1920.png`).
+
+**Verdict** : la V7.1 est prête. Le point 9 peut être coché.
