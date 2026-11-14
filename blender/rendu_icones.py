@@ -430,6 +430,22 @@ ICONES = {
     # « Coffres précieux » (spec v3 §854) : le coffre de diamant entrouvert, lueur dorée dedans
     "amelioration_coffres": dict(source=("module", "coffre_diamant"), ouvrir=45,
                                  lueur="#FFC83D", elevation=32, largeur=0.72),
+    # V7, point 15 : icônes NEUTRES des 3 catégories de boîtes (blender/objets_icones_v7.py)
+    "categorie_classiques": dict(source=("fonction", "objets_icones_v7.construire_categorie_classiques"),
+                                 elevation=12, rotation=15),
+    "categorie_pirates": dict(source=("fonction", "objets_icones_v7.construire_categorie_pirates"),
+                              elevation=15, rotation=10, largeur=0.84),
+    "categorie_animaux": dict(source=("fonction", "objets_icones_v7.construire_categorie_animaux"),
+                              elevation=12, rotation=15),
+    # V7, lots d'échange (docs/specs/v7.md §1) : la quantité de pièces grandit de l'un à l'autre
+    "echange_poignee": dict(source=("fonction", "objets_icones_v7.construire_echange_poignee"), elevation=30, hauteur=0.50),
+    "echange_pochette": dict(source=("fonction", "objets_icones_v7.construire_echange_pochette"), elevation=25, hauteur=0.58),
+    "echange_sac": dict(source=("fonction", "objets_icones_v7.construire_echange_sac"), elevation=25, hauteur=0.64),
+    "echange_seau": dict(source=("fonction", "objets_icones_v7.construire_echange_seau"), elevation=28, hauteur=0.68),
+    "echange_coffre": dict(source=("fonction", "objets_icones_v7.construire_echange_coffre"), elevation=28, hauteur=0.70),
+    "echange_malle": dict(source=("fonction", "objets_icones_v7.construire_echange_malle"), elevation=28, largeur=0.82),
+    "echange_tonneau": dict(source=("fonction", "objets_icones_v7.construire_echange_tonneau"), elevation=28, rotation=30, largeur=0.84),
+    "echange_montagne": dict(source=("fonction", "objets_icones_v7.construire_echange_montagne"), elevation=22, largeur=0.86),
 }
 
 

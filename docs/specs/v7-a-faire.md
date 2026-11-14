@@ -60,6 +60,7 @@
 
 ## Journal de travail autonome
 <!-- Une ligne par session : date, ce qui est fait, commit. -->
+- 14/11 : artiste 3D, points 12 (intérieur des coffres, f6237b2), 15 (3 icônes de catégories + 8 images d'échange) et 17 en cours (planches de comparaison, 13 accessoires refaits en 2 lots, notes skins, lot 10 de prompts) ; commits f6237b2, 1209966, b01ab97 et suivant.
 - 14/11 : 17 textures de skins dessinées (point 10), branchement à faire par le programmeur.
 - 14/11 : revue des modèles 3D (point 8 et QA 18) : 12 modèles corrigés, icône kraken rendue dans Blender ; commits 7a188b4, a9bc6ee, a71dff4, be13f17.
 - 13/11 : détourages refaits (QA 1 à 5, 8, 9) et icônes des coffres rendues dans Blender ; mipmaps à faire (Unity en mode Play).
@@ -194,9 +195,16 @@
     - **Échanges** : plus de packs, avec **réduction sur les gros** (plus de pièces par diamant), en restant raisonnable (pas « broken ») ; remplir l'espace ;
     - **raccourci** : cliquer le compteur de diamants en haut (HUD) doit ouvrir la Boutique sur la section Diamants (packs + échanges) ;
     - **icônes des 3 catégories** de boîtes (Classiques, Pirates, Animaux) : en générer de **neutres** (ni skin ni accessoire), une par catégorie ;
+      *(14/11 : faites, rendues dans Blender : `categorie_classiques` (étoile de fête dorée), `categorie_pirates` (carte au trésor roulée), `categorie_animaux` (empreinte de patte sur une feuille), dans `Assets/Art/icones_detourees/`. Reste au programmeur à les brancher sur les onglets. Aussi : les 8 images des lots d'échange `echange_poignee` … `echange_montagne`, même famille, IconAutoBinder les relie par leur nom.)*
     - **refaire l'interface « i » / Contenu et taux** des boîtes (jugée « dégueulasse ») dans le style Casier/Renaissance.
 16. [x] *(14/11 : retirés des petits textes de la carte d'étage, des Améliorations, de la Boutique et du ×2 de L'Ascension ; gardés sur les titres et boutons ; « Aucun doublon » lisible)* **Contours noirs** : en enlever là où ils rendent le texte illisible (garder où c'est beau).
 17. [ ] **Qualité 3D (demande personnelle forte)** : beaucoup de skins/accessoires 3D sont laids et ne ressemblent pas à leur icône. Refaire les modèles au niveau de l'icône (règles ajoutées à `.claude/agents/artiste-3d.md`), et régénérer avec Gemini les icônes qui ne sont pas incroyables. Le jeu doit être parfait.
+    - *14/11, en cours* : planches icône | 3/4 | sur le cheval pour les 44 accessoires (`docs/captures/v7_qualite_accessoires_1..6.png`) et les 45 skins (`v7_qualite_skins_1..6.png`), script `blender/planche_qualite.py`.
+    - **Classement des accessoires, du pire au meilleur** : masque héros, loup corsaire, auréole, nœud papillon, perroquet, longue-vue, casquette, couronne, ailes d'ange, ancre, bandana, navire fantôme, ailes de papillon, ruche, chaton du sac, planète, cache-œil, moustaches, carapace, baleine, chapeau de fête, boussole, foulard, lunettes de soleil, bonnet, ailes de chauve-souris, truffe, écharpe renard, collier médaille, bocal, poussin, bois de cerf, sorcier, oreilles de lapin, lunettes hibou, tricorne, capitaine, écharpe, collier de fleurs, haut-de-forme, bonnet grenouille, oreilles de chat, lunettes cœur, bébé kraken.
+    - **Refaits** : lot 1 (masque héros, loup corsaire, auréole, nœud papillon, perroquet, longue-vue, casquette, couronne : `v7_qualite_lot1_avant_apres.png`), lot 2 (ailes d'ange, ailes de papillon, planète, chapeau de fête, ancre : `v7_qualite_lot2_avant_apres.png`).
+    - **Reste** : bandana (essai raté, annulé : les pois en relief à aplatir sans casser la calotte), navire fantôme (anneau d'orbite), cache-œil, carapace, baleine, puis la suite du classement. Ruche, chaton du sac, moustaches, truffe, bois de cerf et ailes de chauve-souris attendent leurs nouvelles icônes (`art/prompts/lot10.md`, à générer par le chef de projet), puis on refera le modèle d'après elles.
+    - **Skins** : corrections précises pour le programmeur dans `docs/specs/v7-textures-skins.md` (caméléon gris, métaux trop sombres, lagon, lion, grenouille, coccinelle, sucre d'orge, galaxie, tigre).
+    - Nouveaux matériaux `M7_*` (or clair, plumes) : Unity créera leurs `.mat` à l'import.
 
 > 14/11 : l'auteur adore L'Ascension et le reste de la V7 (« continue comme ça, on vise la perfection »). Il ne touchera plus à son ordinateur jusqu'à son retour : **ne lui poser aucune question**, tout décider seul, ne jamais attendre une réponse. Son mode Play ne tournera plus : l'éditeur est à nous.
 - 14/11 matin (unity-dev) : points 1-6, 10 (textures, échange, import des icônes), 11, 13-16 compilés, testés en mode Play avec captures `docs/captures/v7_*.png`, sauvegarde de l'auteur restaurée et vérifiée identique.
