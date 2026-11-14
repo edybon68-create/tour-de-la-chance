@@ -177,7 +177,7 @@ namespace TourDeLaChance
             // 3 lumières (principale chaude, contre-jour lavande, appoint doux) + la lumière
             // intérieure de la boîte (blanche avant R).
             lights.Add(NewLight("LumierePrincipale", LightType.Spot, new Color(1f, 0.945f, 0.84f), 4f, new Vector3(-1.5f, 4f, -2f), 8f, 50f));
-            lights.Add(NewLight("ContreJour", LightType.Point, new Color(0.7f, 0.62f, 1f), 2f, new Vector3(1.2f, 2.5f, 2f), 6f, 0f));
+            lights.Add(NewLight("ContreJour", LightType.Point, new Color(0.88f, 0.85f, 1f), 1.7f, /* v7 (QA p3) : moins lilas, il teintait le skin */ new Vector3(1.2f, 2.5f, 2f), 6f, 0f));
             lights.Add(NewLight("Appoint", LightType.Point, new Color(1f, 0.95f, 0.9f), 0.8f, new Vector3(2f, 1.5f, -2.5f), 7f, 0f));
             innerLight = NewLight("LumiereInterieure", LightType.Point, NeutralWhite, 0f, new Vector3(0f, 0.6f, 0f), 3f, 0f);
             lights.Add(innerLight);
@@ -553,7 +553,9 @@ namespace TourDeLaChance
                 glowColor = lit ? Rainbow(t) * 0.6f : Color.black;
             }
             SetGlow(glowColor);
-            innerLight.color = lightColor;
+            // v7 (QA phase 3) : la lumière du faisceau garde la couleur de la rareté, mais à moitié
+            // blanchie : elle ne repeint plus le skin du cheval (un « Orange » restait beige rosé).
+            innerLight.color = Color.Lerp(lightColor, Color.white, 0.5f);
             innerLight.intensity = lightIntensity;
 
             // --- Le faisceau : blanc à 1,62 (0 → 3,5 m en 0,13 s), puis couleur de rareté ---

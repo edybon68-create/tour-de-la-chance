@@ -192,11 +192,16 @@ namespace TourDeLaChance
             DrawCounters();
         }
 
+        // v7 (QA phase 3, performances) : on ne refabrique le texte que si le nombre a changé.
+        // Avant, deux textes neufs étaient créés à CHAQUE image : de la mémoire jetée en continu,
+        // que le ramasse-miettes devait ensuite nettoyer (le pic de 45 ms à chaque étage).
+        int shownPot = int.MinValue, shownWallet = int.MinValue;
+
         void DrawCounters()
         {
             // v6 (QA n°47) : séparateur de milliers (« 11 992 » au lieu de « 11992 »).
-            potLabel.text = $"Cagnotte : {ShopUi.Thousands(pot.Displayed)}";
-            walletLabel.text = $"Porte-monnaie : {ShopUi.Thousands(wallet.Displayed)}";
+            if (pot.Displayed != shownPot) { shownPot = pot.Displayed; potLabel.text = $"Cagnotte : {ShopUi.Thousands(shownPot)}"; }
+            if (wallet.Displayed != shownWallet) { shownWallet = wallet.Displayed; walletLabel.text = $"Porte-monnaie : {ShopUi.Thousands(shownWallet)}"; }
         }
 
         /// Les boutons : chacun apparaît avec son animation quand il devient utile (§3.10).

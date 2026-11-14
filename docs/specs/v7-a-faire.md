@@ -38,7 +38,7 @@
    - *Fait le 13/11* : nouvelle méthode de détourage (pente + ombre sous l'objet + matting), 27 icônes rendues dans Blender avec leur transparence exacte (`art/icones_alpha/`), 6 icônes de coffres refaites. Reste `kraken_bebe` à régénérer (lot 9, image 5). Planches : `docs/captures/qa_v7_detourage_00.png` à `_15.png`.
 8. [x] **Revue des modèles 3D** (accessoires, skins, coffres, tour, diamant, boîtes) : meilleur rendu possible, en corrigeant les formes grossières, les matériaux plats et les placements sur le cheval.
    - *Fait le 14/11* : les 60 modèles ont été rendus sur le cheval (vues jeu, 3/4 et profil) avec `blender/revue_modeles.py`. 12 ont été corrigés : longue-vue, ancre, foulard, navire, tricorne, carapace, baleine, casquette, auréole, planète, plus la doublure des 5 coffres. Planches : `docs/captures/v7_modeles_*.png`. Aucun `attachOffset` à changer.
-9. [ ] **Inspection QA complète**, puis ajout de ses trouvailles à cette liste et correction.
+9. [x] *(14/11 : phases 1 à 3 faites ; point bloquant de la phase 3 corrigé : pastilles de la vitrine sur deux lignes sans chevauchement)* **Inspection QA complète**, puis ajout de ses trouvailles à cette liste et correction.
 10. [ ] **Restes connus** :
     - particules des objets rares ; *(14/11 : fumée de l'Or maudit, bulles du Lagon, gouttes du Kraken, réserve créée d'avance, moitié en Faible ; puis accessoires : traînée de la baleine, brume et salve du navire, bulles du bocal, encre du bébé kraken, escarbilles du Lion)*
     - réactions après un piège ; *(14/11 : petit tremblement après l'écrasement, APRÈS la révélation)*
@@ -305,3 +305,58 @@
 17. [x] *(corrigé 14/11)* **Classement** : « Classement local » écrit deux fois (bandeau du haut et bas de la fenêtre).
     - *Capture* : `qa_v7p2_classement_1280.png`.
 18. [x] *(corrigé 14/11 : règle retirée)* **Avertissement USS** : `:last-child` n'est pas reconnu par UI Toolkit, donc la règle ne fait rien (`UI/V65.uss:48`, « Unknown pseudo class "last-child" » dans la console).
+
+## QA phase 3 (vérification finale V7, 14/11/2026)
+
+> En mode Play sur le commit 9ef4d97, en 1280 × 720. Mute Audio activé, aucun son. Sauvegarde copiée dans
+> `TourDeLaChance-sauvegardes/qa3_20261114_1719/`, puis restaurée par Unity : elle est vérifiée identique. Play arrêté.
+> Console : 0 erreur. Captures : `docs/captures/qa_v7p3_*.png`.
+
+### Les trouvailles de la phase 2, revérifiées en jeu
+- **Corrigé** :
+  - n° 1, « Améliorations » de la Renaissance tient sur une ligne ;
+  - n° 2, titres des boîtes sur une ligne en 1280 × 720 (pas recontrôlé en 1920 × 1080) ;
+  - n° 3, le Classement montre « étage 8 » en tête, comme le record ;
+  - n° 4, Argent et Or massif sans taches brunes ;
+  - n° 5, images de catégories et d'échange branchées ;
+  - n° 6, carte du palier 30 entière, lueur douce sous le cheval, numéros d'étage plus grands ;
+  - n° 9, « Bientôt disponible » ne cache plus les packs ;
+  - n° 12, note du bas lisible et légende des barres « Avant / Après » ;
+  - n° 13, « Reprise 1 sur 5 » lisible ;
+  - n° 14, « version 7 » ;
+  - n° 17, « Classement local » n'est plus en double dans le bandeau.
+- **Reste** (mineur, sans gravité) :
+  - « Ma position » posée sur la bordure de L'Ascension ;
+  - « Retour » toujours petit dans Contenu et taux ;
+  - textes des cartes de l'Index toujours petits ;
+  - le faisceau d'ouverture teinte le skin (le skin « Orange » paraît beige rosé) ;
+  - « Tu gardes tout le reste ! » vert sur blanc.
+- **Non revérifié** : n° 7 (fenêtre « i » de L'Ascension), n° 8 « Avec cet objet » (couleur), n° 18 (`:last-child`).
+
+### Nouvelles trouvailles
+1. **Important : pastilles qui se chevauchent dans la vitrine de l'Inventaire** pour les skins qui ont un bonus de diamants (testé avec « Or maudit » : « Légendaire », « +10 % de pièces », « 💎 +15 % »). La pastille des pièces est écrasée, et son texte passe sous la pastille des diamants.
+   - *Cause probable* : `.casier-pilule` (`UI/V65.uss:264`) n'a pas `flex-shrink: 0`. Les pastilles rétrécissent au lieu de passer à la ligne, alors que `flex-wrap: wrap` est prévu (`V65.uss:263`).
+   - *Capture* : `qa_v7p3_inventaire_1280.png`.
+2. **Mineur : la baleine céleste sort du cadre de la vitrine** (en haut à droite, coupée à moitié).
+   - *Capture* : `qa_v7p3_accessoires_cheval.png` (dernière case) et `qa_v7p3_inventaire_1280.png`.
+3. **Mineur, accessoires refaits vus sur le cheval** (`qa_v7p3_accessoires_cheval.png`) :
+   - bons : masques héros et corsaire, couronne, bois de cerf, moustaches, chaton dans son sac, ruche ;
+   - nœud papillon minuscule, qui ressemble à une petite goutte rouge sous le museau ;
+   - perroquet accroché sur le côté de la tête, qui rentre un peu dedans ;
+   - navire fantôme très pâle, qui se lit mal (on dirait un glaçon).
+4. **Skins texturés** : Lagon, Grenouille, Caméléon, Coccinelle et Sucre d'orge sont beaux et lisibles, Argent, Or massif et Blanc nacré sont propres.
+   - *Capture* : `qa_v7p3_skins_textures.png`.
+
+### Performances (point 10)
+- **Mesure** : 1er étage forcé à 6 coffres (`ChestTrial.Begin(…, 6, …)`), skin Or maudit (fumée) avec bébé kraken et baleine céleste (particules). Profiler sur 2 000 images couvrant le choix, le suspense et la révélation, dans l'éditeur.
+- **Graphismes Moyen** : jeu seul (`PlayerLoop`) en moyenne **2,4 ms**, 99 % des images sous **5,1 ms**, maximum **47,1 ms**, 0 image au-dessus de 50 ms.
+- **Graphismes Élevé** : moyenne 2,7 ms, 99 % sous 5,5 ms, maximum 47,9 ms, 0 au-dessus de 50 ms.
+- **Le seul pic** (environ 45 ms, une fois par étage) est un passage du ramasse-miettes (`GarbageCollector.CollectIncremental`) : une pause où Unity libère la mémoire inutilisée.
+  - Les autres pics de l'image complète (jusqu'à 144 ms) viennent de l'éditeur (`EditorLoop`), au moment des commandes de test. Ils n'existeront pas dans le jeu final.
+  - **Cible tenue** (aucune image de jeu au-dessus de 50 ms), mais avec peu de marge. Piste : réduire ce que le jeu fabrique et jette en mémoire pendant la révélation (à regarder au Profiler, colonne « GC Alloc »).
+
+### Verdict
+La V7 est **presque prête**. Les corrections de la phase 2 tiennent, et je n'ai vu aucune autre régression sur les écrans revus. Les performances sont dans la cible.
+
+**Un seul point bloquant** : le chevauchement des pastilles de la vitrine (n° 1 ci-dessus), une ligne de style à corriger. Le point 9 reste **décoché** jusqu'à cette correction. Le reste est mineur et peut attendre.
+- 14/11 soir (unity-dev) : QA phase 3 corrigée (pastilles de la vitrine, « Ma position », Retour, Index, faisceau moins coloré, baleine dans le cadre, navire plus opaque, nœud papillon et perroquet). Mémoire : le HUD ne refabrique plus ses textes à chaque image ; le reste des allocations mesurées en mode Play (environ 9,5 Ko par image) vient de l'éditeur, pas de nos scripts (mesure identique jeu en pause et scripts coupés un par un).

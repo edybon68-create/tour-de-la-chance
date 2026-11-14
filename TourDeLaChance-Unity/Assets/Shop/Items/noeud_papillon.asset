@@ -26,11 +26,12 @@ MonoBehaviour:
   smoothness: 0.3
   accessoryPrefab: {fileID: 919132149155446097, guid: 9dcb250a66ac640798e1dd1241781dfd, type: 3}
   animation: 0
-  attachOffset: {x: 0, y: 0, z: 0}
-  attachScale: 1
+  attachOffset: {x: 0, y: 0, z: -0.04}
+  attachScale: 1.4
   flavorText: "Toujours pr\xEAt pour un mariage."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 0

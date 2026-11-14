@@ -29,6 +29,7 @@ namespace TourDeLaChance
         int ticksToPlay;
         float tickTimer;
         float pulseTime = -1f;
+        int shownCount = int.MinValue;
 
         /// Le compteur est-il visible ? (pour les tests)
         public bool IsVisible => counter.resolvedStyle.display == DisplayStyle.Flex;
@@ -108,7 +109,8 @@ namespace TourDeLaChance
         void Update()
         {
             rolling.Tick(Time.deltaTime);
-            label.text = ShopUi.Thousands(rolling.Displayed);
+            // v7 (performances) : un texte neuf seulement quand le nombre change.
+            if (rolling.Displayed != shownCount) { shownCount = rolling.Displayed; label.text = ShopUi.Thousands(shownCount); }
             // Un « tink » par diamant ajouté, répartis sur les 0,4 s du défilement.
             if (ticksToPlay > 0)
             {

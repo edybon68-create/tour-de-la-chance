@@ -701,3 +701,22 @@
 .up7-effet { height: 136px; margin-top: 12px; }
 /* v7 point 10 : numéros d'étage de L'Ascension encore un peu plus grands. */
 .asc-numero { font-size: 46px; height: 60px; -unity-text-outline-width: 4px; }
+
+/* =====================================================================
+   12. Corrections du QA (V7, phase 3)
+   ===================================================================== */
+/* Point bloquant : les pastilles de la vitrine ne rétrécissent plus et passent à la ligne. */
+.casier-fiche__pilules { flex-wrap: wrap; }
+.casier-pilule { flex-shrink: 0; margin-bottom: 6px; }
+/* « Ma position » bien dans la bande de titre, sans toucher la bordure de la route. */
+.btn.asc-ma-position7 { top: -60px; height: 40px; border-bottom-width: 6px; }
+/* « Retour » de « Contenu et taux » plus grand. */
+.boutique-page .btn.btq-back { font-size: 28px; height: 60px; min-width: 190px; padding: 0 22px; }
+/* Index : textes des cartes plus grands. */
+.tile-card .item-name { font-size: 20px; }
+.tile-card .item-extra { font-size: 21px; }
+.tile-card .bonus-badge { font-size: 19px; }
+/* « Ma position » : plus petite, centrée dans la bande de 60 px (9 px d'air en haut et en bas). */
+.btn.asc-ma-position7 { top: -51px; height: 34px; border-bottom-width: 6px; }
+.asc-ma-position7__icone { top: -10px; width: 40px; height: 40px; }
+.asc-ma-position7__texte { font-size: 20px; }

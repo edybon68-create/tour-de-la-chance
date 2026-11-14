@@ -27,10 +27,11 @@ MonoBehaviour:
   accessoryPrefab: {fileID: 919132149155446097, guid: 350901438a0c14159a52de99e3d8ecd1, type: 3}
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
-  attachScale: 1
+  attachScale: 0.75
   flavorText: "Elle chante entre les \xE9toiles."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 0
