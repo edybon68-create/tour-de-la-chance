@@ -247,6 +247,15 @@ namespace TourDeLaChance
             e.AddToClassList("pas-vu");
             e.style.width = size;
             e.style.height = size;
+            // v7 (point 10) : l'image dessinée par le DA (pas_encore_vu.png) si elle est là ; sinon
+            // le jeton dessiné par le code, teinté de la rareté (repli).
+            var picture = UiImages.PasEncoreVu;
+            if (picture != null)
+            {
+                e.style.backgroundImage = new StyleBackground(picture);
+                e.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
+                return e;
+            }
             Color tint = rarity != null ? rarity.color : new Color(0.6f, 0.6f, 0.7f);
             e.generateVisualContent += ctx => DrawNotSeen(ctx, tint);
             return e;

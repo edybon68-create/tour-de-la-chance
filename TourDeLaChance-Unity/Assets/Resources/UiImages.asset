@@ -31,3 +31,4 @@ MonoBehaviour:
   categorieClassiques: {fileID: 21300000, guid: af3c7b261f99b4536933123d48450952, type: 3}
   categoriePirates: {fileID: 21300000, guid: d9a039973a686454da56fff7b4b4d4e1, type: 3}
   categorieAnimaux: {fileID: 21300000, guid: 6fd48dde963994758a0403d38dbc2a33, type: 3}
+  pasEncoreVu: {fileID: 21300000, guid: f6c428dd107e645b298b49fa7295ff24, type: 3}

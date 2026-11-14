@@ -39,14 +39,14 @@
 8. [x] **Revue des modèles 3D** (accessoires, skins, coffres, tour, diamant, boîtes) : meilleur rendu possible, en corrigeant les formes grossières, les matériaux plats et les placements sur le cheval.
    - *Fait le 14/11* : les 60 modèles ont été rendus sur le cheval (vues jeu, 3/4 et profil) avec `blender/revue_modeles.py`. 12 ont été corrigés : longue-vue, ancre, foulard, navire, tricorne, carapace, baleine, casquette, auréole, planète, plus la doublure des 5 coffres. Planches : `docs/captures/v7_modeles_*.png`. Aucun `attachOffset` à changer.
 9. [x] *(14/11 : phases 1 à 3 faites ; point bloquant de la phase 3 corrigé : pastilles de la vitrine sur deux lignes sans chevauchement)* **Inspection QA complète**, puis ajout de ses trouvailles à cette liste et correction.
-10. [ ] **Restes connus** :
+10. [x] *(14/11 : tous les restes faits ; mesure au Profiler faite par le QA en phase 3)* **Restes connus** :
     - particules des objets rares ; *(14/11 : fumée de l'Or maudit, bulles du Lagon, gouttes du Kraken, réserve créée d'avance, moitié en Faible ; puis accessoires : traînée de la baleine, brume et salve du navire, bulles du bocal, encre du bébé kraken, escarbilles du Lion)*
     - réactions après un piège ; *(14/11 : petit tremblement après l'écrasement, APRÈS la révélation)*
     - révélation propre à chaque Secret ; *(14/11 : tentacules du Kraken, écran sombre des Abysses, lever de soleil du Lion, bulles et baleine)*
     - textures dessinées des skins ; *(14/11 : 17 textures branchées, carte de lumière comprise ; `v7_fiche_animal_tigre.png`, `v7_fiche_pirate_or_maudit.png`)*
     - animation de l'échange (pièces volantes) ; *(14/11 : 10 pièces en 1,3 s, décalées, « tic » du solde à chaque arrivée)*
-    - pictogramme « pas encore vu » de l'Index ; *(14/11 : icône `pas_encore_vu.png` rendue dans Blender — gros « ? » violet en vinyle sur un socle cerclé d'or, lisible à 96 px sur fond sombre — dans `Assets/Art/icones_detourees/` ; reste au programmeur à remplacer le « ? » dessiné par le code)*
-    - mesure des performances au Profiler.
+    - pictogramme « pas encore vu » de l'Index ; *(14/11 : image `pas_encore_vu.png` branchée par `UiImages`, repli sur le jeton dessiné ; `v7p6_index_*.png`)* *(14/11 : icône `pas_encore_vu.png` rendue dans Blender — gros « ? » violet en vinyle sur un socle cerclé d'or, lisible à 96 px sur fond sombre — dans `Assets/Art/icones_detourees/`)*
+    - mesure des performances au Profiler. *(14/11 : QA phase 3, 99 % des images sous 5,1 ms)*
 11. [x] *(14/11 : §17.5, puis retour 13)* **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
 
 ## Règles de sécurité (toujours)

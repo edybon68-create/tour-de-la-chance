@@ -49,6 +49,8 @@ namespace TourDeLaChance
         public Sprite categorieClassiques;
         public Sprite categoriePirates;
         public Sprite categorieAnimaux;
+        [Tooltip("pas_encore_vu.png (v7) : le pictogramme « pas encore vu » de l'Index. Vide = le jeton dessiné par le code.")]
+        public Sprite pasEncoreVu;
 
         static UiImages instance;
         static bool searched;
@@ -80,6 +82,7 @@ namespace TourDeLaChance
         public static Sprite CategorieClassiques => Get != null ? Get.categorieClassiques : null;
         public static Sprite CategoriePirates => Get != null ? Get.categoriePirates : null;
         public static Sprite CategorieAnimaux => Get != null ? Get.categorieAnimaux : null;
+        public static Sprite PasEncoreVu => Get != null ? Get.pasEncoreVu : null;
         /// Le nuage n° 1, 2 ou 3 (null = le dessiner).
         public static Sprite Nuage(int n) => Get == null ? null : n == 1 ? Get.nuage1 : n == 2 ? Get.nuage2 : Get.nuage3;
 
@@ -108,6 +111,7 @@ namespace TourDeLaChance
                 case "categorie_classiques": return nameof(categorieClassiques);
                 case "categorie_pirates": return nameof(categoriePirates);
                 case "categorie_animaux": return nameof(categorieAnimaux);
+                case "pas_encore_vu": return nameof(pasEncoreVu);
                 default: return null;
             }
         }
