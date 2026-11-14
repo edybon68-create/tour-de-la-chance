@@ -43,7 +43,7 @@
     - particules des objets rares ;
     - réactions après un piège ;
     - révélation propre à chaque Secret ;
-    - textures dessinées des skins ;
+    - textures dessinées des skins ; *(14/11 : 17 textures 1024 px faites, `Assets/Art/SkinsTextures/`, à brancher : `docs/specs/v7-textures-skins.md`)*
     - animation de l'échange (pièces volantes) ;
     - pictogramme « pas encore vu » de l'Index ;
     - mesure des performances au Profiler.
@@ -60,6 +60,7 @@
 
 ## Journal de travail autonome
 <!-- Une ligne par session : date, ce qui est fait, commit. -->
+- 14/11 : 17 textures de skins dessinées (point 10), branchement à faire par le programmeur.
 - 14/11 : revue des modèles 3D (point 8 et QA 18) : 12 modèles corrigés, icône kraken rendue dans Blender ; commits 7a188b4, a9bc6ee, a71dff4, be13f17.
 - 13/11 : détourages refaits (QA 1 à 5, 8, 9) et icônes des coffres rendues dans Blender ; mipmaps à faire (Unity en mode Play).
 
