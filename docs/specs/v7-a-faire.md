@@ -183,3 +183,16 @@
 - Aucune icône franchement floue. `boite_skins_1` n'est qu'en 768 px, ce qui reste acceptable.
 - 14/11 02h : le code des points 1-3, 4, 5, 6 et 11 (art bible §17) est ÉCRIT par unity-dev mais NON compilé ni testé, car un mode Play étranger tourne depuis le 13/11 vers 18 h (question posée à l'auteur, ne pas l'arrêter sans son accord). Vérif hors éditeur OK (`scratchpad/check.sh`, 0 erreur). Quand le Play s'arrête : suivre le « Reste à faire » du compte rendu unity-dev (sauvegarde, recompile, showDiamondPacks + rebirthIcon par SerializedObject, captures, restauration, commits par écran). Mute Audio Unity activé, à garder.
 - 14/11 : tout ce qui pouvait se faire sans Unity est fait (détourages, lot 9, revue 3D, 17 textures de skins). À CHAQUE REPRISE : vérifier `EditorApplication.isPlaying` par `script eval`. Tant qu'il vaut vrai et que l'auteur n'a pas répondu, ne rien relancer de coûteux. Dès qu'il vaut faux : relancer unity-dev (agent du 13/11) pour compiler, brancher (showDiamondPacks, rebirthIcon, textures de skins selon `v7-textures-skins.md`, mipmaps : IconAutoBinder force mipmapEnabled=false, à changer), tester, puis commiter par écran. Ensuite le QA phase 2.
+
+## Retours de l'auteur du 14/11 matin (captures `docs/references/v7_retour_1..8.png`)
+12. [ ] **Coffre ouvert** : l'intérieur du couvercle est jaune (coussin capitonné de la revue 3D), ça fait faux. Revenir à un intérieur sombre et propre, cohérent avec la caisse.
+13. [ ] **Carte d'étage (clic sur la barre du haut)** : plus intuitive qu'avant, MAIS il n'accroche pas au « bouton pièce » (la pilule Trésor avec la pièce) ; et revoir la **hiérarchie** : les infos du bas sont de tailles toutes différentes, c'est incohérent → tailles harmonisées, 2-3 niveaux clairs.
+14. [ ] **Améliorations** (DA parfaite) : on ne comprend pas ce que font « Coffres précieux » et « Coffre en plus » sans deviner → une phrase courte et claire visible sur la carte (ex. « Coffres plus rares = trésors plus gros », « Plus souvent un coffre de plus »). **Retirer le défilement** : tout tient sur un écran.
+15. [ ] **Boutique** :
+    - afficher le **prix** directement sur le bouton (« Ouvrir ◆ 5 », grisé si pas assez) au lieu de « Encore ◆ 1 » ;
+    - **Échanges** : plus de packs, avec **réduction sur les gros** (plus de pièces par diamant), en restant raisonnable (pas « broken ») ; remplir l'espace ;
+    - **raccourci** : cliquer le compteur de diamants en haut (HUD) doit ouvrir la Boutique sur la section Diamants (packs + échanges) ;
+    - **icônes des 3 catégories** de boîtes (Classiques, Pirates, Animaux) : en générer de **neutres** (ni skin ni accessoire), une par catégorie ;
+    - **refaire l'interface « i » / Contenu et taux** des boîtes (jugée « dégueulasse ») dans le style Casier/Renaissance.
+16. [ ] **Contours noirs** : en enlever là où ils rendent le texte illisible (garder où c'est beau).
+17. [ ] **Qualité 3D (demande personnelle forte)** : beaucoup de skins/accessoires 3D sont laids et ne ressemblent pas à leur icône. Refaire les modèles au niveau de l'icône (règles ajoutées à `.claude/agents/artiste-3d.md`), et régénérer avec Gemini les icônes qui ne sont pas incroyables. Le jeu doit être parfait.
