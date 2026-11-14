@@ -43,28 +43,32 @@ K = 0.88                      # échelle des bois (le haut reste sous 2,5 m)
 
 
 def bois(bm, s, base):
-    """Un bois (s = +1 : gauche de l'image). Renvoie les bouts des pointes et des points
-    où poser les fleurs."""
+    """Un bois (s = +1 : gauche de l'image). V7 (retour 2 du lot 6) : la nouvelle icône
+    montre des bois GROS et potelés « en main » : un tronc épais qui s'élargit en paume,
+    trois doigts ronds aux bouts crème, et une oreille de cerf caramel à la base.
+    Renvoie les bouts des doigts et le tronc (points où poser les fleurs)."""
     def P(x, y, z):
         return base + Vector((s * x, y, z)) * K
-    merrain = [P(0, 0, -0.02), P(0.06, 0.0, 0.12), P(0.17, -0.02, 0.25), P(0.29, -0.04, 0.35),
-               P(0.38, -0.03, 0.47), P(0.43, 0.0, 0.60)]
-    C.bm_tube(bm, merrain, 0.075, cotes=7, mat=0, rayons=[1.0, 0.95, 0.9, 0.82, 0.75, 0.62])
-    C.bm_sphere(bm, 0.047, merrain[-1], segments=8, anneaux=5, mat=4)   # bout crème arrondi
-    pointes = [merrain[-1]]
-    for depuis, vers, r0 in ((1, (0.10, 0.17, 0.24), 0.034), (2, (0.18, 0.04, 0.46), 0.034),
-                             (3, (0.25, 0.03, 0.55), 0.03)):
-        a = merrain[depuis]
+    # tronc épais (Ø 22 cm à la base) qui monte en s'écartant
+    tronc = [P(0, 0, -0.03), P(0.05, 0.0, 0.12), P(0.12, -0.01, 0.26), P(0.18, -0.01, 0.36)]
+    C.bm_tube(bm, tronc, 0.11, cotes=9, mat=0, rayons=[1.0, 0.95, 0.95, 1.05])
+    # paume : une boule aplatie au sommet du tronc
+    paume = tronc[-1]
+    A.bm_ellipsoide(bm, paume, (0.15 * K, 0.10 * K, 0.11 * K), segments=10, anneaux=6, mat=0)
+    # trois doigts ronds et courts, chacun terminé par un bout crème
+    pointes = []
+    for vers in ((-0.02, 0.0, 0.58), (0.22, -0.01, 0.64), (0.42, 0.0, 0.46)):   # doigts en éventail
         b = P(*vers)
-        mid = a.lerp(b, 0.5) + Vector((0, 0, 0.03))
-        C.bm_tube(bm, [a, mid, b], r0 * 1.5, cotes=7, mat=0, rayons=[1.0, 0.9, 0.75])
-        C.bm_sphere(bm, r0 * 1.5 * 0.75, b, segments=8, anneaux=5, mat=4)   # bout crème
+        C.bm_tube(bm, [paume, paume.lerp(b, 0.55), b], 0.075, cotes=8, mat=0,
+                  rayons=[1.0, 0.95, 0.9])
+        C.bm_sphere(bm, 0.07, b, segments=8, anneaux=5, mat=4)
         pointes.append(b)
-    # meule : bague bosselée à la base
-    meule = C.bm_tore(bm, 0.07, 0.025, segments=12, segments_tube=5, mat=0)
-    axe = (merrain[1] - merrain[0]).normalized()
-    bmesh.ops.transform(bm, matrix=A.matrice_vers(merrain[0] + axe * 0.03, axe), verts=meule)
-    return pointes, merrain
+    # oreille de cerf caramel à la base, tournée vers l'avant et le côté
+    oreille = A.matrice_vers(P(0.13, 0.04, -0.03), Vector((s * 1.0, 0.25, 0.35)), Vector((0, 1, 0)))
+    A.bm_goutte(bm, 0.24, 0.085, segments=8, bandes=((1.0, 0),), aplati=0.45, matrice=oreille)
+    A.bm_goutte(bm, 0.17, 0.05, segments=6, bandes=((1.0, 4),), aplati=0.3,
+                matrice=oreille @ Matrix.Translation((0, 0.025, 0.02)))
+    return pointes, tronc + [paume, paume]
 
 
 def fleur(nom, centre, normale, rayon=0.075):
@@ -103,14 +107,14 @@ def construire():
     C.bm_coussin(bm, cont, 0.018, 0.04, m @ Matrix.Rotation(math.radians(-50), 4, "Y"),
                  mat=2, anneaux=1)
     centre = C.U(*C.CHEVAL_ACCROCHES[POINT])
-    racine = C.piece("Bois", bm, MATS, lissage="angle", pivot=centre)
+    racine = C.piece("Bois", bm, MATS, lissage="tout", pivot=centre)   # V7 : tout lisse (potelé)
     # 3 fleurs : sur le bois gauche (2) et le droit (1), tournées vers la caméra
-    poses = [(tiges[1][2], Vector((0.25, 1, 0.3))), (tiges[1][4], Vector((0.2, 1, 0.5))),
-             (tiges[-1][3], Vector((-0.25, 1, 0.4)))]
+    poses = [(tiges[1][4] + Vector((0, 0.04, 0)), Vector((0.25, 1, 0.3))), (tiges[1][2], Vector((0.2, 1, 0.5))),
+             (tiges[-1][4] + Vector((0, 0.04, 0)), Vector((-0.25, 1, 0.4)))]
     for i, (p, n) in enumerate(poses):
         n = n.normalized()
         C.parenter(fleur(f"Anim_Fleur_{i + 1}", p + n * 0.045, n), racine)
-    for e in C.reperes_effets([toutes[0], toutes[4], toutes[2]]):
+    for e in C.reperes_effets([toutes[0], toutes[4], toutes[2]]):   # bouts des doigts
         C.parenter(e, racine)
     return C.racine_v5(NOM, POINT, [racine])
 

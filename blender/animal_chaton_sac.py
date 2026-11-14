@@ -54,7 +54,7 @@ MATS = ["M7_OsierClair", "M7_BordCreme", "M5_SangleBrune", "M5_PelageChaton", "M
         "M5_YeuxChaton", "M5_AnimNoirVerni", "M5_Reflet", "M5_DoreDeco", "M5_PelageChaton", "M7_OsierFonce"]
 BASE = (0.10, 0.70, 0.62)          # Unity : centre du fond du panier
 H_PANIER = 0.42
-GRAND = 1.22                       # V7 (lot 10) : panier et chaton 22 % plus grands (on les voit)
+GRAND = 1.6                        # V7 (retour 2) : panier et chaton bien plus grands (on les reconnaît de face)
 R_PANIER = 0.35
 
 
