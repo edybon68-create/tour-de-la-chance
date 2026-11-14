@@ -10,13 +10,14 @@ namespace TourDeLaChance
     /// ni destruction pendant le jeu), puis réutilisée :
     ///   - Fumée (Or maudit) : 12 volutes vertes qui montent de 0,5 m en 1,5 s depuis le socle ;
     ///   - Bulles (Lagon) : 10 bulles claires, une toutes les 0,3 s, qui montent le long du corps ;
-    ///   - Gouttes (Kraken) : 12 gouttes qui tombent de la tête, une toutes les 0,5 s.
+    ///   - Gouttes (Kraken) : 12 gouttes qui tombent de la tête, une toutes les 0,5 s ;
+    ///   - Escarbilles (Lion solaire) : 30 étincelles orange qui montent de la crinière.
     /// En Graphismes « Faible », deux fois moins de particules (intervalle doublé).
     /// Pur affichage, avec son propre hasard : aucune chance, aucun gain ne dépend de ceci.
     /// </summary>
     public class SkinParticles
     {
-        public enum Kind { Fumee, Bulles, Gouttes }
+        public enum Kind { Fumee, Bulles, Gouttes, Escarbilles }
 
         class P { public Transform t; public Vector3 start; public float age, size; public bool alive; }
 
@@ -40,6 +41,7 @@ namespace TourDeLaChance
                 case SkinFx.Caustiques:
                 case SkinFx.Bulles: return Kind.Bulles;
                 case SkinFx.Bioluminescence when item.Pattern == SkinPattern.Ventouses: return Kind.Gouttes;
+                case SkinFx.Chaleur: return Kind.Escarbilles;
                 default: return null;
             }
         }
@@ -52,6 +54,7 @@ namespace TourDeLaChance
             {
                 case Kind.Fumee: count = 12; interval = 0.125f; life = 1.5f; color = new Color(0.24f, 1f, 0.6f, 1f); glow = 0.8f; break;   // #3CFF9A
                 case Kind.Bulles: count = 10; interval = 0.3f; life = 2.0f; color = new Color(0.88f, 1f, 1f, 1f); glow = 0.5f; break;     // #E0FFFF
+                case Kind.Escarbilles: count = 30; interval = 0.12f; life = 1.4f; color = new Color(1f, 0.55f, 0.15f, 1f); glow = 1.2f; break;  // orange
                 default: count = 12; interval = 0.5f; life = 1.0f; color = new Color(0.55f, 0.9f, 1f, 1f); glow = 0.4f; break;
             }
             var template = GraphicsSettings.currentRenderPipeline != null ? GraphicsSettings.currentRenderPipeline.defaultMaterial : null;
@@ -107,6 +110,11 @@ namespace TourDeLaChance
                         p.t.localPosition = p.start + new Vector3(0.03f * Mathf.Sin(k * 12f), 1.2f * k, 0f);
                         p.t.localScale = Vector3.one * p.size * (k < 0.9f ? 1f : (1f - k) / 0.1f);
                         break;
+                    case Kind.Escarbilles:
+                        // L'étincelle monte de 0,7 m en tournoyant et s'éteint.
+                        p.t.localPosition = p.start + new Vector3(0.12f * Mathf.Sin(k * 9f + p.size * 90f), 0.7f * k, 0.12f * Mathf.Cos(k * 9f + p.size * 90f));
+                        p.t.localScale = Vector3.one * p.size * (1f - k);
+                        break;
                     default:
                         // La goutte tombe de la tête jusqu'au socle (accélère).
                         p.t.localPosition = p.start + Vector3.down * (1.4f * k * k);
@@ -131,6 +139,10 @@ namespace TourDeLaChance
                 case Kind.Bulles:
                     free.start = new Vector3(Mathf.Sin(angle) * 0.38f, Range(0.15f, 0.5f), Mathf.Cos(angle) * 0.38f);
                     free.size = Range(0.03f, 0.06f); // Ø 3 à 6 cm
+                    break;
+                case Kind.Escarbilles:
+                    free.start = new Vector3(Mathf.Sin(angle) * 0.3f, Range(1.3f, 1.8f), Mathf.Cos(angle) * 0.3f);
+                    free.size = Range(0.02f, 0.035f);
                     break;
                 default:
                     free.start = new Vector3(Mathf.Sin(angle) * 0.3f, Range(1.4f, 1.7f), Mathf.Cos(angle) * 0.3f);

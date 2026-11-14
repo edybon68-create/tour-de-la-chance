@@ -281,7 +281,7 @@ namespace TourDeLaChance
                 yield return null;
             }
             lidAngle = 120f;
-            SetColor(isTrap ? trapColor : treasureColor);
+            SetColor(RevealColor(isTrap));
             onRevealed?.Invoke();
 
             // Rebond du couvercle (0,25 s) et « pop » du coffre (0,2 s) en même temps.
@@ -312,7 +312,7 @@ namespace TourDeLaChance
                 yield return null;
             }
             lidAngle = 115f;
-            SetColor(isTrap ? trapColor : treasureColor);
+            SetColor(RevealColor(isTrap));
             onRevealed?.Invoke();
 
             for (float t = 0f; t < 0.2f; t += Time.deltaTime)
@@ -436,6 +436,17 @@ namespace TourDeLaChance
             model.localRotation = restRotation * Quaternion.Euler(0f, 0f, rotZ);
             model.localScale = Vector3.Scale(restScale, scale) * extraScale;
             if (lid != null) lid.localRotation = Quaternion.Euler(lidAngle, 0f, 0f);
+        }
+
+        /// v7 (QA phase 2 n°13) : la couleur du Corps à la révélation. Piège : rouge, comme avant.
+        /// Trésor : sur un coffre en bois, l'or habituel ; sur un coffre de rareté (bronze, argent,
+        /// or, cristal), le Corps GARDE sa couleur avec une teinte d'or légère (25 %) : un coffre
+        /// d'argent ne paraît plus doré une fois ouvert. Le moment et l'animation de la révélation
+        /// ne changent pas : même suspense pour un trésor et un piège.
+        Color RevealColor(bool isTrap)
+        {
+            if (isTrap) return trapColor;
+            return rank >= 1 ? Color.Lerp(closedColor, treasureColor, 0.25f) : treasureColor;
         }
 
         void SetColor(Color color)

@@ -391,6 +391,9 @@ namespace TourDeLaChance
                 instance.AddComponent<AccessoryMotion>().Setup(item.Animation);
             // v5 : les pièces « Anim_* » des accessoires modernisés (ressorts, boucles, éclats).
             instance.AddComponent<AccessoryRig>();
+            // v7 (point 10) : les particules des accessoires rares (baleine, navire, bocal, kraken).
+            // Elles vivent sur l'objet posé : elles disparaissent avec lui quand on l'enlève.
+            if (AccessoryParticles.Needs(item)) instance.AddComponent<AccessoryParticles>().Setup(item);
             accessoryInstances[index] = instance;
         }
 
