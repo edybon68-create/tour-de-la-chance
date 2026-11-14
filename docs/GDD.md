@@ -95,7 +95,8 @@ Plus on monte, plus les épreuves risquées apparaissent souvent.
   renaissance. Ils vont directement dans le compteur de diamants, **jamais dans la cagnotte**,
   et ne se perdent jamais. Usages : reprise (v6 : 1, 2, 4, 8, 16 ◆ dans une partie, 5 au plus),
   Boîtes Pirates (5), **échange contre des pièces** (v6 : 1 ◆ = 200 pièces, sans plafond ;
-  jouer rapporte toujours 5 à 20 fois plus, `v6.md` §5.5). Repères : ~2,6 diamants par heure au
+  v7 : 8 lots de 1 à 200 ◆, les gros lots donnent un bonus de +5 % à **+40 % au plus**, soit
+  280 pièces le ◆ ; jouer rapporte toujours au moins 4 fois plus, `v7.md` §1). Repères : ~2,6 diamants par heure au
   départ, ~15 au maximum, ~30 avec la renaissance.
 - **Bonus de diamants (v6)** : les objets Pirates équipés Légendaires (+15 %) et Secrets (+30 %)
   augmentent le **nombre** de diamants d'un trésor en diamants (jamais leur chance), plafond
@@ -308,8 +309,8 @@ interface.
 
 **Changements v6** (ils priment sur les lignes plus bas) :
 - Les diamants restent **gagnés uniquement en jouant** (trésors, paliers de la route, collections
-  complètes). Ils peuvent s'**échanger contre des pièces** dans la Boutique, à taux fixe (1 ◆ =
-  200 pièces), **sans plafond** ; **on n'achète jamais de diamants**, ni avec des pièces ni avec
+  complètes). Ils peuvent s'**échanger contre des pièces** dans la Boutique (1 ◆ = 200 pièces ;
+  v7 : bonus sur les gros lots, **+40 % au plus**, affiché en chiffres), **sans plafond** ; **on n'achète jamais de diamants**, ni avec des pièces ni avec
   de l'argent.
 - **Reprise** : jusqu'à **5 par partie**, au coût **1, 2, 4, 8, 16 ◆**, toujours sans compte à
   rebours, jamais montrée si le joueur n'a pas assez de diamants ; « Rejouer » demande une
