@@ -43,8 +43,8 @@ NOM = "aureole"
 POINT = "PointChapeau"
 MATS = ["M5_DoreDeco", "M_Aureole"]  # 0, 1
 HAUTEUR_FLOTTE = 0.22      # V7 : 0,30 -> 0,22 (le QA : « flotte haut au-dessus de la tête »)
-R_TUBE = 0.05             # section de 10 cm
-R_ANNEAU = 0.35 - R_TUBE  # Ø extérieur 0,70
+R_TUBE = 0.06             # V7 : section de 12 cm, anneau généreux comme l'icône
+R_ANNEAU = 0.34 - R_TUBE  # Ø extérieur 0,68
 
 
 def construire():
@@ -59,28 +59,33 @@ def construire():
         c = f.calc_center_median()
         r = math.hypot(c.x, c.y) - R_ANNEAU
         b = math.degrees(math.atan2(c.z, r)) % 360
-        f.material_index = 1 if 60 <= b <= 250 else 0
+        # V7 : l'icône est un anneau crème lumineux presque uni. Seule une fine bande
+        # dorée reste DESSOUS (240° à 300°) pour donner un deuxième ton.
+        f.material_index = 0 if 235 <= b <= 305 else 1
     bmesh.ops.translate(bm, vec=centre, verts=bm.verts)
     anneau = C.piece("Anneau", bm, MATS, lissage="tout", pivot=centre)
 
     perles = []
     for i in range(8):
         a = 2 * math.pi * i / 8
-        p = centre + Vector((math.cos(a) * (R_ANNEAU + 0.035), math.sin(a) * (R_ANNEAU + 0.035),
-                             R_TUBE * 0.55))
+        # V7 : perles discrètes, à demi enfoncées sur le dessus (de simples bosses qui
+        # brillent quand le code fait courir le chenillard) : la silhouette reste un anneau lisse.
+        p = centre + Vector((math.cos(a) * R_ANNEAU, math.sin(a) * R_ANNEAU, R_TUBE * 0.80))
         bm = bmesh.new()
-        C.bm_sphere(bm, 0.04, p, segments=8, anneaux=5, mat=1)
+        C.bm_sphere(bm, 0.03, p, segments=10, anneaux=5, mat=1)
         perles.append(C.piece(f"Perle_{i}", bm, MATS, lissage="tout", pivot=p))
     bm = bmesh.new()
     for i in range(4):
         a = 2 * math.pi * (i + 0.5) / 4 + math.pi / 8
         d = Vector((math.cos(a), math.sin(a), 0))
-        p = centre + d * (R_ANNEAU + R_TUBE + 0.06)
-        los = [(0.0, -0.025), (0.06, 0.0), (0.0, 0.025), (-0.06, 0.0)]
+        # V7 : rayons deux fois plus petits et collés à l'anneau (de petites étincelles),
+        # au lieu des pointes qui le hérissaient.
+        p = centre + d * (R_ANNEAU + R_TUBE + 0.035)
+        los = [(0.0, -0.014), (0.035, 0.0), (0.0, 0.014), (-0.035, 0.0)]
         # losange couché à plat, la pointe vers l'extérieur
         m = Matrix.Translation(p) @ Matrix((d, Vector((0, 0, 1)), d.cross(Vector((0, 0, 1))) * -1)
                                            ).transposed().to_4x4()
-        C.bm_coussin(bm, los, 0.02, 0.04, m, mat=1, anneaux=1)
+        C.bm_coussin(bm, los, 0.012, 0.024, m, mat=1, anneaux=1)
     rayons = C.piece("Anim_Rayons", bm, MATS, lissage="angle", pivot=centre)
     eclats = [centre + Vector((math.cos(a) * 0.34, math.sin(a) * 0.34, 0.05))
               for a in (0.5, 2.6, 4.4)]

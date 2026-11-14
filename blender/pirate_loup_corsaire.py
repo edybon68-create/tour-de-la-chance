@@ -59,8 +59,8 @@ def haut_loup(s):
     """Bord du haut : creux au milieu, GRANDE pointe relevée au coin extérieur."""
     u = abs(s)
     if u <= M.S_PLAQUE:
-        monte = 0.10 + 0.135 * M.lisse(u / 0.13)                  # 0,10 -> 0,235
-        pointe = 0.085 * 0.5 * (1 + math.cos(math.pi * min(1.0, abs(u - 0.25) / 0.10)))
+        monte = 0.19 + 0.08 * M.lisse(u / 0.14)                  # 0,19 -> 0,27 (V7 : plus haut)
+        pointe = 0.06 * 0.5 * (1 + math.cos(math.pi * min(1.0, abs(u - 0.25) / 0.12)))   # V7 : pointe plus douce
         descend = M.lisse((u - 0.27) / (M.S_PLAQUE - 0.27))
         return monte + pointe + (M.LIEN - monte) * descend
     return M.centre_lien(u) + M.LIEN
@@ -70,7 +70,7 @@ def bas_loup(s):
     """Bord du bas : encoche sur le chanfrein, petite pointe sous chaque œil."""
     u = abs(s)
     if u <= M.S_PLAQUE:
-        creux = -0.07 - 0.145 * M.lisse(u / 0.14)                 # -0,07 -> -0,215
+        creux = -0.09 - 0.155 * M.lisse(u / 0.14)                 # -0,09 -> -0,245 (V7)
         pointe = -0.035 * 0.5 * (1 + math.cos(math.pi * min(1.0, abs(u - 0.17) / 0.07)))
         remonte = M.lisse((u - 0.25) / (M.S_PLAQUE - 0.25))
         return creux + pointe + (-M.LIEN - creux) * remonte
@@ -111,12 +111,12 @@ def construire():
         s = cote * 0.25
         p, n = M.vers_tete(s, haut_loup(s) - 0.06, M.ECART + M.EPAISSEUR + 0.015)
         m = C.repere(p, n)
-        C.bm_coussin(bm, C.contour_ellipse(0.035, 0.045, n=8), 0.02, 0.05, m, mat=2,
+        C.bm_coussin(bm, C.contour_ellipse(0.035, 0.045, n=10), 0.02, 0.05, m, mat=2,
                      anneaux=1)
         eclats.append(p + n * 0.03)
     pierres = C.objet_depuis_bmesh("Pierres", bm, MATS)
     obj = C.joindre([M.plaque(), M.galons(), nd, pierres], "Loup")
-    C.lisser_angle(obj, 45)
+    C.lisser_angle(obj, 60)   # V7
     C.deplacer_origine(obj, C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for nom, cote in (("Anim_RubanGauche", -1), ("Anim_RubanDroit", 1)):
         C.parenter(ruban(nom, cote, p_noeud, d_noeud), obj)

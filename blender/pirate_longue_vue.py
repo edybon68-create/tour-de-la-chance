@@ -63,6 +63,7 @@ PROFIL = [(0.0, 0.615), (0.068, 0.62), (0.088, 0.615), (0.09, 0.56), (0.078, 0.5
           (0.075, 0.06), (0.085, 0.05), (0.085, 0.01), (0.06, 0.0),
           (0.058, -0.28), (0.066, -0.29), (0.066, -0.32), (0.047, -0.33),
           (0.045, -0.54), (0.058, -0.57), (0.058, -0.62), (0.0, -0.625)]
+GROS = 1.45      # V7 : facteur d'épaisseur du tube
 MAT_PROFIL = [2, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
@@ -89,20 +90,22 @@ def construire():
     # --- la longue-vue, dans le dos
     i_dos = N // 2
     p_dos, d_dos = tour[i_dos]
-    centre = p_dos + d_dos * 0.09
+    centre = p_dos + d_dos * 0.13      # V7 : écartée du dos (tube plus gros)
     # axe : le long du dos (gauche-droite), penché de 25° (gauche de l'image = +X Blender)
     axe = Vector((-math.cos(ANGLE), 0.0, -math.sin(ANGLE)))   # vers le gros bout (droite, bas)
     bm = bmesh.new()
-    C.bm_revolution(bm, [(r, z) for r, z in PROFIL], 16, mats=MAT_PROFIL)   # V7 : 12 -> 16 côtés
+    # V7 (point 17) : tube 1,45 fois plus gros et 24 côtés. Vue du jeu, l'ancienne n'était
+    # qu'une baguette sombre derrière la tête ; l'icône montre une longue-vue trapue.
+    C.bm_revolution(bm, [(r * GROS, z) for r, z in PROFIL], 24, mats=MAT_PROFIL)
     m = P.matrice_vers(centre, axe, haut=d_dos)
     bmesh.ops.transform(bm, matrix=m, verts=bm.verts)
     # deux passants de cuir autour du gros tube (ils la tiennent contre la sangle)
     for u in (0.17, -0.15):
-        C.bm_tore(bm, 0.083 if u > 0 else 0.066, 0.016, segments=12, segments_tube=4, mat=1,
+        C.bm_tore(bm, (0.083 if u > 0 else 0.066) * GROS, 0.018, segments=20, segments_tube=6, mat=1,
                   matrice=m @ Matrix.Translation((0, 0, u)))
     lv = C.piece("Anim_LongueVue", bm, MATS, lissage="angle", pivot=centre)
     C.parenter(lv, sangle)
-    eclats = [m @ Vector((0, 0.086, z)) for z in (0.30, 0.03, -0.305)]
+    eclats = [m @ Vector((0, 0.086 * GROS, z)) for z in (0.30, 0.03, -0.305)]
     for e in C.reperes_effets(eclats):
         C.parenter(e, lv)
     return C.racine_v5(NOM, POINT, [sangle])

@@ -67,7 +67,9 @@ S_DOS = math.pi * R      # |s| du milieu de la nuque
 LIEN = 0.045             # demi-hauteur du lien (9 cm)
 ECART = 0.015            # le masque est posé 1,5 cm au-dessus de la peau
 EPAISSEUR = 0.02
-GALON = [(-0.022, 0.0), (0.022, 0.0), (0.016, 0.035), (-0.016, 0.035)]  # 4,4 cm × 3,5 cm
+# V7 (point 17) : galon plus fin et plus fin et à flancs inclinés (3 cm × 2,4 cm), lissé : l'ancien
+# (4,4 cm, section carrée) mangeait le bandeau et faisait « lunettes jaunes ».
+GALON = [(-0.015, 0.0), (0.015, 0.0), (0.009, 0.024), (-0.009, 0.024)]
 # Trous : centrés sur les yeux, assez grands pour que le galon (qui déborde de 2,2 cm vers
 # l'intérieur) ne touche pas l'œil (17 × 21 cm, qui dépasse de 3 cm du front).
 TROU_S, TROU_H = 0.105, 0.132
@@ -98,9 +100,10 @@ def haut(s):
     au-dessus des yeux, puis il redescend en douceur vers le lien."""
     u = abs(s)
     if u <= S_PLAQUE:
-        monte = 0.09 + 0.13 * lisse(u / 0.13)                  # 0,09 au milieu -> 0,22
-        # v5 : la POINTE du coin extérieur (+4,5 cm vers u = 0,215, en douceur), puis on redescend
-        pointe = 0.045 * 0.5 * (1 + math.cos(math.pi * min(1.0, abs(u - 0.215) / 0.07)))
+        # V7 : bandeau plus HAUT (comme l'icône : une large bande framboise autour des yeux)
+        monte = 0.21 + 0.06 * lisse(u / 0.14)                  # 0,21 au milieu -> 0,27 (bord du haut presque droit, comme l'icône)
+        # v5 : la POINTE du coin extérieur (+4 cm vers u = 0,225, en douceur), puis on redescend
+        pointe = 0.03 * 0.5 * (1 + math.cos(math.pi * min(1.0, abs(u - 0.225) / 0.09)))
         descend = lisse((u - 0.235) / (S_PLAQUE - 0.235))      # 0 -> 1 sur le côté
         return monte + pointe + (LIEN - monte) * descend
     return centre_lien(u) + LIEN
@@ -110,7 +113,7 @@ def bas(s):
     """Bord du bas. Encoche au milieu (sur le chanfrein), arrondi sous chaque œil."""
     u = abs(s)
     if u <= S_PLAQUE:
-        creux = -0.07 - 0.12 * lisse(u / 0.15)                  # -0,07 -> -0,19
+        creux = -0.09 - 0.15 * lisse(u / 0.15)                  # -0,09 -> -0,24 (V7)
         remonte = lisse((u - 0.21) / (S_PLAQUE - 0.21))
         return creux + (-LIEN - creux) * remonte
     return centre_lien(u) - LIEN
@@ -118,7 +121,7 @@ def bas(s):
 
 def abscisses():
     """Abscisses s du patron : serrées sur la plaque (2,5 cm), plus lâches sur le lien."""
-    devant = [-S_PLAQUE + k * (2 * S_PLAQUE / 26) for k in range(26)]   # sans le bout droit
+    devant = [-S_PLAQUE + k * (2 * S_PLAQUE / 30) for k in range(30)]   # sans le bout droit (V7 : 30)
     lien = [S_PLAQUE + (S_DOS - S_PLAQUE) * k / 9 for k in range(10)]
     return [-x for x in reversed(lien[1:])] + devant + lien
 
@@ -177,7 +180,7 @@ def plaque():
     contour = [(s, haut(s)) for s in xs] + [(s, bas(s)) for s in reversed(xs)]
     boucles = [contour]
     for cote in (-1, 1):
-        boucles.append(C.contour_ellipse(TROU_S, TROU_H, n=16, cx=cote * S_OEIL, cz=0.0))
+        boucles.append(C.contour_ellipse(TROU_S, TROU_H, n=20, cx=cote * S_OEIL, cz=0.0))
     aretes = []
     for boucle in boucles:
         vs = [bm.verts.new((s, h, 0)) for s, h in boucle]
@@ -193,7 +196,7 @@ def plaque():
                 break
     # Les grands triangles de la plaque sont recoupés en 4 (ceux du lien restent longs :
     # le lien est étroit, il suit déjà bien la tête).
-    grandes = [e for e in bm.edges if e.calc_length() > 0.06 and
+    grandes = [e for e in bm.edges if e.calc_length() > 0.09 and
                all(abs(v.co.x) < S_PLAQUE + 0.01 for v in e.verts)]
     bmesh.ops.subdivide_edges(bm, edges=grandes, cuts=1)
     bmesh.ops.triangulate(bm, faces=bm.faces[:])
@@ -231,14 +234,14 @@ def galons():
     bm = bmesh.new()
     # Tour de la plaque : le haut, la « couture » qui coupe le lien, le bas, l'autre couture.
     # Mêmes abscisses que le bord du patron : le galon recouvre exactement le bord.
-    xs = [-S_PLAQUE + k * (2 * S_PLAQUE / 26) for k in range(27)]
+    xs = [-S_PLAQUE + k * (2 * S_PLAQUE / 30) for k in range(31)]
     tour = [(s, haut(s)) for s in xs]
     tour += [(S_PLAQUE, LIEN * 0.33), (S_PLAQUE, -LIEN * 0.33)]
     tour += [(s, bas(s)) for s in reversed(xs)]
     tour += [(-S_PLAQUE, -LIEN * 0.33), (-S_PLAQUE, LIEN * 0.33)]
     galon(tour, bm)
     for cote in (-1, 1):
-        galon(C.contour_ellipse(TROU_S, TROU_H, n=16, cx=cote * S_OEIL), bm)
+        galon(C.contour_ellipse(TROU_S, TROU_H, n=20, cx=cote * S_OEIL), bm)
     o = C.objet_depuis_bmesh("Galons", bm, MATS)
     return o
 
@@ -297,7 +300,7 @@ def construire():
     rainure(bm)
     rain = C.objet_depuis_bmesh("Rainure", bm, MATS)
     obj = C.joindre([plaque(), galons(), nd, rain], "Masque")
-    C.lisser_angle(obj, 45)
+    C.lisser_angle(obj, 60)   # V7 : plus lisse (plus de facettes sur le galon)
     C.deplacer_origine(obj, C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for nom, cote in (("Anim_PanGauche", -1), ("Anim_PanDroit", 1)):
         C.parenter(pan(nom, cote, p_noeud, d_noeud), obj)

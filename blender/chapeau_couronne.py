@@ -40,12 +40,12 @@ import commun as C  # noqa: E402
 
 NOM = "chapeau_couronne"
 POINT = "PointChapeau"
-MATS = ["M_Or", "M5_Nacre", "M5_Rubis", "M5_Velours"]  # 0..3
+MATS = ["M7_OrVif", "M5_Nacre", "M5_Rubis", "M5_Velours"]  # 0..3 (V7 : or clair, voir commun.py)
 BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.06, C.CHAPEAU_BASE[2]
 R0 = 0.31
 BANDE = 0.13
 POINTE = 0.22
-N = 30                     # segments autour (5 pointes × 6)
+N = 35                     # segments autour (5 pointes × 7, V7 : plus lisse)
 EP = 0.045                 # épaisseur de l'anneau
 
 
@@ -63,7 +63,7 @@ def rayon(z):
 
 def anneau(bm):
     rangs = []
-    lignes = 5
+    lignes = 4
     secs = []
     for k in range(N):
         a = 2 * math.pi * k / N
@@ -104,7 +104,7 @@ def bandeau(bm):
             (R0 + EP / 2 - 0.005, 0.105)]
     rr = C.bm_revolution(bm, prof, N, mats=[0] * 4)
     v += [x for r in rr for x in r]
-    for k in range(10):
+    for k in range(0):         # V7 : frise de losanges retirée (absente de l'icône, plus épuré)
         a = math.pi / 2 + 2 * math.pi * (k + 0.5) / 10
         d = Vector((math.cos(a), math.sin(a), 0))
         if abs(a - math.pi / 2) % (2 * math.pi) < 0.4:
@@ -120,17 +120,15 @@ def construire():
     base = C.U(BX, BY, BZ)
     bm = bmesh.new()
     v = anneau(bm) + bandeau(bm)
-    # velours à l'intérieur : un dôme bas sous les pointes
-    prof = [(R0 - EP / 2 + 0.005, 0.06), (R0 * 0.85, 0.16), (R0 * 0.5, 0.23), (0.0, 0.25)]
-    rr = C.bm_revolution(bm, prof, 12, mats=[3] * 3)
-    v += [x for r in rr for x in r]
+    # V7 (point 17) : plus de bonnet de velours violet dedans. Vu du jeu, il remplissait la
+    # couronne d'une masse sombre ; l'icône est une couronne d'or ouverte.
     # perles de nacre au bout des pointes, petits rubis sur le bandeau
     eclats = []
     for k in range(5):
         a = math.pi / 2 + 2 * math.pi * k / 5
         h = hauteur(a)
         p = Vector((math.cos(a), math.sin(a), 0)) * rayon(h) + Vector((0, 0, h + 0.04))
-        v += C.bm_sphere(bm, 0.042, p, segments=8, anneaux=5, mat=1)
+        v += C.bm_sphere(bm, 0.045, p, segments=10, anneaux=6, mat=0)   # V7 : boules d'or (icône)
         if k in (0, 1, 4):
             eclats.append(base + p + Vector((0, 0, 0.04)))
     for k in (1, 2, 3, 4):
@@ -147,9 +145,9 @@ def construire():
     d = Vector((0, 1, 0))
     p = d * (R0 + EP / 2 + 0.045) + Vector((0, 0, 0.07))
     m = C.repere(base + p, d)
-    pierre = C.bm_coussin(bm, C.contour_ellipse(0.08, 0.08, n=8), 0.05, 0.10, m, mat=2,
+    pierre = C.bm_coussin(bm, C.contour_ellipse(0.08, 0.08, n=12), 0.05, 0.10, m, mat=2,
                           anneaux=2, dos_plat=True)
-    serti = C.bm_tore(bm, 0.085, 0.016, segments=12, segments_tube=5, mat=0)
+    serti = C.bm_tore(bm, 0.085, 0.016, segments=20, segments_tube=6, mat=0)
     bmesh.ops.transform(bm, matrix=m @ Matrix.Rotation(math.radians(90), 4, "X"), verts=serti)
     rubis = C.piece("Rubis", bm, MATS, lissage="angle", pivot=base + p)
     C.parenter(rubis, couronne)

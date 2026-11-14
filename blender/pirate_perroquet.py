@@ -52,9 +52,9 @@ NOM = "perroquet"
 POINT = "PointDos"
 MATS = ["M5_PirAraRouge", "M5_PirAraBleu", "M5_PirAraJaune", "M5_PirBecCreme",
         "M5_PirOeilNoir"]   # 0..4
-ANGLE_PERCHOIR = math.radians(-112)    # vers la droite de l'image, un peu en arrière
+ANGLE_PERCHOIR = math.radians(-102)    # vers la droite de l'image (V7 : moins en arrière, on le voit)
 Y_PERCHOIR = 0.95
-ECHELLE = 1.35      # tout l'oiseau est agrandi autour du perchoir (exagéré, bible §13.2)
+ECHELLE = 1.55      # V7 : 1,35 -> 1,55, il était caché par la tête (exagéré, bible §13.2)
 
 
 def grandir(racine, centre, k):
@@ -86,8 +86,8 @@ def construire():
     # --- corps + pattes
     bm = bmesh.new()
     rot = Matrix.Rotation(math.radians(-14), 3, "X")    # un peu penché en arrière
-    P.bm_ellipsoide(bm, F + Vector((0, 0.0, 0.17)), (0.105, 0.11, 0.17), segments=10,
-                    anneaux=7, mat=0, rot=rot)
+    P.bm_ellipsoide(bm, F + Vector((0, 0.0, 0.17)), (0.11, 0.115, 0.17), segments=14,
+                    anneaux=9, mat=0, rot=rot)   # V7 : plus de segments, plus dodu
     for s in (-1, 1):                    # pattes : 2 doigts devant, 1 derrière
         base = F + Vector((s * 0.05, 0.02, 0.04))
         for dy, dz in ((0.07, -0.03), (0.05, -0.04), (-0.06, -0.035)):
@@ -99,29 +99,26 @@ def construire():
     cou = F + Vector((0, 0.03, 0.30))
     T = F + Vector((0, 0.05, 0.38))
     bm = bmesh.new()
-    P.bm_ellipsoide(bm, T, (0.095, 0.10, 0.095), segments=10, anneaux=7, mat=0)
+    P.bm_ellipsoide(bm, T, (0.112, 0.115, 0.108), segments=14, anneaux=9, mat=0)   # V7 : grosse tête ronde (icône)
     yeux = []
     for s in (-1, 1):
         # masque blanc (une plaque bombée sur la joue) puis l'œil par-dessus
         n = Vector((s * 0.80, 0.55, 0.12)).normalized()
-        pm = T + n * 0.085
-        C.bm_coussin(bm, C.contour_ellipse(0.05, 0.045, n=8), 0.012, 0.03,
+        pm = T + n * 0.10
+        C.bm_coussin(bm, C.contour_ellipse(0.058, 0.052, n=12), 0.012, 0.03,
                      C.repere(pm, n), mat=3, anneaux=1, dos_plat=True)
         yeux.append((pm + n * 0.02, n))
     # bec : mandibule du haut recourbée (crème), mandibule du bas (noire)
-    haut_bec = [T + Vector((0, 0.085, 0.02)), T + Vector((0, 0.135, 0.01)),
-                T + Vector((0, 0.165, -0.025)), T + Vector((0, 0.155, -0.07))]
-    C.bm_tube(bm, haut_bec, 0.05, cotes=6, mat=3, rayons=[1.0, 0.8, 0.5, 0.15])
-    P.bm_ellipsoide(bm, T + Vector((0, 0.10, -0.045)), (0.035, 0.03, 0.025), segments=6,
+    haut_bec = [T + Vector((0, 0.10, 0.02)), T + Vector((0, 0.15, 0.01)),
+                T + Vector((0, 0.18, -0.03)), T + Vector((0, 0.17, -0.08))]
+    C.bm_tube(bm, haut_bec, 0.055, cotes=10, mat=3, rayons=[1.0, 0.8, 0.5, 0.15])
+    P.bm_ellipsoide(bm, T + Vector((0, 0.115, -0.05)), (0.035, 0.03, 0.025), segments=6,
                     anneaux=4, mat=4)
-    for k, (dx, dz) in enumerate(((0, 0.0), (0.03, -0.01), (-0.03, -0.01))):  # huppe
-        b = T + Vector((dx, 0.0, 0.085))
-        C.bm_tube(bm, [b, b + Vector((dx * 1.5, -0.05, 0.07 + dz))], 0.022, cotes=4, mat=0,
-                  rayons=[1.0, 0.2])
+    # V7 : plus de huppe en pointes (l'icône a une tête toute ronde, plus « peluche »)
     tete = C.piece("Anim_Tete", bm, MATS, lissage="tout", pivot=cou)
     for (pe, n), nom in zip(yeux, ("Anim_OeilGauche", "Anim_OeilDroit")):
         bm = bmesh.new()
-        P.oeil_mignon(bm, pe, n, 0.032, 4, 3)
+        P.oeil_mignon(bm, pe, n, 0.038, 4, 3)
         o = C.piece(nom, bm, MATS, lissage="tout", pivot=pe)
         C.parenter(o, tete)
     C.parenter(tete, corps)

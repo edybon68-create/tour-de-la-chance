@@ -1583,3 +1583,13 @@ def poser_sur(arbre, centre, direction, ecart=0.0):
     if hit is None:
         return Vector(centre), d
     return hit + normale * ecart, normale
+
+
+# --- V7 (point 17, qualité 3D) : matériaux neufs (préfixe M7_) ------------------------
+# Même raison que pour les M5_ : un nom neuf = un .mat neuf dans Unity, réglé comme ici.
+# M7_OrVif : un or CLAIR et lumineux, moins « miroir » (metallic 0,55) que M_Or. Dans un
+# décor de nuit, un or 100 % métal ne reflète que du sombre et paraît bronze ; celui-ci
+# garde la couleur jaune d'or des icônes.
+MATERIAUX.update({
+    "M7_OrVif": ("#FFC53A", 0.55, 0.28),
+})

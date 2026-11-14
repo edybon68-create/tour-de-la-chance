@@ -60,16 +60,17 @@ def contour_aile():
     arrondi avec 2 encoches (les plis du tissu). Points autour de (L/2, 0)."""
     pts = []
     pts.append((0.0, -H_PINCE / 2))
-    for k in range(1, 4):                     # bas : s'évase
-        t = k / 4
+    for k in range(1, 6):                     # bas : s'évase (V7 : 5 points, plus rond)
+        t = k / 6
         pts.append((L_AILE * t, -H_PINCE / 2 - (H_AILE - H_PINCE) / 2 * math.sin(t * math.pi / 2)))
     # bout : arrondi avec 2 encoches
-    bout = [(-80, 1.0), (-50, 0.98), (-25, 0.86), (0, 0.97), (25, 0.86), (50, 0.98), (80, 1.0)]
+    # V7 : bout simplement ARRONDI (l'icône n'a pas d'encoches), 11 points
+    bout = [(d, 1.0) for d in range(-85, 86, 17)]
     for deg, r in bout:
         a = math.radians(deg)
         pts.append((L_AILE * 0.80 + 0.06 * r * math.cos(a) * 1.5, H_AILE / 2 * r * math.sin(a)))
-    for k in range(3, 0, -1):                 # haut
-        t = k / 4
+    for k in range(5, 0, -1):                 # haut
+        t = k / 6
         pts.append((L_AILE * t, H_PINCE / 2 + (H_AILE - H_PINCE) / 2 * math.sin(t * math.pi / 2)))
     pts.append((0.0, H_PINCE / 2))
     cx = L_AILE / 2
@@ -81,24 +82,20 @@ def aile(nom, cote, origine, n):
     contour = contour_aile()
     if cote < 0:
         contour = [(-x, z) for x, z in reversed(contour)]
-    v = C.bm_coussin(bm, contour, 0.06, 0.11, None, mat=0, anneaux=2, dos_plat=True)
+    v = C.bm_coussin(bm, contour, 0.06, 0.13, None, mat=0, anneaux=3, dos_plat=True)
     # 3 plis : on creuse 3 « rayons » du devant (de l'intérieur vers le bout)
     for v_ in v:
         if v_.co.y > 0.035:
             ang = math.atan2(v_.co.z, cote * v_.co.x + L_AILE / 2)
             for cible in (-0.32, 0.0, 0.32):
                 if abs(ang - cible) < 0.05 and abs(v_.co.x) > 0.02:
-                    v_.co.y -= 0.022
+                    v_.co.y -= 0.005   # V7 : plis à peine marqués
     # pincé vers le nœud : l'aile se resserre et se recule près du centre
     for v_ in v:
         t = (cote * v_.co.x + L_AILE / 2) / L_AILE        # 0 au nœud, 1 au bout
         v_.co.y *= 0.55 + 0.45 * min(1.0, t * 2.2)
     arbre = C.arbre_bm(bm)
-    # 5 pois sur le devant
-    for px, pz in ((-0.07, 0.05), (0.02, -0.06), (0.05, 0.06), (0.10, -0.01), (-0.04, -0.02)):
-        x = cote * px
-        p, nn = C.poser_sur(arbre, Vector((x, 0.0, pz)), Vector((0, 1, 0)), 0.0)
-        C.bm_disque(bm, 0.03, 0.02, C.repere(p, nn), cotes=6, mat=2, bombe=0.008)
+    # V7 : plus de pois blancs (l'icône est un satin rouge uni et brillant)
     # placement : l'aile recule de 14° pour suivre le poitrail arrondi, dans le repère
     rot = Matrix.Rotation(math.radians(cote * -14), 4, "Z")
     cote_n = Vector((1, 0, 0))
@@ -114,14 +111,12 @@ def construire():
     arbre = C.arbre_cheval()
     peau, n = repere_poitrail(arbre)
     centre = peau + n * 0.035
-    # Le nœud central : 3 boudins horizontaux empilés (2 rainures)
+    # V7 : le nœud central est un seul « coussin » rond et bombé, rouge plus foncé (deux
+    # tons), comme sur l'icône (au lieu de 3 boudins).
     bm = bmesh.new()
-    haut = Vector((1, 0, 0)).cross(n).normalized()
-    for k, dz in enumerate((-0.042, 0.0, 0.042)):
-        c = centre + haut * dz + n * (0.008 if k == 1 else 0.0)
-        C.bm_tube(bm, [c - Vector((0.06, 0, 0)), c - Vector((0.035, 0, 0)),
-                       c + Vector((0.035, 0, 0)), c + Vector((0.06, 0, 0))],
-                  0.03, cotes=8, mat=1, rayons=[0.6, 1.0, 1.0, 0.6])
+    v = C.bm_sphere(bm, 1.0, (0, 0, 0), segments=16, anneaux=10, echelle=(0.075, 0.06, 0.085), mat=1)
+    rot = n.to_track_quat("Y", "Z").to_matrix().to_4x4()
+    bmesh.ops.transform(bm, matrix=Matrix.Translation(centre + n * 0.02) @ rot, verts=v)
     noeud = C.piece("Noeud", bm, MATS, lissage="tout", pivot=centre)
     for nom, cote in (("Anim_AileGauche", +1), ("Anim_AileDroite", -1)):
         C.parenter(aile(nom, cote, centre, n), noeud)

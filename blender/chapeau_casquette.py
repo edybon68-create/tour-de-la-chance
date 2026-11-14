@@ -38,7 +38,7 @@ MATS = ["M5_CasquetteRouge", "M5_CasquetteVisiere", "M5_BlancVerni"]  # 0, 1, 2
 BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.04, C.CHAPEAU_BASE[2]
 R0 = C.CHAPEAU_RAYON + 0.03     # rayon de la base de la calotte (elle coiffe la tête)
 HAUT = 0.34                     # hauteur de la calotte
-SEG = 18                        # 6 panneaux × 3
+SEG = 24                        # 6 panneaux × 4 (V7 : plus rond)
 
 
 ANGLE_VISIERE = 72.0            # degrés : visière tournée vers la droite de l'image
@@ -58,9 +58,9 @@ def calotte(bm):
 
     def rainure(a, i, r, z):
         # 6 rainures : sur 1 méridien sur 3, la calotte rentre de 2 cm (sauf sommet et bord).
-        k = round(a / (2 * math.pi / SEG)) % 3
+        k = round(a / (2 * math.pi / SEG)) % 4
         if k == 0 and 0 < i < len(profil) - 2:
-            return r - 0.02, z
+            return r - 0.012, z      # V7 : rainures plus discrètes (1,2 cm)
         return r, z
 
     v_avant = set(bm.verts)
@@ -71,7 +71,8 @@ def calotte(bm):
 
 
 def bourrelet(bm):
-    v = C.bm_tore(bm, R0 + 0.008, 0.038, segments=SEG, segments_tube=5, mat=2)
+    # V7 : bourrelet ROUGE foncé (l'icône n'a pas de bande blanche), plus fin
+    v = C.bm_tore(bm, R0 + 0.006, 0.030, segments=SEG, segments_tube=6, mat=1)
     bmesh.ops.translate(bm, vec=base_blender() + Vector((0, 0, 0.012)), verts=v)
 
 
@@ -83,9 +84,9 @@ def visiere(bm, bm_couture):
     silhouette (on la voit de face) et ne passe JAMAIS devant les yeux. Une visière droit
     devant, à cette hauteur, cacherait les deux yeux depuis la caméra du jeu (qui est
     au-dessus) : nous l'avons vérifié en rendu."""
-    nu, nv = 8, 4                 # V7 : 6 × 3 -> 8 × 4 (courbe plus douce)
-    larg, long_ = 0.56, 0.55
-    epais = 0.05
+    nu, nv = 10, 5                # V7 : grille plus fine (courbe douce)
+    larg, long_ = 0.54, 0.40      # V7 : visière plus COURTE et ronde, comme l'icône
+    epais = 0.04
     inc = math.radians(-6)        # V7 : relevée (avant : 12° vers le bas)
     hs, bs = [], []
     for j in range(nv + 1):
@@ -97,7 +98,7 @@ def visiere(bm, bm_couture):
             x = s * demi
             y0 = math.sqrt(max((R0 - 0.02) ** 2 - x ** 2, 0.0))     # sur le bord de la calotte
             y = y0 + long_ * t * math.cos(inc)
-            z = 0.03 - long_ * t * math.sin(inc) - 0.05 * s * s * t
+            z = 0.03 - long_ * t * math.sin(inc) - 0.07 * s * s * (0.3 + 0.7 * t)   # bien bombée
             rh.append(bm.verts.new((x, y, z + epais / 2)))
             rb.append(bm.verts.new((x, y, z - epais / 2)))
         hs.append(rh)
@@ -113,9 +114,14 @@ def visiere(bm, bm_couture):
     for k in range(len(ch)):
         q = (k + 1) % len(ch)
         faces.append(bm.faces.new((ch[k], cb[k], cb[q], ch[q])))
-    for f in faces:
-        f.material_index = 1
     bmesh.ops.recalc_face_normals(bm, faces=faces)
+    # V7 : dessus de la visière du même rouge que la calotte, dessous et tranche plus foncés
+    for f in faces:
+        f.material_index = 0 if f.normal.z > 0.5 else 1
+    if True:   # V7 : plus de couture blanche (elle faisait « plaque en plastique »)
+        bmesh.ops.transform(bm, matrix=Matrix.Translation(base_blender()) @ Matrix.Rotation(
+            math.radians(ANGLE_VISIERE), 4, "Z"), verts=bm.verts)
+        return
     # Couture blanche en relief (2 cm), 4 cm en retrait du bord, sur le dessus.
     chemin = []
     for j, i in [(1, 0), (2, 0)] + [(nv, i) for i in range(1, nu)] + [(2, nu), (1, nu)]:
@@ -132,14 +138,13 @@ def details(bm, arbre):
     """Bouton du sommet, 2 œillets et l'étoile brodée du panneau avant (face à la caméra),
     posés pile sur la calotte par des rayons."""
     b = base_blender()
-    C.bm_disque(bm, 0.07, 0.03, Matrix.Translation(b + Vector((0, 0, HAUT + 0.005)))
-                @ Matrix.Rotation(math.radians(-90), 4, "X"), cotes=10, mat=2, bombe=0.025)
+    C.bm_disque(bm, 0.06, 0.03, Matrix.Translation(b + Vector((0, 0, HAUT + 0.005)))
+                @ Matrix.Rotation(math.radians(-90), 4, "X"), cotes=16, mat=2, bombe=0.025)
     centre = b + Vector((0, 0, 0.05))
     for cote in (-1, 1):
         p, n = C.poser_sur(arbre, centre, C.direction_angles(cote * 0.62, math.radians(30)), 0.004)
-        C.bm_disque(bm, 0.034, 0.03, C.repere(p, n), cotes=8, mat=1)
-    p, n = C.poser_sur(arbre, centre, C.direction_angles(0.0, math.radians(22)), 0.008)
-    C.bm_etoile(bm, 0.075, 0.03, C.repere(p, n), mat=2)
+        C.bm_disque(bm, 0.026, 0.02, C.repere(p, n), cotes=10, mat=1)
+    # V7 : plus d'étoile brodée (absente de l'icône : une casquette rouge toute simple)
 
 
 def construire():
