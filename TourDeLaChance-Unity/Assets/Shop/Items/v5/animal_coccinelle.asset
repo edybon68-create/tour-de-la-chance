@@ -31,10 +31,11 @@ MonoBehaviour:
   flavorText: Elle porte bonheur !
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 5
   accentColor: {r: 1, g: 1, b: 1, a: 1}
   glowColor: {r: 1, g: 1, b: 1, a: 1}
-  patternCount: 7
+  patternCount: 12
   emissionStrength: 0

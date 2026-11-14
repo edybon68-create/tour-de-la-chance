@@ -20,8 +20,8 @@ MonoBehaviour:
   free: 0
   icon: {fileID: 21300000, guid: 953e178b8ec3a48a1922a94ec0a0c6ff, type: 3}
   skinStyle: 0
-  color: {r: 0.29803923, g: 0.7607843, b: 0.41568628, a: 1}
-  secondaryColor: {r: 0.9098039, g: 0.9411765, b: 0.627451, a: 1}
+  color: {r: 0.23529412, g: 0.78431374, b: 0.2901961, a: 1}
+  secondaryColor: {r: 0.11764706, g: 0.5411765, b: 0.22745098, a: 1}
   metallic: 0
   smoothness: 0.85
   accessoryPrefab: {fileID: 0}
@@ -31,10 +31,11 @@ MonoBehaviour:
   flavorText: "Cro\xE2-ment bien."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
-  pattern: 14
+  pattern: 3
   accentColor: {r: 1, g: 1, b: 1, a: 1}
   glowColor: {r: 1, g: 1, b: 1, a: 1}
-  patternCount: 0
+  patternCount: 30
   emissionStrength: 0

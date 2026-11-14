@@ -28,42 +28,42 @@ MonoBehaviour:
     displayName: "Poign\xE9e"
     diamonds: 1
     coins: 200
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 6fe87f7a9b99748369df66c990c67f8b, type: 3}
   - id: echange_pochette
     displayName: Pochette
     diamonds: 3
     coins: 600
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 1364b4a37cf7845bca1fc0e3a0c88eca, type: 3}
   - id: echange_sac
     displayName: Sac
     diamonds: 5
     coins: 1050
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: e3bd6a4bcf3bd447e91401c0add0e01d, type: 3}
   - id: echange_seau
     displayName: Seau
     diamonds: 10
     coins: 2200
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 9cc3941057755439f8ce07fc10555f45, type: 3}
   - id: echange_coffre
     displayName: Coffre
     diamonds: 25
     coins: 5750
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 98b9cd6fab8d94dd2806be1bb258a1e4, type: 3}
   - id: echange_malle
     displayName: Malle
     diamonds: 50
     coins: 12000
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 49b8729323edb45bfbbe2a6450e6d69e, type: 3}
   - id: echange_tonneau
     displayName: Tonneau
     diamonds: 100
     coins: 26000
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 9667dad785cf9413abb61bc827f64b67, type: 3}
   - id: echange_montagne
     displayName: Montagne
     diamonds: 200
     coins: 56000
-    icon: {fileID: 0}
+    icon: {fileID: 21300000, guid: 2ff1b1d4897f747f19210e0673c2b0bd, type: 3}
   exchangeBaseRate: 200
   exchangeBonusCap: 40
   trophyMilestones:

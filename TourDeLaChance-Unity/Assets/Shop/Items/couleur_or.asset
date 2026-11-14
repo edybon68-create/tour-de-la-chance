@@ -22,8 +22,8 @@ MonoBehaviour:
   skinStyle: 0
   color: {r: 1, g: 0.78431374, b: 0.22745098, a: 1}
   secondaryColor: {r: 1, g: 1, b: 1, a: 1}
-  metallic: 1
-  smoothness: 0.8
+  metallic: 0.6
+  smoothness: 0.65
   accessoryPrefab: {fileID: 0}
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
@@ -31,6 +31,7 @@ MonoBehaviour:
   flavorText: "Le roi de l'\xE9chiquier, c'est lui."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 0

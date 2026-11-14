@@ -20,10 +20,10 @@ MonoBehaviour:
   free: 0
   icon: {fileID: 21300000, guid: cf19c60d69baa4039a39b0b8649bf3de, type: 3}
   skinStyle: 0
-  color: {r: 0.92941177, g: 0.9019608, b: 0.9490196, a: 1}
-  secondaryColor: {r: 1, g: 1, b: 1, a: 1}
-  metallic: 0.2
-  smoothness: 0.75
+  color: {r: 1, g: 0.95686275, b: 0.98039216, a: 1}
+  secondaryColor: {r: 0.8509804, g: 0.9019608, b: 1, a: 1}
+  metallic: 0.35
+  smoothness: 0.92
   accessoryPrefab: {fileID: 0}
   animation: 0
   attachOffset: {x: 0, y: 0, z: 0}
@@ -31,9 +31,10 @@ MonoBehaviour:
   flavorText: "Brille comme l'int\xE9rieur d'un coquillage."
   baseTexture: {fileID: 0}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
-  pattern: 0
+  pattern: 14
   accentColor: {r: 1, g: 1, b: 1, a: 1}
   glowColor: {r: 1, g: 1, b: 1, a: 1}
   patternCount: 0

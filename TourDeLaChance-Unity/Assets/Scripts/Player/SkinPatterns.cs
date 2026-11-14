@@ -109,8 +109,9 @@ namespace TourDeLaChance
                 case SkinPattern.Points:
                 {
                     // 7 points placés (pas un motif répété), dont un sur le front (devant = u 0,5).
-                    spots = new List<Vector3> { new Vector3(0.5f, 0.9f, 0.08f) };
-                    spots.AddRange(Scatter(Mathf.Max(1, (count > 0 ? count : 7) - 1), 0.08f, 0.11f, 0.12f, 0.75f));
+                    // v7 (revue des skins) : points plus gros (0,10 à 0,14), pour qu'on les voie de face.
+                    spots = new List<Vector3> { new Vector3(0.5f, 0.9f, 0.10f) };
+                    spots.AddRange(Scatter(Mathf.Max(1, (count > 0 ? count : 7) - 1), 0.10f, 0.14f, 0.12f, 0.75f));
                     break;
                 }
                 case SkinPattern.Bois: spots = Scatter(10, 0.02f, 0.035f, 0.1f, 0.85f); break;   // coquillages

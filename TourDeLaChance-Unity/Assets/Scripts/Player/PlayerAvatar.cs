@@ -215,7 +215,7 @@ namespace TourDeLaChance
                     // Les couleurs sont dans la texture : la couleur de base reste blanche.
                     mat.SetColor(BaseColorId, Color.white);
                     mat.SetTexture(BaseMapId, SkinTextures.Stripes(item.Color, item.SecondaryColor));
-                    mat.SetTextureScale(BaseMapId, new Vector2(1f, 4f)); // 4 tuiles × 2 bandes = 8 bandes
+                    mat.SetTextureScale(BaseMapId, new Vector2(1f, 8f)); // v7 : 8 tuiles × 2 bandes = 16 bandes fines, comme l'icône
                     break;
                 case SkinStyle.Pois:
                     mat.SetColor(BaseColorId, Color.white);

@@ -28,3 +28,6 @@ MonoBehaviour:
   nuage3: {fileID: 21300000, guid: 2e8f43240f49a48599e0d49031c8f5cc, type: 3}
   guirlandeFanions: {fileID: 21300000, guid: a7ca03fa1ecca4963b90cfe47456b5bd, type: 3}
   rubanPalier: {fileID: 21300000, guid: 66b4b293474ee4b68b49d03d701a2d33, type: 3}
+  categorieClassiques: {fileID: 21300000, guid: af3c7b261f99b4536933123d48450952, type: 3}
+  categoriePirates: {fileID: 21300000, guid: d9a039973a686454da56fff7b4b4d4e1, type: 3}
+  categorieAnimaux: {fileID: 21300000, guid: 6fd48dde963994758a0403d38dbc2a33, type: 3}
