@@ -339,7 +339,7 @@ def construire(style):
     C.biseau(o, 0.03, 1, 50)
     C.appliquer(o)
     couv.append(o)
-    couv.append(B.doublure_couvercle(style["metal"], style["interieur"]))   # V7 : cadre + coussin
+    couv.append(B.doublure_couvercle(style["couvercle"], style["interieur"]))   # V7 : cadre sombre
 
     # Bandes de métal sur le dessus, qui suivent le profil (lisse ou à facettes).
     bm = bmesh.new()

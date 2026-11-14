@@ -62,38 +62,31 @@ def profil_dome(decalage=0.0, z0=HAUTEUR):
 
 
 # =========================================================================================
-def doublure_couvercle(mat_cadre, mat_coussin):
-    """V7 : le dessous du couvercle était une grande plaque unie (vue chaque fois qu'on
-    ouvre un coffre). On y pose un cadre de métal et un coussin capitonné bombé dans la
-    couleur de la doublure. Tout reste DANS l'ouverture du corps quand c'est fermé (marge de
-    13 cm) : rien ne traverse les parois. Renvoie l'objet (à joindre au Couvercle)."""
+def doublure_couvercle(mat_cadre, mat_fond):
+    """Dessous du couvercle, vu à chaque ouverture.
+    V7 (retour de l'auteur du 14/11) : le coussin capitonné faisait « faux » (en jeu on voyait
+    surtout un grand panneau jaune). On revient à un intérieur SOMBRE et PROPRE, assorti à la
+    caisse : le fond reste la doublure foncée (`mat_fond`, celle de l'intérieur du corps) et un
+    simple cadre biseauté dans le bois du couvercle (`mat_cadre`) en fait le tour, comme le
+    rebord de la caisse vu d'en haut. Deux tons, aucune couleur vive.
+    Le cadre reste DANS l'ouverture du corps quand c'est fermé (marge de 13 cm) : rien ne
+    traverse les parois. Ce sont des boîtes fermées : leurs normales sont fiables (le coussin
+    ouvert avait des normales retournées, donc invisible dans Unity)."""
     bm = bmesh.new()
     y0, y1 = COUV_ARRIERE + 0.13, COUV_AVANT - 0.13
     lx, ly = 2 * (COUV_X - 0.13), y1 - y0
     cy = (y0 + y1) / 2
-    # cadre : une boîte fine un peu plus grande que le coussin
-    C.bm_boite(bm, (lx + 0.06, ly + 0.06, 0.02), (0, cy, HAUTEUR - 0.010), mat=0)
-    # coussin : grille bombée vers le bas (le centre descend de 4 cm), 4 boutons capitonnés
-    nx, ny = 6, 4
-    rangs = []
-    for j in range(ny + 1):
-        rang = []
-        for i in range(nx + 1):
-            u, v = -1 + 2 * i / nx, -1 + 2 * j / ny
-            creux = 0.04 * (1 - u * u) * (1 - v * v)
-            rang.append(bm.verts.new((u * lx / 2, cy + v * ly / 2, HAUTEUR - 0.022 - creux)))
-        rangs.append(rang)
-    for j in range(ny):
-        for i in range(nx):
-            f = bm.faces.new((rangs[j][i], rangs[j][i + 1], rangs[j + 1][i + 1], rangs[j + 1][i]))
-            f.material_index = 1
-    for bx in (-lx / 4, lx / 4):
-        for by in (-ly / 4, ly / 4):
-            C.bm_sphere(bm, 0.022, (bx, cy + by, HAUTEUR - 0.022 - 0.04 * 0.56), segments=8,
-                        anneaux=4, mat=0)
+    lb, ep = 0.06, 0.025          # largeur et épaisseur du cadre
+    z = HAUTEUR - ep / 2 + 0.002  # collé sous le couvercle (2 mm dedans : pas de jour)
+    # deux longs côtés (avant / arrière) puis deux petits côtés entre eux
+    for sy in (-1, 1):
+        C.bm_boite(bm, (lx, lb, ep), (0, cy + sy * (ly - lb) / 2, z), mat=0)
+    for sx in (-1, 1):
+        C.bm_boite(bm, (lb, ly - 2 * lb, ep), (sx * (lx - lb) / 2, cy, z), mat=0)
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-    o = C.objet_depuis_bmesh("DoublureCouvercle", bm, [mat_cadre, mat_coussin])
-    C.lisser_tout(o)
+    o = C.objet_depuis_bmesh("DoublureCouvercle", bm, [mat_cadre, mat_fond])
+    C.biseau(o, 0.008, 2, 30)
+    C.appliquer(o)
     return o
 
 
@@ -249,7 +242,7 @@ def construire():
     C.appliquer(o)
     couv.append(o)
 
-    couv.append(doublure_couvercle("M_Laiton", "M_Interieur"))   # V7
+    couv.append(doublure_couvercle("M_BoisCouvercle", "M_Interieur"))   # V7 : cadre sombre
     couvercle = C.joindre(couv, "Couvercle")
     C.lisser_angle(couvercle, 40)
 

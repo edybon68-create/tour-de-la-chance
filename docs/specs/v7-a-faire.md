@@ -185,7 +185,8 @@
 - 14/11 : tout ce qui pouvait se faire sans Unity est fait (détourages, lot 9, revue 3D, 17 textures de skins). À CHAQUE REPRISE : vérifier `EditorApplication.isPlaying` par `script eval`. Tant qu'il vaut vrai et que l'auteur n'a pas répondu, ne rien relancer de coûteux. Dès qu'il vaut faux : relancer unity-dev (agent du 13/11) pour compiler, brancher (showDiamondPacks, rebirthIcon, textures de skins selon `v7-textures-skins.md`, mipmaps : IconAutoBinder force mipmapEnabled=false, à changer), tester, puis commiter par écran. Ensuite le QA phase 2.
 
 ## Retours de l'auteur du 14/11 matin (captures `docs/references/v7_retour_1..8.png`)
-12. [ ] **Coffre ouvert** : l'intérieur du couvercle est jaune (coussin capitonné de la revue 3D), ça fait faux. Revenir à un intérieur sombre et propre, cohérent avec la caisse.
+12. [x] **Coffre ouvert** : l'intérieur du couvercle est jaune (coussin capitonné de la revue 3D), ça fait faux. Revenir à un intérieur sombre et propre, cohérent avec la caisse.
+    - *Fait le 14/11* : coussin retiré (ses normales étaient retournées : Unity montrait le cadre en laiton derrière). Dessous = doublure foncée de la caisse + fin cadre biseauté dans le bois du couvercle, sur les 5 coffres. Planche : `docs/captures/blender_coffres_planche_ouverts.png`.
 13. [ ] **Carte d'étage (clic sur la barre du haut)** : plus intuitive qu'avant, MAIS il n'accroche pas au « bouton pièce » (la pilule Trésor avec la pièce) ; et revoir la **hiérarchie** : les infos du bas sont de tailles toutes différentes, c'est incohérent → tailles harmonisées, 2-3 niveaux clairs.
 14. [ ] **Améliorations** (DA parfaite) : on ne comprend pas ce que font « Coffres précieux » et « Coffre en plus » sans deviner → une phrase courte et claire visible sur la carte (ex. « Coffres plus rares = trésors plus gros », « Plus souvent un coffre de plus »). **Retirer le défilement** : tout tient sur un écran.
 15. [ ] **Boutique** :
