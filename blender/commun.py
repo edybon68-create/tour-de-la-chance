@@ -1598,6 +1598,16 @@ MATERIAUX.update({
     "M7_CarapaceFonce": ("#3E7A2E", 0.0, 0.50),  # bord de la carapace : vert foncé
     "M7_MontureNoire": ("#16161E", 0.0, 0.22),   # lunettes de soleil : noir verni
     "M7_VerreNoir": ("#20202C", 0.0, 0.06),      # verres sombres et brillants
+    "M7_BoisCaramel": ("#D48A3C", 0.0, 0.45),    # bois de cerf : caramel
+    "M7_BoutCreme": ("#FFEFD2", 0.0, 0.40),      # bouts crème des bois
+    "M7_MembraneLilas": ("#B394E0", 0.0, 0.50),  # ailes de chauve-souris
+    "M7_OsPrune": ("#6A3A8E", 0.0, 0.35),
+    "M7_FermoirViolet": ("#8A4FD0", 0.0, 0.30),
+    "M7_OsierClair": ("#D9964E", 0.0, 0.55),     # panier du chaton
+    "M7_OsierFonce": ("#A9682E", 0.0, 0.60),
+    "M7_BordCreme": ("#F6E8C8", 0.0, 0.50),
+    "M7_RuchePaille": ("#F4B63C", 0.0, 0.45),    # ruche en paille dorée
+    "M7_RucheEntree": ("#4A2A14", 0.0, 0.70),    # entrée de la ruche
     "M7_PlumeBlanche": ("#FFFFFF", 0.0, 0.55),   # ailes d'ange : blanc pur, satiné
     "M7_PlumeOmbre": ("#E4DDF0", 0.0, 0.60),     # rangée du bas : lavande très clair
 })

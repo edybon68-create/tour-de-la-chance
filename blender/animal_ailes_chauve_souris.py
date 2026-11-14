@@ -39,13 +39,15 @@ import commun_animaux as A  # noqa: E402
 
 NOM = "ailes_chauve_souris"
 POINT = "PointDos"
-MATS = ["M5_OsChauveSouris", "M5_MembraneChauveSouris", "M5_DoreDeco"]  # 0..2
+# V7 (lot 10) : membrane LILAS et os prune (nouvelle icône), plus de violet presque noir
+MATS = ["M7_OsPrune", "M7_MembraneLilas", "M7_OrVif", "M7_FermoirViolet"]  # 0..3
 X_CH, Y_CH = 0.13, 1.05
-RECUL = math.radians(30)
+RECUL = math.radians(14)      # V7 : bien ouvertes, vues de face
 LEVE = math.radians(10)
-POIGNET = Vector((0.26, 0.30))
-DOIGTS = [Vector((0.80, 0.30)), Vector((0.70, -0.02)), Vector((0.46, -0.24))]
-BAS = Vector((0.06, -0.10))
+# V7 : ailes 15 % plus grandes
+POIGNET = Vector((0.30, 0.35))
+DOIGTS = [Vector((0.92, 0.34)), Vector((0.80, -0.02)), Vector((0.53, -0.28))]
+BAS = Vector((0.07, -0.12))
 
 
 def contour_membrane():
@@ -88,21 +90,19 @@ def aile(cote):
     m = Matrix.Translation(h) @ Matrix.Diagonal((cote, 1, 1, 1)) @ repere_aile()
     bm = bmesh.new()
     contour, (cu, cv) = contour_membrane()
-    C.bm_coussin(bm, contour, 0.03, 0.045, Matrix.Translation((cu, 0, cv)), mat=1, anneaux=1)
+    C.bm_coussin(bm, contour, 0.03, 0.055, Matrix.Translation((cu, 0, cv)), mat=1, anneaux=2)
 
     def P(uv, y=0.03):
         return Vector((uv.x, y, uv.y))
     C.bm_tube(bm, [P(Vector((0.0, 0.05))), P(POIGNET * 0.5 + Vector((0, 0.03))), P(POIGNET)],
-              0.034, cotes=6, mat=0, rayons=[1.2, 1.0, 1.0])
+              0.042, cotes=8, mat=0, rayons=[1.2, 1.0, 1.0])
     C.bm_sphere(bm, 0.045, P(POIGNET), segments=8, anneaux=5, mat=0)
     for d in DOIGTS:
         mid = POIGNET.lerp(d, 0.5)
-        C.bm_tube(bm, [P(POIGNET), P(mid, 0.035), P(d)], 0.024, cotes=6, mat=0,
+        C.bm_tube(bm, [P(POIGNET), P(mid, 0.035), P(d)], 0.032, cotes=8, mat=0,
                   rayons=[1.0, 0.85, 0.6])
-        C.bm_sphere(bm, 0.025, P(d), segments=6, anneaux=4, mat=0)
-    # griffe dorée au poignet : un petit cône courbé vers le haut
-    A.bm_goutte(bm, 0.11, 0.035, segments=6, bandes=((1.0, 2),),
-                matrice=A.matrice_vers(P(POIGNET, 0.04), Vector((-0.2, 0.15, 1.0))))
+        C.bm_sphere(bm, 0.033, P(d), segments=8, anneaux=5, mat=0)
+    # V7 : plus de griffe dorée (absente de l'icône)
     bmesh.ops.transform(bm, matrix=m, verts=bm.verts)
     if cote < 0:
         bmesh.ops.reverse_faces(bm, faces=bm.faces[:])
@@ -121,7 +121,14 @@ def construire():
     C.parenter(e1, gauche)
     C.parenter(e3, gauche)
     C.parenter(e2, droite)
-    return C.racine_v5(NOM, POINT, [gauche, droite])
+    # V7 (lot 10) : petit fermoir violet rond entre les deux ailes, étoile dorée (icône)
+    bm = bmesh.new()
+    p = (charniere(1) + charniere(-1)) / 2 + Vector((0, -0.04, 0.02))
+    m = C.repere(p, Vector((0, -1, 0.35)).normalized())
+    C.bm_coussin(bm, C.contour_ellipse(0.09, 0.08, n=16), 0.04, 0.08, m, mat=3, anneaux=2)
+    C.bm_etoile(bm, 0.045, 0.02, m @ Matrix.Translation((0, 0.045, 0)), mat=2, bombe=0.01)
+    fermoir = C.piece("Fermoir", bm, MATS, lissage="tout", pivot=p)
+    return C.racine_v5(NOM, POINT, [gauche, droite, fermoir])
 
 
 if __name__ == "__main__":

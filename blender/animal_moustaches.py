@@ -35,7 +35,7 @@ import commun_animaux as A  # noqa: E402
 
 NOM = "moustaches"
 POINT = "PointVisage"
-MATS = ["M5_Moustache", "M5_LapinBlanc", "M5_NezRose", "M5_Reflet"]
+MATS = ["M5_Moustache", "M5_LapinBlanc", "M5_NezRose", "M5_Reflet", "M5_AnimNoirVerni"]
 
 
 def construire():
@@ -43,21 +43,19 @@ def construire():
     bm = bmesh.new()
     # nez rose : triangle arrondi, pointe en bas, en haut du devant du museau
     p, n = A.sur_museau(0.0, 1.42, 0.0)
-    m = C.repere(p + n * 0.02, n)
-    tri = []
-    for k in range(12):
-        t = 2 * math.pi * k / 12
-        tri.append((math.cos(t) * 0.075 * (1 - 0.45 * max(0, -math.sin(t))),
-                    math.sin(t) * 0.05))
-    C.bm_coussin(bm, tri, 0.03, 0.06, m, mat=2, anneaux=2)
+    n = (n + Vector((0, 0.2, 0.4))).normalized()   # V7 : face vers la caméra
+    m = C.repere(p + n * 0.03, n)
+    # V7 (lot 10) : nez en CŒUR rose bombé, comme la nouvelle icône
+    C.bm_coussin(bm, C.contour_coeur(0.17, n=24), 0.04, 0.085, m, mat=2, anneaux=3)
     C.bm_reflet(bm, m @ Matrix.Translation((0.02, 0.032, 0.012)), mat=3, echelle=0.6)
     racines = {}
     for s in (-1, 1):                    # s = +1 : gauche de l'image (+X Blender)
-        pc, nc = A.sur_museau(-s * 0.13, 1.30, 0.0)
+        pc, nc = A.sur_museau(-s * 0.115, 1.355, 0.0)   # V7 : plus haut, vus du jeu
+        nc = (nc + Vector((0, 0.3, 0.5))).normalized()   # V7 : tournés vers la caméra (au-dessus)
         mc = C.repere(pc + nc * 0.02, nc)
-        C.bm_coussin(bm, C.contour_ellipse(0.075, 0.06, n=10), 0.03, 0.06, mc, mat=1, anneaux=2)
-        for j, (x, z) in enumerate(((0.025, 0.02), (-0.015, 0.025), (0.0, -0.015))):
-            C.bm_sphere(bm, 0.009, mc @ Vector((s * x, 0.03, z)), segments=5, anneaux=3, mat=2)
+        # V7 (lot 10) : deux GROS coussinets blancs bien ronds (les joues de l'icône), sans détail (épuré)
+        C.bm_coussin(bm, C.contour_ellipse(0.10, 0.085, n=24), 0.04, 0.09, mc, mat=1, anneaux=3)
+
         racines[s] = (pc + nc * 0.04, nc)
     nez = C.piece("Nez", bm, MATS, lissage="tout", pivot=p)
 
@@ -74,8 +72,10 @@ def construire():
                 z = L * math.sin(a) - 0.035 * t * t + 0.02 * ang / 18
                 y = 0.04 * math.sin(t * math.pi) - 0.08 * t
                 chemin.append(r + Vector((x, y, z)))
-            C.bm_tube(bm, chemin, 0.016, cotes=6, mat=0,
-                      rayons=[1.0, 0.95, 0.85, 0.72, 0.55, 0.35])
+            # V7 (lot 10) : moustaches ÉPAISSES et arrondies au bout (icône), 8 côtés
+            C.bm_tube(bm, chemin, 0.032, cotes=6, mat=1,
+                      rayons=[1.0, 1.0, 0.95, 0.9, 0.85, 0.75])
+            C.bm_sphere(bm, 0.024, chemin[-1], segments=8, anneaux=5, mat=1)
         C.parenter(C.piece(nom, bm, MATS, lissage="tout", pivot=r), nez)
     return C.racine_v5(NOM, POINT, [nez])
 

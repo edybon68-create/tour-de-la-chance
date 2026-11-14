@@ -49,10 +49,12 @@ POINT = "PointDos"
 # Bible §13.7 (Super rare) : 5 matières au plus (+ reflet). Les indices 1, 2, 4 et 9 sont
 # des « rôles » qui réutilisent une matière : rangs foncés et bretelles en osier, intérieur
 # des oreilles et joues dans le pelage.
-MATS = ["M5_Osier", "M5_Osier", "M5_Osier", "M5_PelageChaton", "M5_PelageChaton",
-        "M5_YeuxChaton", "M5_AnimNoirVerni", "M5_Reflet", "M5_DoreDeco", "M5_PelageChaton"]
+# V7 (lot 10) : osier caramel à rangs foncés, bord crème, bretelles de cuir (nouvelle icône)
+MATS = ["M7_OsierClair", "M7_BordCreme", "M5_SangleBrune", "M5_PelageChaton", "M5_PelageChaton",
+        "M5_YeuxChaton", "M5_AnimNoirVerni", "M5_Reflet", "M5_DoreDeco", "M5_PelageChaton", "M7_OsierFonce"]
 BASE = (0.10, 0.70, 0.62)          # Unity : centre du fond du panier
 H_PANIER = 0.42
+GRAND = 1.22                       # V7 (lot 10) : panier et chaton 22 % plus grands (on les voit)
 R_PANIER = 0.35
 
 
@@ -61,7 +63,7 @@ def panier(bm):
     profil = [(0.0, 0.0), (0.27, 0.0), (0.31, 0.04), (0.33, 0.12), (0.345, 0.2),
               (0.35, 0.28), (0.35, 0.36), (0.345, H_PANIER), (0.31, H_PANIER), (0.31, 0.05),
               (0.0, 0.05)]
-    mats = [0, 0, 1, 0, 1, 0, 1, 0, 1, 1]
+    mats = [0, 0, 10, 0, 10, 0, 10, 0, 1, 1]   # V7 : rangs foncés (10), bord crème (1)
 
     def tresse(a, i, r, z):
         if 2 <= i <= 6:
@@ -71,10 +73,10 @@ def panier(bm):
     C.bm_revolution(bm, profil, 22, mats=mats, rayon_fn=tresse)
     nv = [v for v in bm.verts if v not in av]
     # bourrelet du bord (tore), foncé
-    nv += C.bm_tore(bm, 0.345, 0.035, segments=22, segments_tube=5, mat=1,
+    nv += C.bm_tore(bm, 0.345, 0.045, segments=22, segments_tube=5, mat=1,   # V7 : gros bord crème
                     matrice=Matrix.Translation((0, 0, H_PANIER)))
     incl = Matrix.Rotation(math.radians(-10), 4, "X") @ Matrix.Rotation(math.radians(-8), 4, "Y")
-    bmesh.ops.transform(bm, matrix=Matrix.Translation(b) @ incl, verts=nv)
+    bmesh.ops.transform(bm, matrix=Matrix.Translation(b) @ incl @ Matrix.Scale(GRAND, 4), verts=nv)
     return Matrix.Translation(b) @ incl
 
 
@@ -98,7 +100,7 @@ def chaton(mp):
     # corps : une boule qui sort du panier
     bm = bmesh.new()
     A.bm_ellipsoide(bm, mp @ Vector((-0.12, 0.08, H_PANIER - 0.02)), (0.17, 0.15, 0.16),
-                    segments=10, anneaux=7, mat=3)
+                    segments=8, anneaux=6, mat=3)   # (caché dans le panier : peu de faces)
     # patte droite (fixe) posée sur le bord
     A.bm_ellipsoide(bm, mp @ Vector((-0.27, 0.22, H_PANIER + 0.03)), (0.05, 0.075, 0.045),
                     segments=8, anneaux=5, mat=3)
@@ -107,7 +109,7 @@ def chaton(mp):
     cou = mp @ Vector((-0.16, 0.12, H_PANIER + 0.10))
     tc = cou + Vector((-0.12, 0.10, 0.18))                # la tête penche vers la droite
     bm = bmesh.new()
-    A.bm_ellipsoide(bm, tc, (0.17, 0.14, 0.145), segments=10, anneaux=7, mat=3)
+    A.bm_ellipsoide(bm, tc, (0.19, 0.16, 0.165), segments=12, anneaux=7, mat=3)   # V7 : grosse tête ronde
     for s in (-1, 1):                                     # joues claires
         A.bm_ellipsoide(bm, tc + Vector((s * 0.06, 0.11, -0.05)), (0.06, 0.04, 0.045),
                         segments=8, anneaux=5, mat=9)
@@ -120,7 +122,7 @@ def chaton(mp):
         A.bm_goutte(bm, 0.09, 0.04, segments=5, bandes=((1.0, 4),), aplati=0.4,
                     matrice=A.matrice_vers(base + Vector((0, 0.03, 0.01)), d, Vector((0, 1, 0))))
     # ruban rose + clochette sous le menton
-    rub = C.bm_tore(bm, 0.11, 0.02, segments=12, segments_tube=4, mat=8)
+    rub = C.bm_tore(bm, 0.11, 0.02, segments=8, segments_tube=4, mat=8)
     bmesh.ops.transform(bm, matrix=Matrix.Translation(tc + Vector((0, 0.02, -0.12)))
                         @ Matrix.Rotation(math.radians(15), 4, "X"), verts=rub)
     tete = C.piece("Anim_TeteChaton", bm, MATS, lissage="tout", pivot=cou)
@@ -129,7 +131,7 @@ def chaton(mp):
     bm = bmesh.new()
     cloche = tc + Vector((0, 0.12, -0.16))
     C.bm_revolution(bm, [(0.0, 0.035), (0.025, 0.03), (0.035, 0.0), (0.042, -0.03),
-                         (0.0, -0.03)], 8, mats=[8] * 4)
+                         (0.0, -0.03)], 6, mats=[8] * 4)
     bmesh.ops.translate(bm, vec=cloche, verts=bm.verts)
     cl = C.piece("Clochette", bm, MATS, lissage="angle", pivot=cloche)
     C.parenter(cl, tete)
@@ -161,6 +163,8 @@ def construire():
     bretelles(bm)
     pan = C.piece("Panier", bm, MATS, lissage="tout", pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))
     corps, eclats, fx = chaton(mp)
+    from pirate_perroquet import grandir
+    grandir(corps, mp @ Vector((0, 0, 0)), GRAND)   # même agrandissement que le panier
     C.parenter(corps, pan)
     e = C.reperes_effets(eclats, fx=fx)
     tete = next(o for o in corps.children if o.name == "Anim_TeteChaton")

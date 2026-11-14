@@ -36,7 +36,9 @@ import commun_animaux as A  # noqa: E402
 
 NOM = "bois_cerf"
 POINT = "PointChapeau"
-MATS = ["M5_BoisCerf", "M5_PetaleCerf", "M5_FeuilleVerte", "M5_DoreDeco"]  # 0..3
+# V7 (lot 10) : bois CARAMEL dodus à bouts crème, sur un serre-tête brun (nouvelle icône)
+MATS = ["M7_BoisCaramel", "M5_PetaleCerf", "M5_FeuilleVerte", "M5_JauneVerni", "M7_BoutCreme",
+        "M5_SangleBrune"]  # 0..5
 K = 0.88                      # échelle des bois (le haut reste sous 2,5 m)
 
 
@@ -47,19 +49,19 @@ def bois(bm, s, base):
         return base + Vector((s * x, y, z)) * K
     merrain = [P(0, 0, -0.02), P(0.06, 0.0, 0.12), P(0.17, -0.02, 0.25), P(0.29, -0.04, 0.35),
                P(0.38, -0.03, 0.47), P(0.43, 0.0, 0.60)]
-    C.bm_tube(bm, merrain, 0.05, cotes=7, mat=0, rayons=[1.0, 0.95, 0.85, 0.72, 0.6, 0.42])
-    C.bm_sphere(bm, 0.021 * K * 1.0, merrain[-1], segments=6, anneaux=4, mat=0)
+    C.bm_tube(bm, merrain, 0.075, cotes=7, mat=0, rayons=[1.0, 0.95, 0.9, 0.82, 0.75, 0.62])
+    C.bm_sphere(bm, 0.047, merrain[-1], segments=8, anneaux=5, mat=4)   # bout crème arrondi
     pointes = [merrain[-1]]
     for depuis, vers, r0 in ((1, (0.10, 0.17, 0.24), 0.034), (2, (0.18, 0.04, 0.46), 0.034),
                              (3, (0.25, 0.03, 0.55), 0.03)):
         a = merrain[depuis]
         b = P(*vers)
         mid = a.lerp(b, 0.5) + Vector((0, 0, 0.03))
-        C.bm_tube(bm, [a, mid, b], r0, cotes=6, mat=0, rayons=[1.0, 0.8, 0.5])
-        C.bm_sphere(bm, r0 * 0.5, b, segments=6, anneaux=4, mat=0)
+        C.bm_tube(bm, [a, mid, b], r0 * 1.5, cotes=7, mat=0, rayons=[1.0, 0.9, 0.75])
+        C.bm_sphere(bm, r0 * 1.5 * 0.75, b, segments=8, anneaux=5, mat=4)   # bout crème
         pointes.append(b)
     # meule : bague bosselée à la base
-    meule = C.bm_tore(bm, 0.05, 0.022, segments=10, segments_tube=5, mat=0)
+    meule = C.bm_tore(bm, 0.07, 0.025, segments=12, segments_tube=5, mat=0)
     axe = (merrain[1] - merrain[0]).normalized()
     bmesh.ops.transform(bm, matrix=A.matrice_vers(merrain[0] + axe * 0.03, axe), verts=meule)
     return pointes, merrain
@@ -90,6 +92,10 @@ def construire():
         pointes, merrain = bois(bm, s, base)
         toutes += pointes
         tiges[s] = merrain
+    # V7 (lot 10) : serre-tête brun qui passe sur le crâne d'un bois à l'autre (icône)
+    arc = [A.surface((0.0, 1.62, -0.01), math.radians(a), math.radians(58 + 22 * math.cos(math.radians(a))),
+                     0.012, fenetre=(0.0, 0.14))[0] for a in range(-90, 91, 15)]
+    C.bm_tube(bm, arc[1:-1], 0.022, cotes=6, mat=5)
     # la feuille : accrochée près de la fleur du bois gauche
     a = tiges[1][2]
     m = C.repere(a + Vector((0.06, 0.07, -0.02)), Vector((0.3, 1, 0.4)).normalized())

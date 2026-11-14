@@ -34,7 +34,7 @@ import commun_animaux as A  # noqa: E402
 
 NOM = "truffe"
 POINT = "PointVisage"
-MATS = ["M5_TruffeNoire", "M5_TruffeNarine", "M5_Reflet"]  # 0..2
+MATS = ["M5_TruffeNoire", "M5_TruffeNarine", "M5_Reflet", "M5_NezRose"]  # 0..3
 
 
 def contour_truffe(l, h, n=20):
@@ -54,22 +54,22 @@ def construire():
     p, _ = A.sur_museau(0.0, 1.34, 0.0)
     # normale « moyenne » du bout du museau (il pique de 18° vers le bas) : plus stable
     # que la normale d'une seule face touchée par le rayon
-    n = Vector((0.0, math.cos(math.radians(14)), -math.sin(math.radians(14))))
+    n = Vector((0.0, math.cos(math.radians(14)), 0.25 - math.sin(math.radians(14)))).normalized()   # V7 : un peu vers la caméra
     centre = p + n * 0.03
     m = C.repere(centre, n)
     bm = bmesh.new()
-    C.bm_coussin(bm, contour_truffe(0.33, 0.24), 0.05, 0.17, m, mat=0, anneaux=3)
+    # V7 (lot 10) : plus grosse, très bombée et lisse, comme la nouvelle icône
+    C.bm_coussin(bm, contour_truffe(0.38, 0.28, n=28), 0.06, 0.20, m, mat=0, anneaux=4)
     # narines : deux virgules creusées (posées dans le bombé, mat)
     for s in (-1, 1):
-        virgule = [(s * x, z) for x, z in ((0.0, 0.018), (0.035, 0.02), (0.05, 0.0),
-                                           (0.035, -0.022), (0.012, -0.03), (0.005, -0.01))]
-        if s < 0:
-            virgule.reverse()
-        C.bm_plaque(bm, virgule, 0.02, m @ Matrix.Translation((s * 0.04, 0.075, -0.015)),
-                    mat=1)
+        # V7 : narines OVALES nettes (icône), posées sur le devant bombé
+        C.bm_coussin(bm, C.contour_ellipse(0.028, 0.042, n=14), 0.01, 0.015,
+                     m @ Matrix.Translation((s * 0.06, 0.098, 0.0)) @ Matrix.Rotation(math.radians(-s * 15), 4, "Y"),
+                     mat=1, anneaux=1, dos_plat=True)
     # sillon : une petite barre mate sous la truffe, au milieu
-    C.bm_plaque(bm, C.contour_rectangle_arrondi(0.014, 0.06, 0.006, par_coin=1), 0.02,
-                m @ Matrix.Translation((0, 0.06, -0.075)), mat=1)
+    # V7 (lot 10) : petit bout de langue rose qui dépasse sous la truffe (icône)
+    C.bm_coussin(bm, C.contour_ellipse(0.045, 0.05, n=16), 0.02, 0.04,
+                 m @ Matrix.Translation((0.0, 0.03, -0.15)), mat=3, anneaux=2)
     C.bm_reflet(bm, m @ Matrix.Translation((0.07, 0.07, 0.05)), mat=2, echelle=1.1)
     truffe = C.piece("Anim_Truffe", bm, MATS, lissage="tout", pivot=centre)
     return C.racine_v5(NOM, POINT, [truffe])

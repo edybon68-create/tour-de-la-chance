@@ -51,8 +51,8 @@ import commun_animaux as A  # noqa: E402
 NOM = "ruche"
 POINT = "PointChapeau"
 # 5 matières (bible §13.7, Super rare) : yeux et ficelle dans le brun des rayures.
-MATS = ["M5_PotMiel", "M5_Miel", "M5_AbeilleJaune", "M5_AbeilleBrune", "M5_AileAbeille",
-        "M5_AbeilleBrune", "M5_AbeilleBrune"]  # 0..6
+MATS = ["M7_RuchePaille", "M5_Miel", "M5_AbeilleJaune", "M5_AbeilleBrune", "M5_AileAbeille",
+        "M5_AbeilleBrune", "M5_AbeilleBrune", "M7_RucheEntree"]  # 0..7 (V7 : ruche en paille dorée)
 CENTRE_ORBITES = (0.0, 2.0, 0.03)
 # rayon, inclinaison vers l'avant (°, devant en haut), inclinaison de côté (°), angle de départ
 ORBITES = [(0.50, 14, 8, 30), (0.58, 10, -12, 160), (0.46, 18, 4, 270)]
@@ -60,28 +60,40 @@ RB = 0.065                       # rayon d'une abeille
 
 
 def pot():
+    """V7 (lot 10) : la nouvelle icône montre une vraie RUCHE en paille (« skep ») : quatre
+    gros anneaux dorés empilés qui rétrécissent vers le haut, une entrée ronde sombre devant
+    et du miel qui coule du sommet. L'objet garde son nom « Pot » (le code le cherche)."""
     base = C.U(0.0, 1.87, 0.04)
     bm = bmesh.new()
-    profil = [(0.0, 0.0), (0.09, 0.0), (0.125, 0.05), (0.135, 0.11), (0.115, 0.17),
-              (0.085, 0.195), (0.09, 0.215), (0.075, 0.22), (0.0, 0.205)]
-    C.bm_revolution(bm, profil, 14, mats=[0] * 8)
-    # ficelle sous le col
-    C.bm_tore(bm, 0.093, 0.012, segments=14, segments_tube=4, mat=6,
-              matrice=Matrix.Translation((0, 0, 0.19)))
-    # miel : bourrelet ondulé sur le haut + 3 coulures
-    C.bm_tore(bm, 0.07, 0.03, segments=14, segments_tube=5, mat=1,
-              matrice=Matrix.Translation((0, 0, 0.225)),
-              rayon_fn=lambda a: 0.03 + 0.008 * math.cos(3 * a))
-    for k, (a, L) in enumerate(((0.6, 0.10), (2.4, 0.07), (4.3, 0.12))):
+    # profil : 4 bourrelets (rayon, hauteur) de bas en haut, puis le dôme
+    profil = [(0.0, 0.0), (0.15, 0.0)]
+    anneaux = [(0.205, 0.0, 0.10), (0.19, 0.10, 0.19), (0.165, 0.19, 0.27), (0.13, 0.27, 0.34)]
+    for r, z0, z1 in anneaux:
+        for k in range(1, 4):
+            t = k / 4
+            profil.append((r * (0.86 + 0.14 * math.sin(math.pi * t)), z0 + (z1 - z0) * t))
+        profil.append((r * 0.86, z1))
+    profil += [(0.09, 0.375), (0.0, 0.39)]
+    C.bm_revolution(bm, profil, 16, mats=[0] * (len(profil) - 1))
+    # entrée ronde sombre, devant (+Y), sur le premier anneau
+    m = C.repere(Vector((0, 0.205, 0.05)), Vector((0, 1, 0.1)).normalized())
+    C.bm_coussin(bm, C.contour_ellipse(0.045, 0.04, n=12), 0.01, 0.02, m, mat=7, anneaux=1,
+                 dos_plat=True)
+    # miel : une flaque bombée sur le sommet + 3 coulures qui descendent sur les anneaux
+    C.bm_tore(bm, 0.075, 0.035, segments=12, segments_tube=4, mat=1,
+              matrice=Matrix.Translation((0, 0, 0.365)),
+              rayon_fn=lambda a: 0.035 + 0.01 * math.cos(3 * a))
+    for k, (a, L) in enumerate(((1.2, 0.12), (2.1, 0.08), (0.4, 0.15))):
         d = Vector((math.cos(a), math.sin(a), 0))
-        haut = d * 0.098 + Vector((0, 0, 0.215))
-        chemin = [haut, d * 0.122 + Vector((0, 0, 0.17)), d * 0.135 + Vector((0, 0, 0.215 - L))]
-        C.bm_tube(bm, chemin, 0.022, cotes=5, mat=1, rayons=[1.0, 0.9, 1.15])
+        chemin = [d * 0.10 + Vector((0, 0, 0.36)), d * 0.135 + Vector((0, 0, 0.31)),
+                  d * 0.15 + Vector((0, 0, 0.34 - L))]
+        C.bm_tube(bm, chemin, 0.022, cotes=5, mat=1, rayons=[1.0, 0.85, 1.2])
+        C.bm_sphere(bm, 0.026, chemin[-1], segments=6, anneaux=4, mat=1)
     bmesh.ops.translate(bm, vec=base, verts=bm.verts)
     obj = C.piece("Pot", bm, MATS, lissage="tout", pivot=base)
-    eclats = [base + Vector((0.05, 0.06, 0.26)), base + Vector((0.08, 0.1, 0.12)),
-              base + Vector((-0.06, 0.04, 0.26))]
-    for e in C.reperes_effets(eclats, fx=base + Vector((0, 0, 0.32))):
+    eclats = [base + Vector((0.05, 0.06, 0.40)), base + Vector((0.10, 0.12, 0.25)),
+              base + Vector((-0.06, 0.04, 0.40))]
+    for e in C.reperes_effets(eclats, fx=base + Vector((0, 0, 0.46))):
         C.parenter(e, obj)
     return obj
 
@@ -99,7 +111,7 @@ def abeille(n, centre):
                 matrice=A.matrice_vers(Vector((-RB * 1.08, 0, 0)), Vector((-1, 0, 0))))
     for s in (-1, 1):                           # yeux devant, antennes
         A.oeil_mignon(bm, Vector((RB * 0.95, s * RB * 0.38, RB * 0.2)),
-                      Vector((1, s * 0.4, 0.1)), RB * 0.24, 5, 5, hauteur=1.2)
+                      Vector((1, s * 0.4, 0.1)), RB * 0.24, 4, 4, hauteur=1.2)
         bout = Vector((RB * 1.3, s * RB * 0.5, RB * 1.5))
         C.bm_tube(bm, [Vector((RB * 0.7, s * RB * 0.3, RB * 0.75)), bout], 0.008, cotes=4, mat=3)
         C.bm_sphere(bm, 0.014, bout, segments=5, anneaux=3, mat=3)
