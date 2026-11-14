@@ -45,7 +45,7 @@
     - révélation propre à chaque Secret ; *(14/11 : tentacules du Kraken, écran sombre des Abysses, lever de soleil du Lion, bulles et baleine)*
     - textures dessinées des skins ; *(14/11 : 17 textures branchées, carte de lumière comprise ; `v7_fiche_animal_tigre.png`, `v7_fiche_pirate_or_maudit.png`)*
     - animation de l'échange (pièces volantes) ; *(14/11 : 10 pièces en 1,3 s, décalées, « tic » du solde à chaque arrivée)*
-    - pictogramme « pas encore vu » de l'Index ;
+    - pictogramme « pas encore vu » de l'Index ; *(14/11 : icône `pas_encore_vu.png` rendue dans Blender — gros « ? » violet en vinyle sur un socle cerclé d'or, lisible à 96 px sur fond sombre — dans `Assets/Art/icones_detourees/` ; reste au programmeur à remplacer le « ? » dessiné par le code)*
     - mesure des performances au Profiler.
 11. [x] *(14/11 : §17.5, puis retour 13)* **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
 

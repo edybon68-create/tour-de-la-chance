@@ -532,3 +532,41 @@ def construire_categorie_animaux():
                      mat=0, mat_dos=1, anneaux=3)
     objet("Patte", bm, [patte, patte_f], racine, angle=60, biseau=0.02, seg=2)
     return racine
+
+
+# =========================================================================================
+# Point 10 : pictogramme « pas encore vu » de l'Index
+# =========================================================================================
+def construire_pas_encore_vu():
+    """Un gros point d'interrogation dodu en vinyle violet (lettre extrudée et très arrondie),
+    posé sur un petit socle rond lavande cerclé d'or, avec deux éclats. Lisible à 96 px sur
+    une case sombre : une seule forme claire et contrastée, un liseré clair (le socle)."""
+    C.nouvelle_scene()
+    racine = C.vide("PasEncoreVu")
+    violet = matiere("Violet", "#9B5CF6", 0.32, vernis=0.5)
+    violet_f = matiere("VioletFonce", "#6A34C8", 0.36, vernis=0.4)
+    socle_m = matiere("Socle", "#D9CCF5", 0.4, vernis=0.3)
+    or_ = matiere("Or", "#FFC83A", 0.3, metal=0.5, vernis=0.35)
+    # le « ? » construit à la main (la police de Blender donnait un crochet pointu et un
+    # point collé à la tige) : un gros tube rond qui suit le crochet, et une boule séparée.
+    # Plan XZ, face vers +Y (la caméra des icônes).
+    chemin = []
+    for k in range(15):                      # crochet : de -150° (gauche) à -30° (bas droite)
+        a = math.radians(160 - 230 * k / 14)
+        chemin.append(Vector((-0.48 * math.cos(a), 0, 2.05 + 0.48 * math.sin(a))))   # (−x : vu de face)
+    fin = chemin[-1]
+    chemin += [fin.lerp(Vector((0.0, 0, 1.32)), t) for t in (0.4, 0.75)] + [Vector((0.0, 0, 1.25)),
+                                                                         Vector((0.0, 0, 1.12))]
+    bm = bmesh.new()
+    C.bm_tube(bm, chemin, 0.25, cotes=20, mat=0, haut=Vector((0, 1, 0)))
+    for bout in (chemin[0], chemin[-1]):     # bouts arrondis
+        C.bm_sphere(bm, 0.25, bout, segments=20, anneaux=12, mat=0)
+    C.bm_sphere(bm, 0.28, (0.0, 0.0, 0.52), segments=24, anneaux=14, mat=0)   # le point
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-4)
+    q = objet("Question", bm, [violet, violet_f], racine, angle=60)
+    q.rotation_euler = (0, math.radians(-8), 0)          # un peu penché (vivant)
+    # socle rond, tranche dorée
+    prof = [(0.0, 0.0), (0.78, 0.0), (0.84, 0.06), (0.84, 0.16), (0.78, 0.22), (0.0, 0.22)]
+    revolution("Socle", prof, [0, 1, 1, 1, 0], [socle_m, or_], racine, 40)
+    eclats(racine, [Vector((1.05, 0.3, 2.45)), Vector((-1.0, 0.3, 1.2))], taille=0.25)
+    return racine

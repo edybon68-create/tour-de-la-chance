@@ -445,6 +445,8 @@ ICONES = {
     "echange_coffre": dict(source=("fonction", "objets_icones_v7.construire_echange_coffre"), elevation=28, hauteur=0.70),
     "echange_malle": dict(source=("fonction", "objets_icones_v7.construire_echange_malle"), elevation=28, largeur=0.82),
     "echange_tonneau": dict(source=("fonction", "objets_icones_v7.construire_echange_tonneau"), elevation=28, rotation=30, largeur=0.84),
+    # V7, point 10 : pictogramme « pas encore vu » de l'Index
+    "pas_encore_vu": dict(source=("fonction", "objets_icones_v7.construire_pas_encore_vu"), elevation=12, rotation=0),
     "echange_montagne": dict(source=("fonction", "objets_icones_v7.construire_echange_montagne"), elevation=22, largeur=0.86),
 }
 
