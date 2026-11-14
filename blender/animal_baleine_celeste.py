@@ -68,13 +68,19 @@ CAP = Vector((1.0, -0.35, 0.30))   # Blender : elle nage vers la gauche de l'ima
 SEG = 14
 
 
+ECHELLE_V7 = 1.35
+
+
 def matrice_pose():
     """Repère local de la baleine : +X = vers où elle nage, +Z = son dos."""
     x = CAP.normalized()
     z = Vector((0, 0, 1))
     y = z.cross(x).normalized()
     z = x.cross(y)
-    return Matrix.Translation(C.U(*POSE)) @ Matrix((x, y, z)).transposed().to_4x4()
+    # V7 : × 1,35 (0,80 -> 1,08 m). Le QA la trouvait « loin et petite » : sa trajectoire en 8
+    # est imposée par le code (AccessoryRig.AnimateWhale), seule sa taille peut grandir.
+    return Matrix.Translation(C.U(*POSE)) @ Matrix((x, y, z)).transposed().to_4x4() \
+        @ Matrix.Scale(ECHELLE_V7, 4)
 
 
 def corps(bm):

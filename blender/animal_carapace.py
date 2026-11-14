@@ -44,7 +44,7 @@ RX, RY, RZ = 0.62, 0.50, 0.30      # demi-largeur, demi-hauteur, épaisseur du d
 def dome(bm):
     """Dôme : demi-ellipsoïde dont la face plate regarde le cheval (vers l'avant, +Y)."""
     c = C.U(*CENTRE)
-    n_a, n_e = 18, 5
+    n_a, n_e = 24, 7          # V7 : 18 × 5 -> 24 × 7 (dôme plus rond)
     rangs = []
     for j in range(n_e + 1):
         e = (math.pi / 2) * j / n_e         # 0 = le bord, π/2 = le sommet (vers l'arrière)
@@ -69,7 +69,9 @@ def dome(bm):
     plastron = bm.faces.new(devant)
     for f in faces:
         f.material_index = 0
-    plastron.material_index = 1        # le « plastron » clair, vu sur les côtés
+    # V7 : le plastron était jaune clair. Vu du jeu (de face), on ne voyait que ce disque
+    # jaune et son bourrelet : un « tambourin ». Il prend la couleur de l'écaille (vert).
+    plastron.material_index = 0
     faces.append(plastron)
     bmesh.ops.recalc_face_normals(bm, faces=faces)
     # bourrelet jaune sur le bord
@@ -78,14 +80,15 @@ def dome(bm):
         a = 2 * math.pi * k / n_a
         bord.append(c + Vector(((RX + 0.01) * math.cos(a), -0.015, (RY + 0.01) * math.sin(a))))
     hauts = [(p - c).normalized() for p in bord]
-    C.bm_balayage_surface(bm, bord, hauts, [(-0.05, -0.035), (0.05, -0.035), (0.06, 0.0),
-                                            (0.05, 0.035), (-0.05, 0.035), (-0.06, 0.0)],
+    # V7 : bourrelet plus mince (il lisait comme le cercle d'un tambourin)
+    C.bm_balayage_surface(bm, bord, hauts, [(-0.035, -0.025), (0.035, -0.025), (0.042, 0.0),
+                                            (0.035, 0.025), (-0.035, 0.025), (-0.042, 0.0)],
                           mat=1, ferme=True)
     # 12 bosses de bord (petites écailles marginales)
     for k in range(10):
         a = 2 * math.pi * (k + 0.5) / 10
         p = c + Vector(((RX + 0.05) * math.cos(a), -0.05, (RY + 0.05) * math.sin(a)))
-        A.bm_ellipsoide(bm, p, (0.05, 0.035, 0.04), segments=6, anneaux=3, mat=1)
+        A.bm_ellipsoide(bm, p, (0.05, 0.035, 0.04), segments=8, anneaux=4, mat=0)
     return c
 
 
