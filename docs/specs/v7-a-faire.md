@@ -196,3 +196,5 @@
     - **refaire l'interface « i » / Contenu et taux** des boîtes (jugée « dégueulasse ») dans le style Casier/Renaissance.
 16. [ ] **Contours noirs** : en enlever là où ils rendent le texte illisible (garder où c'est beau).
 17. [ ] **Qualité 3D (demande personnelle forte)** : beaucoup de skins/accessoires 3D sont laids et ne ressemblent pas à leur icône. Refaire les modèles au niveau de l'icône (règles ajoutées à `.claude/agents/artiste-3d.md`), et régénérer avec Gemini les icônes qui ne sont pas incroyables. Le jeu doit être parfait.
+
+> 14/11 : l'auteur adore L'Ascension et le reste de la V7 (« continue comme ça, on vise la perfection »). Il ne touchera plus à son ordinateur jusqu'à son retour : **ne lui poser aucune question**, tout décider seul, ne jamais attendre une réponse. Son mode Play ne tournera plus : l'éditeur est à nous.
