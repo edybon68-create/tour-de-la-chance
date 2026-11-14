@@ -699,3 +699,5 @@
 .up7-pied { margin: 12px 0 24px 0; }
 .up7-carte > * { flex-shrink: 0; }
 .up7-effet { height: 136px; margin-top: 12px; }
+/* v7 point 10 : numéros d'étage de L'Ascension encore un peu plus grands. */
+.asc-numero { font-size: 46px; height: 60px; -unity-text-outline-width: 4px; }

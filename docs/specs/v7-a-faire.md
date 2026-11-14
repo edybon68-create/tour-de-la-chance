@@ -40,11 +40,11 @@
    - *Fait le 14/11* : les 60 modèles ont été rendus sur le cheval (vues jeu, 3/4 et profil) avec `blender/revue_modeles.py`. 12 ont été corrigés : longue-vue, ancre, foulard, navire, tricorne, carapace, baleine, casquette, auréole, planète, plus la doublure des 5 coffres. Planches : `docs/captures/v7_modeles_*.png`. Aucun `attachOffset` à changer.
 9. [ ] **Inspection QA complète**, puis ajout de ses trouvailles à cette liste et correction.
 10. [ ] **Restes connus** :
-    - particules des objets rares ;
-    - réactions après un piège ;
-    - révélation propre à chaque Secret ;
+    - particules des objets rares ; *(14/11 : fumée de l'Or maudit, bulles du Lagon, gouttes du Kraken, réserve créée d'avance, moitié en Faible ; restent celles des accessoires : baleine, navire, bocal)*
+    - réactions après un piège ; *(14/11 : petit tremblement après l'écrasement, APRÈS la révélation)*
+    - révélation propre à chaque Secret ; *(14/11 : tentacules du Kraken, écran sombre des Abysses, lever de soleil du Lion, bulles et baleine)*
     - textures dessinées des skins ; *(14/11 : 17 textures branchées, carte de lumière comprise ; `v7_fiche_animal_tigre.png`, `v7_fiche_pirate_or_maudit.png`)*
-    - animation de l'échange (pièces volantes) ; *(14/11 : faite, 10 pièces vers le solde)*
+    - animation de l'échange (pièces volantes) ; *(14/11 : 10 pièces en 1,3 s, décalées, « tic » du solde à chaque arrivée)*
     - pictogramme « pas encore vu » de l'Index ;
     - mesure des performances au Profiler.
 11. [x] *(14/11 : §17.5, puis retour 13)* **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
@@ -290,7 +290,7 @@
     - « Risque : 29 % > 27 % » est minuscule.
 
     *Capture* : `qa_v7p2_ameliorations_1280.png`.
-13. [ ] *(en partie 14/11 : reprise et boutons lisibles, plus de « 2 % » en double ; restent la carte qui cache le cheval et les coffres d'argent qui deviennent or à l'ouverture)* **Partie** :
+13. [ ] *(14/11 : reprise et boutons lisibles, plus de « 2 % » en double, carte « Reprise réussie » raccourcie à 0,9 s ; reste : les coffres d'argent qui deviennent or à l'ouverture, côté 3D)* **Partie** :
     - « Reprise 1 sur 5 · Tu as 4 » en tout petit, peu contrasté (`qa_v7p2_piege_1280.png`) ;
     - les boutons « Oui, continuer » et « Annuler » ont un texte petit (`qa_v7p2_continuer_confirm_1280.png`) ;
     - la carte « Reprise réussie » cache entièrement le cheval pendant quelques secondes (`qa_v7p2_apres_reprise_1280.png`), et la carte des détails aussi (`qa_v7p2_carte_details_1280.png`). Cette carte répète « 2 % » et « +29 % » (pastilles, puis ligne du bas) ;

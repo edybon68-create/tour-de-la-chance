@@ -228,8 +228,11 @@ namespace TourDeLaChance
 
             // 1. Écrasement (0,12 s). Le penché du suspense revient à 0.
             yield return Phase(0.12f, Ease.Out, k => { actionScale = Vector3.Lerp(s0, flat, k); leanX = Mathf.Lerp(lean0, 0f, k); });
-            // 2. Maintien 0,25 s.
+            // 2. Maintien 0,25 s, puis (v7, point 10) un petit tremblement de 0,5 s : il a eu
+            //    peur. Ceci arrive APRÈS la révélation du piège : le suspense reste le même.
             yield return new WaitForSeconds(0.25f);
+            yield return Phase(0.5f, Ease.Out, k => { spinY = 4f * Mathf.Sin(k * Mathf.PI * 10f) * (1f - k); });
+            spinY = 0f;
             // 3. Tête basse (0,4 s) : penché de 12°, respiration ralentie.
             headDown = true;
             breathing = true;

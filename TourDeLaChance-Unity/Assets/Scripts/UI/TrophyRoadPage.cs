@@ -588,7 +588,7 @@ namespace TourDeLaChance
                 var number = ShopUi.NewLabel(f.ToString(), "asc-numero");
                 if (unexplored) number.AddToClassList("asc-numero--inexplore");
                 number.style.left = NumberCenterX - 40f;
-                number.style.top = centerY - 24f;
+                number.style.top = centerY - 30f; // v7 : numéro de 60 px de haut
                 // Caché à l'étage du record : la pilule le montre déjà.
                 if (f == record) number.style.visibility = Visibility.Hidden;
                 numbers.Add(number);

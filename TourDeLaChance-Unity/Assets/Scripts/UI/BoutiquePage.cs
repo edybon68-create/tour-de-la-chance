@@ -932,19 +932,35 @@ namespace TourDeLaChance
                 coin.style.left = from.x - 18f; coin.style.top = from.y - 18f;
                 coin.style.opacity = 0f;
                 page.Add(coin);
-                flyingCoins.Add((coin, from + new Vector2((i - 4.5f) * 8f, 0f), to, now + i * 0.04f));
+                flyingCoins.Add((coin, from + new Vector2((i - 4.5f) * 8f, 0f), to, now + i * CoinStagger));
             }
         }
+
+        // v7 (point 10) : vol plus long (1,3 s) et plus étalé, pour qu'on voie les pièces arriver.
+        const float CoinFlight = 1.3f, CoinStagger = 0.09f;
+        float coinBumpAt = -10f;
 
         void TickFlyingCoins()
         {
             float now = Time.realtimeSinceStartup;
+            // Le « tic » : la pièce du solde passe à 1,35 puis revient à 1 en 0,15 s.
+            var balanceCoin = balanceRow.Q<VisualElement>(className: "coin");
+            if (balanceCoin != null)
+            {
+                float b = Mathf.Clamp01(1f - (now - coinBumpAt) / 0.15f);
+                balanceCoin.style.scale = new Scale(new Vector3(1f + 0.35f * b, 1f + 0.35f * b, 1f));
+            }
             for (int i = flyingCoins.Count - 1; i >= 0; i--)
             {
                 var (coin, from, to, start) = flyingCoins[i];
-                float u = (now - start) / 0.7f;
+                float u = (now - start) / CoinFlight;
                 if (u < 0f) continue;
-                if (u >= 1f || coin.panel == null) { coin.RemoveFromHierarchy(); flyingCoins.RemoveAt(i); continue; }
+                if (u >= 1f || coin.panel == null)
+                {
+                    coin.RemoveFromHierarchy(); flyingCoins.RemoveAt(i);
+                    coinBumpAt = now; // le « tic » du solde : il gonfle un instant à chaque pièce
+                    continue;
+                }
                 // Une courbe : la pièce monte un peu avant de filer vers le solde.
                 var pos = Vector2.Lerp(from, to, Ease.InOut(u)) + Vector2.up * (-90f * Mathf.Sin(u * Mathf.PI));
                 coin.style.left = pos.x - 18f; coin.style.top = pos.y - 18f;

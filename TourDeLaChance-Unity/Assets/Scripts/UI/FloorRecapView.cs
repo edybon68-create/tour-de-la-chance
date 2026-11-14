@@ -45,7 +45,8 @@ namespace TourDeLaChance
         const float BigTimeBanner = 2.6f;// …plus longtemps s'il y a une bannière spéciale
         const float FoldTime = 0.3f;     // se range en barre compacte
         const float QuickFoldTime = 0.15f; // rangée aussitôt (survol d'un coffre, choix…)
-        const float ReopenTime = 2.0f;   // v7 : un clic sur la barre rouvre la carte 2 s (toutes les infos)
+        const float ReopenTime = 2.0f;
+        const float ReviveTime = 0.9f;   // v7 : carte « Reprise réussie » raccourcie   // v7 : un clic sur la barre rouvre la carte 2 s (toutes les infos)
 
         enum Phase { Hidden, Arriving, Big, Folding, Compact }
         Phase phase = Phase.Hidden;
@@ -305,6 +306,9 @@ namespace TourDeLaChance
             Fill();
             SetDetailed(false);
             bigDuration = sticker.text.Length > 0 ? BigTimeBanner : BigTime;
+            // v7 (point 13) : après une reprise, la carte ne reste qu'un instant : elle ne cache
+            // plus le cheval (le détail reste à un clic, sur la barre).
+            if (game.RevivedThisFloor) bigDuration = ReviveTime;
             SetPhase(Phase.Arriving);
             if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RecapEtage);
             if ((game.NewRecordThisFloor || game.TrophyDiamondsThisFloor > 0) && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Record);

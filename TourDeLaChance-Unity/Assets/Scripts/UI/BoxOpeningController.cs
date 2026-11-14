@@ -646,6 +646,71 @@ namespace TourDeLaChance
                     }
                 }
             }
+            DrawSecretTouch(r, p, since, k);
+        }
+
+        /// v7 (point 10, catalogue v5) : la touche PROPRE à chaque Secret, en plus de celle de sa
+        /// famille, pendant les mêmes 1,2 s après l'impact (donc après la révélation : rien n'est
+        /// annoncé à l'avance). Dessins simples, par le code.
+        static void DrawSecretTouchCurve(Painter2D p, Vector2 a, Vector2 b, Vector2 c, float width, Color col)
+        {
+            p.strokeColor = col; p.lineWidth = width; p.lineCap = LineCap.Round;
+            p.BeginPath(); p.MoveTo(a); p.QuadraticCurveTo(b, c); p.Stroke();
+        }
+
+        void DrawSecretTouch(Rect r, Painter2D p, float since, float k)
+        {
+            float bell = Mathf.Sin(Mathf.Clamp01(k) * Mathf.PI); // 0 → 1 → 0
+            switch (current.Item != null ? current.Item.Id : "")
+            {
+                case "pirate_kraken":
+                {
+                    // Deux tentacules violets jaillissent des coins bas, s'enroulent, redescendent.
+                    var col = new Color(0.55f, 0.25f, 0.75f, 0.9f);
+                    for (int side = 0; side < 2; side++)
+                    {
+                        float x0 = side == 0 ? 0f : r.width, dir = side == 0 ? 1f : -1f;
+                        var a = new Vector2(x0, r.height);
+                        var b = new Vector2(x0 + dir * r.width * 0.05f, r.height * (1f - 0.6f * bell));
+                        var c = new Vector2(x0 + dir * r.width * (0.12f + 0.06f * Mathf.Sin(since * 6f)), r.height * (1f - 0.75f * bell));
+                        DrawSecretTouchCurve(p, a, b, c, 46f * bell + 4f, col);
+                        p.fillColor = new Color(0.95f, 0.75f, 1f, 0.9f * bell);
+                        p.BeginPath(); p.Arc(Vector2.Lerp(a, c, 0.6f), 10f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill(); // ventouse
+                    }
+                    break;
+                }
+                case "pirate_abysses":
+                    // L'écran s'assombrit à 80 % : seule la lanterne de la carte éclaire.
+                    p.fillColor = new Color(0.02f, 0.03f, 0.08f, 0.8f * bell);
+                    p.BeginPath(); p.MoveTo(Vector2.zero); p.LineTo(new Vector2(r.width, 0f)); p.LineTo(new Vector2(r.width, r.height)); p.LineTo(new Vector2(0f, r.height)); p.ClosePath(); p.Fill();
+                    break;
+                case "animal_lion_soleil":
+                {
+                    // Un lever de soleil : un fond orange monte du bas, avec un demi-soleil.
+                    float top = r.height * (1f - 0.55f * bell);
+                    p.fillColor = new Color(1f, 0.6f, 0.15f, 0.45f * bell);
+                    p.BeginPath(); p.MoveTo(new Vector2(0f, top)); p.LineTo(new Vector2(r.width, top)); p.LineTo(new Vector2(r.width, r.height)); p.LineTo(new Vector2(0f, r.height)); p.ClosePath(); p.Fill();
+                    p.fillColor = new Color(1f, 0.85f, 0.35f, 0.6f * bell);
+                    p.BeginPath(); p.Arc(new Vector2(r.width * 0.5f, r.height), r.height * 0.35f * bell, Angle.Degrees(180f), Angle.Degrees(360f)); p.Fill();
+                    break;
+                }
+                case "baleine_celeste":
+                {
+                    // Des bulles d'étoiles montent, et la silhouette de la baleine traverse le fond.
+                    for (int i = 0; i < 14; i++)
+                    {
+                        float x = r.width * ((i * 0.137f + 0.05f) % 1f);
+                        float y = r.height * (1.05f - Mathf.Repeat(k * 1.3f + i * 0.07f, 1.1f));
+                        p.fillColor = new Color(0.8f, 0.9f, 1f, 0.7f * bell);
+                        p.BeginPath(); p.Arc(new Vector2(x, y), 6f + (i % 3) * 4f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();
+                    }
+                    float wx = Mathf.Lerp(-r.width * 0.3f, r.width * 1.3f, k), wy = r.height * 0.3f;
+                    p.fillColor = new Color(0.35f, 0.45f, 0.85f, 0.35f * bell);
+                    p.BeginPath(); p.Arc(new Vector2(wx, wy), 70f, Angle.Degrees(0f), Angle.Degrees(360f)); p.Fill();          // corps
+                    p.BeginPath(); p.MoveTo(new Vector2(wx - 60f, wy)); p.LineTo(new Vector2(wx - 140f, wy - 45f)); p.LineTo(new Vector2(wx - 140f, wy + 45f)); p.ClosePath(); p.Fill(); // queue
+                    break;
+                }
+            }
         }
 
         /// Échelle de la carte : 0,5 → pic (1,15 ou 1,3) → 1 en 0,3 s (0,6 s pour le Légendaire).
