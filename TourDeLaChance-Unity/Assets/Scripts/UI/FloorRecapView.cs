@@ -245,12 +245,10 @@ namespace TourDeLaChance
             Show(rarityLine, precious);
 
             // Les mentions détaillées (seulement si non nulles / actives).
+            // QA v7 p2 n°13 : seulement ce que les pastilles ne disent pas déjà (pas de « 2 % » en double).
             var m = new List<string>();
-            if (setup.DiamondChancePermille > 0)
-                m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%"
-                      + (setup.DiamondBonusPercent > 0 ? $" · tenue {ShopUi.Diamant} +{setup.DiamondBonusPercent}\u00A0%" : ""));
-            if (setup.OutfitBonusPercent > 0) m.Add($"Tenue +{setup.OutfitBonusPercent}\u00A0%");
-            if (setup.RebirthMultiplier > 1) m.Add($"Renaissance ×{setup.RebirthMultiplier}");
+            if (setup.DiamondBonusPercent > 0) m.Add($"Bonus de diamants de ta tenue : +{setup.DiamondBonusPercent}\u00A0%");
+            if (setup.OutfitBonusPercent > 0) m.Add($"Bonus de pièces de ta tenue : +{setup.OutfitBonusPercent}\u00A0%");
             mentions.text = string.Join("   ·   ", m);
             Show(mentions, m.Count > 0);
 

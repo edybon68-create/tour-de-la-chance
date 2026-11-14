@@ -84,6 +84,8 @@ namespace TourDeLaChance
         public async void Open()
         {
             confirm.style.display = DisplayStyle.None;
+            // QA v7 p2 n°3 : le record manquant entre dans le classement local (règle dans le service).
+            if (Leaderboard.Service is LocalLeaderboardService) LocalLeaderboardService.CatchUpRecord(Leaderboard.CurrentScores().etage);
             await Leaderboard.TrySendPendingAsync(); // en ligne : ce qui attendait part maintenant
             Refresh();
         }
@@ -117,7 +119,7 @@ namespace TourDeLaChance
                         : $"Secrets obtenus : {scores.secrets}";
             bool online = Leaderboard.Service.IsOnline;
             info.text = Leaderboard.Service is LocalLeaderboardService
-                ? "Classement local : tes meilleures parties sur cet ordinateur. Le classement entre tous les joueurs arrivera avec la version en ligne."
+                ? "Tes meilleures parties sur cet ordinateur. Le classement entre tous les joueurs arrivera avec la version en ligne."
                 : online ? "Classement en ligne : tous les joueurs." : "Hors ligne : ton score sera envoyé plus tard.";
             banner.style.display = DisplayStyle.None;
 

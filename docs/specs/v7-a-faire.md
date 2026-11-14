@@ -228,44 +228,44 @@
 
 ### Important
 
-1. **Renaissance : le mot « Améliorations » est coupé en « Amélioratio / ns »** sous l'icône de « Tu perds ». « Nouvelles boîtes » tient aussi sur deux lignes, en tout petit.
+1. [x] *(corrigé 14/11 : légendes sur une ligne)* **Renaissance : le mot « Améliorations » est coupé en « Amélioratio / ns »** sous l'icône de « Tu perds ». « Nouvelles boîtes » tient aussi sur deux lignes, en tout petit.
    - *Fichier* : `Scripts/UI/RebirthPage.cs:93` (libellé trop long pour la largeur de l'icône).
    - *Capture* : `qa_v7p2_renaissance_1280.png`, `qa_v7p2_renaissance_1920.png`.
-2. **Boutique : titres de boîtes sur 2 ou 3 lignes, et barre de collection écrasée.**
+2. [x] *(corrigé 14/11 : titre en haut sur une ligne, jauge fixe et texte foncé)* **Boutique : titres de boîtes sur 2 ou 3 lignes, et barre de collection écrasée.**
    - « Boîte d'accessoires n°1 » occupe 3 lignes, « Pirates : accessoires » et « Animaux : accessoires » 2 lignes. Les deux cartes d'une même rangée n'ont donc plus la même mise en page.
    - En 1920 × 1080, la barre « 11 / 16 » est aplatie et son texte coupé.
    - Le texte de la barre, blanc 20 px sur orange ou jaune, est illisible.
    - *Fichiers* : `UI/V7.uss:334-335` (`.bq7-titre-carte`, 32 px, `white-space: normal`) et `:345` (texte de la barre).
    - *Piste* : titre court (« Skins n°1 », « Accessoires n°1 ») ou police plus petite sur une seule ligne.
    - *Capture* : `qa_v7p2_boutique_1920.png`, `qa_v7p2_boutique_classiques_1280.png`, `qa_v7p2_boutique_pirates_1280.png`.
-3. **Classement : « Ton record : étage 8 », alors que la meilleure ligne de la liste est « étage 7 ».** Le record (`record_etage` = 8) n'a jamais été envoyé au classement local, qui plafonne à 7. C'était déjà signalé en v6 (`qa_v6_classement_record_8_liste_7.png`) et ce n'est toujours pas corrigé.
+3. [x] *(corrigé 14/11 : le record manquant est rattrapé dans le classement local)* **Classement : « Ton record : étage 8 », alors que la meilleure ligne de la liste est « étage 7 ».** Le record (`record_etage` = 8) n'a jamais été envoyé au classement local, qui plafonne à 7. C'était déjà signalé en v6 (`qa_v6_classement_record_8_liste_7.png`) et ce n'est toujours pas corrigé.
    - *Fichier* : `Scripts/UI/LeaderboardPopup.cs:115` (titre lu ailleurs que la liste). Il faudrait aussi rattraper le record manquant dans le classement local.
    - *Capture* : `qa_v7p2_classement_1280.png`.
-4. **Skins métalliques salis** : sur « Argent » et « Or massif », de grosses taches brunes apparaissent au museau, au poitrail et au socle (reflet d'un environnement brun). « Blanc nacré » est blanc uni, sans aucun reflet nacré. Dans le faisceau bleu d'ouverture, « Argent » paraît en verre bleu.
+4. [x] *(corrigé 14/11 : métal 0,6 / brillance 0,65 ; nacré en dégradé rose-bleu)* **Skins métalliques salis** : sur « Argent » et « Or massif », de grosses taches brunes apparaissent au museau, au poitrail et au socle (reflet d'un environnement brun). « Blanc nacré » est blanc uni, sans aucun reflet nacré. Dans le faisceau bleu d'ouverture, « Argent » paraît en verre bleu.
    - *Cause probable* : la réflexion ou la sonde d'environnement des matériaux métalliques, dans la vitrine comme dans l'ouverture.
    - *Capture* : `qa_v7p2_vitrine_skins_1280.png` (5e et 6e), `qa_v7p2_ouverture_3_1280.png`.
-5. **Images de catégories et d'échange non branchées.**
+5. [x] *(corrigé 14/11 : 3 catégories et 8 échanges branchés)* **Images de catégories et d'échange non branchées.**
    - Les 3 `categorie_*.png` et les 8 `echange_*.png` sont dans `Art/icones_detourees/`, mais l'en-tête des sections montre encore la 1re boîte, et les échanges des piles de pièces dessinées.
    - *Cause* : `Resources/EconomyCatalog.asset:31-66` (`icon: {fileID: 0}` pour les 8 lots) et `Resources/UiImages.asset` (aucune entrée `categorie*`). `IconAutoBinder` n'a pas été relancé.
    - *Capture* : `qa_v7p2_boutique_diamants_1280.png`, `qa_v7p2_boutique_classiques_1280.png`.
 
 ### Mineur
 
-6. **L'Ascension** :
+6. [x] *(corrigé 14/11 : marge du haut, lueur pleine, numéros plus grands, « Ma position » dans la bande)* **L'Ascension** :
    - la carte du palier 30, tout en haut, est coupée par le bord de la zone (`TopPadding = 40f`, `TrophyRoadPage.cs:52`, trop petit pour une carte de palier) ;
    - la lueur sous le cheval du joueur ressemble à un cadre jaune vide (`asc-toi__lueur`, `V65.uss:415`) ;
    - les numéros d'étage normaux (« 3 », « 29 ») sont minuscules à côté de la pastille de l'étage actuel ;
    - « Ma position » est posée à cheval sur la bordure du haut de la fenêtre.
 
    *Capture* : `qa_v7p2_ascension_haut_1280.png`, `qa_v7p2_ascension_1280.png`.
-7. **Fenêtre « i » de L'Ascension inchangée** : trois lignes de petit gris, « risque 29,17 % » coupé à la ligne, titre décalé (point 16 de la phase 1).
+7. [x] *(corrigé 14/11 : titre centré, petites lignes plus grandes, risque arrondi)* **Fenêtre « i » de L'Ascension inchangée** : trois lignes de petit gris, « risque 29,17 % » coupé à la ligne, titre décalé (point 16 de la phase 1).
    - *Capture* : `qa_v7p2_ascension_info_1280.png`.
-8. **Inventaire, vitrine** : quand la pastille de rareté et celle du bonus ne tiennent pas sur une ligne (« Peu commun » + « +2 % de pièces »), elles passent sur deux lignes et la scène du cheval rétrécit. La vitrine « saute » d'un objet à l'autre.
+8. [x] *(corrigé 14/11, sauf la légende des deux points bleus : pastilles sur une ligne, baisse en rouge, compteur décollé)* **Inventaire, vitrine** : quand la pastille de rareté et celle du bonus ne tiennent pas sur une ligne (« Peu commun » + « +2 % de pièces »), elles passent sur deux lignes et la scène du cheval rétrécit. La vitrine « saute » d'un objet à l'autre.
    - « Avec cet objet : +16 % » s'affiche en vert alors que c'est une baisse (+29 % → +16 %) : `InventoryPage.cs:389`.
    - En 1920 × 1080, « Accessoires » et son compteur « 11 » se touchent.
    - Les deux points bleus à droite du titre « Accessoires » n'ont pas de légende.
    - *Capture* : `qa_v7p2_vitrine_skins_1280.png`, `qa_v7p2_inventaire_accessoires_1280.png`, `qa_v7p2_inventaire_1920.png`.
-9. **Boutique, petits textes** :
+9. [x] *(corrigé 14/11, sauf le solde en double, gardé dans la Boutique)* **Boutique, petits textes** :
    - « Ta cagnotte en jeu (34) ne se dépense pas… » en gris minuscule ;
    - porte-monnaie en double avec le HUD ;
    - pourcentages sous les aperçus et rubans « +5 % » des échanges en environ 9 px ;
@@ -273,33 +273,33 @@
    - grand vide au-dessus de « Packs de diamants ».
 
    *Capture* : `qa_v7p2_boutique_*_1280.png`.
-10. **Contenu et taux** :
+10. [x] *(corrigé 14/11)* **Contenu et taux** :
     - bouton « Retour » minuscule ;
     - solde affiché sur une ligne à part ;
     - pastilles de bonus (« +1 % ») illisibles ;
     - grille de 4 colonnes avec une grande marge vide à droite.
 
     *Capture* : `qa_v7p2_contenu_taux_1280.png`.
-11. **Ouverture d'une boîte** : le panneau du résultat recouvre le socle, et « Rare ! » est bleu sur bleu dans le faisceau.
+11. [x] *(corrigé 14/11 : panneau plus bas, « Rare ! » contour d'encre épais)* **Ouverture d'une boîte** : le panneau du résultat recouvre le socle, et « Rare ! » est bleu sur bleu dans le faisceau.
     - *Capture* : `qa_v7p2_ouverture_3_1280.png`.
-12. **Améliorations** (bien plus épurées) :
+12. [x] *(corrigé 14/11, sauf l'image plate de « Coffre en plus », à refaire par le DA)* **Améliorations** (bien plus épurées) :
     - la note du bas « Chaque amélioration compte à partir du prochain étage » est quasi invisible (gris très clair sur blanc) ;
     - les barres « Avant / Après » de Coffres précieux n'ont pas de légende des couleurs ;
     - l'image de « Coffre en plus » (3 coffres) est plate et sans contour ;
     - « Risque : 29 % > 27 % » est minuscule.
 
     *Capture* : `qa_v7p2_ameliorations_1280.png`.
-13. **Partie** :
+13. [ ] *(en partie 14/11 : reprise et boutons lisibles, plus de « 2 % » en double ; restent la carte qui cache le cheval et les coffres d'argent qui deviennent or à l'ouverture)* **Partie** :
     - « Reprise 1 sur 5 · Tu as 4 » en tout petit, peu contrasté (`qa_v7p2_piege_1280.png`) ;
     - les boutons « Oui, continuer » et « Annuler » ont un texte petit (`qa_v7p2_continuer_confirm_1280.png`) ;
     - la carte « Reprise réussie » cache entièrement le cheval pendant quelques secondes (`qa_v7p2_apres_reprise_1280.png`), et la carte des détails aussi (`qa_v7p2_carte_details_1280.png`). Cette carte répète « 2 % » et « +29 % » (pastilles, puis ligne du bas) ;
     - les coffres d'argent fermés sont bleus, mais une fois ouverts, ceux qui contenaient un trésor deviennent jaune or (`qa_v7p2_suspense_1280.png`), ce qui peut faire croire à une autre rareté.
-14. **Réglages : « Tour de la Chance · version 6 »** alors qu'on est en V7 (`UI/Panels.uxml:109`).
+14. [x] *(corrigé 14/11)* **Réglages : « Tour de la Chance · version 6 »** alors qu'on est en V7 (`UI/Panels.uxml:109`).
     - *Capture* : `qa_v7p2_reglages_1280.png`.
-15. **Renaissance** : « Tu gardes tout le reste ! » vert contouré de noir sur blanc, peu lisible ; les deux lignes du bas sont en petit gris.
+15. [x] *(corrigé 14/11)* **Renaissance** : « Tu gardes tout le reste ! » vert contouré de noir sur blanc, peu lisible ; les deux lignes du bas sont en petit gris.
     - *Capture* : `qa_v7p2_renaissance_1280.png`.
-16. **Index** : textes des cartes toujours minuscules (« 10 % », « Pas encore », « +1 % ») ; « Tout collectionner : 5 » en marron sur fond clair.
+16. [x] *(corrigé 14/11)* **Index** : textes des cartes toujours minuscules (« 10 % », « Pas encore », « +1 % ») ; « Tout collectionner : 5 » en marron sur fond clair.
     - *Capture* : `qa_v7p2_index_1280.png`.
-17. **Classement** : « Classement local » écrit deux fois (bandeau du haut et bas de la fenêtre).
+17. [x] *(corrigé 14/11)* **Classement** : « Classement local » écrit deux fois (bandeau du haut et bas de la fenêtre).
     - *Capture* : `qa_v7p2_classement_1280.png`.
-18. **Avertissement USS** : `:last-child` n'est pas reconnu par UI Toolkit, donc la règle ne fait rien (`UI/V65.uss:48`, « Unknown pseudo class "last-child" » dans la console).
+18. [x] *(corrigé 14/11 : règle retirée)* **Avertissement USS** : `:last-child` n'est pas reconnu par UI Toolkit, donc la règle ne fait rien (`UI/V65.uss:48`, « Unknown pseudo class "last-child" » dans la console).

@@ -63,6 +63,19 @@ namespace TourDeLaChance
             return Task.FromResult(SubmitResult.Sent);
         }
 
+        /// QA v7 p2 n°3 : rattrape le record d'étage quand il n'est pas dans la liste locale
+        /// (record atteint avant que le classement existe, ou partie jamais enregistrée) : la
+        /// meilleure ligne correspond alors toujours à « Ton record ». Renvoie vrai si ajouté.
+        public static bool CatchUpRecord(int record)
+        {
+            if (record < 1) return false;
+            var list = Read(EtageKey);
+            foreach (var e in list) if (ScoreOf(e) >= record) return false;
+            AddRun(EtageKey, record, Today());
+            PlayerPrefs.Save();
+            return true;
+        }
+
         /// Ajoute une partie et ne garde que les 10 meilleures (en cas d'égalité, on retire la
         /// plus ancienne). L'ordre d'ajout est conservé : la dernière ligne est la plus récente.
         static void AddRun(string key, int score, string date)

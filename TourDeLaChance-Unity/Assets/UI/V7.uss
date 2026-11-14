@@ -621,3 +621,81 @@
 .asc-x2 { -unity-text-outline-width: 0; text-shadow: 0 2px 0 #3A2200; }
 /* Inventaire : le bouton « Aucun doublon » (gris clair sur gris, illisible) devient lisible. */
 .btn.casier-vente__btn:disabled { opacity: 1; background-color: #5A5670; background-image: none; color: #FFFFFF; -unity-text-outline-width: 0; }
+
+/* =====================================================================
+   11. Corrections du QA (V7, phase 2)
+   ===================================================================== */
+/* n°1 et 15 : Renaissance. Les légendes tiennent sur une ligne ; la phrase verte sans contour. */
+.rn-ic { width: auto; min-width: 86px; margin: 0 6px; }
+.rn-ic__legende { font-size: 17px; white-space: nowrap; -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.7); }
+.message-important__texte.message-important__texte--positif { color: #1E9A3A; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.rn-note { font-size: 21px; color: #4A4560; }
+
+/* n°2 : Boutique. Titre de la carte en haut, sur UNE ligne ; jauge qui ne s'écrase plus et texte lisible. */
+.boutique-page .bq7-titre-carte {
+    font-size: 30px; white-space: nowrap; overflow: hidden; margin: 0 64px 8px 0; flex-shrink: 0;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F;
+}
+.bq7-haut { height: 150px; }
+.bq7-heros { height: 150px; }
+.bq7-heros__boite { width: 150px; height: 150px; }
+.bq7-droite { padding-right: 0; }
+.bq7-jauge { flex-shrink: 0; min-height: 30px; height: 30px; background-color: rgba(255, 255, 255, 0.6); }
+.bq7-jauge__plein { background-color: #FFB020; }
+.boutique-page .bq7-jauge .bq7-jauge__texte { color: #2A1A00; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); font-size: 20px; }
+.bq7-cases { margin-top: 14px; }
+/* n°9 : petits textes de la Boutique. */
+.boutique-page .taux-badge.bq7-pourcent { font-size: 20px; height: 28px; }
+.bq7-ech-ruban { width: 160px; height: 40px; right: -40px; top: 18px; }
+.boutique-page .bq7-ech-ruban__texte { font-size: 24px; }
+.pk-section { margin-top: 0; }
+.pk-vitrine { height: 400px; padding-top: 96px; }
+.pk-badge { top: 14px; translate: -50% 0; }
+#pot-note { font-size: 20px; color: #4A4560; }
+/* n°10 : « Contenu et taux ». */
+.btn.btq-back { font-size: 24px; height: 52px; min-width: 160px; padding: 0 18px; border-radius: 18px; }
+.ct7-ligne__bonus { width: 90px; height: 30px; }
+.boutique-page .ct7-ligne__bonus-texte { font-size: 19px; }
+.ct7-case { width: 118px; height: 118px; margin: 0 10px 10px 0; }
+
+/* n°6 : L'Ascension. Anneaux du joueur en lueur pleine (plus de « cadre vide »), numéros plus
+   grands, « Ma position » centrée dans la bande de titre. */
+.asc-toi7__anneau { border-width: 0; background-color: rgba(255, 213, 74, 0.55); border-radius: 50%; }
+.asc-numero { font-size: 40px; height: 56px; }
+.btn.asc-ma-position7 { top: -56px; height: 44px; border-bottom-width: 7px; }
+.asc-ma-position7__icone { top: -12px; width: 44px; height: 44px; }
+/* n°7 : fenêtre « i » de L'Ascension. */
+.asc-info-titre { margin-left: 0; -unity-text-align: middle-center; }
+.asc-info-petit { font-size: 21px; color: #4A4560; }
+
+/* n°8 : vitrine de l'Inventaire. Les pastilles restent sur une ligne ; la baisse est en rouge. */
+.casier-fiche__pilules { flex-wrap: nowrap; }
+.casier-pilule__texte { font-size: 19px; }
+.casier-bonus__essai.casier-bonus__essai--baisse { color: #D23A3A; }
+.casier-entree__compteur { margin-left: 8px; flex-shrink: 0; }
+
+/* n°12 : Améliorations. */
+.up7-pied { color: #4A4560; font-size: 22px; }
+.up7-risque { font-size: 22px; -unity-font-style: bold; }
+.up7-legende { flex-direction: row; justify-content: center; margin-top: 4px; }
+.up7-legende__item { flex-direction: row; align-items: center; margin: 0 5px; }
+.up7-legende__pastille { width: 14px; height: 14px; border-radius: 4px; border-width: 2px; border-color: #110D1F; margin-right: 4px; }
+.up7-legende__texte { font-size: 16px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.6); }
+.up7-effet { height: 150px; }
+
+/* n°13 : partie. Reprise lisible, boutons de confirmation plus grands. */
+.revive-info__petit { font-size: 26px; color: #FFFFFF; -unity-font-style: bold; -unity-text-outline-width: 0; text-shadow: 0 2px 0 #110D1F; }
+.btn.sur-btn { font-size: 32px; height: 80px; }
+
+/* n°16 : Index. Textes des cartes lisibles ; récompense en couleur foncée. */
+.item-extra { font-size: 19px; color: #E6E1EE; }
+.bonus-badge { font-size: 18px; }
+.tile-ribbon { font-size: 17px; }
+.idx-section-recompense { color: #2A2440; font-size: 22px; }
+/* n°16 (suite) : le ruban « Pas encore » passe en haut à droite : il ne cache plus le pourcentage. */
+.tile-ribbon { top: 6px; right: 6px; left: auto; bottom: auto; padding: 1px 6px; font-size: 15px; }
+/* n°12 (suite) : les cartes rapetissent un peu pour que la phrase du bas sorte du fondu de la liste. */
+.up-card.up7-carte { height: 560px; }
+.up7-pied { margin: 12px 0 24px 0; }
+.up7-carte > * { flex-shrink: 0; }
+.up7-effet { height: 136px; margin-top: 12px; }

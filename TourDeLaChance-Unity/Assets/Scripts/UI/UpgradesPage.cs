@@ -254,9 +254,24 @@ namespace TourDeLaChance
         /// rareté de coffre (une part sous 4 % garde au moins 6 px pour rester visible).
         static void ChestsEffect(VisualElement well, int level, bool max)
         {
-            well.Add(ChanceBar(max ? "Niveau" : "Avant", Upgrades.ChestWeights(level)));
-            if (!max) well.Add(ChanceBar("Après", Upgrades.ChestWeights(level + 1)));
-            well.Add(ShopUi.NewLabel("Coffres plus précieux", "up7-etiquette"));
+            var now = Upgrades.ChestWeights(level);
+            var next = Upgrades.ChestWeights(max ? level : level + 1);
+            well.Add(ChanceBar(max ? "Niveau" : "Avant", now));
+            if (!max) well.Add(ChanceBar("Après", next));
+            // QA v7 p2 n°12 : la légende des couleurs (une pastille par rareté de coffre possible).
+            var legend = Icon("up7-legende");
+            for (int i = 0; i < Upgrades.RarityCount; i++)
+            {
+                bool used = (i < now.Length && now[i] > 0) || (i < next.Length && next[i] > 0);
+                if (!used) continue;
+                var item = Icon("up7-legende__item");
+                var dot = Icon("up7-legende__pastille");
+                dot.style.backgroundColor = Upgrades.Rarity(i).bodyColor;
+                item.Add(dot);
+                item.Add(ShopUi.NewLabel(Upgrades.Rarity(i).shortName, "up7-legende__texte"));
+                legend.Add(item);
+            }
+            well.Add(legend);
         }
 
         static VisualElement ChanceBar(string label, int[] weights)

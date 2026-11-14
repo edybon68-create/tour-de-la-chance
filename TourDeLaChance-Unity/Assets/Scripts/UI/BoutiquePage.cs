@@ -305,6 +305,8 @@ namespace TourDeLaChance
             // Le dernier onglet colle aux monnaies (24 px de marge portés par les monnaies).
             if (tabsRow.childCount > 0) tabsRow[tabsRow.childCount - 1].style.marginRight = 0;
             tabsRow.style.display = contentBox != null ? DisplayStyle.None : DisplayStyle.Flex;
+            // QA v7 p2 n°10 : sur « Contenu et taux », plus de solde seul sur sa ligne (le HUD le montre).
+            balanceRow.style.display = contentBox != null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
         Button AddTab(Tab tab, string text, string iconClasses)
@@ -462,9 +464,11 @@ namespace TourDeLaChance
             }
             top.Add(hero);
 
+            // QA v7 p2 n°2 : le titre passe EN HAUT de la carte, sur toute la largeur, sur UNE
+            // ligne : les deux cartes d'une rangée gardent la même mise en page.
+            card.Insert(0, ShopUi.NewLabel(box.displayName, "bq7-titre-carte"));
             var right = new VisualElement { pickingMode = PickingMode.Ignore };
             right.AddToClassList("bq7-droite");
-            right.Add(ShopUi.NewLabel(box.displayName, "bq7-titre-carte"));
             int found = Shop.FoundCount(box), total = box.items.Count;
             right.Add(Gauge(found, total));
             int reward = CollectionRewards.RewardOf(box);

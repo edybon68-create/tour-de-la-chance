@@ -49,7 +49,7 @@ namespace TourDeLaChance
         const float TileCenterX = 560f;             // les dalles sont centrées sur x = 560
         const float NumberCenterX = 118f, InfoCenterX = 962f;
         const float BarCenterX = 40f, BarWidth = 40f; // couloir de la barre : x 20 → 60
-        const float TopPadding = 40f, BottomPadding = 40f;
+        const float TopPadding = 150f, BottomPadding = 40f; // QA v7 p2 n°6 : la carte du palier du haut dépasse de sa dalle
         const float Gap = 36f;                      // vide entre le bas d'une dalle et l'arrière de la suivante
         const float FadeHeight = 320f;              // fondu entre deux ciels
 
@@ -929,7 +929,7 @@ namespace TourDeLaChance
                 infoLines.Add(InfoSmall(TrophyRoad.IsReceived(floor) ? $"Palier : +{row.MilestoneReward} {ShopUi.Diamant} (reçu)" : $"Palier : +{row.MilestoneReward} {ShopUi.Diamant} la première fois"));
             // Ce qui ne dépend PAS de l'étage (§8.2) : l'ancien bandeau « Tes coffres en ce moment ».
             int chests = Upgrades.Level(Upgrades_.Chests), traps = Upgrades.Level(Upgrades_.Traps);
-            infoLines.Add(InfoSmall($"Tes coffres (à tous les étages) : {TrophyRoad.ChestCountText(traps)} · 1 piège · risque {ShopUi.Number(Upgrades.AverageRiskPercent(traps))} %"));
+            infoLines.Add(InfoSmall($"Tes coffres (à tous les étages) : {TrophyRoad.ChestCountText(traps)} · 1 piège · risque {Mathf.RoundToInt(Upgrades.AverageRiskPercent(traps))}\u00A0%"));
             var w = Upgrades.ChestWeights(chests);
             var rarities = new List<string>();
             for (int i = 0; i < w.Length && i < Upgrades.RarityCount; i++)

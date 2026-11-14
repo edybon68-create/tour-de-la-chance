@@ -106,7 +106,7 @@
                             </ui:VisualElement>
                             <!-- v6 §12 : la ligne Graphismes (Faible / Moyen / Élevé), construite par SettingsPage. -->
                             <ui:VisualElement name="settings-graph" class="settings-graph" />
-                            <ui:Label text="Tour de la Chance · version 6" class="settings-footer" picking-mode="Ignore" />
+                            <ui:Label text="Tour de la Chance · version 7" class="settings-footer" picking-mode="Ignore" />
                         </ui:VisualElement>
 
                         <!-- Choisis ton pseudo (§12.7) -->

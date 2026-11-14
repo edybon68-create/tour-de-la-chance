@@ -386,7 +386,10 @@ namespace TourDeLaChance
             gaugeCheck.style.display = k >= 1f ? DisplayStyle.Flex : DisplayStyle.None;
 
             bool trying = section != Section.Tenues && selected != null && !Shop.IsEquipped(selected);
-            bonusTry.text = trying ? $"Avec cet objet : +{Shop.OutfitBonusPercentWith(selected)} %" : "";
+            int withIt = trying ? Shop.OutfitBonusPercentWith(selected) : 0;
+            bonusTry.text = trying ? $"Avec cet objet : +{withIt} %" : "";
+            // QA v7 p2 n°8 : en vert seulement si c'est mieux ; une baisse s'affiche en rouge.
+            ShopUi.SetClass(bonusTry, "casier-bonus__essai--baisse", trying && withIt < Shop.OutfitBonusPercent);
             bonusTry.style.display = trying ? DisplayStyle.Flex : DisplayStyle.None;
 
             int raw = Shop.DiamondBonusPercentRaw;
