@@ -41,7 +41,10 @@ HAUT = 0.34                     # hauteur de la calotte
 SEG = 18                        # 6 panneaux × 3
 
 
-ANGLE_VISIERE = 62.0            # degrés : visière tournée vers la droite de l'image
+ANGLE_VISIERE = 72.0            # degrés : visière tournée vers la droite de l'image
+# V7 : 62° et penchée vers le BAS, la racine de la visière couvrait le haut de l'œil droit
+# vu du jeu. Plus tournée et relevée de 6° (comme une casquette portée « cool »), elle
+# dégage les deux yeux.
 
 
 def base_blender():
@@ -80,10 +83,10 @@ def visiere(bm, bm_couture):
     silhouette (on la voit de face) et ne passe JAMAIS devant les yeux. Une visière droit
     devant, à cette hauteur, cacherait les deux yeux depuis la caméra du jeu (qui est
     au-dessus) : nous l'avons vérifié en rendu."""
-    nu, nv = 6, 3
+    nu, nv = 8, 4                 # V7 : 6 × 3 -> 8 × 4 (courbe plus douce)
     larg, long_ = 0.56, 0.55
     epais = 0.05
-    inc = math.radians(12)
+    inc = math.radians(-6)        # V7 : relevée (avant : 12° vers le bas)
     hs, bs = [], []
     for j in range(nv + 1):
         t = j / nv

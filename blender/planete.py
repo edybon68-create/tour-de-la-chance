@@ -54,7 +54,7 @@ import commun as C  # noqa: E402
 NOM = "planete"
 POINT = "PointDos"
 MATS = ["M5_Planete", "M5_BandePlanete", "M_AnneauPlanete", "M5_LuneMat"]  # 0..3
-K = 0.8                                  # tailles de la fiche × 0,8 (voir plus haut)
+K = 1.0                                  # V7 : 0,8 -> 1,0 (tailles de la fiche) : le QA la trouvait petite et lointaine
 CENTRE_ORBITE = (0.0, 2.02, 0.05)        # Unity, local à Joueur
 RAYON_ORBITE = 0.85
 INCLINAISON_ORBITE = 20.0                # devant en HAUT

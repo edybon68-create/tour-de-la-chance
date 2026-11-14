@@ -19,7 +19,7 @@ AccessoryMotion : il cherche « Anneau » et « Perle_0 » à « Perle_7 », et 
 « M_Aureole » dont il allume l'émission) :
     aureole              vide, origine = PointChapeau (attachScale 1, attachOffset 0)
     └── Anneau           l'anneau ; origine = son centre, position locale (0 ; 0,30 ; 0)
-        │                (flotte 30 cm au-dessus du sommet de la tête ; le code le fait
+        │                (flotte 22 cm au-dessus du sommet de la tête ; le code le fait
         │                flotter ±4 cm, tourner à 30°/s et suivre la tête avec retard)
         ├── Perle_0 … Perle_7   les perles (matériau M_Aureole : chenillard du code)
         ├── Anim_Rayons  les 4 rayons ; origine = centre de l'anneau. Ils doivent tourner en
@@ -42,7 +42,7 @@ import commun as C  # noqa: E402
 NOM = "aureole"
 POINT = "PointChapeau"
 MATS = ["M5_DoreDeco", "M_Aureole"]  # 0, 1
-HAUTEUR_FLOTTE = 0.30
+HAUTEUR_FLOTTE = 0.22      # V7 : 0,30 -> 0,22 (le QA : « flotte haut au-dessus de la tête »)
 R_TUBE = 0.05             # section de 10 cm
 R_ANNEAU = 0.35 - R_TUBE  # Ø extérieur 0,70
 
