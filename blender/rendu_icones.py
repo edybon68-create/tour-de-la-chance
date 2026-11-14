@@ -447,6 +447,8 @@ ICONES = {
     "echange_tonneau": dict(source=("fonction", "objets_icones_v7.construire_echange_tonneau"), elevation=28, rotation=30, largeur=0.84),
     # V7, point 10 : pictogramme « pas encore vu » de l'Index
     "pas_encore_vu": dict(source=("fonction", "objets_icones_v7.construire_pas_encore_vu"), elevation=12, rotation=0),
+    # V7.1, point 4 : « Coffre en plus » refait avec les vrais coffres (même cadrage que amelioration_coffres)
+    "amelioration_pieges": dict(source=("fonction", "objets_icones_v7.construire_coffre_en_plus"), elevation=32, largeur=0.84),
     "echange_montagne": dict(source=("fonction", "objets_icones_v7.construire_echange_montagne"), elevation=22, largeur=0.86),
 }
 

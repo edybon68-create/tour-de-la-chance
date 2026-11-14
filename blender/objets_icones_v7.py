@@ -570,3 +570,76 @@ def construire_pas_encore_vu():
     revolution("Socle", prof, [0, 1, 1, 1, 0], [socle_m, or_], racine, 40)
     eclats(racine, [Vector((1.05, 0.3, 2.45)), Vector((-1.0, 0.3, 1.2))], taille=0.25)
     return racine
+
+
+# =========================================================================================
+# Polissage V7.1, point 4 : amélioration « Coffre en plus » (amelioration_pieges.png)
+# =========================================================================================
+def construire_coffre_en_plus():
+    """Les VRAIS coffres en bois du jeu (blender/coffre.py) : deux au fond, un troisième au
+    premier plan qui « arrive », couvercle entrouvert avec une lueur dorée #FFE38A, et une
+    pastille « + » dorée en volume au-dessus (aucun texte). Ne montre aucune chance : c'est
+    juste « un coffre de plus »."""
+    import coffre as CF
+    CF.construire()                                  # scène neuve + le coffre « Coffre »
+    scene = bpy.context.scene
+    modele = [o for o in scene.objects]
+    racine = C.vide("CoffreEnPlus")
+
+    def copie(nom, position, rot_z, echelle=1.0):
+        """Copie complète de la hiérarchie du coffre (maillages partagés)."""
+        corres = {}
+        for o in modele:
+            n = o.copy()
+            scene.collection.objects.link(n)
+            corres[o] = n
+        for o, n in corres.items():
+            n.parent = corres.get(o.parent)
+            if o.parent is None:
+                n.parent = racine
+                n.location = position
+                n.rotation_euler = (0, 0, rot_z)
+                n.scale = (echelle,) * 3
+        return next(n for o, n in corres.items() if o.parent is None)
+
+    copie("Fond_G", Vector((-1.15, -1.2, 0)), math.radians(14), 0.92)
+    copie("Fond_D", Vector((1.15, -1.2, 0)), math.radians(-14), 0.92)
+    devant = copie("Devant", Vector((0.0, 0.55, 0)), 0.0, 1.08)
+    for o in modele:
+        bpy.data.objects.remove(o, do_unlink=True)
+    # couvercle du coffre de devant entrouvert (comme Unity : rotation de la Charniere)
+    charniere = next(o for o in C.descendants(devant) if o.name.startswith("Charniere"))
+    charniere.rotation_euler = (math.radians(70), 0, 0)
+    bpy.context.view_layer.update()
+    # dedans : un tas de pièces d'or qui luit doucement (la « lueur » #FFE38A de la fiche)
+    P = Pieces(racine, 11)
+    for mat_ in (P.or_, P.or_fonce):
+        b = mat_.node_tree.nodes["Principled BSDF"]
+        b.inputs["Emission Color"].default_value = C.hex_vers_lineaire("#FFE38A")
+        b.inputs["Emission Strength"].default_value = 0.35
+    for k in range(22):
+        t = math.sqrt((k + 0.5) / 22)
+        a = k * 2.399963
+        x, y = 0.55 * t * math.cos(a) * 1.08, 0.55 + 0.32 * t * math.sin(a) * 1.08
+        z = 0.62 + 0.28 * (1 - t * t)
+        P.poser(Vector((x, y, z)), (-math.cos(a) * t, -math.sin(a) * t, 1.0), penche=0.3,
+                echelle=0.32)
+    # pastille « + » dorée au-dessus, en volume, bordée d'un liseré foncé
+    or_ = matiere("Or", "#FFC83A", 0.28, metal=0.5, vernis=0.4)
+    encre = matiere("Encre", "#110D1F", 0.4, vernis=0.2)
+    blanc = matiere("Blanc", "#FFF8E8", 0.3, vernis=0.4)
+    m = Matrix.Translation((-0.1, 0.9, 2.95))      # au-dessus du coffre de devant
+    bm = bmesh.new()
+    C.bm_coussin(bm, C.contour_ellipse(0.52, 0.52, n=40), 0.12, 0.22, m, mat=0, anneaux=3)
+    objet("Pastille", bm, [or_], racine, angle=60)
+    bm = bmesh.new()
+    C.bm_coussin(bm, C.contour_ellipse(0.58, 0.58, n=40), 0.10, 0.10,
+                 m @ Matrix.Translation((0, -0.05, 0)), mat=0, anneaux=1)
+    objet("PastilleBord", bm, [encre], racine, angle=60)
+    bm = bmesh.new()
+    for taille in ((0.56, 0.16), (0.16, 0.56)):
+        C.bm_coussin(bm, C.contour_rectangle_arrondi(taille[0], taille[1], 0.07, par_coin=3),
+                     0.06, 0.10, m @ Matrix.Translation((0, 0.13, 0)), mat=0, anneaux=2)
+    objet("Plus", bm, [blanc], racine, angle=60)
+    eclats(racine, [Vector((-0.95, 1.0, 1.95)), Vector((0.95, 1.0, 1.75))], taille=0.28)
+    return racine
