@@ -81,8 +81,6 @@ REGLAGES = {
         "boite_accessoires_1.png", "chapeau_bonnet.png", "icone_inventaire.png",
         "icone_index.png", "icone_boutique.png", "motif_pois.png", "motif_sucre_orge.png",
         "chapeau_capitaine.png", "bocal_poisson.png", "icone_mes_skins.png"]},
-    # bébé kraken : son corps est VIOLET comme une ombre ; on n'accepte que l'ombre claire
-    "kraken_bebe.png": {"ombre_min": 0.72, "pente_ombre": 0.03, "contact": 0},
     "icone_reglages.png": {"ombre": False},
     "icone_effets.png": {"ombre": False},
     "icone_rotation.png": {"ombre": False},

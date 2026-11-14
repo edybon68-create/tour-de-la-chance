@@ -420,6 +420,9 @@ ICONES = {
     "coffre_argent": dict(source=("module", "coffre_argent"), largeur=0.72),
     "coffre_or": dict(source=("module", "coffre_or"), largeur=0.72),
     "coffre_diamant": dict(source=("module", "coffre_diamant"), largeur=0.72),
+    # V7 : le bébé kraken (violet sur une ombre violette) ne pouvait pas être détouré
+    # proprement depuis l'image Gemini : on le rend depuis son modèle 3D, sans ombre.
+    "kraken_bebe": dict(source=("module", "pirate_kraken_bebe"), elevation=8, rotation=15),
     # V7, lot 9 (art/prompts/lot9.md, images 3 et 4) : rendus au lieu de Gemini
     "sablier_bientot": dict(source=("fonction", "objets_lot9.construire_sablier")),
     "pack_diamants_tresor": dict(source=("fonction", "objets_lot9.construire_pack_tresor"),

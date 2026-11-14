@@ -62,6 +62,41 @@ def profil_dome(decalage=0.0, z0=HAUTEUR):
 
 
 # =========================================================================================
+def doublure_couvercle(mat_cadre, mat_coussin):
+    """V7 : le dessous du couvercle était une grande plaque unie (vue chaque fois qu'on
+    ouvre un coffre). On y pose un cadre de métal et un coussin capitonné bombé dans la
+    couleur de la doublure. Tout reste DANS l'ouverture du corps quand c'est fermé (marge de
+    13 cm) : rien ne traverse les parois. Renvoie l'objet (à joindre au Couvercle)."""
+    bm = bmesh.new()
+    y0, y1 = COUV_ARRIERE + 0.13, COUV_AVANT - 0.13
+    lx, ly = 2 * (COUV_X - 0.13), y1 - y0
+    cy = (y0 + y1) / 2
+    # cadre : une boîte fine un peu plus grande que le coussin
+    C.bm_boite(bm, (lx + 0.06, ly + 0.06, 0.02), (0, cy, HAUTEUR - 0.010), mat=0)
+    # coussin : grille bombée vers le bas (le centre descend de 4 cm), 4 boutons capitonnés
+    nx, ny = 6, 4
+    rangs = []
+    for j in range(ny + 1):
+        rang = []
+        for i in range(nx + 1):
+            u, v = -1 + 2 * i / nx, -1 + 2 * j / ny
+            creux = 0.04 * (1 - u * u) * (1 - v * v)
+            rang.append(bm.verts.new((u * lx / 2, cy + v * ly / 2, HAUTEUR - 0.022 - creux)))
+        rangs.append(rang)
+    for j in range(ny):
+        for i in range(nx):
+            f = bm.faces.new((rangs[j][i], rangs[j][i + 1], rangs[j + 1][i + 1], rangs[j + 1][i]))
+            f.material_index = 1
+    for bx in (-lx / 4, lx / 4):
+        for by in (-ly / 4, ly / 4):
+            C.bm_sphere(bm, 0.022, (bx, cy + by, HAUTEUR - 0.022 - 0.04 * 0.56), segments=8,
+                        anneaux=4, mat=0)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+    o = C.objet_depuis_bmesh("DoublureCouvercle", bm, [mat_cadre, mat_coussin])
+    C.lisser_tout(o)
+    return o
+
+
 def construire():
     C.nouvelle_scene()
     racine = C.vide("Coffre")
@@ -214,6 +249,7 @@ def construire():
     C.appliquer(o)
     couv.append(o)
 
+    couv.append(doublure_couvercle("M_Laiton", "M_Interieur"))   # V7
     couvercle = C.joindre(couv, "Couvercle")
     C.lisser_angle(couvercle, 40)
 
