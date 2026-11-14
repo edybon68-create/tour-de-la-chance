@@ -72,3 +72,49 @@ Les `.meta` ne sont pas encore créés : Unity ne les a pas importés pendant le
 5. Les effets animés (`SkinFx` : étoiles, scintillement, taches du kraken) ne changent pas : ils
    se dessinent par-dessus.
 6. Règle d'or : purement visuel, aucune chance ni aucun gain ne change.
+
+---
+
+## V7, point 17 : comparaison icône / skin porté (à corriger par le programmeur)
+
+> Écrit le 14/11 par l'artiste 3D. Planches : `docs/captures/v7_qualite_skins_1..6.png`
+> (icône | cheval de 3/4 | cheval vu par la caméra du jeu), faites par `blender/planche_qualite.py`
+> avec les VRAIES valeurs des fiches `ShopItem` (couleurs, métal, brillance, texture). Les motifs
+> calculés y sont reproduits en version simplifiée ; les effets animés (`SkinFx`) n'y sont pas.
+> Aucune de ces corrections ne touche aux chances ni aux gains (règle d'or) : purement visuel.
+
+Classement du **pire au meilleur** (seuls les skins qui ne ressemblent pas assez à leur icône) :
+
+1. **`animal_cameleon`** — la fiche a `color` #F2F2F2 et `secondaryColor` #C8C8C8 : le cheval est
+   **gris**, alors que l'icône est jaune en haut, turquoise au milieu et vert menthe en bas, avec des
+   petits points. Correction : `color` = #FFD84A (haut), `secondaryColor` = #3CC8B4 (bas),
+   `accentColor` = #8AE07A (liseré des écailles). Si `SkinFx` 6 recolore déjà le cheval en jeu,
+   vérifier que la couleur de repos est celle-ci.
+2. **Métaux** `couleur_or`, `matiere_argent`, `pirate_or_maudit` (metallic 1, smoothness 0,8-0,85) —
+   dans notre décor de nuit, un métal pur ne reflète que du sombre : l'or paraît **bronze** et
+   l'argent **violet foncé**, alors que les icônes sont lumineuses. Correction : metallic **0,6**,
+   smoothness **0,65** pour les trois (même règle que le nouveau `M7_OrVif` des accessoires), ou une
+   *Reflection Probe* claire autour du cheval.
+3. **`pirate_lagon`** — dégradé uni turquoise → bleu, alors que l'icône montre un **réseau de reflets
+   d'eau** (caustiques claires) sur un dégradé, et de petites gouttes sur le socle. Correction :
+   une texture dessinée (à ajouter dans `blender/textures_skins.py` : cellules de Voronoï aux bords
+   clairs #E0FFFF sur le dégradé), ou au minimum un motif « réseau » clair par-dessus.
+4. **`animal_lion_soleil`** — corps beige-orangé terne ; l'icône est **dorée et lumineuse**, avec une
+   flamme claire sur le poitrail. Correction : `metallic` 0,5 → **0,2**, `smoothness` 0,85, et
+   `emissionStrength` appliquée aussi au corps (lueur #FFE58A, 0,3), pas seulement aux effets.
+5. **`animal_grenouille`** — un dégradé vert sombre → jaune pâle sans taches ; l'icône est vert vif
+   avec des **taches vert foncé** sur le dos et la tête. Correction : `color` #3CC84A, et des taches
+   (motif `Taches`, `secondaryColor` #1E8A3A, ~30 taches), le jaune pâle en bas seulement.
+6. **`animal_coccinelle`** — 7 points, trop petits et trop rares vu de face. Correction :
+   `patternCount` **12**, rayons 0,10 à 0,14 (au lieu de 0,08 à 0,11).
+7. **`motif_sucre_orge`** — 8 grosses bandes ; l'icône en a ~16, fines. Correction : tiling de
+   `SkinTextures.Stripes` (1 ; 4) → **(1 ; 8)**.
+8. **`matiere_galaxie`** — à vérifier en jeu : l'icône est une nébuleuse **bleue et violette vive**
+   avec beaucoup d'étoiles ; si la `GalaxyTexture` animée paraît surtout noire, augmenter la part
+   de nébuleuse (couleurs #3A5BFF et #B04CFF) et l'émission (sous le plafond 1,5).
+9. **`animal_tigre`** — la texture n'a pas le **poitrail blanc** ni le museau clair de l'icône
+   (mineur ; se corrige dans `textures_skins.py`, bande claire devant, de V = 0,25 à 0,6).
+
+Corrects (ressemblent à leur icône) : les 11 couleurs unies, pois, arc-en-ciel, cristal, méduse,
+fantôme, abeille, marinière, chat roux, dalmatien, vache, léopard, girafe, flamant, zèbre, paon,
+panda, kraken, abysses, bois flotté, carte, corail, écailles, tempête, vert-de-gris.

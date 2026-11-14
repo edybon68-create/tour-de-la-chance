@@ -189,13 +189,19 @@ def motif_calcule(d, n=512):
 
 
 def image_numpy(nom, rgb):
+    """Écrit le motif dans un PNG temporaire puis le recharge : une image « générée »
+    directement en mémoire sortait NOIRE au rendu en arrière-plan."""
+    import tempfile
     n = rgb.shape[0]
     im = bpy.data.images.new(nom, n, n, alpha=True)
     px = np.concatenate([rgb.astype(np.float32), np.ones((n, n, 1), np.float32)], axis=2)
     im.pixels.foreach_set(np.ascontiguousarray(px).ravel())
-    im.colorspace_settings.name = "sRGB"
-    im.pack()
-    return im
+    chemin = os.path.join(tempfile.gettempdir(), f"tdlc_motif_{nom}.png")
+    im.filepath_raw = chemin
+    im.file_format = "PNG"
+    im.save()
+    bpy.data.images.remove(im)
+    return bpy.data.images.load(chemin)
 
 
 def lin(c):
@@ -234,7 +240,9 @@ def materiau_skin(d):
             nt.links.new(li.outputs["Color"], bsdf.inputs["Emission Color"])
             bsdf.inputs["Emission Strength"].default_value = 1.0
     es = float(d.get("emissionStrength") or 0)
-    if es > 0 and not d.get("texEm") and em is None:
+    # Lumière unie seulement pour un skin SANS motif (fantôme, méduse…) : avec un motif
+    # calculé, Unity ne fait briller que la carte de lumière ou les effets animés.
+    if es > 0 and not d.get("texEm") and em is None and int(d.get("pattern") or 0) == 0:
         bsdf.inputs["Emission Color"].default_value = (*lin(d["glowColor"]), 1)
         bsdf.inputs["Emission Strength"].default_value = es * 0.4
     if style == 3:                                   # cristal / méduse / fantôme : transparent

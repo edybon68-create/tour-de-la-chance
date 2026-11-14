@@ -36,7 +36,7 @@ MATS = ["M5_CartonRose", "M5_CartonJaune", "M5_BlancMat"]  # 0, 1, 2
 BX, BY, BZ = C.CHAPEAU_BASE[0], C.CHAPEAU_BASE[1] + 0.06, C.CHAPEAU_BASE[2]
 R0 = C.CHAPEAU_RAYON + 0.02
 HAUTEUR = 0.66
-SEG = 16
+SEG = 28                       # V7 : 16 -> 28, cône bien rond
 RELIEF = 0.015
 PENCHE = math.radians(10)
 
@@ -107,7 +107,10 @@ def construire():
     base = C.U(BX, BY, BZ)
     m = inclinaison() @ Matrix.Translation(base)
     bm = bmesh.new()
-    v = cone(bm) + collerette(bm)
+    # V7 (point 17) : plus de collerette de papier blanche (absente de l'icône, elle faisait
+    # « fraise »). À la place, un simple bourrelet rose roulé au bord du cône.
+    v = cone(bm)
+    v += C.bm_tore(bm, R0 - 0.005, 0.03, segments=SEG, segments_tube=8, mat=0)
     bmesh.ops.transform(bm, matrix=m, verts=list(set(v)))
     chapeau = C.piece("Chapeau", bm, MATS, lissage="angle")
     C.deplacer_origine(chapeau, m @ Vector((0, 0, 0)))

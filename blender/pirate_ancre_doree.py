@@ -45,7 +45,9 @@ import commun_pirates as P  # noqa: E402
 
 NOM = "ancre_doree"
 POINT = "PointDos"
-MATS = ["M5_PirOrAncre", "M5_DoreDeco", "M5_PirCordeRouge"]   # 0, 1, 2
+# V7 : ancre en or CLAIR (M7_OrVif), chaîne en or un peu plus foncé (M7_OrChaine) : deux tons, et l'ancre ne paraît
+# plus bronze dans le décor de nuit.
+MATS = ["M7_OrVif", "M7_OrChaine", "M5_PirCordeRouge"]   # 0, 1, 2
 N = 30
 A_ACCROCHE = -2.85          # angle de la chaîne où pend l'ancre (derrière, à droite)
 LONGUEUR = 0.90
@@ -61,24 +63,24 @@ def ancre(bm):
     plan de l'ancre = XZ (devant = +Y). Hauteur totale 0,90."""
     av = set(bm.verts)
     e = 0.06                                    # épaisseur
-    C.bm_tore(bm, 0.07, 0.024, segments=10, segments_tube=4, mat=0,
+    C.bm_tore(bm, 0.07, 0.026, segments=12, segments_tube=5, mat=0,
               matrice=Matrix.Rotation(math.radians(90), 4, "X"))           # anneau
     chemin = [Vector((0, 0, -0.07)), Vector((0, 0, -0.45)), Vector((0, 0, -0.78))]
-    C.bm_tube(bm, chemin, 0.04, cotes=6, mat=0)                            # verge
-    C.bm_tube(bm, [Vector((-0.22, 0, -0.17)), Vector((0.22, 0, -0.17))], 0.03, cotes=6,
+    C.bm_tube(bm, chemin, 0.045, cotes=8, mat=0)                           # verge (V7 : plus ronde)
+    C.bm_tube(bm, [Vector((-0.22, 0, -0.17)), Vector((0.22, 0, -0.17))], 0.035, cotes=8,
               mat=0)                                                       # jas
     for s in (-1, 1):
-        C.bm_sphere(bm, 0.045, (s * 0.24, 0, -0.17), segments=6, anneaux=4, mat=0)
+        C.bm_sphere(bm, 0.05, (s * 0.24, 0, -0.17), segments=8, anneaux=5, mat=0)
     arc = [Vector((0.30 * math.sin(a), 0, -0.55 - 0.25 * math.cos(a)))
            for a in [math.radians(d) for d in range(-80, 81, 20)]]
-    C.bm_tube(bm, arc, 0.04, cotes=5, mat=0)                              # bras
+    C.bm_tube(bm, arc, 0.045, cotes=8, mat=0)                            # bras
     for s in (-1, 1):                                                      # pattes
         a = math.radians(80 * s)
         c = Vector((0.30 * math.sin(a), 0, -0.55 - 0.25 * math.cos(a)))
         m = Matrix.Translation(c) @ Matrix.Rotation(math.radians(-35 * s), 4, "Y")
         C.bm_coussin(bm, [(0, 0.13), (-0.09, -0.02), (-0.05, -0.05), (0.05, -0.05),
-                          (0.09, -0.02)], 0.04, 0.07, m, mat=0, anneaux=1)
-    C.bm_sphere(bm, 0.06, (0, 0, -0.80), segments=8, anneaux=5, mat=0)    # croisée
+                          (0.09, -0.02)], 0.04, 0.08, m, mat=0, anneaux=1)
+    C.bm_sphere(bm, 0.065, (0, 0, -0.80), segments=8, anneaux=5, mat=0)   # croisée
     for k in range(2):                                                     # corde
         C.bm_tore(bm, 0.052, 0.018, segments=8, segments_tube=4, mat=2,
                   matrice=Matrix.Translation((0, 0, -0.25 - 0.04 * k))
@@ -91,7 +93,7 @@ def construire():
     # --- la chaîne autour du cou
     tour = P.tour_cou(hauteur, 0.01, n=N)
     bm = bmesh.new()
-    nb = P.bm_chaine(bm, [p for p, _ in tour], longueur=0.17, largeur=0.10, fil=0.022,
+    nb = P.bm_chaine(bm, [p for p, _ in tour], longueur=0.21, largeur=0.12, fil=0.024,   # V7 : maillons plus gros, moins nombreux
                      mat=1, ferme=True, hauts=[d for _, d in tour])
     print("Maillons de la chaîne :", nb)
     chaine = C.piece("Chaine", bm, MATS, lissage="angle", pivot=C.U(*C.CHEVAL_ACCROCHES[POINT]))

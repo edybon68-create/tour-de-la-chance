@@ -1592,4 +1592,7 @@ def poser_sur(arbre, centre, direction, ecart=0.0):
 # garde la couleur jaune d'or des icônes.
 MATERIAUX.update({
     "M7_OrVif": ("#FFC53A", 0.55, 0.28),
+    "M7_OrChaine": ("#E3A52C", 0.5, 0.35),       # chaîne de l'ancre : 2e ton d'or
+    "M7_PlumeBlanche": ("#FFFFFF", 0.0, 0.55),   # ailes d'ange : blanc pur, satiné
+    "M7_PlumeOmbre": ("#E4DDF0", 0.0, 0.60),     # rangée du bas : lavande très clair
 })

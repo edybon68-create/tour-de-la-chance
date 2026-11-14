@@ -48,10 +48,11 @@ NOM = "ailes_papillon"
 POINT = "PointDos"
 MATS = ["M5_AilePapillon", "M5_BordPapillon", "M5_TachePapillon"]  # 0, 1, 2
 X_CH, Y_CH = 0.12, 1.02
-RECUL = math.radians(25)
+RECUL = math.radians(14)      # V7 : plus ouvertes vers les côtés (vues de face)
 LOBES = [  # centre (u, v), rayons, tache (décalage, rayons)
-    ((0.34, 0.21), (0.30, 0.25), ((0.06, 0.04), (0.08, 0.065))),
-    ((0.24, -0.15), (0.20, 0.16), ((0.03, -0.02), (0.055, 0.045))),
+    # V7 : lobes plus ronds et plus grands, GROSSES taches orange rondes (comme l'icône)
+    ((0.36, 0.22), (0.32, 0.27), ((0.07, 0.05), (0.11, 0.10))),
+    ((0.25, -0.16), (0.21, 0.17), ((0.03, -0.02), (0.075, 0.07))),
 ]
 
 
@@ -59,7 +60,7 @@ def contour_festonne(ru, rv, n=24, vagues=8):
     pts = []
     for k in range(n):
         a = 2 * math.pi * k / n
-        f = 1.0 - 0.10 * abs(math.sin(vagues * a / 2))      # vagues d'environ 5 cm
+        f = 1.0 - 0.03 * abs(math.sin(vagues * a / 2))      # V7 : bord presque lisse (icône)
         pts.append((ru * f * math.cos(a), rv * f * math.sin(a)))
     return pts
 
@@ -83,15 +84,15 @@ def aile(cote, arbre):
     bm = bmesh.new()
     for (cu, cv), (ru, rv), ((tu, tv), (tru, trv)) in LOBES:
         loc = Matrix.Translation((cu, 0, cv))
-        C.bm_coussin(bm, contour_festonne(ru, rv), 0.045, 0.07, loc, mat=0, anneaux=2)
+        C.bm_coussin(bm, contour_festonne(ru, rv, n=28), 0.045, 0.08, loc, mat=0, anneaux=2)
         # le cerne violet : une plaque un peu plus grande, 1,5 cm derrière
-        C.bm_coussin(bm, contour_festonne(ru + 0.035, rv + 0.035), 0.04, 0.05,
+        C.bm_coussin(bm, contour_festonne(ru + 0.035, rv + 0.035, n=24), 0.04, 0.05,
                      loc @ Matrix.Translation((0, -0.018, 0)), mat=1, anneaux=1)
-        C.bm_coussin(bm, C.contour_ellipse(tru, trv, n=10), 0.03, 0.06,
-                     Matrix.Translation((cu + tu, 0.03, cv + tv)), mat=2, anneaux=1,
+        C.bm_coussin(bm, C.contour_ellipse(tru, trv, n=20), 0.02, 0.04,
+                     Matrix.Translation((cu + tu, 0.045, cv + tv)), mat=2, anneaux=1,
                      dos_plat=True)
     # 3 nervures en relief depuis la racine
-    for fin in ((0.52, 0.34), (0.50, 0.12), (0.34, -0.22)):
+    for fin in ():   # V7 : nervures retirées (fines baguettes absentes de l'icône)
         chemin = [Vector((0.05, 0.03, fin[1] * 0.15)), Vector((fin[0] * 0.5, 0.036, fin[1] * 0.5)),
                   Vector((fin[0] * 0.85, 0.032, fin[1] * 0.85))]
         C.bm_tube(bm, chemin, 0.03, cotes=4, mat=1, rayons=[0.9, 0.7, 0.4])

@@ -59,24 +59,22 @@ CENTRE_ORBITE = (0.0, 2.02, 0.05)        # Unity, local à Joueur
 RAYON_ORBITE = 0.85
 INCLINAISON_ORBITE = 20.0                # devant en HAUT
 INCLINAISON_ANNEAU = 20.0
-R_BOULE = 0.20 * K
+R_BOULE = 0.24 * K                       # V7 : boule plus grosse (icône)
 
 
 def boule():
     bm = bmesh.new()
-    n = 12
+    n = 16                               # V7 : 12 -> 16 (sphère bien ronde)
     profil, mats = [], []
     for k in range(n + 1):
         a = math.pi * k / n
         r, z = R_BOULE * math.sin(a), R_BOULE * math.cos(a)
         profil.append((r, z))
-    # 2 bandes en relief : entre les anneaux 4-5 et 7-8 du profil, +1,2 cm
-    def bande(a, i, r, z):
-        return (r * 1.0 + (0.012 if i in (4, 5, 8, 9) else 0.0), z)
-    mats = [1 if i in (4, 8) else 0 for i in range(n)]
-    C.bm_revolution(bm, profil, 18, mats=mats, rayon_fn=bande)
+    # V7 : bandes seulement PEINTES (plus de relief) : une sphère lisse comme l'icône
+    mats = [1 if i in (6, 10) else 0 for i in range(n)]
+    C.bm_revolution(bm, profil, 28, mats=mats)
     arbre = C.arbre_bm(bm)
-    for ang, el in ((0.4, 0.75), (2.4, -0.15), (4.2, 0.35)):
+    for ang, el in ():   # V7 : cratères retirés (absents de l'icône)
         d = C.direction_angles(ang, el)
         p, nn = C.poser_sur(arbre, Vector((0, 0, 0)), d, 0.0)
         m = C.repere(p, nn)
@@ -90,7 +88,7 @@ def anneau(r_in, r_out, ep=0.03):
     bm = bmesh.new()
     prof = [(r_in, -ep / 2), (r_out, -ep / 2), (r_out + 0.008, 0.0), (r_out, ep / 2),
             (r_in, ep / 2), (r_in, -ep / 2)]
-    C.bm_revolution(bm, prof, 40, mats=[2] * 5)
+    C.bm_revolution(bm, prof, 48, mats=[2] * 5)
     bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
     bmesh.ops.transform(bm, matrix=Matrix.Rotation(math.radians(INCLINAISON_ANNEAU), 4, "Y"),
                         verts=bm.verts)
@@ -116,8 +114,9 @@ def construire():
                        pivot=centre)
 
     planete = poser(boule(), "Planete")
-    a1 = poser(anneau(0.20, 0.28), "AnneauPrincipal")      # Ø 0,56 (0,70 × 0,8)
-    a2 = poser(anneau(0.305, 0.33, ep=0.022), "AnneauExterieur")   # Ø 0,66, vide de 2,5 cm
+    # V7 : un grand anneau plat et épais (Ø 0,80) comme l'icône, et un fin anneau intérieur
+    a1 = poser(anneau(0.31, 0.40, ep=0.035), "AnneauPrincipal")
+    a2 = poser(anneau(0.275, 0.295, ep=0.02), "AnneauExterieur")   # (nom historique gardé)
     for a in (a1, a2):
         C.parenter(a, planete)
     C.parenter(planete, orbite)
@@ -127,8 +126,8 @@ def construire():
     bpy.context.view_layer.update()
     C.parenter(lune_orbite, orbite)
     bm = bmesh.new()
-    pos_lune = lune_orbite.matrix_world @ Vector((0.0, 0.26, 0.0))
-    C.bm_sphere(bm, 0.075 / 2, pos_lune, segments=8, anneaux=6, mat=3)
+    pos_lune = lune_orbite.matrix_world @ Vector((0.0, 0.47, 0.0))   # V7 : hors du grand anneau
+    C.bm_sphere(bm, 0.075 / 2, pos_lune, segments=12, anneaux=8, mat=3)
     lune = C.piece("Lune", bm, MATS, lissage="tout", pivot=pos_lune)
     C.parenter(lune, lune_orbite)
 

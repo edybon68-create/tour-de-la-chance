@@ -45,15 +45,15 @@ import commun as C  # noqa: E402
 
 NOM = "ailes_ange"
 POINT = "PointDos"
-MATS = ["M_Plume", "M_PlumeOmbre", "M5_DoreDeco"]  # 0, 1, 2
+MATS = ["M7_PlumeBlanche", "M7_PlumeOmbre", "M5_DoreDeco"]  # 0, 1, 2 (V7 : blanc plus pur)
 X_CH, Y_CH = 0.13, 1.05
-RECUL = math.radians(30)      # l'aile part vers l'extérieur ET vers l'arrière
+RECUL = math.radians(16)      # V7 : 30° -> 16°, les ailes s'ouvrent plus vers les côtés : on les voit de face
 LEVE = math.radians(8)        # et se relève un peu
 
 
 def arc_haut(u):
     """Bord du haut de l'aile (v en fonction de u) : monte de la racine vers la pointe."""
-    return 0.08 + 0.34 * math.sin(min(u / 0.72, 1.0) * math.pi / 2)
+    return 0.08 + 0.38 * math.sin(min(u / 0.80, 1.0) * math.pi / 2)
 
 
 def contour_rang(u_max, v_bas, lobes):
@@ -64,9 +64,9 @@ def contour_rang(u_max, v_bas, lobes):
     for k in range(lobes):
         u0, u1 = u_max * k / lobes, u_max * (k + 1) / lobes
         vb = v_bas(0.5 * (u0 + u1))
-        for f in (0.0, 0.2, 0.5, 0.8):
+        for f in (0.0, 0.12, 0.3, 0.5, 0.7, 0.88):   # V7 : plumes plus rondes
             u = u0 + (u1 - u0) * f
-            bombe = 0.065 * math.sin(math.pi * f) ** 0.6     # plume ronde
+            bombe = 0.075 * math.sin(math.pi * f) ** 0.6     # plume ronde, « nuage » comme l'icône
             pts.append((u, vb - bombe + 0.03))
     # bout de l'aile arrondi, qui remonte vers le haut
     for f in (0.35, 0.7):
@@ -84,9 +84,10 @@ def contour_rang(u_max, v_bas, lobes):
 
 
 RANGS = [  # nom, u_max, bas(u), lobes, matériau, avance (couches de 2 cm)
-    ("Bas", 0.70, lambda u: -0.08 - 0.04 * (u / 0.7), 5, 1, 0.00),
-    ("Milieu", 0.56, lambda u: 0.06 + 0.02 * (u / 0.56), 4, 0, 0.022),
-    ("Haut", 0.40, lambda u: 0.17 + 0.03 * (u / 0.40), 3, 0, 0.044),
+    # V7 : ailes 15 % plus grandes
+    ("Bas", 0.80, lambda u: -0.10 - 0.04 * (u / 0.8), 5, 1, 0.00),
+    ("Milieu", 0.64, lambda u: 0.06 + 0.02 * (u / 0.64), 4, 0, 0.025),
+    ("Haut", 0.46, lambda u: 0.19 + 0.03 * (u / 0.46), 3, 0, 0.05),
 ]
 
 
@@ -119,7 +120,7 @@ def aile(cote, arbre):
         bm = bmesh.new()
         contour, (cu, cv) = contour_rang(u_max, bas, lobes)
         local = Matrix.Translation((cu, avance, cv))
-        C.bm_coussin(bm, contour, 0.05, 0.075, local, mat=mat, anneaux=2)
+        C.bm_coussin(bm, contour, 0.055, 0.10, local, mat=mat, anneaux=2)   # V7 : plus dodu
         if nom == "Haut":
             # broche dorée bombée à la racine, devant la rangée du haut
             C.bm_disque(bm, 0.05, 0.03, Matrix.Translation((0.07, 0.08, 0.14)), cotes=10,
