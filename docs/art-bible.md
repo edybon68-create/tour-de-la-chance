@@ -79,6 +79,18 @@
 > herbe, pierre, nuages, galaxie). Elle remplace le §15.5. Nouvelle image : `art/prompts/lot8.md`
 > (icône « Mes skins ») ; les 12 dalles sont rendues dans Blender.
 
+>
+> **Mise à jour « V7 »** — nouvelle section **§17** : les **8 règles d'épure** tirées de la
+> Renaissance et du Casier, **L'Ascension vivante** (ciel en dégradé, nuages qui dérivent,
+> étoiles, projecteur sur l'étage du joueur, guirlandes des paliers, barre de progression à
+> rayures et jalons, ouverture « on monte », rayons de Récupérer sur socle sombre, « Ma position »
+> dans la bande de titre), la **Boutique épurée** (cartes façon Casier, bouton « i », packs de
+> diamants grisés « Bientôt disponible »), les **Améliorations** en 3 cartes côte à côte et la
+> **carte d'étage allégée** (le gain du trésor en héros). Elle remplace, pour l'aspect, les
+> §16.2.2 (couleurs du fond), §16.2.3 (barre), l'ouverture et « Ma position » du §16.2.1, et le
+> §15.2.3 pour l'onglet « Échanges » (devenu « Diamants »). Nouvelles images :
+> `art/prompts/lot9.md` ; 3 nuages rendus dans Blender.
+
 ---
 
 ## 1. L'ambiance en une phrase
@@ -4019,3 +4031,564 @@ code ou en USS**.
   numéro tombe au milieu de sa dalle ; le « i » est aligné avec lui.
 - Le fond change de teinte aux étages 10, 20 et 30, en douceur.
 - La pilule du record, le drapeau et le cheval ne se cachent pas l'un l'autre.
+
+---
+
+## 17. V7 : épurer, et rendre L'Ascension festive
+
+> **Pourquoi cette section ?** Mandat V7 (`docs/specs/v7-a-faire.md`, points 1, 4, 5, 6 et 11).
+> L'auteur **adore** la Renaissance (§15.4) et l'Inventaire « Casier » (§16.1). Il veut la
+> Boutique et les Améliorations **plus simples**, dans le même esprit. Il trouve L'Ascension
+> « tristounette », et la carte d'étage trop chargée (`docs/references/v7_carte_etage_chargee.png`).
+>
+> Captures étudiées : `v6_renaissance.png`, `v65_inventaire_*.png`, `v65_ascension_*.png`,
+> `v65_boutique_*.png`, `v6fix_ameliorations.png`.
+>
+> Tailles en **pixels de référence 1920 × 1080**. Encre = **`#110D1F`** partout. Police Fredoka
+> Bold. **Aucune règle de jeu ne change ici** : seulement l'aspect. Les chiffres affichés viennent
+> toujours des fonctions du jeu (rien en dur).
+
+### 17.1 Ce qui plaît dans la Renaissance et le Casier (les règles d'épure)
+
+Le diagnostic, en comparant les captures :
+- **Renaissance** : **une** grande image au centre, des **icônes avec un chiffre** au lieu de
+  phrases, **un** énorme bouton. Une seule phrase dans tout l'écran.
+- **Casier** : chaque zone a **un seul rôle**, la grille est posée **directement sur le blanc**,
+  **une seule** grande surface colorée (la vitrine), des cases colorées qui disent la rareté sans
+  texte.
+- **Boutique et Améliorations (aujourd'hui)** : 5 à 7 lignes de petit texte par carte, 4 à
+  5 tailles de police différentes, et des boutons secondaires (« Contenu et taux ») aussi visibles
+  que le bouton principal. L'œil ne sait pas où aller.
+
+**Les 8 règles d'épure V7** (pour toutes les fenêtres refaites dans cette section) :
+
+| # | Règle | Valeur |
+|---|---|---|
+| 1 | Un **héros** par carte : l'image ou le chiffre qui compte, en grand | image 150 – 190 px, ou chiffre 48 – 72 px |
+| 2 | **3 tailles de texte au plus** dans une carte | titre 32 – 34 px · chiffre 40 – 52 px · étiquette 20 – 22 px |
+| 3 | **Pas de phrase dans une carte.** Un mot ou un chiffre, avec une icône | une phrase au plus par fenêtre, en pied (18 – 20 px `#6E6A80`) |
+| 4 | Le détail est **à un clic**, derrière un bouton **« i »** rond (le même que L'Ascension) | `bulle_petit_ardoise` **56 × 56**, « i » 34 px Bold blanc contour 3 px `#1E1A33` |
+| 5 | **Un seul bouton vert** par carte, le plus gros élément cliquable | `bulle_rect_vert` 9-slice, hauteur **96 – 104 px** |
+| 6 | La raison d'un bouton grisé va **dans** le bouton, pas sur une ligne en plus | « Encore ◆ 2 », « Encore ● 120 » |
+| 7 | De l'air : grille de **8 px** | marges intérieures de carte **24 px**, écart entre cartes **24 px**, entre sections **40 px** |
+| 8 | Les titres de section sont l'**autocollant du Casier** (§16.1.5) | 44 px Bold blanc, contour 5 px encre, `text-shadow 0 5px 0 #110D1F`, filet 3 px `rgba(17,13,31,0.12)` dessous |
+
+**Règle d'or rappelée** : on enlève du texte, **jamais une information de chance ou de gain**.
+Les taux d'une boîte, l'effet d'une amélioration, le gain du trésor et la chance de diamants
+restent **visibles sans rien ouvrir** ; seuls les tableaux détaillés passent derrière le « i ».
+
+---
+
+### 17.2 L'Ascension vivante et festive
+
+**Le diagnostic** (captures `v65_ascension_*`) : les dalles sont belles, mais tout est immobile ;
+le fond rose du palier 2 est terne ; l'étage du joueur ne se distingue que par un petit cheval ;
+la barre de progression est un simple trait jaune ; les « i » sont coupés par la barre de
+défilement sur certaines captures ; « Ma position » chevauche le « i » du bas ; les rayons de
+« Récupérer » sont invisibles sur le rose.
+
+**L'idée** : une **fête qui monte dans le ciel**. Le ciel bouge (nuages, étoiles), l'étage du
+joueur est **sous un projecteur**, les paliers ont des **guirlandes** et des rayons dorés, la
+barre se remplit comme une jauge de jeu vidéo. Tout reste calme et lisible : **rien ne bouge
+vite**, et rien ne passe devant un chiffre.
+
+#### 17.2.1 Les calques, de l'arrière vers l'avant
+
+Ordre à respecter dans le contenu qui défile (sinon un nuage passe devant un bouton) :
+
+| # | Calque | Contenu | Clics |
+|---|---|---|---|
+| 1 | Ciel | bandes de couleur (§17.2.2) + losanges | ignore |
+| 2 | Ciel vivant | astres (lueurs), étoiles qui scintillent, nuages lointains | ignore |
+| 3 | Lumières | projecteur et rayons de l'étage du joueur ; rayons et lueur des paliers | ignore |
+| 4 | Nuages proches | nuages qui dérivent, plus gros | ignore |
+| 5 | Dalles | les images de dalles (inchangé) | ignore |
+| 6 | Posés | pièces, diamants, cartes, cheval, drapeau, guirlandes (§16.2.5) | ignore, sauf la carte |
+| 7 | Boutons | « i », Récupérer, étincelles et confettis | actifs |
+
+La barre de progression et les numéros restent dans leur couloir, au-dessus de tout.
+
+#### 17.2.2 Un ciel plus lumineux
+
+Les bandes unies du §16.2.2 deviennent un **dégradé vertical par palier** (plus profond en haut,
+plus clair en bas, comme un vrai ciel), avec le même fondu de **320 px** entre deux paliers
+(plages : `GameManager.TierForFloor`). Le motif de losanges (blanc 6 %, arêtes 10 %) reste.
+
+| Palier | Haut du palier | Bas du palier | Pourquoi |
+|---|---|---|---|
+| 1 « En plein jour » | `#5FB4F5` | `#A8DEFF` | bleu de jour, franc et gai |
+| 2 « Dans les nuages ! » | `#F0809A` | `#FFC29E` | **coucher de soleil corail-pêche**, remplace le rose terne `#C98A96` |
+| 3 « Au-dessus des nuages ! » | `#6C5BD6` | `#A99BFF` | lavande du crépuscule |
+| 4 « Dans les étoiles ! » | `#120D2B` | `#2E2366` | nuit profonde |
+
+**Astres** (lueurs rondes, image cuite `lueur_ronde.png`, déjà utilisée par la Renaissance ; sinon
+à cuire : disque blanc, opacité 100 % au centre → 0 % au bord, 256 × 256) :
+
+| Palier | Astre | Place (x dans le contenu, hauteur de l'étage) | Taille | Couleur, opacité | Animation |
+|---|---|---|---|---|---|
+| 1 | soleil | x 860, au niveau de l'étage 3 | Ø 520 | `#FFF3B0`, 55 % | respire : opacité 45 → 60 % en 4 s, aller-retour |
+| 2 | soleil couchant | x 180, entre les étages 5 et 6 | Ø 640 | `#FFB27A`, 50 % | idem |
+| 3 | lune | x 880, au niveau de l'étage 8 | Ø 360 | `#F2ECFF`, 40 % | idem |
+| 4 | aucune lueur (les étoiles suffisent) | — | — | — | — |
+
+#### 17.2.3 Les nuages qui dérivent
+
+**Images : 3 nuages rendus dans Blender** par l'artiste 3D (même rendu que les nuages des
+dalles, pour qu'ils aillent ensemble) : `art/ascension/nuage_1.png` (grand), `nuage_2.png`
+(moyen), `nuage_3.png` (petit), copiés dans `Assets/UI/Ascension/`. Fiche au §17.2.11.
+Ils sont rendus **blancs** et **teintés par le code** selon le palier
+(`-unity-background-image-tint-color`).
+
+| | Nuages lointains (calque 2) | Nuages proches (calque 4) |
+|---|---|---|
+| Images | `nuage_2`, `nuage_3` | `nuage_1`, `nuage_2` |
+| Taille affichée | 160 – 220 px de large | 260 – 340 px de large |
+| Opacité | 45 % | 85 % |
+| Vitesse (de gauche à droite) | **10 – 14 px/s** | **20 – 28 px/s** |
+| Nombre | 1 pour **700 px** de hauteur de contenu | 1 pour **900 px** |
+| Hauteur | au hasard, mais **jamais** à moins de 60 px d'un numéro d'étage | idem |
+
+- Chaque nuage part de x = −360 et ressort à x = 1022 + 40, puis revient à gauche à une nouvelle
+  hauteur au hasard. Départ décalé au hasard pour qu'ils ne partent pas tous ensemble.
+- En plus, chaque nuage **flotte** de ±4 px en hauteur, en 3 à 5 s (aller-retour).
+- Ils passent **derrière les dalles** (calques 2 et 4 sont sous le calque 5).
+
+| Palier | Teinte des nuages |
+|---|---|
+| 1 | `#FFFFFF` |
+| 2 | `#FFE6DA` |
+| 3 | `#E4DAF0` |
+| 4 | `#5A4E8C`, opacité divisée par 2 (des nuages de nuit, très discrets) |
+
+#### 17.2.4 Les étoiles qui scintillent
+
+| Palier | Densité | Formes |
+|---|---|---|
+| 3 | 1 étoile pour **18 000 px²**, seulement dans la moitié haute du palier | points |
+| 4 | 1 pour **9 000 px²** (comme au §16.2.2) | 80 % de **points** Ø 2 – 4 px `#FFF1D6` ; 20 % d'**étincelles à 4 branches** 14 – 22 px |
+
+- **Étincelle à 4 branches** : dessinée par le code (deux losanges fins croisés, `Painter2D`, ou
+  deux barres de 4 × 22 px aux bouts arrondis tournées de 0° et 90°), couleur `#FFF1D6`, cœur
+  blanc.
+- **Scintillement** : `scale 0.6 → 1.1 → 0.6` et opacité `30 % → 100 % → 30 %`, durée au hasard
+  **1,4 à 2,8 s**, décalage au hasard.
+- **Étoile filante** (palier 4 seulement) : toutes les **7 à 11 s**, un trait de **140 × 3 px**
+  (dégradé blanc 90 % → transparent vers l'arrière, bouts arrondis), tourné de −25°, qui traverse
+  **420 px** en **0,6 s** `ease-in`, en haut de la partie visible, puis s'efface.
+
+#### 17.2.5 L'étage du joueur sous le projecteur
+
+C'est le cœur de la demande : **on doit voir son étage en une demi-seconde**, même en défilant vite.
+
+| Élément (calque) | Valeur | Animation |
+|---|---|---|
+| **Projecteur** (3) | image cuite `faisceau.png` (128 × 512) : trapèze vertical, haut étroit (40 % de la largeur), bas large ; blanc chaud `#FFF6C8`, opacité **0 % en haut → 55 % en bas**, bords latéraux fondus sur 20 %. Affiché **420 × 760**, centré en x sur la dalle, le **bas** posé sur le centre du dessus de la dalle (280, 166 dans l'image de la dalle) | respire : opacité 70 → 100 % en **2,4 s** (aller-retour) |
+| **Rayons** (3) | `RaysElement` Ø **640**, centré sur le centre du dessus de la dalle ; **16 rayons** `#FFE38A` à **40 %** qui s'effacent vers l'extérieur | un tour en **40 s** |
+| **Lueur au sol** (3) | `lueur_ronde.png` étirée en ellipse **560 × 220**, `#FFE9A0` à **50 %**, centrée sur le dessus de la dalle | — |
+| **Anneau du cheval** (6) | l'ellipse or `#FFD54A` actuelle passe à **140 × 44**, plus un 2e anneau qui part 0,8 s plus tard | chaque anneau : opacité 70 → 0 %, taille 1 → 1,5, en **1,6 s** |
+| **Cheval** (6) | icône du skin équipé, **110 px** (au lieu de 100) | sautille : `translate 0 → −6px → 0` en **1,2 s** `ease-in-out` |
+| **Étincelles** (7) | 6 étincelles à 4 branches (16 px, `#FFE38A`) qui montent des bords de la dalle | chacune monte de 80 px en 2,2 s en s'effaçant ; décalage 0,35 s |
+| **Numéro de l'étage** (couloir) | devient un **médaillon bleu** : rond Ø **76**, fond `#3B7DD8`, contour **5 px** encre, bas 6 px `#1F4A8C` (relief) ; numéro **40 px** Bold blanc contour 4 px `#1F4A8C` | pulsation `scale 1 → 1.08 → 1` en 1,6 s |
+
+Si l'étage du joueur est aussi un palier : le projecteur et les rayons du joueur **remplacent**
+ceux du palier (pas deux jeux de rayons l'un sur l'autre), mais la guirlande reste.
+
+#### 17.2.6 Les dalles de palier spectaculaires
+
+Les images de dalles ne changent pas : tout le spectacle est **posé par le code**.
+
+| Élément | Valeur |
+|---|---|
+| **Bande de fête** (calque 3) | une bande horizontale sur toute la largeur du contenu, haute de **360 px**, centrée sur la dalle : `lueur_ronde.png` étirée, `#FFF3B0` à **22 %** (palier atteint) ou `#FFFFFF` à **8 %** (pas encore) |
+| **Guirlande de fanions** (calque 6) | `art/ui/guirlande_fanions.png` (lot 9, image 1), affichée **640 × 160**, centrée en x, le haut à **y = 8** dans l'image de la dalle de palier (elle pend **derrière** la carte récompense, au-dessus des coffres du fond). Palier pas encore atteint : teinte `#A8A4BC`, et elle ne bouge pas |
+| Balancement de la guirlande | `rotate −1.5° → +1.5°` autour de son centre haut, en **3 s** (aller-retour) ; `scale-y 1 → 1.03` dans le même rythme |
+| **Rayons dorés** (calque 3, atteint seulement) | `RaysElement` Ø **760**, **20 rayons** `#FFD54A` à **28 %**, centré sur le piédestal (358, 182) ; un tour en **60 s** |
+| **Numéro du palier** (couloir) | **médaillon or** : rond Ø **84**, fond `#FFD54A`, contour 5 px encre, bas 6 px `#D99A1A` ; numéro **40 px** Bold `#3A2200` sans contour. Pas encore atteint : fond `#4A4566`, bas `#2E2A4E`, numéro `#D9D2F0` |
+| **Ruban du palier** (facultatif, au **premier étage de chaque palier d'altitude** : 1, 4, 7, 10) | `art/ui/ruban_palier.png` (lot 9, image 2) en 9-slice (`-unity-slice-left/right: 120`, image de 1200 × 400 affichée à 50 %), hauteur **88 px**, largeur selon le texte + 160 px ; texte = nom du palier du jeu (« Dans les nuages ! »), **30 px** Bold `#3A2200`, sans contour ; centré en x sur la dalle, **36 px au-dessus** du haut de l'image de la dalle ; `rotate −2°` |
+
+**La carte récompense** (§16.2.5) grandit un peu : **220 × 250** (au lieu de 200 × 230), diamant
+130 px, « +2 » **50 px**. Les 3 états restent ; l'état « gagné, pas encore pris » est décrit
+au §17.2.9.
+
+**Confettis** : la **première fois** qu'un palier « gagné, pas encore pris » entre dans la partie
+visible (pendant l'ouverture ou en défilant), **24 confettis** jaillissent de la carte (§17.2.10).
+Une seule fois par ouverture de la fenêtre.
+
+#### 17.2.7 Une barre de progression plus riche
+
+| Partie | Valeur (couloir de la barre : x **20 → 60**, centre **40**) |
+|---|---|
+| **Piste** | **40 px** de large (au lieu de 28), fond `rgba(17,13,31,0.55)`, contour **4 px** encre, coins **20** |
+| **Remplissage** | de l'étage 1 au **record** (inchangé) ; dégradé vertical `#FFE66B` (haut) → `#FFB020` (bas), coins 16 ; reflet blanc 35 %, 8 px de large, à 5 px du bord gauche |
+| **Rayures qui montent** | dans le remplissage, rayures diagonales blanches à **18 %** (bandes de 10 px, pas de 28 px, à 45°) : image cuite `rayures_barre.png` (tuile 56 × 56) répétée dans un enfant 2 fois plus haut que nécessaire, `overflow: hidden` sur le remplissage ; l'enfant glisse de **0 à −56 px en 1,2 s**, linéaire, en boucle. On voit la jauge « couler » vers le haut |
+| **Bout lumineux** | au sommet du remplissage : `lueur_ronde.png` Ø **72**, `#FFF3B0` à 70 % ; pulsation opacité 50 → 90 % en 1,2 s |
+| **Crans d'étage** | à chaque étage, un petit trait horizontal **14 × 4 px**, coins 2, `rgba(17,13,31,0.45)` dans la partie vide, `rgba(138,75,0,0.35)` sur le remplissage |
+| **Jalons de palier** | sur la piste, à la hauteur de chaque palier : rond Ø **40**, contour **4 px** encre. Atteint : fond `#FFD54A`, petit diamant 24 px dedans. Pas atteint : fond `#4A4566`, petit cadenas dessiné (corps 14 × 11 `#B8B4C8`, anse 10 px). « Gagné, pas encore pris » : fond `#FFD54A` et il **pulse** (`scale 1 → 1.15 → 1`, 1 s) |
+| **Prochain objectif** | du sommet du remplissage jusqu'au prochain palier pas encore atteint : tirets dans la piste, **4 × 12 px** (12 px d'écart), blanc à **55 %** : on voit « jusqu'où il reste à monter » |
+| **Repère « toi »** | sur la piste, à la hauteur de l'étage actuel : `bulle_petit_or` **60 × 60** avec l'icône du skin **40 px** ; s'il tombe sur le repère du record, il se met **à droite** de la pilule du record (pas par-dessus) |
+| **Pilule du record** | inchangée (§16.2.3), décalée de 6 px vers la droite pour suivre la piste plus large |
+
+Ouverture : le remplissage monte **pendant** le défilement d'ouverture (§17.2.8), et chaque jalon
+de palier franchi fait un petit rebond (`scale 1 → 1.25 → 1`, 0,2 s) au passage.
+
+#### 17.2.8 L'ouverture animée : « on monte »
+
+Remplace le « glissé de 200 px » du §15.5. Durée totale **1,5 s**, **interrompue** dès que le
+joueur clique, défile ou tourne la molette (tout passe directement à l'état final).
+
+| Temps | Ce qui se passe |
+|---|---|
+| 0 → 0,25 s | La fenêtre apparaît (pop-up standard : `scale 0.9 → 1.03 → 1`, `ease-out-back`) |
+| 0,15 s | Le contenu est placé **6 étages sous** l'étage du joueur (ou à l'étage 1 s'il est plus bas) |
+| 0,15 → 1,05 s | **Défilement vers le haut** jusqu'à l'étage du joueur (dalle au **tiers bas** de la zone), en **0,9 s** `ease-in-out-cubic` ; le remplissage de la barre monte en même temps ; nuages et étoiles bougent déjà |
+| 1,05 → 1,4 s | **Arrivée** : le cheval tombe de −60 px avec un rebond (`ease-out-bounce`, 0,35 s) ; le projecteur, les rayons et la lueur s'allument (opacité 0 → 1 en 0,3 s) ; le médaillon bleu fait `scale 0 → 1.2 → 1` |
+| 1,1 s | **16 confettis** jaillissent autour du cheval (§17.2.10) |
+| 1,4 s → | Si un palier « gagné, pas encore pris » est visible : ses confettis (§17.2.6) |
+
+#### 17.2.9 Les rayons de « Récupérer » bien visibles
+
+Le problème : des rayons **blancs** à 85 % disparaissent sur le ciel clair (jour, pêche). La
+solution : **un fond sombre sous les rayons**, puis des rayons **dorés** en deux couches.
+
+| Couche (de l'arrière vers l'avant) | Valeur |
+|---|---|
+| 1. Socle sombre | `lueur_ronde.png` Ø **460**, `#110D1F` à **28 %**, centré sur la carte récompense : il crée le contraste, sur tous les ciels |
+| 2. Grands rayons | `RaysElement` Ø **440**, **14 rayons** `#FFD54A` à **85 %** ; un tour en **14 s** |
+| 3. Petits rayons | `RaysElement` Ø **320**, **10 rayons** `#FFF6C8` à **90 %**, décalés d'un demi-rayon, tournent **en sens inverse** ; un tour en **20 s** |
+| 4. Lueur | `lueur_ronde.png` Ø **260**, `#FFF3B0` à 70 %, pulsation opacité 50 → 85 % en 1,2 s |
+| 5. Carte | sautille (inchangé) ; **contour or** en plus : anneau 6 px `#FFD54A` autour du contour encre, qui « respire » (opacité 1 → 0,6 → 1, 1,4 s) |
+| 6. Étincelles | 8 étincelles à 4 branches (18 px, `#FFF6C8`) qui tournent lentement autour de la carte (rayon 150 px, un tour en 8 s), chacune scintille |
+
+**Le bouton** passe à **300 × 112**, texte **34 px**, avec la même pulsation (1 → 1,06 → 1,
+1 s) et l'éclat toutes les 2,5 s. Au-dessus du bouton, une petite **flèche** or (chevron USS de
+deux barres 26 × 10 px, `#FFD54A`, contour 3 px encre) qui pointe vers la carte et monte-descend
+de 6 px en 0,8 s : on comprend « clique ici pour prendre ça ».
+
+#### 17.2.10 Confettis (dessinés par le code)
+
+- Rectangles **10 × 16 px** et ronds Ø 10 px, coins 3, **sans contour**.
+- Couleurs tirées dans : `#FF5FA2`, `#FFD54A`, `#3BC8FF`, `#6BE34A`, `#A35CE0`, `#FFFFFF`.
+- Jaillissement vers le haut dans un cône de ±60°, vitesse 380 – 620 px/s, gravité 1 400 px/s²,
+  rotation 180 – 540°/s, durée de vie **1,2 s** (fondu sur les 0,3 dernières secondes).
+- Ils vivent dans le calque 7 et ne bloquent aucun clic.
+
+#### 17.2.11 Fiche de rendu Blender des 3 nuages (pour l'artiste 3D)
+
+À ajouter à `blender/rendu_dalles.py` (même caméra **orthographique** 62°, même lumière que le
+palier 1, même contour extérieur 4 px affichés `#110D1F`, **pas** d'ombre portée).
+
+| Fichier | Rendu (×2) | Affiché au plus | Forme |
+|---|---|---|---|
+| `art/ascension/nuage_1.png` | 720 × 360 | 340 px de large | 5 boules, ventre plat, large |
+| `art/ascension/nuage_2.png` | 520 × 280 | 260 px | 4 boules |
+| `art/ascension/nuage_3.png` | 360 × 200 | 180 px | 3 boules |
+
+- Matière **blanche** `#FFFFFF`, ventre **gris-lavande clair** `#D8D2E6` (léger, pour que la
+  teinte du code reste propre) ; *Film → Transparent*, *View Transform* Standard.
+- Mêmes boules lisses que les nuages des dalles (§16.3.5) : ils doivent sembler venir du même jeu.
+
+#### 17.2.12 « Ma position » ne chevauche plus le « i »
+
+**La cause** : le bouton est collé en bas à droite **dans** la zone de route
+(`right: 40px; bottom: 16px`), précisément là où passe la colonne des « i ».
+
+**La correction** : il **sort de la route** et va dans la **bande de titre** de la fenêtre (les
+60 px du haut du corps, vides à droite du titre). Il ne peut plus rien chevaucher.
+
+| Partie | Valeur |
+|---|---|
+| Place | dans la fenêtre (pas dans la zone qui défile), `top: 6px`, `right: 110px` (à gauche de la croix) |
+| Forme | pilule **240 × 52**, fond `#FFD54A`, contour **4 px** encre, coins 26, bas 5 px `#D99A1A` (relief) |
+| Contenu | icône du skin équipé **48 px** qui **déborde** de 8 px vers le haut à gauche, « Ma position » **22 px** Bold `#3A2200`, puis un chevron (2 barres 14 × 5 px `#3A2200`) qui pointe **vers le bas** si l'étage du joueur est plus bas que la vue, **vers le haut** sinon |
+| Quand | visible seulement quand la dalle du joueur est **hors de la vue** ; apparition `opacity 0 → 1` + `translate 0 −8px → 0` en 0,2 s |
+| Clic | ramène à l'étage du joueur en 0,4 s `ease-in-out`, puis le cheval fait un petit saut |
+
+**Et les « i » coupés** (captures `v65_ascension_recuperer.png`, `_palier.png`) : le contenu est
+plus large que la zone visible, donc il défile un peu de côté et la colonne des « i » passe sous
+la barre de défilement. Largeur utile : 1056 − 2 × 5 (contour) − 24 (barre) = **1022 px**.
+
+| Couloir (x dans le contenu de **1022 px**) | Valeur |
+|---|---|
+| Barre de progression | 20 → 60 (centre 40) |
+| Numéros et médaillons | centre **118** |
+| Dalles | centrées sur **x = 560** (normale 280 → 840 ; palier 202 → 918) |
+| Boutons « i » | centre **x = 962** (64 px : 930 → 994), **28 px** d'air avant la barre |
+| Défilement | **vertical seulement** : défilement horizontal coupé, barre horizontale cachée |
+
+#### 17.2.13 Graphismes « Faible » et performances
+
+- **Faible** : nuages immobiles, pas d'étoile filante, rayons immobiles, pas de rayures qui
+  bougent, ouverture raccourcie à 0,4 s, 8 confettis au lieu de 24. Le projecteur reste (c'est
+  une image fixe) : l'étage du joueur se voit toujours.
+- Toutes les quantités : **n'animer que ce qui est visible** (± 1 hauteur de zone). Au plus
+  **40 éléments animés** en même temps.
+- Aucun clignotement rapide : rien en dessous de **0,8 s** de période, sauf les confettis.
+
+---
+
+### 17.3 La Boutique épurée
+
+**Le diagnostic** (captures `v65_boutique_*`, en 1280 × 720) : chaque carte de boîte empile
+titre, « 16 objets à collectionner ! », « Collection : 5 / 16 », une jauge, « Tout collectionner :
+5 ◆ », 6 aperçus avec leur %, et **deux** boutons de même hauteur. Soit **5 tailles de texte**
+et 7 lignes. Les titres de section sont petits et centrés ; le paragraphe « D'où viennent les
+diamants ? » ajoute un bloc de texte.
+
+**L'idée** : la carte d'une boîte ressemble à une **case du Casier en grand** : la boîte en
+héros, les aperçus en **cases de rareté** (la couleur dit la rareté, le % reste dessous), un
+seul gros bouton. Le reste est derrière le « i ».
+
+#### 17.3.1 La fenêtre
+
+- **1200 × 860** (au lieu de ~1150 × 810), panneau blanc cassé (§12.18.1), titre et icône
+  inchangés. Corps `padding: 60px 32px 26px 32px` → **1136 × 774**.
+- **Rangée du haut** (hauteur 64) : onglets + soldes (§15.2.3, inchangés). **4 onglets** :
+  « Classiques » · « Pirates » · « Animaux » · « **Diamants** ». L'onglet « Échanges » devient
+  « Diamants » : il mène à la section des échanges **et**, juste dessous, aux packs.
+- 18 px d'écart, puis la **liste qui défile** (hauteur 692) ; barre de défilement 24 px à droite,
+  12 px d'écart → contenu de **1100 px** de large.
+- Fondus haut et bas de la liste : 24 px, `#F8F4ED` / `#F4F0E8` (inchangés).
+
+#### 17.3.2 Le titre de section
+
+Rangée de **72 px**, alignée à **gauche** (comme le Casier, plus centrée), puis filet 3 px
+`rgba(17,13,31,0.12)` et **24 px** avant les cartes. **40 px** entre deux sections.
+
+| Élément | Valeur |
+|---|---|
+| Icône | 64 px à gauche : la boîte de la section (`boite_skins_1.png`, `boite_pirates_skins.png`, `boite_animaux_skins.png`), ou `diamant.png` pour les sections Diamants |
+| Titre | « Boîtes classiques », « Boîtes de pirates », « Boîtes animaux », « Échanges », « Packs de diamants » : **44 px** Bold blanc, contour 5 px encre, `text-shadow 0 5px 0 #110D1F`, 14 px après l'icône |
+| Bouton « i » de section (Pirates seulement) | `bulle_petit_ardoise` 56 px, à 16 px du titre : il ouvre le petit texte « D'où viennent les diamants ? » (le paragraphe actuel, **retiré** de la liste) |
+| Échanges : rappel du taux | à droite du titre, pilule h **48**, `padding 0 18px`, fond `#E9E3D6`, contour 4 px encre, coins 24 : « 1 » + diamant 30 px + « = 200 » + pièce 30 px, **24 px** Bold `#2A2440` |
+
+#### 17.3.3 La carte d'une boîte
+
+Deux cartes par rangée : **538 × 470**, **24 px** d'écart. Fond `carte_*.png` de la famille
+(§12.18.3 : rose Classiques `#FFC94A → #FF4F8B`, bleue Pirates `#62E6FF → #3B5BDB`, verte
+Animaux `#D2F55A → #1FAE6A`), contour **5 px** encre, coins **28**, `padding 24px`.
+
+```
+┌──────────────────────────────────────────────┐
+│  ✦ rayons ✦      Boîte de skins n°1      (i) │
+│ ┌─────────┐      ▓▓▓▓▓▓▓░░░░░  5 / 16         │
+│ │  BOÎTE  │      ( ◆ 5 )  ← récompense        │
+│ │ 170 px  │                                   │
+│ └─────────┘                                   │
+│  ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐ ┌──┐                │
+│  │  │ │  │ │  │ │  │ │  │ │? │  ← cases       │
+│  └50%┘└25%┘└14%┘└7%┘ └3%┘ └1%┘                │
+│ ┏━━━━━━━━  Ouvrir   ● 250  ━━━━━━━━┓          │
+│ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛          │
+└──────────────────────────────────────────────┘
+```
+
+| Zone | Valeur |
+|---|---|
+| **Haut** (hauteur 180, `flex-direction: row`) | à gauche, la **boîte 170 px** sur une lueur blanche à 35 % Ø 220 et un `RaysElement` Ø 240 (10 rayons blancs à 30 %, un tour en 40 s) ; la boîte flotte de ±4 px en 2,4 s. À droite (20 px d'écart, `flex-grow 1`) : le **titre** **32 px** Bold blanc contour 4 px encre (2 lignes au plus), puis 12 px, puis la **jauge de collection** |
+| Jauge de collection | **260 × 28**, piste `rgba(17,13,31,0.30)`, contour 3 px encre, coins 14, remplissage `#FFE66B → #FFB020` ; « 5 / 16 » **20 px** Bold blanc contour 3 px encre, centré **dans** la jauge |
+| Récompense de collection | 10 px sous la jauge : pilule h **38**, `padding 0 14px 0 6px`, coins 19, fond `rgba(17,13,31,0.40)` : `medaille_or.png` 28 px + diamant 26 px + « 5 » **22 px** Bold blanc. Pas de phrase : la médaille dit « récompense ». Collection finie : la pilule devient `#6BE34A` avec une coche |
+| **Bouton « i »** | `bulle_petit_ardoise` **56 × 56**, `position: absolute; top: 14px; right: 14px` : il ouvre « Contenu et taux » (la page actuelle, inchangée). Le bouton sombre « Contenu et taux » **disparaît** |
+| **Cases des aperçus** (rangée de 110 px, 20 px sous le haut) | 6 **mini-cases du Casier** (§16.1.6 : `case_<rarete>.png`, contour **4 px** encre, coins **16**) de **70 × 70**, **10 px** d'écart (470 px), centrées ; icône 56 px. Le « ? » des objets cachés reste |
+| % sous chaque case | pilule h **26**, `padding 0 8px`, coins 13, fond `rgba(17,13,31,0.62)`, **17 px** Bold blanc sans contour, qui **chevauche** le bas de la case de 8 px. Pirates : un % par **paire** de rareté (comme aujourd'hui), centré sous la paire |
+| **Bouton** (en bas, 20 px sous les cases) | `bulle_rect_vert` 9-slice **490 × 96** : « Ouvrir » **32 px** + monnaie **36 px** + prix **34 px**, blanc contour 4 px `#0E3D21` |
+| Pas assez | `bulle_rect_gris`, texte « **Encore** » + monnaie 32 px + montant manquant, **28 px** `#E6E2F0`. La ligne « Il te manque… » sous le bouton **disparaît** |
+| Verrouillée (Animaux avant la Renaissance) | fond `carte_*.png` teinté `#B8B4C8` ; boîte teintée `#A8A4BC` ; cadenas dessiné (corps 34 × 26 `#6E6A84`, anse 24 px, contour 3 px) sur la boîte ; bouton gris avec `icone_rebirth.png` 40 px + « Après la Renaissance » 26 px |
+
+**Survol** de la carte : `scale 1.02`, 0,15 s `ease-out-back` ; la boîte fait un petit saut de
+8 px. **Survol** d'une case : `scale 1.1` et l'info-bulle actuelle (nom de l'objet).
+
+#### 17.3.4 Les échanges (section « Échanges »)
+
+Trois cartes **350 × 320**, **25 px** d'écart, centrées. Fond `carte_or.png`, contour 5 px
+encre, coins 28, `padding 20px`. **Plus de nom** (« Poignée », « Sac », « Coffre ») : la taille
+de la pile le dit.
+
+| Zone | Valeur |
+|---|---|
+| Image | la pile de pièces actuelle (dessinée par le code) sur ses rayons, zone de **150 px** |
+| Gain (le héros) | pièce **44 px** + « **+200** » / « +1 000 » / « +5 000 » **50 px** Bold blanc, contour **5 px `#8A4B00`**, `text-shadow 0 4px 0 #8A4B00` |
+| Bouton | `bulle_rect_vert` **290 × 92** : diamant 34 px + « 1 » / « 5 » / « 25 » **36 px** (pas de verbe : le bouton vert seul dit « échanger ») |
+| Pas assez | `bulle_rect_gris` : « Encore » + diamant 28 px + « 2 », **28 px** `#E6E2F0` |
+
+Au clic : animation des pièces volantes (reste connu du mandat, point 10) : 10 pièces de 36 px
+volent vers le compteur du porte-monnaie en 0,7 s, l'une après l'autre (0,04 s d'écart).
+
+#### 17.3.5 Les packs de diamants, « Bientôt disponible »
+
+**L'idée** : une **vitrine fermée**. On voit ce qui viendra, dans des tons gris-lavande calmes,
+sous **un seul** grand badge « Bientôt disponible ». Aucun prix, aucun bouton, aucune promesse.
+Règles de la spec v5 §15.5, inchangées : **aucun prix en euros**, pas de « bonus », pas de
+« meilleure offre », pas de compte à rebours, aucun SDK de paiement.
+
+Section sous les échanges, titre « Packs de diamants » (§17.3.2), puis :
+
+| Élément | Valeur |
+|---|---|
+| **Vitrine** | un puits **1100 × 340**, fond `#E9E3D6`, contour **4 px** encre, coins **28**, `padding 24px`, `overflow: hidden` |
+| **4 cartes** | **248 × 292**, **20 px** d'écart ; fond dégradé vertical **`#F1EEF6` (haut) → `#D3CDE0` (bas)**, contour **4 px `#8F89A6`** (pas l'encre : un contour adouci dit « pas encore actif »), coins **24** |
+| Image | `pack_diamants_petit.png`, `_sac.png`, `_coffre.png`, `_tresor.png` (lot 9, image 4) à **140 px**, teinte `#CFC8DE`, opacité **85 %** ; une lueur blanche à 40 % Ø 180 derrière |
+| Quantité | « 10 », « 30 », « 70 », « 160 » (lus dans `DiamondPackCatalog`) + diamant 30 px : **34 px** Bold **`#6E6A84`**, **sans contour** |
+| Nom | aucun (les noms restent dans les données) |
+| **Le badge** | un seul, **centré sur la vitrine**, `rotate −3deg` : pilule h **76**, `padding 0 32px 0 20px`, fond `#8F89A6`, contour **4 px** encre, coins 38, bas 6 px `#6E6A84` (relief) ; `sablier_bientot.png` (lot 9, image 3) **72 px** qui déborde de 10 px à gauche ; « Bientôt disponible » **32 px** Bold blanc, contour 4 px `#45425A` |
+| Reflet | une bande blanche à **22 %**, 60 px de large, penchée de 20°, traverse la vitrine de gauche à droite en 1,2 s, **toutes les 5 s** (comme l'éclat de Jouer, en plus doux) |
+| Phrase (sous la vitrine, 12 px) | « Pour l'instant, les diamants se gagnent en jouant. » **20 px** `#6E6A80`, centrée |
+| Clics | rien n'est cliquable (`picking-mode: Ignore`), pas de survol ; son `ui_refus` facultatif au clic sur la vitrine |
+| Données | si `showDiamondPacks` est faux : la section entière est cachée (titre compris) |
+
+---
+
+### 17.4 Les Améliorations épurées
+
+**Le diagnostic** (`v6fix_ameliorations.png`) : trois longues cartes empilées, chacune avec une
+description, « Niveau 2 / 10 » et 10 petits points, deux phrases d'effet, un bouton, une note
+« S'applique à partir du prochain étage », et pour « Coffres précieux » un tableau de 5 lignes.
+Il faut défiler pour voir la 3e. **L'idée** : faire comme les **trois cartes de la Renaissance**,
+côte à côte, **sans défilement** : l'icône, le niveau en jauge, l'effet **avant → après** en
+grand, un gros bouton.
+
+#### 17.4.1 La fenêtre
+
+- **1280 × 800**, panneau blanc cassé, titre « Améliorations » et icône inchangés. Corps
+  `padding: 60px 32px 26px 32px` → **1216 × 714**.
+- En haut à droite du corps : le solde de pièces (pilule h 52, fond `#E9E3D6`, contour 4 px
+  encre, coins 26, pièce 34 px + nombre **28 px** Bold `#2A2440`).
+- 16 px, puis **3 cartes de 384 × 590**, **32 px** d'écart. **Pas de barre de défilement.**
+- Pied (16 px sous les cartes) : **une** phrase pour toutes les cartes, **20 px** `#6E6A80`,
+  centrée : « Chaque amélioration compte à partir du prochain étage. »
+
+#### 17.4.2 La carte d'une amélioration
+
+Fond `carte_*.png` (§12.18.3 : **or** `#FFE66B → #FF9F1C` Bourse magique ; **violette**
+`#D2B4FF → #6C4FE0` Coffres précieux ; **bleue** `#62E6FF → #3B5BDB` Coffre en plus), contour
+**5 px** encre, coins **28**, `padding 24px`, contenu centré en colonne.
+
+```
+┌──────────────────────┐
+│                  (i) │
+│      ✦ (icône) ✦     │
+│     Bourse magique   │
+│  ▮▮▯▯▯▯▯▯▯▯   2/10   │
+│ ┌──────────────────┐ │
+│ │  ×1,4  ›  ×1,6   │ │
+│ │    par trésor    │ │
+│ └──────────────────┘ │
+│ ┏━━━━  ● 900  ━━━━┓  │
+│ ┗━━━━━━━━━━━━━━━━━┛  │
+└──────────────────────┘
+```
+
+| Zone | Valeur |
+|---|---|
+| **Bouton « i »** | `bulle_petit_ardoise` **56 × 56**, `top: 14px; right: 14px` : petite fenêtre (style du « i » de L'Ascension, §16.2.6, **620 × 520**) avec la description actuelle, le tableau détaillé (Coffres précieux : les 5 raretés, maintenant / prochain) et le coût du niveau suivant |
+| **Icône** (hauteur 170) | `amelioration_gains.png` / `amelioration_coffres.png` / `amelioration_pieges.png` à **150 px**, lueur blanche 35 % Ø 200, `RaysElement` Ø 230 (10 rayons blancs à 30 %, un tour en 40 s) ; flotte de ±5 px en 2,4 s (comme l'illustration de la Renaissance) |
+| **Nom** | **34 px** Bold blanc, contour 4 px encre, ombre `0 4px 0 #110D1F`, une ligne (réduit jusqu'à 28 px) |
+| **Niveau** (16 px sous le nom) | jauge de **10 segments** : 10 × **24 × 26 px**, **4 px** d'écart (276 px), coins 6 ; segment acquis = **blanc**, contour 3 px encre ; segment à acquérir = `rgba(17,13,31,0.22)`, sans contour ; le **prochain** segment clignote doucement (opacité 22 → 45 %, 1,2 s). À droite, 12 px d'écart : « 2/10 » **22 px** Bold blanc contour 3 px encre |
+| **Effet** (le héros, 20 px sous le niveau) | puits **336 × 170**, fond `rgba(17,13,31,0.28)`, coins **22**, `padding 14px`. Contenu selon l'amélioration, ci-dessous |
+| **Bouton** (en bas, `margin-top: auto`) | `bulle_rect_vert` 9-slice **336 × 100** : pièce **40 px** + prix **40 px** Bold blanc contour 4 px `#0E3D21` (pas de verbe : sur cette carte, le vert dit « améliorer »). Réduction en cours (spec v6) : étiquette penchée « −25 % » au coin haut droit du bouton, style `.v5-tab__bientot` (§15.2.3), 18 px |
+| Pas assez | `bulle_rect_gris` : « Encore » + pièce 32 px + montant manquant, **28 px** `#E6E2F0` |
+| **Niveau max** | le bouton devient une pilule or **336 × 100** : fond `#FFD54A`, contour 4 px encre, bas 8 px `#D99A1A`, coins 30 ; `medaille_or.png` 56 px + « MAX » **44 px** Bold `#3A2200` ; les 10 segments sont **or** `#FFD54A` ; le puits montre seulement la valeur actuelle, en grand |
+
+**Le contenu du puits « Effet »** (tous les nombres viennent des fonctions du jeu) :
+
+| Amélioration | Ligne 1 (héros) | Ligne 2 (étiquette) |
+|---|---|---|
+| **Bourse magique** | « ×1,4 » **36 px** blanc à 75 % · chevron · « **×1,6** » **52 px** Bold blanc, contour 5 px encre | « par trésor » **22 px** Bold blanc contour 3 px |
+| **Coffres précieux** | **deux barres empilées** de **300 × 24**, contour 3 px encre, coins 12, découpées selon les chances de chaque rareté de coffre, aux couleurs du §2.10 ; à gauche de chacune, « Avant » / « Après » **18 px** Bold blanc contour 2 px. Une part sous 4 % garde au moins 6 px de large | « Coffres plus précieux » **22 px** |
+| **Coffre en plus** | « 25 % » **36 px** à 75 % · chevron · « **50 %** » **52 px** | « étages à 6 coffres » **22 px** (le nombre de coffres lu dans les données), puis « Risque : 19 % › 18 % » **20 px** blanc contour 2 px |
+
+Le **chevron** : deux barres USS **18 × 7 px**, blanches, contour 2 px encre, en « › », 14 px
+d'écart de chaque côté.
+
+**Après un achat** : le nouveau segment apparaît (`scale 0 → 1.3 → 1`, 0,25 s,
+`ease-out-back`) ; la valeur « après » glisse à la place de « avant » (0,2 s) et la nouvelle
+valeur « après » arrive par la droite ; l'icône saute de 16 px ; 8 étincelles or jaillissent du
+bouton. Au passage à MAX : confettis (§17.2.10).
+
+---
+
+### 17.5 La carte d'étage allégée
+
+**Le diagnostic** (`docs/references/v7_carte_etage_chargee.png`) : 6 lignes, 5 tailles et
+4 couleurs de texte pour un message lu en 2 secondes. « +77 pièces · cagnotte 137 » (or) est
+presque aussi visible que le gain qui compte, « Trésor : +103 » ; la bannière « Dans les nuages ! »
+et deux pastilles brunes s'intercalent ; les petites mentions sont à peine lisibles.
+
+**L'idée** : **un titre, un héros, une rangée de pastilles**. Le **gain du trésor devient
+l'élément le plus gros de la carte** (règle d'or : lisible avant le choix). Ce qui vient d'être
+gagné est déjà montré par le texte flottant et le compteur de la cagnotte ; le détail complet
+est dans la fenêtre « toutes les infos » (un clic sur la carte, mandat point 3).
+
+```
+        ┌──── Dans les nuages ! ────┐   ← autocollant penché (si nouveau palier)
+┌───────────────────────────────────────────┐
+│                 ÉTAGE 4                    │
+│        ┏━━━━━━━━━━━━━━━━━━━━━━━━┓          │
+│        ┃ Trésor   ●  +103       ┃          │  ← le héros
+│        ┗━━━━━━━━━━━━━━━━━━━━━━━━┛          │
+│  ( ▣ 3 coffres · 1 piège )  ( ◆ 1,5 % )  ( ✦ +31 % ) │
+└───────────────────────────────────────────┘
+```
+
+| Partie | Valeur |
+|---|---|
+| **Carte** | largeur **640** (au lieu de 720), hauteur selon le contenu (~**250**), `padding 20px 28px 22px 28px`, contour **5 px** encre, coins **28**, fond dégradé du palier (inchangé). Arrivée, durée et rangement : spec v5 §9.3, inchangés |
+| **Titre** | « ÉTAGE 4 » **48 px** Bold blanc, contour 5 px encre, `text-shadow 0 4px 0 #110D1F`. La phrase drôle de montée **ne s'affiche plus** sur la carte (elle reste pour les toasts/annonces si le game designer le souhaite) |
+| **Le héros : le trésor** (14 px sous le titre) | pilule **h 96**, `padding 0 36px 0 24px`, fond `#FFD54A`, contour **5 px** encre, coins 48, bas **8 px** `#D99A1A` (relief) ; « Trésor » **28 px** Bold `#3A2200` ; 14 px ; pièce **60 px** ; 10 px ; « **+103** » **64 px** Bold blanc, contour **5 px `#3A2200`**, `text-shadow 0 4px 0 #3A2200`. Le multiplicateur de rareté est **déjà compris** dans ce nombre |
+| Étage en diamants possible | rien de plus sur le héros (on ne dit **jamais** à l'avance qu'un étage est en diamants) ; la chance est dans la pastille ◆ |
+| **Rangée de pastilles** (16 px sous le héros, centrée, 10 px d'écart) | pilules h **44**, `padding 0 14px 0 8px`, coins 22, contour **3 px** encre, texte **22 px** Bold blanc contour 2 px encre, icône **30 px** |
+| Pastille 1 (toujours) | fond = **couleur de la rareté des coffres** de l'étage (§2.10) ; icône du coffre de cette rareté + « 3 coffres · 1 piège ». Le nom « Coffres de bronze : trésor ×1,5 » passe dans « toutes les infos » (le ×1,5 est déjà dans le gain) |
+| Pastille 2 (si la chance n'est pas nulle) | fond `#3B5BDB` ; `diamant.png` + « 1,5 % » |
+| Pastille 3 (si bonus de tenue) | fond `rgba(17,13,31,0.45)` ; icône du **skin équipé** + « +31 % » |
+| Pastille 4 (après la Renaissance) | fond `rgba(17,13,31,0.45)` ; `icone_rebirth.png` + « ×2 » |
+| **Autocollant de palier** (seulement au 1er étage d'un palier d'altitude, ou « Nouveau record ! », ou « Reprise réussie ») | pilule h **52**, `padding 0 20px`, fond `#FF5FA2` (palier), `#FFD54A` texte `#3A2200` (record) ou `#3BC8FF` (reprise), contour 4 px encre, coins 26, `rotate −4deg`, **à cheval sur le bord haut** de la carte (`top: −30px`), texte **24 px** Bold blanc contour 3 px encre. Une seule à la fois (priorité : record, reprise, palier) |
+| Ce qu'on vient de gagner | **retiré de la carte** : texte flottant « +77 » (déjà là) et petit rebond du compteur de cagnotte (`scale 1 → 1.12 → 1`, 0,25 s). Trésor en diamants : texte flottant « +2 ◆ » et rebond du compteur de diamants |
+| **Barre compacte** (après le rangement) | même ordre de lecture : pièce 36 px + « **+103** » **34 px** Bold `#FFD54A` contour 3 px `#3A2200`, puis « · 3 coffres » et « · ◆ 1,5 % » **24 px** blanc. Hauteur 64, placement du §15.2.2 inchangés |
+| Survol (carte et barre) | `scale 1.03` ; le curseur montre qu'on peut cliquer (ouvre « toutes les infos ») |
+
+Lisibilité contrôlée : le « +103 » de 64 px est **2,9 fois** plus haut que tout autre texte de
+la carte (22 px), et c'est le seul nombre blanc sur fond or.
+
+---
+
+### 17.6 Images de la V7 (récapitulatif)
+
+| Fichier | Fait par | Où |
+|---|---|---|
+| `art/ui/guirlande_fanions.png` | Gemini, `art/prompts/lot9.md` image 1 | paliers de L'Ascension |
+| `art/ui/ruban_palier.png` | Gemini, lot 9 image 2 (facultatif) | 1er étage de chaque palier d'altitude |
+| `art/icones/sablier_bientot.png` | Gemini, lot 9 image 3 | badge « Bientôt disponible » |
+| `art/icones/pack_diamants_tresor.png` | Gemini, lot 9 image 4 | 4e pack (il réutilisait l'image du coffret) |
+| `art/ascension/nuage_1.png`, `nuage_2.png`, `nuage_3.png` | **artiste 3D**, `blender/rendu_dalles.py` (§17.2.11) | nuages qui dérivent |
+| `faisceau.png`, `rayures_barre.png` (+ `lueur_ronde.png` s'il n'existe pas encore) | **code**, `UiFxTextures.BakeAll()` dans `Assets/UI/Degrades/` | projecteur, barre, lueurs |
+
+Réutilisés sans changement : `case_<rarete>.png`, `carte_*.png`, `medaille_or.png`,
+`icone_rebirth.png`, `diamant.png`, `piece.png`, les pack_diamants existants, les icônes
+d'amélioration, les bulles `bulle_rect_*` et `bulle_petit_*`. Tout le reste (rayons, confettis,
+étincelles, chevrons, segments, jalons, cadenas, médaillons) est **dessiné par le code ou en USS**.
+
+### 17.7 À éviter (V7)
+
+- Remettre une phrase dans une carte « parce qu'il reste de la place » : l'air **est** le design.
+- Cacher un taux de boîte, l'effet d'une amélioration, le gain du trésor ou la chance de
+  diamants derrière le « i » : ces quatre-là restent **toujours visibles**.
+- Un nuage, une étincelle ou un confetti **devant** un chiffre, un « i » ou un bouton.
+- Des animations rapides ou qui clignotent (période < 0,8 s), ou tout qui bouge en même temps.
+- Des rayons blancs sur un ciel clair sans socle sombre dessous (§17.2.9).
+- Dans les packs : un prix, une monnaie réelle, « promo », « meilleure offre », un compte à
+  rebours, un bouton qui a l'air cliquable.
+- Utiliser l'or ailleurs que pour ce qui est **atteint, gagné ou à prendre** (§15.9) ; le rouge
+  reste réservé à la croix.
+
+### 17.8 À vérifier en capture (1920 × 1080 et 1280 × 720)
+
+- L'Ascension : l'étage du joueur se repère en moins d'une seconde, sur les 4 ciels.
+- Les « i » sont entiers, à 28 px de la barre de défilement ; « Ma position » ne touche rien.
+- Les rayons de « Récupérer » se voient sur le ciel de jour et sur le corail.
+- L'ouverture s'interrompt au premier clic ou coup de molette.
+- En Graphismes Faible, rien ne dérive et l'étage du joueur reste éclairé.
+- Boutique : une carte de boîte se lit en 3 coups d'œil (boîte, cases, prix) ; les % sont
+  visibles sans ouvrir ; « Encore ◆ 2 » tient dans le bouton gris.
+- Les packs sont clairement inactifs et ne ressemblent à aucune offre payante.
+- Améliorations : les 3 cartes tiennent sans défiler ; l'effet avant → après se lit de loin.
+- Carte d'étage : « +103 » est le plus gros texte ; la carte ne dépasse pas 640 px de large ;
+  la barre compacte garde le gain en premier.
