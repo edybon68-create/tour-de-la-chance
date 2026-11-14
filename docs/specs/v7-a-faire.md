@@ -178,3 +178,4 @@
   - `coffre_bois`, `coffre_bronze`, `coffre_argent`, `coffre_or`, `coffre_diamant` ;
   - `amelioration_coffres`.
 - Aucune icône franchement floue. `boite_skins_1` n'est qu'en 768 px, ce qui reste acceptable.
+- 14/11 02h : le code des points 1-3, 4, 5, 6 et 11 (art bible §17) est ÉCRIT par unity-dev mais NON compilé ni testé, car un mode Play étranger tourne depuis le 13/11 vers 18 h (question posée à l'auteur, ne pas l'arrêter sans son accord). Vérif hors éditeur OK (`scratchpad/check.sh`, 0 erreur). Quand le Play s'arrête : suivre le « Reste à faire » du compte rendu unity-dev (sauvegarde, recompile, showDiamondPacks + rebirthIcon par SerializedObject, captures, restauration, commits par écran). Mute Audio Unity activé, à garder.
