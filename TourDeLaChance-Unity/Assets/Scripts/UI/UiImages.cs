@@ -35,6 +35,20 @@ namespace TourDeLaChance
         public Sprite piece;
         [Tooltip("diamant.png : le diamant.")]
         public Sprite diamant;
+        [Tooltip("sablier_bientot.png (v7, lot 9) : le sablier du badge « Bientôt disponible » des packs.")]
+        public Sprite sablierBientot;
+        [Tooltip("nuage_1.png, nuage_2.png, nuage_3.png (v7, artiste 3D) : les nuages blancs qui dérivent dans L'Ascension. Vides = nuages dessinés par le code.")]
+        public Sprite nuage1;
+        public Sprite nuage2;
+        public Sprite nuage3;
+        [Tooltip("guirlande_fanions.png (v7, lot 9) : la guirlande des paliers de L'Ascension. Vide = fanions dessinés par le code.")]
+        public Sprite guirlandeFanions;
+        [Tooltip("ruban_palier.png (v7, lot 9, facultatif) : le ruban du 1er étage de chaque palier d'altitude. Vide = pilule dessinée.")]
+        public Sprite rubanPalier;
+        [Tooltip("categorie_classiques.png, categorie_pirates.png, categorie_animaux.png (v7) : les icônes neutres des 3 catégories de boîtes, à côté des titres de section de la Boutique. Vides = l'image de la 1re boîte.")]
+        public Sprite categorieClassiques;
+        public Sprite categoriePirates;
+        public Sprite categorieAnimaux;
 
         static UiImages instance;
         static bool searched;
@@ -60,6 +74,14 @@ namespace TourDeLaChance
         public static Sprite Macaron => Get != null ? Get.macaronOr : null;
         public static Sprite Piece => Get != null ? Get.piece : null;
         public static Sprite Diamant => Get != null ? Get.diamant : null;
+        public static Sprite Sablier => Get != null ? Get.sablierBientot : null;
+        public static Sprite Guirlande => Get != null ? Get.guirlandeFanions : null;
+        public static Sprite Ruban => Get != null ? Get.rubanPalier : null;
+        public static Sprite CategorieClassiques => Get != null ? Get.categorieClassiques : null;
+        public static Sprite CategoriePirates => Get != null ? Get.categoriePirates : null;
+        public static Sprite CategorieAnimaux => Get != null ? Get.categorieAnimaux : null;
+        /// Le nuage n° 1, 2 ou 3 (null = le dessiner).
+        public static Sprite Nuage(int n) => Get == null ? null : n == 1 ? Get.nuage1 : n == 2 ? Get.nuage2 : Get.nuage3;
 
         /// Le nom de la case qui correspond à un fichier (« icone_route » → « iconeRoute »),
         /// utilisé par l'outil d'éditeur.
@@ -77,6 +99,15 @@ namespace TourDeLaChance
                 case "macaron_or": return nameof(macaronOr);
                 case "piece": return nameof(piece);
                 case "diamant": return nameof(diamant);
+                case "sablier_bientot": return nameof(sablierBientot);
+                case "nuage_1": return nameof(nuage1);
+                case "nuage_2": return nameof(nuage2);
+                case "nuage_3": return nameof(nuage3);
+                case "guirlande_fanions": return nameof(guirlandeFanions);
+                case "ruban_palier": return nameof(rubanPalier);
+                case "categorie_classiques": return nameof(categorieClassiques);
+                case "categorie_pirates": return nameof(categoriePirates);
+                case "categorie_animaux": return nameof(categorieAnimaux);
                 default: return null;
             }
         }

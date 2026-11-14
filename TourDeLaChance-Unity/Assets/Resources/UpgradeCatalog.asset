@@ -64,7 +64,7 @@ MonoBehaviour:
       effectText: "Tr\xE9sors \xD73 !"
   - id: coffres
     displayName: "Coffres pr\xE9cieux"
-    description: "Des coffres plus beaux, qui multiplient le gain de l'\xE9tage."
+    description: "Coffres plus rares = tr\xE9sors plus gros."
     icon: {fileID: 21300000, guid: ed90845292de34f53b8f3e85bfd19787, type: 3}
     levels:
     - price: 0
@@ -113,7 +113,7 @@ MonoBehaviour:
       effectText: 
   - id: pieges
     displayName: Coffre en plus
-    description: "De 4 \xE0 6 coffres\u2026 et toujours un seul pi\xE8ge !"
+    description: "Plus souvent un coffre de plus. Toujours un seul pi\xE8ge !"
     icon: {fileID: 21300000, guid: 729f933f90f7940968f108da99a6a5f4, type: 3}
     levels:
     - price: 0

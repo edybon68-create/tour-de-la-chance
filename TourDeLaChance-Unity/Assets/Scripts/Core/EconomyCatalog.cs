@@ -52,9 +52,13 @@ namespace TourDeLaChance
         [Tooltip("Plafond du bonus de diamants de la tenue, en % (50).")]
         [SerializeField, Min(0)] int diamondBonusCap = 50;
 
-        [Header("Échange diamants → pièces (v6 §5.4)")]
-        [Tooltip("Les lots, dans l'ordre d'affichage. Tous au même taux (1 ◆ = 200 pièces).")]
+        [Header("Échange diamants → pièces (v6 §5.4, v7 §1 : lots dégressifs)")]
+        [Tooltip("Les lots, du plus petit au plus gros. v7 : les gros lots donnent un peu plus de pièces par diamant (bonus plafonné).")]
         [SerializeField] List<CoinPackDef> coinPacks = new List<CoinPackDef>();
+        [Tooltip("v7 §1.6 : le taux de base, en pièces pour 1 ◆ (200). La pilule « 1 ◆ = 200 » le lit, et il sert au calcul du bonus.")]
+        [SerializeField, Min(1)] int exchangeBaseRate = 200;
+        [Tooltip("v7 §1.6 : le bonus maximal d'un lot d'échange, en % (40 = 280 pièces le ◆ au plus).")]
+        [SerializeField, Min(0)] int exchangeBonusCap = 40;
 
         [Header("L'Ascension, ex-route des trophées (v6 §8.4)")]
         [Tooltip("Les paliers, dans l'ordre croissant : 5 → 1 ◆, 10 → 2, 15 → 3, 20 → 5, 25 → 5, 30 → 10.")]
@@ -83,6 +87,17 @@ namespace TourDeLaChance
         public int MaxRevivesPerRun => maxRevivesPerRun;
         public int DiamondBonusCap => diamondBonusCap;
         public IReadOnlyList<CoinPackDef> CoinPacks => coinPacks;
+        public int ExchangeBaseRate => exchangeBaseRate;
+        public int ExchangeBonusCap => exchangeBonusCap;
+
+        /// v7 §1.6 : le bonus d'un lot comparé au taux de base, en % entier (arrondi en dessous).
+        /// Exemple : 50 ◆ → 12 000 pièces, au lieu de 10 000 au taux de base : +20 %.
+        public int ExchangeBonusPercent(CoinPackDef pack)
+        {
+            if (pack == null || pack.diamonds <= 0) return 0;
+            long baseCoins = (long)pack.diamonds * exchangeBaseRate;
+            return Mathf.Max(0, (int)(pack.coins * 100L / baseCoins) - 100);
+        }
         public IReadOnlyList<TrophyMilestone> TrophyMilestones => trophyMilestones;
         public int TrophyRepeatEvery => trophyRepeatEvery;
         public int TrophyRepeatDiamonds => trophyRepeatDiamonds;
@@ -152,11 +167,25 @@ namespace TourDeLaChance
                 if (diamondTiers[i].fromFloor <= diamondTiers[i - 1].fromFloor)
                     Error("les tranches d'étages des diamants doivent être dans l'ordre croissant.");
             if (diamondTiers.Count > 0 && diamondTiers[0].fromFloor != 1) Error("la première tranche doit commencer à l'étage 1.");
-            // v6 §5.4 : tous les lots d'échange au MÊME taux (pas de « bonus de gros »).
-            // On compare en croisant les produits (pièces × diamants) pour éviter les virgules.
-            for (int i = 1; i < coinPacks.Count; i++)
-                if ((long)coinPacks[i].coins * coinPacks[0].diamonds != (long)coinPacks[0].coins * coinPacks[i].diamonds)
-                    Error($"le lot d'échange « {coinPacks[i].displayName} » n'a pas le même taux que « {coinPacks[0].displayName} ».");
+            // v7 §1.6 : les lots d'échange dégressifs. On compare en croisant les produits
+            // (pièces × diamants) pour éviter les virgules.
+            for (int i = 0; i < coinPacks.Count; i++)
+            {
+                var p = coinPacks[i];
+                if ((long)p.coins < (long)p.diamonds * exchangeBaseRate)
+                    Error($"le lot d'échange « {p.displayName} » donne moins que le taux de base ({exchangeBaseRate} pièces le diamant).");
+                if ((long)p.coins * 100 > (long)p.diamonds * exchangeBaseRate * (100 + exchangeBonusCap))
+                    Error($"le lot d'échange « {p.displayName} » : plafond dépassé (bonus de plus de {exchangeBonusCap} %).");
+                if (i > 0)
+                {
+                    var q = coinPacks[i - 1];
+                    if (p.diamonds <= q.diamonds) Error($"les lots d'échange doivent être rangés par diamants strictement croissants (« {p.displayName} »).");
+                    if ((long)p.coins * q.diamonds < (long)q.coins * p.diamonds)
+                        Error($"le lot d'échange « {p.displayName} » donne moins de pièces par diamant que « {q.displayName} ».");
+                }
+                for (int j = 0; j < i; j++)
+                    if (coinPacks[j].id == p.id) Error($"deux lots d'échange ont le même identifiant « {p.id} ».");
+            }
             for (int i = 1; i < trophyMilestones.Count; i++)
                 if (trophyMilestones[i].floor <= trophyMilestones[i - 1].floor)
                     Error("les paliers de L'Ascension doivent être dans l'ordre croissant.");

@@ -111,6 +111,13 @@ namespace TourDeLaChance
 
         /// Ouvre la Boutique (sur la dernière section regardée) ou directement sur « Contenu et
         /// taux » d'une boîte.
+        /// v7 (point 15) : la prochaine ouverture se fera sur cette section (ex. clic sur le
+        /// compteur de diamants du HUD → « Diamants »).
+        public static void OpenNextOn(Tab tab) => lastTab = tab;
+
+        /// v7 : fait défiler la Boutique déjà ouverte jusqu'à une section (comme un clic d'onglet).
+        public void ShowTab(Tab tab) => ScrollTo(tab);
+
         public void Open(LootBox content = null, ShopItem showItem = null)
         {
             detail.Close();
@@ -140,6 +147,8 @@ namespace TourDeLaChance
         {
             detail.Tick(dt);
             TickScroll(dt);
+            TickBoxes();
+            TickFlyingCoins();
         }
 
         public void Refresh()
@@ -155,44 +164,119 @@ namespace TourDeLaChance
             ButtonStyler.Apply(page);
         }
 
-        /// Les quatre sections de la liste, chacune sous son titre décoré.
+        /// Les quatre sections de la liste, chacune sous son titre « autocollant » (v7 §17.3.2).
         void BuildSections()
         {
             scroll.Clear();
             sections.Clear();
-            AddSection(Tab.Boites, "Boîtes classiques", PopupDecor.Deco.Piece, Shop.Boxes.Where(b => b.family == BoxFamily.Classique));
-            var pirates = AddSection(Tab.Pirates, "Boîtes de pirates", PopupDecor.Deco.Couronne, Shop.Boxes.Where(b => b.family == BoxFamily.Pirates));
-            var note = new VisualElement { pickingMode = PickingMode.Ignore };
-            note.AddToClassList("btq-note");
-            note.Add(ShopUi.NewLabel("D'où viennent les diamants ?", "btq-note__titre"));
-            note.Add(ShopUi.NewLabel(DiamondOriginText(), "btq-note__texte"));
-            pirates.Add(note);
-            AddSection(Tab.Animaux, "Boîtes Animaux", PopupDecor.Deco.Patte, Shop.Boxes.Where(b => b.family == BoxFamily.Animaux));
+            animatedBoxes.Clear();
+            AddSection(Tab.Boites, "Boîtes classiques", Shop.Boxes.Where(b => b.family == BoxFamily.Classique), icon: UiImages.CategorieClassiques);
+            // v7 : le paragraphe « D'où viennent les diamants ? » quitte la liste : il est derrière
+            // le bouton « i » du titre des Boîtes de pirates.
+            AddSection(Tab.Pirates, "Boîtes de pirates", Shop.Boxes.Where(b => b.family == BoxFamily.Pirates), withInfo: true, icon: UiImages.CategoriePirates);
+            AddSection(Tab.Animaux, "Boîtes animaux", Shop.Boxes.Where(b => b.family == BoxFamily.Animaux), icon: UiImages.CategorieAnimaux);
             // v6 §5.4 : la section Échanges (diamants → pièces), puis, SEULEMENT si on les montre,
             // les packs de diamants désactivés « Bientôt disponible » dessous.
-            var exchange = NewSection(Tab.Echanges, "Échanges", PopupDecor.Deco.Diamant);
+            var exchange = NewSection(Tab.Echanges, "Échanges", null, RatePill());
             BuildExchange(exchange);
-            if (EconomyCatalog.Instance.ShowDiamondPacks) BuildPacks(exchange);
+            if (EconomyCatalog.Instance.ShowDiamondPacks) BuildPacks();
         }
 
-        VisualElement NewSection(Tab tab, string title, PopupDecor.Deco deco)
+        /// Une section : le titre « autocollant du Casier » aligné à gauche (icône 64 px, titre
+        /// 44 px), un élément facultatif à droite du titre, puis un filet.
+        VisualElement NewSection(Tab tab, string title, Sprite icon, VisualElement extra = null)
         {
             var section = new VisualElement { pickingMode = PickingMode.Ignore };
             section.AddToClassList("btq-section");
-            section.Add(PopupDecor.SectionTitle(title, deco));
+            section.AddToClassList("bq7-section");
+            section.Add(SectionTitle7(title, icon, extra));
             scroll.Add(section);
             sections[tab] = section;
             return section;
         }
 
-        VisualElement AddSection(Tab tab, string title, PopupDecor.Deco deco, IEnumerable<LootBox> boxes)
+        /// Le titre de section v7 (§17.3.2). Sans image : un diamant (sections Diamants).
+        static VisualElement SectionTitle7(string title, Sprite icon, VisualElement extra)
         {
-            var section = NewSection(tab, title, deco);
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("bq7-titre");
+            var picture = new VisualElement { pickingMode = PickingMode.Ignore };
+            picture.AddToClassList("bq7-titre__icone");
+            if (icon != null) picture.style.backgroundImage = new StyleBackground(icon);
+            else picture.AddToClassList("diamant");
+            row.Add(picture);
+            row.Add(ShopUi.NewLabel(title, "bq7-titre__texte"));
+            if (extra != null) row.Add(extra);
+            var wrap = new VisualElement { pickingMode = PickingMode.Ignore };
+            wrap.Add(row);
+            var line = new VisualElement { pickingMode = PickingMode.Ignore };
+            line.AddToClassList("bq7-filet");
+            wrap.Add(line);
+            return wrap;
+        }
+
+        /// v7 : l'icône de la catégorie (categorie_classiques…) ; tant qu'elle manque, la 1re boîte.
+        VisualElement AddSection(Tab tab, string title, IEnumerable<LootBox> boxes, bool withInfo = false, Sprite icon = null)
+        {
+            var list = boxes.ToList();
+            if (icon == null) icon = list.Select(b => b.icon).FirstOrDefault(i => i != null);
+            VisualElement extra = null;
+            if (withInfo)
+            {
+                var info = InfoButton(OpenDiamondNote);
+                info.AddToClassList("bq7-titre__info");
+                extra = info;
+            }
+            var section = NewSection(tab, title, icon, extra);
             var grid = new VisualElement { pickingMode = PickingMode.Ignore };
             grid.AddToClassList("btq-grid");
-            foreach (var box in boxes) grid.Add(CompactCard(box));
+            grid.AddToClassList("bq7-grille");
+            foreach (var box in list) grid.Add(CompactCard(box));
             section.Add(grid);
             return section;
+        }
+
+        /// Le bouton rond « i » (le même que L'Ascension) : 56 × 56, « i » blanc.
+        static Button InfoButton(Action onClick)
+        {
+            var info = new Button(onClick);
+            foreach (var c in new[] { "btn", "bulle", "bulle-petit", "bulle-petit--ardoise", "bq7-info" }) info.AddToClassList(c);
+            info.Add(ShopUi.NewLabel("i", "bq7-info__texte"));
+            return info;
+        }
+
+        /// À droite du titre « Échanges » : le taux, en pilule (« 1 ◆ = 200 ● »), lu dans les données.
+        static VisualElement RatePill()
+        {
+            int rate = EconomyCatalog.Instance.ExchangeBaseRate; // v7 §1.6 : lu directement
+            var pill = new VisualElement { pickingMode = PickingMode.Ignore };
+            pill.AddToClassList("bq7-taux");
+            pill.Add(ShopUi.NewLabel("1", "bq7-taux__texte"));
+            pill.Add(Icon("diamant bq7-taux__icone"));
+            pill.Add(ShopUi.NewLabel($"= {ShopUi.Thousands(rate)}", "bq7-taux__texte"));
+            pill.Add(Icon("coin bq7-taux__icone"));
+            return pill;
+        }
+
+        /// La petite fenêtre « D'où viennent les diamants ? » (le paragraphe d'avant, inchangé).
+        void OpenDiamondNote()
+        {
+            CloseExchangeConfirm();
+            exchangeConfirm = new VisualElement();
+            exchangeConfirm.AddToClassList("v5-confirm");
+            var box = new VisualElement();
+            box.AddToClassList("v5-confirm-box");
+            box.Add(ShopUi.NewLabel("D'où viennent les diamants ?", "btq-note__titre"));
+            box.Add(ShopUi.NewLabel(DiamondOriginText(), "v5-confirm-text"));
+            var buttons = new VisualElement();
+            buttons.AddToClassList("v5-confirm-buttons");
+            var ok = new Button(CloseExchangeConfirm) { text = "OK" };
+            ok.AddToClassList("btn"); ok.AddToClassList("btn--vert"); ok.AddToClassList("v5-confirm-btn");
+            buttons.Add(ok);
+            box.Add(buttons);
+            exchangeConfirm.Add(box);
+            page.Add(exchangeConfirm);
+            ButtonStyler.Apply(exchangeConfirm);
         }
 
         /// « Parfois, un trésor contient des diamants… (1 % à 5 %) » : chiffres lus dans le
@@ -217,7 +301,7 @@ namespace TourDeLaChance
             AddTab(Tab.Boites, "Classiques", "coin coin--small");
             AddTab(Tab.Pirates, "Pirates", "diamant diamant--petit");
             AddTab(Tab.Animaux, "Animaux", "coin coin--small");
-            AddTab(Tab.Echanges, "Échanges", "diamant diamant--petit");
+            AddTab(Tab.Echanges, "Diamants", "diamant diamant--petit"); // v7 §17.3.1 : échanges ET packs
             // Le dernier onglet colle aux monnaies (24 px de marge portés par les monnaies).
             if (tabsRow.childCount > 0) tabsRow[tabsRow.childCount - 1].style.marginRight = 0;
             tabsRow.style.display = contentBox != null ? DisplayStyle.None : DisplayStyle.Flex;
@@ -330,10 +414,19 @@ namespace TourDeLaChance
         // Les cartes (v5.1 : fond en dégradé vif, rayonnement, taux en badges)
         // =====================================================================
 
+        // v7 (§17.3.3) : la carte d'une boîte ressemble à une case du Casier en grand. La boîte
+        // en héros, la jauge de collection, les aperçus en CASES DE RARETÉ (la couleur dit la
+        // rareté, le % reste dessous : règle d'or, les taux sont toujours visibles), UN gros
+        // bouton vert. « Contenu et taux » est derrière le bouton « i ».
+
+        /// Les boîtes qui flottent et leurs rayons qui tournent (animés dans Tick).
+        readonly List<(VisualElement image, RaysElement rays, float phase)> animatedBoxes = new List<(VisualElement, RaysElement, float)>();
+
         VisualElement CompactCard(LootBox box)
         {
             var card = new VisualElement();
             card.AddToClassList("btq-card");
+            card.AddToClassList("bq7-carte");
             card.AddToClassList("carte");
             card.AddToClassList(box.family switch
             {
@@ -342,70 +435,156 @@ namespace TourDeLaChance
                 _ => "carte--rose"
             });
             bool locked = Shop.IsLocked(box);
+            if (locked) card.AddToClassList("bq7-carte--verrou");
 
-            // 1. Le titre, blanc contouré, centré.
-            card.Add(ShopUi.NewLabel(box.displayName, "carte__titre"));
-
-            // 2. L'illustration (sur son rayonnement) et la courte description à côté.
-            var middle = new VisualElement { pickingMode = PickingMode.Ignore };
-            middle.AddToClassList("carte__milieu");
-            var illu = new VisualElement { pickingMode = PickingMode.Ignore };
-            illu.AddToClassList("carte__illu");
-            illu.Add(PopupDecor.CardRays());
-            illu.Add(BoxImage(box, "btq-card-image"));
-            middle.Add(illu);
-            var desc = new VisualElement { pickingMode = PickingMode.Ignore };
-            desc.AddToClassList("carte__desc");
-            int found = Shop.FoundCount(box), total = box.items.Count;
-            desc.Add(ShopUi.NewLabel($"{total} objets à collectionner !", "carte__texte"));
-            desc.Add(ShopUi.NewLabel($"Collection : {found} / {total}", "progress-text"));
-            desc.Add(ProgressBar(found, total));
-            // v6 §6.3 : la petite ligne de la récompense de collection (sans pastille ni animation).
-            string reward = IndexPage.RewardLine(box);
-            if (reward.Length > 0) desc.Add(ShopUi.NewLabel(reward, "collection-recompense"));
-            middle.Add(desc);
-            card.Add(middle);
-
-            // 3. Les taux, toujours visibles : un objet par rareté et son taux en badge.
-            // v6.5 §2 : les Boîtes Pirates en montrent 2 par rareté (6 aperçus, serrés).
-            card.Add(box.family == BoxFamily.Pirates ? PopupDecor.RateBadgesPairs(box) : PopupDecor.RateBadges(box));
-
-            // 4. La pilule de prix « Ouvrir » et « Contenu et taux ».
-            var buttons = new VisualElement();
-            buttons.AddToClassList("btq-card-buttons");
-            if (!locked)
-            {
-                var open = PopupDecor.PriceButton(() => OpenRequested?.Invoke(box), "Ouvrir", box.price, box.currency == BoxCurrency.Diamants);
-                open.AddToClassList("btq-open");
-                open.AddToClassList(UiSounds.SilentClass); // le son de paiement suffit
-                open.SetEnabled(Shop.CanOpen(box));
-                buttons.Add(open);
-            }
-            var content = new Button(() => Open(box)) { text = "Contenu et taux" };
-            content.AddToClassList("btn"); content.AddToClassList("btn--sombre"); content.AddToClassList("btq-content-btn");
-            buttons.Add(content);
-            card.Add(buttons);
-            if (!locked && !Shop.CanOpen(box)) card.Add(ShopUi.NewLabel(MissingText(box), "missing btq-missing"));
-
-            // 5. Collection complète / verrou des Boîtes Animaux.
-            if (Shop.IsComplete(box)) card.Add(ShopUi.NewLabel("Collection complète !", "complete-banner btq-complete"));
+            // 1. Le haut : la boîte (170 px) sur sa lueur et ses rayons, à droite le titre, la
+            //    jauge et la récompense de collection.
+            var top = new VisualElement { pickingMode = PickingMode.Ignore };
+            top.AddToClassList("bq7-haut");
+            var hero = new VisualElement { pickingMode = PickingMode.Ignore };
+            hero.AddToClassList("bq7-heros");
+            var glow = new VisualElement { pickingMode = PickingMode.Ignore };
+            glow.AddToClassList("bq7-heros__lueur");
+            glow.style.backgroundImage = new StyleBackground(UiFxTextures.Halo);
+            hero.Add(glow);
+            var rays = new RaysElement();
+            rays.AddToClassList("bq7-heros__rayons");
+            rays.Configure(10, new Color(1f, 1f, 1f, 0.30f));
+            hero.Add(rays);
+            var image = BoxImage(box, "bq7-heros__boite");
+            hero.Add(image);
+            animatedBoxes.Add((image, rays, animatedBoxes.Count * 0.7f));
             if (locked)
             {
-                // v6 (QA n°37) : avant, le cadenas était au CENTRE de la carte et cachait
-                // « Collection : 0 / 16 ». Maintenant il est posé sur l'image de la boîte, et la
-                // phrase « Débloquée après… » s'écrit sous la barre de collection.
-                // Le voile sombre est placé EN PREMIER (index 0) : il assombrit le fond de la carte
-                // mais reste sous les textes, qui restent lisibles, et sous « Contenu et taux »,
-                // qui reste cliquable. (BringToFront changerait l'ordre de la mise en page.)
-                var veil = new VisualElement { pickingMode = PickingMode.Ignore };
-                veil.AddToClassList("btq-lock");
-                card.Insert(0, veil);
                 var padlock = Lock();
-                padlock.AddToClassList("btq-lock__cadenas");
-                illu.Add(padlock);
-                desc.Add(ShopUi.NewLabel("Débloquée après ta première renaissance", "btq-lock__texte"));
+                padlock.AddToClassList("bq7-cadenas");
+                hero.Add(padlock);
             }
+            top.Add(hero);
+
+            var right = new VisualElement { pickingMode = PickingMode.Ignore };
+            right.AddToClassList("bq7-droite");
+            right.Add(ShopUi.NewLabel(box.displayName, "bq7-titre-carte"));
+            int found = Shop.FoundCount(box), total = box.items.Count;
+            right.Add(Gauge(found, total));
+            int reward = CollectionRewards.RewardOf(box);
+            if (reward > 0) right.Add(RewardPill(reward, CollectionRewards.Received(box)));
+            top.Add(right);
+            card.Add(top);
+
+            // Le bouton « i » : il ouvre « Contenu et taux » (la page détaillée, inchangée).
+            var info = InfoButton(() => Open(box));
+            info.AddToClassList("bq7-carte__info");
+            card.Add(info);
+
+            // 2. Les aperçus en cases de rareté, avec leur % (taux de la RARETÉ, lu dans la boîte).
+            card.Add(PreviewCases(box));
+
+            // 3. UN seul gros bouton : « Ouvrir ● 250 » (gris s'il n'y a pas assez), ou verrouillé.
+            Button open;
+            if (locked)
+            {
+                open = new Button();
+                open.AddToClassList("bq7-ouvrir--verrou");
+                var rebirth = new VisualElement { pickingMode = PickingMode.Ignore };
+                rebirth.AddToClassList("bq7-ouvrir__renaissance");
+                open.Add(rebirth);
+                open.Add(ShopUi.NewLabel("Après la Renaissance", "bulle-rect__texte bq7-ouvrir__petit"));
+                open.SetEnabled(false);
+            }
+            else
+            {
+                // v7 (retour de l'auteur, point 15) : le PRIX est toujours sur le bouton
+                // (« Ouvrir ◆ 5 ») ; s'il n'y a pas assez, le même bouton devient gris.
+                open = new Button(() => OpenRequested?.Invoke(box));
+                open.AddToClassList(UiSounds.SilentClass); // le son de paiement suffit
+                open.Add(ShopUi.NewLabel("Ouvrir", "bulle-rect__texte bq7-ouvrir__verbe"));
+                open.Add(Icon((box.currency == BoxCurrency.Diamants ? "diamant" : "coin") + " bq7-ouvrir__monnaie"));
+                open.Add(ShopUi.NewLabel(ShopUi.Thousands(box.price), "bulle-rect__texte bq7-ouvrir__prix"));
+                open.SetEnabled(Shop.CanOpen(box));
+            }
+            foreach (var c in new[] { "btn", "bulle", "bulle-rect", "bulle-rect--vert", "btq-open", "bq7-ouvrir" }) open.AddToClassList(c);
+            card.Add(open);
             return card;
+        }
+
+        /// La jauge de collection 260 × 28, « 5 / 16 » écrit DANS la jauge.
+        static VisualElement Gauge(int found, int total)
+        {
+            var gauge = new VisualElement { pickingMode = PickingMode.Ignore };
+            gauge.AddToClassList("bq7-jauge");
+            var fill = new VisualElement { pickingMode = PickingMode.Ignore };
+            fill.AddToClassList("bq7-jauge__plein");
+            fill.style.width = Length.Percent(total > 0 ? 100f * found / total : 0f);
+            gauge.Add(fill);
+            gauge.Add(ShopUi.NewLabel($"{found} / {total}", "bq7-jauge__texte progress-text"));
+            return gauge;
+        }
+
+        /// La récompense de collection : médaille + diamant + nombre (pas de phrase). Reçue : verte avec une coche.
+        static VisualElement RewardPill(int reward, bool received)
+        {
+            var pill = new VisualElement { pickingMode = PickingMode.Ignore };
+            pill.AddToClassList("bq7-recompense");
+            if (received)
+            {
+                pill.AddToClassList("bq7-recompense--recue");
+                var check = new VisualElement { pickingMode = PickingMode.Ignore };
+                check.AddToClassList("bq7-recompense__coche");
+                check.Add(Icon("casier-coche__court"));
+                check.Add(Icon("casier-coche__long"));
+                pill.Add(check);
+            }
+            else pill.Add(Icon("bq7-recompense__medaille"));
+            pill.Add(Icon("diamant bq7-recompense__diamant"));
+            pill.Add(ShopUi.NewLabel(reward.ToString(), "bq7-recompense__texte"));
+            return pill;
+        }
+
+        /// Les aperçus : une mini-case du Casier par rareté (Pirates : 2 par rareté, avec UN %
+        /// par paire). Un Secret jamais obtenu reste un « ? » (les Pirates : toujours « ? »).
+        static VisualElement PreviewCases(LootBox box)
+        {
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("bq7-cases");
+            bool pairs = box.family == BoxFamily.Pirates;
+            foreach (var rarity in Shop.RaritiesIn(box))
+            {
+                var group = new VisualElement { pickingMode = PickingMode.Ignore };
+                group.AddToClassList("bq7-groupe");
+                var frames = new VisualElement { pickingMode = PickingMode.Ignore };
+                frames.AddToClassList("bq7-groupe__cases");
+                var items = Shop.ItemsOfRarity(box, rarity.id);
+                var shown = pairs
+                    ? items.OrderByDescending(i => i.Icon != null).Take(2).ToList()
+                    : items.Take(1).ToList();
+                foreach (var item in shown)
+                {
+                    var cell = new VisualElement { pickingMode = PickingMode.Position };
+                    cell.AddToClassList("bq7-case");
+                    cell.AddToClassList("case--" + rarity.id);
+                    bool mystery = item.RarityId == "secret" && (pairs || Shop.CountOf(item) < 1);
+                    cell.Add(ShopUi.Visual(item, mystery ? ShopUi.Look.Mystery : ShopUi.Look.Normal, "bq7-case__visuel"));
+                    cell.tooltip = mystery ? "???" : item.DisplayName;
+                    frames.Add(cell);
+                }
+                group.Add(frames);
+                group.Add(ShopUi.NewLabel(ShopUi.Percent(Shop.RarityChance(box, rarity)), "bq7-pourcent taux-badge"));
+                row.Add(group);
+            }
+            return row;
+        }
+
+        /// Les boîtes flottent de ±4 px en 2,4 s ; leurs rayons font un tour en 40 s.
+        void TickBoxes()
+        {
+            float t = Time.realtimeSinceStartup;
+            foreach (var (image, rays, phase) in animatedBoxes)
+            {
+                if (image.panel == null) continue;
+                image.style.translate = new Translate(0f, 4f * Mathf.Sin(t * Mathf.PI * 2f / 2.4f + phase));
+                rays.style.rotate = new Rotate(t * 9f);
+            }
         }
 
         /// Le cadenas, dessiné en USS (anse + corps), aucune image.
@@ -470,52 +649,148 @@ namespace TourDeLaChance
         // La sous-page « Contenu et taux » (§15.4)
         // =====================================================================
 
+        // v7 (retour de l'auteur, point 15) : « Contenu et taux » refait dans l'esprit du Casier et
+        // de la Renaissance. À gauche, UNE vitrine de la couleur de la famille : la boîte en héros,
+        // la jauge de collection, la liste des raretés (couleur, chance, bonus de tenue) et le gros
+        // bouton. À droite, la grille des objets en CASES DE RARETÉ, chacune avec sa chance. Tous
+        // les taux restent visibles (règle d'or) ; les deux paragraphes deviennent une seule phrase.
         void BuildContentPage(LootBox box)
         {
+            animatedBoxes.Clear();
             var back = new Button(() => { contentBox = null; jumpPending = true; Refresh(); }) { text = "← Retour" };
             back.AddToClassList("btn"); back.AddToClassList("btn--sombre"); back.AddToClassList("btq-back"); back.AddToClassList(UiSounds.TabClass);
             contentHost.Add(back);
 
             var split = new VisualElement();
             split.AddToClassList("btq-content");
+            split.AddToClassList("ct7");
+
+            // ---- La vitrine (gauche) ----
             var left = new VisualElement();
-            left.AddToClassList("btq-content-left");
-            left.Add(BoxImage(box, "btq-content-image"));
-            left.Add(ShopUi.NewLabel(box.displayName, "btq-card-name"));
-            left.Add(PriceRow(box));
-            left.Add(FullRatesTable(box));
-            left.Add(ShopUi.NewLabel("Chaque ouverture donne 1 objet. Les chances sont toujours les mêmes, à chaque ouverture.", "rates-note"));
-            left.Add(ShopUi.NewLabel(OutfitBonusLine(box), "rates-note"));
+            left.AddToClassList("ct7-vitrine");
+            left.AddToClassList("carte");
+            left.AddToClassList(box.family switch
+            {
+                BoxFamily.Pirates => "carte--bleue",
+                BoxFamily.Animaux => "carte--verte",
+                _ => "carte--rose"
+            });
+            var hero = new VisualElement { pickingMode = PickingMode.Ignore };
+            hero.AddToClassList("ct7-heros");
+            var glow = new VisualElement { pickingMode = PickingMode.Ignore };
+            glow.AddToClassList("ct7-heros__lueur");
+            glow.style.backgroundImage = new StyleBackground(UiFxTextures.Halo);
+            hero.Add(glow);
+            var rays = new RaysElement();
+            rays.AddToClassList("ct7-heros__rayons");
+            rays.Configure(10, new Color(1f, 1f, 1f, 0.30f));
+            hero.Add(rays);
+            var image = BoxImage(box, "ct7-heros__boite");
+            hero.Add(image);
+            animatedBoxes.Add((image, rays, 0f));
+            left.Add(hero);
+            left.Add(ShopUi.NewLabel(box.displayName, "ct7-nom"));
+            int found = Shop.FoundCount(box), total = box.items.Count;
+            var gauge = Gauge(found, total);
+            gauge.AddToClassList("ct7-jauge");
+            left.Add(gauge);
+
+            // Les raretés : une ligne par rareté (case de couleur, nom, chance, bonus de tenue).
+            var rates = new VisualElement { pickingMode = PickingMode.Ignore };
+            rates.AddToClassList("ct7-taux");
+            foreach (var rarity in Shop.RaritiesIn(box))
+            {
+                var row = new VisualElement { pickingMode = PickingMode.Ignore };
+                row.AddToClassList("ct7-ligne");
+                var swatch = new VisualElement { pickingMode = PickingMode.Ignore };
+                swatch.AddToClassList("ct7-ligne__case");
+                swatch.AddToClassList("case--" + rarity.id);
+                row.Add(swatch);
+                var name = ShopUi.NewLabel(rarity.displayName, "ct7-ligne__nom");
+                row.Add(name);
+                row.Add(ShopUi.NewLabel(ShopUi.Percent(Shop.RarityChance(box, rarity)), "ct7-ligne__chance"));
+                var bonus = new VisualElement { pickingMode = PickingMode.Ignore };
+                bonus.AddToClassList("ct7-ligne__bonus");
+                bonus.Add(Icon("coin ct7-ligne__piece"));
+                bonus.Add(ShopUi.NewLabel($"+{rarity.coinBonusPercent}\u00A0%", "ct7-ligne__bonus-texte"));
+                row.Add(bonus);
+                rates.Add(row);
+            }
+            left.Add(rates);
+
+            // Le gros bouton (prix toujours visible, gris s'il n'y a pas assez).
+            Button open;
             if (Shop.IsLocked(box))
             {
-                left.Add(ShopUi.NewLabel("Débloquée après ta première renaissance", "missing"));
+                open = new Button();
+                var rebirth = new VisualElement { pickingMode = PickingMode.Ignore };
+                rebirth.AddToClassList("bq7-ouvrir__renaissance");
+                open.Add(rebirth);
+                open.Add(ShopUi.NewLabel("Après la Renaissance", "bulle-rect__texte bq7-ouvrir__petit"));
+                open.SetEnabled(false);
             }
             else
             {
-                var open = PopupDecor.PriceButton(() => OpenRequested?.Invoke(box), "Ouvrir", box.price, box.currency == BoxCurrency.Diamants);
-                open.AddToClassList("btq-open");
+                open = new Button(() => OpenRequested?.Invoke(box));
                 open.AddToClassList(UiSounds.SilentClass);
+                open.Add(ShopUi.NewLabel("Ouvrir", "bulle-rect__texte bq7-ouvrir__verbe"));
+                open.Add(Icon((box.currency == BoxCurrency.Diamants ? "diamant" : "coin") + " bq7-ouvrir__monnaie"));
+                open.Add(ShopUi.NewLabel(ShopUi.Thousands(box.price), "bulle-rect__texte bq7-ouvrir__prix"));
                 open.SetEnabled(Shop.CanOpen(box));
-                left.Add(open);
-                if (!Shop.CanOpen(box)) left.Add(ShopUi.NewLabel(MissingText(box), "missing"));
             }
+            foreach (var c in new[] { "btn", "bulle", "bulle-rect", "bulle-rect--vert", "btq-open", "ct7-ouvrir" }) open.AddToClassList(c);
+            left.Add(open);
             split.Add(left);
 
-            var right = new ScrollView();
-            right.AddToClassList("shop-scroll");
-            right.AddToClassList("btq-content-right");
-            PanelsController.SetupScroll(right);
+            // ---- La grille (droite) ----
+            var right = new VisualElement();
+            right.AddToClassList("ct7-droite");
+            var head = new VisualElement { pickingMode = PickingMode.Ignore };
+            head.AddToClassList("ct7-entete");
+            head.Add(ShopUi.NewLabel("Contenu", "ct7-titre"));
+            head.Add(ShopUi.NewLabel($"{found} / {total}", "ct7-compteur"));
+            right.Add(head);
+            var line = new VisualElement { pickingMode = PickingMode.Ignore };
+            line.AddToClassList("bq7-filet");
+            right.Add(line);
+            var list = new ScrollView();
+            list.AddToClassList("shop-scroll");
+            list.AddToClassList("ct7-liste");
+            PanelsController.SetupScroll(list);
             var cells = new VisualElement { pickingMode = PickingMode.Ignore };
-            cells.AddToClassList("grid");
+            cells.AddToClassList("ct7-grille");
             var items = box.items.Where(i => i != null).ToList();
             for (int i = 0; i < items.Count; i++)
             {
                 int position = i;
-                VisualElement card = null;
-                card = ShopUi.CollectionTile(items[i], () => detail.Open(items, position, card));
-                cells.Add(card);
+                var item = items[i];
+                var rarity = Shop.RaritiesIn(box).FirstOrDefault(r => r.id == item.RarityId);
+                Button cell = null;
+                cell = new Button(() => detail.Open(items, position, cell));
+                cell.AddToClassList("ct7-case");
+                cell.AddToClassList("case--" + item.RarityId);
+                bool owned = Shop.CountOf(item) >= 1;
+                bool mystery = !owned && item.RarityId == "secret";
+                cell.Add(ShopUi.Visual(item, mystery ? ShopUi.Look.Mystery : ShopUi.Look.Normal, "ct7-case__visuel"));
+                if (rarity != null)
+                {
+                    int sameRarity = Shop.ItemsOfRarity(box, rarity.id).Count;
+                    double each = sameRarity > 0 ? Shop.RarityChance(box, rarity) / sameRarity : 0.0;
+                    cell.Add(ShopUi.NewLabel(ShopUi.Percent(System.Math.Round(each, 2)), "ct7-case__chance"));
+                }
+                if (owned)
+                {
+                    var check = new VisualElement { pickingMode = PickingMode.Ignore };
+                    check.AddToClassList("ct7-case__coche");
+                    check.Add(Icon("casier-coche__court"));
+                    check.Add(Icon("casier-coche__long"));
+                    cell.Add(check);
+                }
+                cells.Add(cell);
             }
-            right.Add(cells);
+            list.Add(cells);
+            right.Add(list);
+            right.Add(ShopUi.NewLabel("1 objet par ouverture. Les chances ne changent jamais.", "ct7-pied"));
             split.Add(right);
             contentHost.Add(split);
         }
@@ -579,58 +854,116 @@ namespace TourDeLaChance
 
         VisualElement exchangeConfirm;
 
+        // v7 (§17.3.4) : trois cartes or, sans nom (la taille de la pile le dit), le GAIN en héros,
+        // un bouton vert « ◆ 1 » (pas de verbe : le vert seul dit « échanger »).
+        readonly Dictionary<string, VisualElement> exchangeCards = new Dictionary<string, VisualElement>();
+
         void BuildExchange(VisualElement section)
         {
+            exchangeCards.Clear();
             var packs = EconomyCatalog.Instance.CoinPacks;
-            // Le taux, lu dans les données (le même pour tous les lots, vérifié par Validate).
-            string rate = packs.Count > 0 ? ShopUi.Thousands(packs[0].coins / Mathf.Max(1, packs[0].diamonds)) : "?";
-            section.Add(ShopUi.NewLabel($"Change tes diamants en pièces. 1 {ShopUi.Diamant} = {rate} pièces, toujours.", "ech-intro"));
             var row = new VisualElement { pickingMode = PickingMode.Ignore };
             row.AddToClassList("ech-cartes");
-            foreach (var pack in packs)
+            row.AddToClassList("bq7-ech-cartes");
+            for (int rank = 0; rank < packs.Count; rank++)
             {
-                var p = pack;
+                var p = packs[rank];
                 var card = new VisualElement();
                 card.AddToClassList("ech-carte");
+                card.AddToClassList("bq7-ech-carte");
                 card.AddToClassList("carte");
                 card.AddToClassList("carte--or");
                 var image = new VisualElement { pickingMode = PickingMode.Ignore };
                 image.AddToClassList("ech-image");
+                image.AddToClassList("bq7-ech-image");
                 image.Add(PopupDecor.CardRays());
                 var picture = new VisualElement { pickingMode = PickingMode.Ignore };
                 picture.AddToClassList("ech-image__piles");
                 if (p.icon != null) picture.style.backgroundImage = new StyleBackground(p.icon);
-                else picture.Add(CoinPile(p.diamonds));
+                else picture.Add(CoinPile(rank));
                 image.Add(picture);
                 card.Add(image);
-                card.Add(ShopUi.NewLabel(p.displayName, "ech-nom"));
-                card.Add(ShopUi.NewLabel($"{p.diamonds} {ShopUi.Diamant} → {ShopUi.Thousands(p.coins)} pièces", "ech-taux"));
-                var button = new Button(() => OpenExchangeConfirm(p)) { text = $"Échanger — {p.diamonds} {ShopUi.Diamant}" };
-                button.AddToClassList("btn"); button.AddToClassList("btn--vert"); button.AddToClassList("ech-btn");
+                // v7 §1.4 : le ruban « +15 % » (seulement si le lot a un bonus), calculé à partir des données.
+                int bonus = EconomyCatalog.Instance.ExchangeBonusPercent(p);
+                if (bonus > 0)
+                {
+                    var ribbon = new VisualElement { pickingMode = PickingMode.Ignore };
+                    ribbon.AddToClassList("bq7-ech-ruban");
+                    ribbon.Add(ShopUi.NewLabel($"+{bonus}\u00A0%", "bq7-ech-ruban__texte"));
+                    card.Add(ribbon);
+                }
+                // Le gain, en héros : pièce 44 px + « +1 000 ».
+                var gain = new VisualElement { pickingMode = PickingMode.Ignore };
+                gain.AddToClassList("bq7-ech-gain");
+                gain.Add(Icon("coin bq7-ech-gain__piece"));
+                gain.Add(ShopUi.NewLabel($"+{ShopUi.Thousands(p.coins)}", "bq7-ech-gain__texte"));
+                card.Add(gain);
+                // v7 §1.2 : le bouton affiche toujours le prix (« ◆ 25 ») ; gris s'il n'y a pas
+                // assez, sans aucun lien ni proposition (on n'achète jamais de diamants).
+                var button = new Button(() => OpenExchangeConfirm(p));
+                button.Add(Icon("diamant bq7-ech-btn__diamant"));
+                button.Add(ShopUi.NewLabel(p.diamonds.ToString(), "bulle-rect__texte bq7-ech-btn__texte"));
                 button.SetEnabled(CoinExchange.CanExchange(p));
+                foreach (var c in new[] { "btn", "bulle", "bulle-rect", "bulle-rect--vert", "ech-btn", "bq7-ech-btn" }) button.AddToClassList(c);
                 card.Add(button);
-                // Pas assez : grisé + texte simple, sans aucun lien (on n'achète jamais de diamants).
-                if (!CoinExchange.CanExchange(p)) card.Add(ShopUi.NewLabel($"Il te manque {CoinExchange.MissingDiamonds(p)} {ShopUi.Diamant}", "ech-manque"));
                 row.Add(card);
+                exchangeCards[p.id] = card;
             }
             section.Add(row);
         }
 
+        // ---- Les pièces volantes après un échange (§17.3.4) : 10 pièces de 36 px volent vers le
+        //      solde de pièces en 0,7 s, l'une après l'autre (0,04 s d'écart). Pur spectacle. ----
+        readonly List<(VisualElement coin, Vector2 from, Vector2 to, float start)> flyingCoins = new List<(VisualElement, Vector2, Vector2, float)>();
+
+        void StartFlyingCoinsFrom(Vector2 worldFrom, Vector2 worldTo)
+        {
+            Vector2 from = page.WorldToLocal(worldFrom);
+            Vector2 to = page.WorldToLocal(worldTo);
+            float now = Time.realtimeSinceStartup;
+            for (int i = 0; i < 10; i++)
+            {
+                var coin = Icon("coin bq7-piece-volante");
+                coin.style.position = Position.Absolute;
+                coin.style.left = from.x - 18f; coin.style.top = from.y - 18f;
+                coin.style.opacity = 0f;
+                page.Add(coin);
+                flyingCoins.Add((coin, from + new Vector2((i - 4.5f) * 8f, 0f), to, now + i * 0.04f));
+            }
+        }
+
+        void TickFlyingCoins()
+        {
+            float now = Time.realtimeSinceStartup;
+            for (int i = flyingCoins.Count - 1; i >= 0; i--)
+            {
+                var (coin, from, to, start) = flyingCoins[i];
+                float u = (now - start) / 0.7f;
+                if (u < 0f) continue;
+                if (u >= 1f || coin.panel == null) { coin.RemoveFromHierarchy(); flyingCoins.RemoveAt(i); continue; }
+                // Une courbe : la pièce monte un peu avant de filer vers le solde.
+                var pos = Vector2.Lerp(from, to, Ease.InOut(u)) + Vector2.up * (-90f * Mathf.Sin(u * Mathf.PI));
+                coin.style.left = pos.x - 18f; coin.style.top = pos.y - 18f;
+                coin.style.opacity = u < 0.1f ? u / 0.1f : 1f;
+            }
+        }
+
         /// Une pile de pièces dessinée (substitut tant que l'image du lot n'existe pas) :
         /// d'autant plus de pièces que le lot est gros.
-        static VisualElement CoinPile(int diamonds)
+        static VisualElement CoinPile(int rank)
         {
+            // v7 §1.4 : une pile différente pour chacun des 8 lots (1 à 8 pièces selon le rang).
             var pile = new VisualElement { pickingMode = PickingMode.Ignore };
             pile.style.flexDirection = FlexDirection.Row;
             pile.style.flexWrap = Wrap.Wrap;
             pile.style.justifyContent = Justify.Center;
             pile.style.alignItems = Align.Center;
             pile.style.width = 130; pile.style.height = 120;
-            int n = diamonds >= 25 ? 7 : diamonds >= 5 ? 4 : 2;
+            int n = Mathf.Clamp(rank + 1, 1, 8);
             for (int i = 0; i < n; i++)
             {
                 var coin = Icon("coin");
-                coin.style.width = 44; coin.style.height = 44; coin.style.marginLeft = -4;
+                coin.style.width = 40; coin.style.height = 40; coin.style.marginLeft = -4;
                 pile.Add(coin);
             }
             return pile;
@@ -645,7 +978,9 @@ namespace TourDeLaChance
             exchangeConfirm.AddToClassList("v5-confirm");
             var box = new VisualElement();
             box.AddToClassList("v5-confirm-box");
-            box.Add(ShopUi.NewLabel($"Échanger {pack.diamonds} {ShopUi.Diamant} contre {ShopUi.Thousands(pack.coins)} pièces ? Les diamants servent aussi aux reprises et aux Boîtes Pirates.", "v5-confirm-text"));
+            int bonus = EconomyCatalog.Instance.ExchangeBonusPercent(pack);
+            string named = bonus > 0 ? $" ({pack.displayName}, +{bonus}\u00A0%)" : "";
+            box.Add(ShopUi.NewLabel($"Échanger {pack.diamonds} {ShopUi.Diamant} contre {ShopUi.Thousands(pack.coins)} pièces{named} ? Les diamants servent aussi aux reprises et aux Boîtes Pirates.", "v5-confirm-text"));
             var buttons = new VisualElement();
             buttons.AddToClassList("v5-confirm-buttons");
             var yes = new Button(() => ConfirmExchange(pack)) { text = "Échanger" };
@@ -671,8 +1006,16 @@ namespace TourDeLaChance
         void ConfirmExchange(CoinPackDef pack)
         {
             CloseExchangeConfirm();
-            if (!CoinExchange.TryExchange(pack)) UiSounds.PlayRefus();
+            // Les positions à l'écran sont lues AVANT l'échange : l'échange change le solde de
+            // diamants, et la Boutique est aussitôt redessinée (les anciennes cartes disparaissent).
+            exchangeCards.TryGetValue(pack.id, out var fromCard);
+            Vector2? from = fromCard != null && fromCard.panel != null ? fromCard.worldBound.center : (Vector2?)null;
+            var target = balanceRow.Q<VisualElement>(className: "coin");
+            Vector2? to = target != null && target.panel != null ? target.worldBound.center : (Vector2?)null;
+            bool done = CoinExchange.TryExchange(pack);
+            if (!done) UiSounds.PlayRefus();
             Refresh();
+            if (done && from.HasValue && to.HasValue) StartFlyingCoinsFrom(from.Value, to.Value);
         }
 
         /// OUTILS DE TEST : clic sur « Échanger » d'un lot, puis sur « Échanger » ou « Annuler ».
@@ -682,44 +1025,113 @@ namespace TourDeLaChance
         public bool ExchangeConfirmOpen => exchangeConfirm != null;
 
         // =====================================================================
-        // L'onglet « Diamants » (§15.5) : packs AFFICHÉS, DÉSACTIVÉS, sans prix
+        // Les packs de diamants : AFFICHÉS, INACTIFS, sans prix (v5 §15.5, v7 §17.3.5)
         // =====================================================================
 
-        void BuildPacks(VisualElement section)
+        // v7 (art bible §17.3.5) : une VITRINE FERMÉE. On voit ce qui viendra, en gris-lavande
+        // calme, sous UN SEUL badge « Bientôt disponible ». Aucun prix, aucun nom, aucune
+        // promesse, et SURTOUT AUCUN BOUTON : rien dans cette section ne reçoit de clic
+        // (pickingMode Ignore partout). Il n'existe aucun paiement dans le jeu.
+
+        static Texture2D packGradient; // le dégradé des cartes (fabriqué une seule fois)
+
+        /// La section « Packs de diamants » (sous les échanges), seulement si showDiamondPacks.
+        void BuildPacks()
         {
-            section.Add(ShopUi.NewLabel("Bientôt disponible. Pour l'instant, les diamants se gagnent uniquement en jouant : parfois, un trésor en contient !", "btq-packs-intro"));
-            var grid = new VisualElement { pickingMode = PickingMode.Ignore };
-            grid.AddToClassList("btq-packs");
+            var section = new VisualElement { pickingMode = PickingMode.Ignore };
+            section.AddToClassList("btq-section");
+            section.AddToClassList("pk-section");
+            section.Add(SectionTitle7("Packs de diamants", null, null));
+
+            // Le puits gris-lavande qui contient les cartes, le badge et le reflet.
+            var vitrine = new VisualElement { pickingMode = PickingMode.Ignore };
+            vitrine.AddToClassList("pk-vitrine");
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("pk-cartes");
+            if (packGradient == null)
+                packGradient = UiFxTextures.VerticalGradient(new Color32(0xF1, 0xEE, 0xF6, 0xFF), new Color32(0xD3, 0xCD, 0xE0, 0xFF));
             foreach (var pack in EconomyCatalog.Instance.DiamondPacks)
+                row.Add(PackCard(pack));
+            vitrine.Add(row);
+
+            // Le reflet : une bande blanche penchée qui traverse la vitrine toutes les 5 s.
+            var shine = new VisualElement { pickingMode = PickingMode.Ignore };
+            shine.AddToClassList("pk-reflet");
+            vitrine.Add(shine);
+            AnimateShine(vitrine, shine);
+
+            // LE badge, un seul, centré sur la vitrine et penché.
+            var badge = new VisualElement { pickingMode = PickingMode.Ignore };
+            badge.AddToClassList("pk-badge");
+            var hourglass = UiImages.Sablier;
+            if (hourglass != null)
             {
-                var card = new VisualElement();
-                card.AddToClassList("btq-pack");
-                card.AddToClassList("carte");
-                card.AddToClassList("carte--violette");
-                var image = new VisualElement { pickingMode = PickingMode.Ignore };
-                image.AddToClassList("btq-pack-image");
-                image.Add(PopupDecor.CardRays());
-                var picture = new VisualElement { pickingMode = PickingMode.Ignore };
-                picture.AddToClassList("btq-pack-picture");
-                if (pack.icon != null) picture.style.backgroundImage = new StyleBackground(pack.icon);
-                else picture.Add(Icon("diamant diamant--grand"));
-                image.Add(picture);
-                card.Add(image);
-                card.Add(ShopUi.NewLabel(pack.displayName, "btq-pack-name"));
-                card.Add(ShopUi.NewLabel($"{pack.amount} {ShopUi.Diamant}", "btq-pack-amount"));
-                // Le bouton est TOUJOURS désactivé : aucun achat n'est possible (règle d'or v5).
-                var soon = new Button { text = "Bientôt disponible" };
-                soon.AddToClassList("btn"); soon.AddToClassList("btn--sombre"); soon.AddToClassList("btq-pack-btn");
-                soon.SetEnabled(false);
-                card.Add(soon);
-                grid.Add(card);
+                var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+                icon.AddToClassList("pk-badge__sablier");
+                icon.style.backgroundImage = new StyleBackground(hourglass);
+                badge.Add(icon);
             }
-            section.Add(grid);
+            else badge.AddToClassList("pk-badge--sans-image"); // repli : le texte seul, bien centré
+            badge.Add(ShopUi.NewLabel("Bientôt disponible", "pk-badge__texte"));
+            vitrine.Add(badge);
+
+            section.Add(vitrine);
+            section.Add(ShopUi.NewLabel("Pour l'instant, les diamants se gagnent en jouant.", "pk-phrase"));
+            scroll.Add(section);
+        }
+
+        /// Une carte de pack : l'image (grisée) sur une lueur, puis la quantité. Pas de nom, pas
+        /// de prix, pas de bouton.
+        static VisualElement PackCard(DiamondPackDef pack)
+        {
+            var card = new VisualElement { pickingMode = PickingMode.Ignore };
+            card.AddToClassList("pk-carte");
+            card.style.backgroundImage = new StyleBackground(packGradient);
+            var image = new VisualElement { pickingMode = PickingMode.Ignore };
+            image.AddToClassList("pk-image");
+            var glow = new VisualElement { pickingMode = PickingMode.Ignore };
+            glow.AddToClassList("pk-lueur");
+            glow.style.backgroundImage = new StyleBackground(UiFxTextures.Halo);
+            image.Add(glow);
+            var picture = new VisualElement { pickingMode = PickingMode.Ignore };
+            picture.AddToClassList("pk-image__pack");
+            if (pack.icon != null) picture.style.backgroundImage = new StyleBackground(pack.icon);
+            else picture.Add(Icon("diamant diamant--grand"));
+            image.Add(picture);
+            card.Add(image);
+            var amount = new VisualElement { pickingMode = PickingMode.Ignore };
+            amount.AddToClassList("pk-quantite");
+            amount.Add(ShopUi.NewLabel(pack.amount.ToString(), "pk-quantite__texte"));
+            amount.Add(Icon("diamant pk-quantite__diamant"));
+            card.Add(amount);
+            return card;
+        }
+
+        /// Fait passer le reflet de gauche à droite en 1,2 s, toutes les 5 s, tant que la
+        /// vitrine est affichée (l'animation s'arrête toute seule quand on la retire).
+        static void AnimateShine(VisualElement vitrine, VisualElement shine)
+        {
+            const float Period = 5f, Pass = 1.2f;
+            float start = Time.realtimeSinceStartup;
+            IVisualElementScheduledItem item = null;
+            item = vitrine.schedule.Execute(() =>
+            {
+                if (vitrine.panel == null) { item?.Pause(); return; }
+                float t = (Time.realtimeSinceStartup - start) % Period;
+                float width = vitrine.resolvedStyle.width;
+                if (float.IsNaN(width) || width <= 0f) width = 1100f;
+                float k = Mathf.Clamp01(t / Pass);
+                shine.style.left = Mathf.Lerp(-120f, width + 60f, k);
+                shine.style.opacity = t < Pass ? 1f : 0f;
+            }).Every(33);
         }
 
         // =====================================================================
         // Outils de test
         // =====================================================================
+
+        /// OUTIL DE TEST : nombre de pièces volantes en l'air.
+        public int FlyingCoinCount => flyingCoins.Count;
 
         /// OUTIL DE TEST : clic sur un onglet (0 Classiques, 1 Pirates, 2 Animaux, 3 Échanges) :
         /// la liste défile en douceur jusqu'à la section.

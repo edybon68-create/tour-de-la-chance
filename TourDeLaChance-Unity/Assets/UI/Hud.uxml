@@ -4,6 +4,7 @@
     <Style src="Buttons.uss" />
     <Style src="V5.uss" />
     <Style src="V6.uss" />
+    <Style src="V7.uss" />
     <ui:VisualElement name="root" class="root" picking-mode="Ignore">
         <!-- Le voile sombre des transitions d'étage (§3.11). Il est en premier : il passe
              devant la scène 3D mais derrière le reste de l'interface. -->

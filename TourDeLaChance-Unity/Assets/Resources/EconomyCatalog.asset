@@ -25,20 +25,47 @@ MonoBehaviour:
   diamondBonusCap: 50
   coinPacks:
   - id: echange_poignee
-    displayName: "Poign\xE9e de pi\xE8ces"
+    displayName: "Poign\xE9e"
     diamonds: 1
     coins: 200
     icon: {fileID: 0}
+  - id: echange_pochette
+    displayName: Pochette
+    diamonds: 3
+    coins: 600
+    icon: {fileID: 0}
   - id: echange_sac
-    displayName: "Sac de pi\xE8ces"
+    displayName: Sac
     diamonds: 5
-    coins: 1000
+    coins: 1050
+    icon: {fileID: 0}
+  - id: echange_seau
+    displayName: Seau
+    diamonds: 10
+    coins: 2200
     icon: {fileID: 0}
   - id: echange_coffre
-    displayName: "Coffre de pi\xE8ces"
+    displayName: Coffre
     diamonds: 25
-    coins: 5000
+    coins: 5750
     icon: {fileID: 0}
+  - id: echange_malle
+    displayName: Malle
+    diamonds: 50
+    coins: 12000
+    icon: {fileID: 0}
+  - id: echange_tonneau
+    displayName: Tonneau
+    diamonds: 100
+    coins: 26000
+    icon: {fileID: 0}
+  - id: echange_montagne
+    displayName: Montagne
+    diamonds: 200
+    coins: 56000
+    icon: {fileID: 0}
+  exchangeBaseRate: 200
+  exchangeBonusCap: 40
   trophyMilestones:
   - floor: 5
     diamonds: 1
@@ -58,7 +85,7 @@ MonoBehaviour:
   rebirthCoinMultiplier: 2
   rebirthDiamondMultiplier: 2
   maxRebirths: 1
-  showDiamondPacks: 0
+  showDiamondPacks: 1
   diamondPacks:
   - id: pack_diamants_1
     displayName: "Poign\xE9e de diamants"
@@ -75,4 +102,4 @@ MonoBehaviour:
   - id: pack_diamants_4
     displayName: "Tr\xE9sor de diamants"
     amount: 160
-    icon: {fileID: 21300000, guid: 6f57966357c70496283a1a5117b85de2, type: 3}
+    icon: {fileID: 21300000, guid: 602cc68295160452fb32ac54de1010e3, type: 3}

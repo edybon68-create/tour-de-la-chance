@@ -12,6 +12,9 @@ namespace TourDeLaChance
     /// petit « tink » (diamant_compteur) par diamant ajouté (au plus 6).
     /// L'icône est un diamant DESSINÉ par l'interface (classe .diamant) tant que l'image
     /// icone_diamant.png n'existe pas (lot d'images v5).
+    ///
+    /// v7 (retour de l'auteur, point 15) : un CLIC sur le compteur ouvre la Boutique sur la
+    /// section « Diamants » (échanges et packs). C'est un raccourci de navigation, pas une règle.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class DiamondCounterView : MonoBehaviour
@@ -45,6 +48,9 @@ namespace TourDeLaChance
                 icon.style.backgroundImage = new StyleBackground(diamondIcon);
             }
             rolling.Snap(Diamonds.Count);
+            counter.pickingMode = PickingMode.Position;
+            counter.AddToClassList("diamond-counter--cliquable");
+            counter.RegisterCallback<ClickEvent>(OnCounterClicked);
             Diamonds.Changed += OnDiamondsChanged;
             Rebirth.Changed += Refresh;
             game.Changed += Refresh;
@@ -53,10 +59,29 @@ namespace TourDeLaChance
 
         void OnDisable()
         {
+            counter.UnregisterCallback<ClickEvent>(OnCounterClicked);
             Diamonds.Changed -= OnDiamondsChanged;
             Rebirth.Changed -= Refresh;
             game.Changed -= Refresh;
         }
+
+        /// Clic sur le compteur : la Boutique, directement sur « Diamants » (si une pop-up peut s'ouvrir).
+        void OnCounterClicked(ClickEvent evt)
+        {
+            if (!game.CanOpen(PanelId.Boutique)) { UiSounds.PlayRefus(); return; }
+            if (game.PanelOpen == PanelId.Boutique)
+            {
+                // Déjà ouverte : on défile jusqu'à la section.
+                var panels = FindFirstObjectByType<PanelsController>();
+                if (panels != null) panels.Boutique_Page.ShowTab(BoutiquePage.Tab.Echanges);
+                return;
+            }
+            BoutiquePage.OpenNextOn(BoutiquePage.Tab.Echanges);
+            game.OpenPanel(PanelId.Boutique);
+        }
+
+        /// OUTIL DE TEST : simule un clic sur le compteur.
+        public void DebugClick() => OnCounterClicked(null);
 
         void OnDiamondsChanged()
         {

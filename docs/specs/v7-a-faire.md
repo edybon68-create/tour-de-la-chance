@@ -18,10 +18,10 @@
 - **Qualité** : faire très attention aux **détourages** de toutes les icônes et aux **modèles 3D**. On cherche le meilleur rendu possible.
 
 ## Demandes précises
-1. [ ] **Packs de diamants** : les remettre dans la Boutique, visibles mais grisés « Bientôt disponible », dans une section belle et épurée. Aucun paiement branché.
-2. [ ] **Fenêtre Inventaire un peu trop large** : elle touche les bulles des colonnes de menus. La réduire pour garder une marge nette à 1280 × 720 et à 1920 × 1080.
-3. [ ] **Clic sur la carte d'étage** (grande carte du centre) : il doit rouvrir la fenêtre « toutes les infos » (récapitulatif des stats). C'est le **badge ÉTAGE** en haut à gauche qui ouvre L'Ascension.
-4. [ ] **L'Ascension est « tristounette »** : la rendre vivante et festive. Idées :
+1. [x] *(14/11 : vitrine fermée sans aucun bouton, captures `v7_boutique_packs.png`)* **Packs de diamants** : les remettre dans la Boutique, visibles mais grisés « Bientôt disponible », dans une section belle et épurée. Aucun paiement branché.
+2. [x] *(14/11 : 1600 → 1510 px, marge mesurée de 49 unités, soit 33 px en 1280 × 720 et 49 px en 1920 × 1080 ; `v7_inventaire_1280.png`)* **Fenêtre Inventaire un peu trop large** : elle touche les bulles des colonnes de menus. La réduire pour garder une marge nette à 1280 × 720 et à 1920 × 1080.
+3. [x] *(14/11 : clic sur la barre = carte rouverte 2 s avec toutes les infos ; badge = L'Ascension ; `v7_carte_etage_infos.png`)* **Clic sur la carte d'étage** (grande carte du centre) : il doit rouvrir la fenêtre « toutes les infos » (récapitulatif des stats). C'est le **badge ÉTAGE** en haut à gauche qui ouvre L'Ascension.
+4. [x] *(14/11 : art bible §17.2 codée ; `v7_ascension_*.png`)* **L'Ascension est « tristounette »** : la rendre vivante et festive. Idées :
    - lumière et rayons sur l'étage du joueur ;
    - petites animations (nuages qui dérivent, étoiles qui scintillent, drapeau) ;
    - dalles de palier plus spectaculaires ;
@@ -29,11 +29,11 @@
    - transition d'ouverture ;
    - corriger « Ma position » qui chevauche le « i » du bas ;
    - rayons de « Récupérer » trop discrets.
-5. [ ] **Boutique épurée**, dans l'esprit de la Renaissance et du Casier :
+5. [x] *(14/11 : §17.3 ; `v7_boutique_*.png`)* **Boutique épurée**, dans l'esprit de la Renaissance et du Casier :
    - moins de texte ;
    - cartes plus aérées ;
    - hiérarchie claire.
-6. [ ] **Améliorations épurées**, même esprit.
+6. [x] *(14/11 : §17.4 ; `v7_ameliorations*.png`)* **Améliorations épurées**, même esprit.
 7. [x] **Revue complète des détourages** : comparer chaque icône à son original, chercher les liserés, les trous, les ombres entourées de noir et les contours irréguliers. Corriger dans `blender/detourer_icones.py`, ou régénérer l'icône.
    - *Fait le 13/11* : nouvelle méthode de détourage (pente + ombre sous l'objet + matting), 27 icônes rendues dans Blender avec leur transparence exacte (`art/icones_alpha/`), 6 icônes de coffres refaites. Reste `kraken_bebe` à régénérer (lot 9, image 5). Planches : `docs/captures/qa_v7_detourage_00.png` à `_15.png`.
 8. [x] **Revue des modèles 3D** (accessoires, skins, coffres, tour, diamant, boîtes) : meilleur rendu possible, en corrigeant les formes grossières, les matériaux plats et les placements sur le cheval.
@@ -43,11 +43,11 @@
     - particules des objets rares ;
     - réactions après un piège ;
     - révélation propre à chaque Secret ;
-    - textures dessinées des skins ; *(14/11 : 17 textures 1024 px faites, `Assets/Art/SkinsTextures/`, à brancher : `docs/specs/v7-textures-skins.md`)*
-    - animation de l'échange (pièces volantes) ;
+    - textures dessinées des skins ; *(14/11 : 17 textures branchées, carte de lumière comprise ; `v7_fiche_animal_tigre.png`, `v7_fiche_pirate_or_maudit.png`)*
+    - animation de l'échange (pièces volantes) ; *(14/11 : faite, 10 pièces vers le solde)*
     - pictogramme « pas encore vu » de l'Index ;
     - mesure des performances au Profiler.
-11. [ ] **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
+11. [x] *(14/11 : §17.5, puis retour 13)* **Carte d'étage** (capture de l'auteur du 13/11) : elle est chargée. La simplifier, sans jamais cacher le gain du trésor (règle d'or).
 
 ## Règles de sécurité (toujours)
 - **Ne JAMAIS activer le son de l'ordinateur** (demande expresse de l'auteur) : ne pas toucher au volume du Mac (`osascript`, `afplay`, etc.), ne pas désactiver le « Mute Audio » de Unity, ne jouer aucun son à voix haute. Les sons se vérifient par le code ou les fichiers, pas en les écoutant.
@@ -115,7 +115,7 @@
    - oreilles de lapin, revers du bonnet, monture des lunettes cœur, socle du drapeau.
 
    *Cause* : même mécanisme que le point 1, en moins grave. *Capture* : `qa_v7_icones_zoom_a.png`, `_b.png`.
-10. [ ] *(à faire : l'éditeur était en mode Play lancé par quelqu'un d'autre ; les 6 icônes de coffres, désormais en 1024 px, sont encore limitées à 512 px à l'import)* **Réglages d'import des icônes incohérents.**
+10. [x] *(14/11 : mipmaps activées sur toutes les icônes, `IconAutoBinder` les active aussi pour les nouvelles ; coffres à 1024 px ; ruban en 9-slice 120 px)* **Réglages d'import des icônes incohérents.**
     - 79 icônes n'ont pas de mipmaps (`enableMipMap: 0`) : une image de 1024 px affichée en 60-100 px devient crénelée et scintille.
     - 48 autres sont limitées à 512 px avec mipmaps.
     - *Piste* : harmoniser, avec mipmaps activés et 1024 px partout.
@@ -187,15 +187,16 @@
 ## Retours de l'auteur du 14/11 matin (captures `docs/references/v7_retour_1..8.png`)
 12. [x] **Coffre ouvert** : l'intérieur du couvercle est jaune (coussin capitonné de la revue 3D), ça fait faux. Revenir à un intérieur sombre et propre, cohérent avec la caisse.
     - *Fait le 14/11* : coussin retiré (ses normales étaient retournées : Unity montrait le cadre en laiton derrière). Dessous = doublure foncée de la caisse + fin cadre biseauté dans le bois du couvercle, sur les 5 coffres. Planche : `docs/captures/blender_coffres_planche_ouverts.png`.
-13. [ ] **Carte d'étage (clic sur la barre du haut)** : plus intuitive qu'avant, MAIS il n'accroche pas au « bouton pièce » (la pilule Trésor avec la pièce) ; et revoir la **hiérarchie** : les infos du bas sont de tailles toutes différentes, c'est incohérent → tailles harmonisées, 2-3 niveaux clairs.
-14. [ ] **Améliorations** (DA parfaite) : on ne comprend pas ce que font « Coffres précieux » et « Coffre en plus » sans deviner → une phrase courte et claire visible sur la carte (ex. « Coffres plus rares = trésors plus gros », « Plus souvent un coffre de plus »). **Retirer le défilement** : tout tient sur un écran.
-15. [ ] **Boutique** :
+13. [x] *(14/11 : gain en grand chiffre or sur une lueur, plus de pilule ; 3 niveaux de texte : titre 44, gain 76, le reste 22 ; `v7_carte_etage_arrivee.png`)* **Carte d'étage (clic sur la barre du haut)** : plus intuitive qu'avant, MAIS il n'accroche pas au « bouton pièce » (la pilule Trésor avec la pièce) ; et revoir la **hiérarchie** : les infos du bas sont de tailles toutes différentes, c'est incohérent → tailles harmonisées, 2-3 niveaux clairs.
+14. [x] *(14/11 : phrase sous chaque nom, aucun défilement ; `v7_ameliorations.png`)* **Améliorations** (DA parfaite) : on ne comprend pas ce que font « Coffres précieux » et « Coffre en plus » sans deviner → une phrase courte et claire visible sur la carte (ex. « Coffres plus rares = trésors plus gros », « Plus souvent un coffre de plus »). **Retirer le défilement** : tout tient sur un écran.
+15. [x] *(14/11 : prix sur le bouton (gris s'il manque), 8 échanges dégressifs de `v7.md` §1, clic sur le compteur de diamants, « Contenu et taux » refait ; icônes de catégories branchées dès leur arrivée dans `icones_detourees/`, repli = image de la 1re boîte)* **Boutique** :
     - afficher le **prix** directement sur le bouton (« Ouvrir ◆ 5 », grisé si pas assez) au lieu de « Encore ◆ 1 » ;
     - **Échanges** : plus de packs, avec **réduction sur les gros** (plus de pièces par diamant), en restant raisonnable (pas « broken ») ; remplir l'espace ;
     - **raccourci** : cliquer le compteur de diamants en haut (HUD) doit ouvrir la Boutique sur la section Diamants (packs + échanges) ;
     - **icônes des 3 catégories** de boîtes (Classiques, Pirates, Animaux) : en générer de **neutres** (ni skin ni accessoire), une par catégorie ;
     - **refaire l'interface « i » / Contenu et taux** des boîtes (jugée « dégueulasse ») dans le style Casier/Renaissance.
-16. [ ] **Contours noirs** : en enlever là où ils rendent le texte illisible (garder où c'est beau).
+16. [x] *(14/11 : retirés des petits textes de la carte d'étage, des Améliorations, de la Boutique et du ×2 de L'Ascension ; gardés sur les titres et boutons ; « Aucun doublon » lisible)* **Contours noirs** : en enlever là où ils rendent le texte illisible (garder où c'est beau).
 17. [ ] **Qualité 3D (demande personnelle forte)** : beaucoup de skins/accessoires 3D sont laids et ne ressemblent pas à leur icône. Refaire les modèles au niveau de l'icône (règles ajoutées à `.claude/agents/artiste-3d.md`), et régénérer avec Gemini les icônes qui ne sont pas incroyables. Le jeu doit être parfait.
 
 > 14/11 : l'auteur adore L'Ascension et le reste de la V7 (« continue comme ça, on vise la perfection »). Il ne touchera plus à son ordinateur jusqu'à son retour : **ne lui poser aucune question**, tout décider seul, ne jamais attendre une réponse. Son mode Play ne tournera plus : l'éditeur est à nous.
+- 14/11 matin (unity-dev) : points 1-6, 10 (textures, échange, import des icônes), 11, 13-16 compilés, testés en mode Play avec captures `docs/captures/v7_*.png`, sauvegarde de l'auteur restaurée et vérifiée identique.

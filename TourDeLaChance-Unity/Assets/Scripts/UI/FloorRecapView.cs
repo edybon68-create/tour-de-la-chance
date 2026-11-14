@@ -12,12 +12,20 @@ namespace TourDeLaChance
     /// trésor ×3 », « Trésor : +150 » et les petites mentions (◆ Diamants : 3 %, Tenue +12 %,
     /// Renaissance ×2). Après 2 s (2,6 s avec une bannière), elle se range en une BARRE
     /// compacte en haut, qui reste visible pendant le choix : le gain est toujours affiché
-    /// avant le choix (règle d'or). v6 §8.3 : un clic sur la barre ouvre la ROUTE DES TROPHÉES
-    /// (au lieu de rouvrir la carte) ; bannière « Trophée : étage 10 ! +2 ◆ » à un palier ;
+    /// avant le choix (règle d'or). v6 §8.3 (remplacé en v7) : un clic sur la barre ouvrait la
+    /// route des trophées ; bannière « Trophée : étage 10 ! +2 ◆ » à un palier ;
     /// mention du bonus de diamants de la tenue ; « dont 1 grâce à ta tenue ».
     ///
     /// Elle ne bloque JAMAIS : survoler ou choisir un coffre, appuyer sur 1-6 ou encaisser la
     /// range aussitôt, et elle ne reçoit pas les clics (sauf la barre compacte).
+    ///
+    /// v7 (art bible §17.5) : carte ALLÉGÉE. Un titre, un héros (le gain du trésor, le plus gros
+    /// texte de la carte, règle d'or), une rangée de pastilles (coffres, chance de diamants,
+    /// tenue, Renaissance) et un seul autocollant penché (record, reprise ou palier). Le reste
+    /// (phrase, ce qu'on vient de gagner, nom de la rareté des coffres, mentions détaillées)
+    /// est dans la vue « TOUTES LES INFOS » : un clic sur la barre compacte rouvre la carte
+    /// 2 s avec ces détails en plus (mandat V7, point 3 ; comme avant la v6). C'est le badge
+    /// ÉTAGE en haut à gauche qui ouvre L'Ascension (FloorBadgeView).
     /// Pur affichage : tout est lu dans le FloorSetup (préparé par le GameManager), le
     /// catalogue et l'état du jeu. AUCUN chiffre en dur. Le fait que CET étage soit « en
     /// diamants » n'est jamais montré : seulement la chance.
@@ -28,6 +36,8 @@ namespace TourDeLaChance
         [SerializeField] GameManager game;
         [SerializeField] ChestTrial chestTrial;
         [SerializeField] AltitudeDecor decor; // nom du palier (« Dans les étoiles ! »)
+        [Tooltip("v7 §17.5 : icône de la Renaissance pour la pastille « ×2 » (icone_rebirth.png). Vide = le mot « Renaissance ».")]
+        [SerializeField] Sprite rebirthIcon;
 
         // ---------- Les durées (§9.3) ----------
         const float ArriveTime = 0.25f;  // glisse du haut et grandit 0,85 → 1,04 → 1
@@ -35,21 +45,30 @@ namespace TourDeLaChance
         const float BigTimeBanner = 2.6f;// …plus longtemps s'il y a une bannière spéciale
         const float FoldTime = 0.3f;     // se range en barre compacte
         const float QuickFoldTime = 0.15f; // rangée aussitôt (survol d'un coffre, choix…)
+        const float ReopenTime = 2.0f;   // v7 : un clic sur la barre rouvre la carte 2 s (toutes les infos)
 
         enum Phase { Hidden, Arriving, Big, Folding, Compact }
         Phase phase = Phase.Hidden;
         float phaseTime, bigDuration, foldDuration = FoldTime;
 
-        VisualElement layer, card, pillsRow, bar;
-        Label title, phrase, won, banner, mentions, barText;
-        Label pillChests, pillRarity, pillGain;
-        VisualElement pillRarityBox;
+        VisualElement layer, card, pillsRow, bar, details;
+        Label title, sticker, heroGain, phrase, won, rarityLine, mentions, barGain, barText;
+        // Les pastilles v7 : (la pastille, son icône, son texte).
+        VisualElement pillChests, pillChestsIcon, pillDiamonds, pillOutfit, pillOutfitIcon, pillRebirth, pillRebirthIcon;
+        Label pillChestsText, pillDiamondsText, pillOutfitText, pillRebirthText;
+
+        /// v7 : vrai quand la carte a été rouverte par un clic (vue « toutes les infos »).
+        bool detailed;
 
         /// Les textes de la carte (pour les tests).
         public string Text { get; private set; } = "";
         public string BarText => barText.text;
         public bool IsBig => phase == Phase.Arriving || phase == Phase.Big;
         public bool IsCompact => phase == Phase.Compact;
+        /// v7 : la carte montre-t-elle « toutes les infos » (rouverte par un clic) ?
+        public bool IsDetailed => detailed && IsBig;
+        /// OUTIL DE TEST : simule un clic sur la barre compacte.
+        public void DebugClickBar() => OnBarClicked(null);
 
         void OnEnable()
         {
@@ -71,35 +90,68 @@ namespace TourDeLaChance
             bar.UnregisterCallback<ClickEvent>(OnBarClicked);
         }
 
-        /// Fabrique la carte et la barre (une seule fois).
+        /// Fabrique la carte et la barre (une seule fois). v7 §17.5 : titre, héros, pastilles,
+        /// autocollant ; les détails sont dans un bloc caché, montré seulement après un clic.
         void Build()
         {
             layer.Clear();
             layer.pickingMode = PickingMode.Ignore;
 
-            card = Box("recap-card");
-            title = Text_("recap-title", card);
-            phrase = Text_("recap-phrase", card);
-            won = Text_("recap-won", card);
-            banner = Text_("recap-banner", card);
-            // v6 (QA n°30) : le gain a SA PROPRE ligne, juste avant les autres pastilles. Avant,
-            // il partageait la rangée des pastilles : quand elle débordait, il passait à la
-            // ligne et chevauchait les petites mentions (gain illisible = règle d'or touchée).
-            var gainRow = Box("recap-gain-row", card);
-            pillGain = Pill(gainRow, "recap-pill recap-pill--gain", out _);
-            pillsRow = Box("recap-pills", card);
-            pillChests = Pill(pillsRow, "recap-pill", out _);
-            pillRarity = Pill(pillsRow, "recap-pill", out pillRarityBox);
-            mentions = Text_("recap-mentions", card);
+            card = Box("recap-card rc7");
+            // L'autocollant penché, à cheval sur le bord haut (un seul à la fois).
+            sticker = Text_("rc7-autocollant", card);
+            title = Text_("recap-title rc7-titre", card);
+
+            // LE HÉROS : le gain du trésor, en grand chiffre or posé sur une lueur (v7, retour de
+            // l'auteur, point 13 : plus de pilule « bouton pièce »). Règle d'or : le gain est
+            // toujours affiché avant le choix, et c'est le plus gros texte de la carte.
+            var hero = Box("rc7-heros", card);
+            var heroGlow = Box("rc7-heros__lueur", hero);
+            heroGlow.style.backgroundImage = new StyleBackground(UiFxTextures.Halo);
+            Text_("rc7-heros__mot", hero).text = "TRÉSOR";
+            var heroRow = Box("rc7-heros__ligne", hero);
+            Box("coin rc7-heros__piece", heroRow);
+            heroGain = Text_("rc7-heros__gain", heroRow);
+
+            pillsRow = Box("rc7-pastilles", card);
+            pillChests = Pill7(pillsRow, out pillChestsIcon, out pillChestsText);
+            pillDiamonds = Pill7(pillsRow, out var diamondIcon, out pillDiamondsText);
+            diamondIcon.AddToClassList("diamant");
+            pillDiamonds.AddToClassList("rc7-pastille--diamants");
+            pillOutfit = Pill7(pillsRow, out pillOutfitIcon, out pillOutfitText);
+            pillOutfit.AddToClassList("rc7-pastille--sombre");
+            pillRebirth = Pill7(pillsRow, out pillRebirthIcon, out pillRebirthText);
+            pillRebirth.AddToClassList("rc7-pastille--sombre");
+
+            // « Toutes les infos » : seulement quand la carte est rouverte par un clic.
+            details = Box("rc7-details", card);
+            phrase = Text_("recap-phrase", details);
+            won = Text_("recap-won", details);
+            rarityLine = Text_("rc7-details__ligne", details);
+            // v7 (point 13) : 3 niveaux seulement. Titre, gain, puis TOUT le reste à la même taille.
+            phrase.AddToClassList("rc7-details__ligne");
+            won.AddToClassList("rc7-details__ligne");
+            mentions = Text_("recap-mentions rc7-details__ligne", details);
             layer.Add(card);
 
-            // La barre compacte : la SEULE partie cliquable (elle rouvre la carte).
+            // La barre compacte : la SEULE partie cliquable (elle rouvre la carte, toutes les infos).
+            // Même ordre de lecture que la carte : le gain d'abord.
             bar = new VisualElement { pickingMode = PickingMode.Position };
             bar.AddToClassList("recap-bar");
-            barText = new Label { pickingMode = PickingMode.Ignore };
-            barText.AddToClassList("recap-bar-text");
-            bar.Add(barText);
+            bar.AddToClassList("rc7-barre");
+            Box("coin rc7-barre__piece", bar);
+            barGain = Text_("rc7-barre__gain", bar);
+            barText = Text_("recap-bar-text", bar);
             layer.Add(bar);
+        }
+
+        /// Une pastille v7 : une icône de 30 px et un texte.
+        static VisualElement Pill7(VisualElement parent, out VisualElement icon, out Label text)
+        {
+            var pill = Box("rc7-pastille", parent);
+            icon = Box("rc7-pastille__icone", pill);
+            text = Text_("rc7-pastille__texte", pill);
+            return pill;
         }
 
         static VisualElement Box(string classes, VisualElement parent = null)
@@ -113,15 +165,9 @@ namespace TourDeLaChance
         static Label Text_(string className, VisualElement parent)
         {
             var l = new Label { pickingMode = PickingMode.Ignore };
-            l.AddToClassList(className);
+            foreach (var c in className.Split(' ')) l.AddToClassList(c); // plusieurs classes possibles
             parent.Add(l);
             return l;
-        }
-
-        static Label Pill(VisualElement parent, string classes, out VisualElement pill)
-        {
-            pill = Box(classes, parent);
-            return Text_("recap-pill-text", pill);
         }
 
         // =====================================================================
@@ -133,12 +179,48 @@ namespace TourDeLaChance
             var setup = game.Setup;
             int floor = game.Floor;
             title.text = $"ÉTAGE {floor}";
+            // Le héros : le gain du trésor (le multiplicateur de rareté y est déjà compris).
+            heroGain.text = $"+{ShopUi.Thousands(setup.Gain)}";
 
-            // La phrase drôle de montée (v3 §11) ; étage 1 : « C'est parti ! ».
+            // ---- L'autocollant : une seule chose à la fois (trophée/record, reprise, palier) ----
             bool newTier = floor > 1 && GameManager.TierForFloor(floor) != GameManager.TierForFloor(floor - 1);
             string tierName = newTier && decor != null ? decor.TierName(GameManager.TierForFloor(floor)) : "";
-            // v6 (QA n°42) : après une reprise, on n'est PAS monté (on rejoue l'étage) : pas de
-            // phrase de montée, la ligne « Reprise réussie » suffit.
+            bool trophy = game.TrophyDiamondsThisFloor > 0;
+            string kind;
+            if (trophy) { sticker.text = $"Trophée : étage {game.TrophyFloorThisFloor} ! +{game.TrophyDiamondsThisFloor} {ShopUi.Diamant}"; kind = "record"; }
+            else if (game.NewRecordThisFloor && TextPicker.Texts != null) { sticker.text = TextPicker.Texts.recordLine; kind = "record"; }
+            else if (game.RevivedThisFloor) { sticker.text = "Reprise réussie"; kind = "reprise"; }
+            else if (!string.IsNullOrEmpty(tierName)) { sticker.text = tierName; kind = "palier"; }
+            else { sticker.text = ""; kind = ""; }
+            foreach (var k in new[] { "record", "reprise", "palier" }) ShopUi.SetClass(sticker, "rc7-autocollant--" + k, k == kind);
+            Show(sticker, sticker.text.Length > 0);
+            ShopUi.SetClass(card, "rc7--autocollant", sticker.text.Length > 0);
+
+            // ---- Les pastilles ----
+            bool precious = setup.RarityRank >= 1 && setup.Rarity != null;
+            pillChestsText.text = $"{setup.ChestCount} coffres · 1 piège";
+            // Fond = couleur de la rareté des coffres de l'étage, icône du coffre de cette rareté.
+            if (setup.Rarity != null)
+            {
+                pillChests.style.backgroundColor = setup.Rarity.bodyColor;
+                SetIcon(pillChestsIcon, setup.Rarity.icon);
+            }
+            else { pillChests.style.backgroundColor = StyleKeyword.Null; SetIcon(pillChestsIcon, null); }
+
+            Show(pillDiamonds, setup.DiamondChancePermille > 0);
+            pillDiamondsText.text = $"{ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%";
+
+            Show(pillOutfit, setup.OutfitBonusPercent > 0);
+            pillOutfitText.text = $"+{setup.OutfitBonusPercent}\u00A0%";
+            var skin = Shop.GetEquippedSkin();
+            SetIcon(pillOutfitIcon, skin != null ? skin.Icon : null);
+
+            Show(pillRebirth, setup.RebirthMultiplier > 1);
+            SetIcon(pillRebirthIcon, rebirthIcon);
+            pillRebirthText.text = rebirthIcon != null ? $"×{setup.RebirthMultiplier}" : $"Renaissance ×{setup.RebirthMultiplier}";
+
+            // ---- « Toutes les infos » (vue détaillée, après un clic) ----
+            // La phrase drôle de montée ; après une reprise, on n'est PAS monté (v6 QA n°42).
             phrase.text = floor <= 1 ? "C'est parti !"
                         : game.RevivedThisFloor ? ""
                         : TextPicker.ClimbLine(floor, "", game.Pot, game.LastGain);
@@ -158,28 +240,11 @@ namespace TourDeLaChance
             else won.text = "";
             Show(won, won.text.Length > 0);
 
-            // Bannière spéciale (remplace les bannières séparées) : record, nouveau palier.
-            // v6 §8.4 : priorité Trophée > Nouveau record > décor (le trophée remplace le record).
-            var lines = new List<string>();
-            bool trophy = game.TrophyDiamondsThisFloor > 0;
-            if (trophy) lines.Add($"Trophée : étage {game.TrophyFloorThisFloor} ! +{game.TrophyDiamondsThisFloor} {ShopUi.Diamant}");
-            else if (game.NewRecordThisFloor && TextPicker.Texts != null) lines.Add(TextPicker.Texts.recordLine);
-            if (!string.IsNullOrEmpty(tierName)) lines.Add(tierName);
-            banner.text = string.Join(" · ", lines);
-            ShopUi.SetClass(banner, "recap-banner--trophee", trophy);
-            Show(banner, banner.text.Length > 0);
-            // v6 (QA n°30) : carte moins chargée. Avec une bannière (record, palier), la phrase
-            // drôle s'efface : la bannière est plus importante et la carte reste lisible.
-            if (banner.text.Length > 0) Show(phrase, false);
+            // Le nom de la rareté des coffres (le ×3 est déjà dans le gain du héros).
+            rarityLine.text = precious ? $"{setup.Rarity.displayName} : trésor ×{ShopUi.Number(setup.Rarity.multiplier)}" : "";
+            Show(rarityLine, precious);
 
-            // Ce qui t'attend.
-            pillChests.text = $"{setup.ChestCount} coffres · 1 piège";
-            bool precious = setup.RarityRank >= 1 && setup.Rarity != null;
-            Show(pillRarityBox, precious);
-            if (precious) pillRarity.text = $"{setup.Rarity.displayName} : trésor ×{ShopUi.Number(setup.Rarity.multiplier)}";
-            pillGain.text = $"Trésor : +{setup.Gain}";
-
-            // Petites mentions (seulement si non nulles / actives).
+            // Les mentions détaillées (seulement si non nulles / actives).
             var m = new List<string>();
             if (setup.DiamondChancePermille > 0)
                 m.Add($"{ShopUi.Diamant} Diamants : {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%"
@@ -192,15 +257,36 @@ namespace TourDeLaChance
             // Couleur du palier (celle du badge d'étage).
             for (int t = 1; t <= 4; t++) ShopUi.SetClass(card, "recap-card--palier" + t, GameManager.TierForFloor(floor) == t);
 
-            // La barre compacte : « Trésor +150 · 5 coffres · Or ×3 · ◆ 3 % ».
-            var b = new List<string> { $"Trésor +{setup.Gain}", $"{setup.ChestCount} coffres" };
-            if (precious) b.Add($"{setup.Rarity.shortName} ×{ShopUi.Number(setup.Rarity.multiplier)}");
+            // La barre compacte : « ● +103 · 3 coffres · ◆ 1,5 % » (le gain d'abord).
+            barGain.text = $"+{ShopUi.Thousands(setup.Gain)}";
+            var b = new List<string> { $"{setup.ChestCount} coffres" };
             if (setup.DiamondChancePermille > 0) b.Add($"{ShopUi.Diamant} {ShopUi.Number(setup.DiamondChancePermille / 10f)}\u00A0%");
-            barText.text = string.Join(" · ", b);
+            barText.text = " · " + string.Join(" · ", b);
 
-            bigDuration = banner.text.Length > 0 ? BigTimeBanner : BigTime;
-            Text = string.Join(" | ", new[] { title.text, phrase.text, won.text, banner.text, pillChests.text,
-                                                precious ? pillRarity.text : "", pillGain.text, mentions.text });
+            bigDuration = sticker.text.Length > 0 ? BigTimeBanner : BigTime;
+            Text = string.Join(" | ", new[] { title.text, sticker.text, $"Trésor {heroGain.text}", pillChestsText.text,
+                                                setup.DiamondChancePermille > 0 ? pillDiamondsText.text : "",
+                                                setup.OutfitBonusPercent > 0 ? pillOutfitText.text : "",
+                                                setup.RebirthMultiplier > 1 ? pillRebirthText.text : "",
+                                                phrase.text, won.text, rarityLine.text, mentions.text });
+        }
+
+        /// Pose une image sur une icône de pastille ; sans image, l'icône est masquée.
+        static void SetIcon(VisualElement icon, Sprite sprite)
+        {
+            if (sprite != null) icon.style.backgroundImage = new StyleBackground(sprite);
+            else icon.style.backgroundImage = StyleKeyword.Null;
+            // L'icône des diamants a son image par la classe USS « diamant » : on la garde.
+            bool hasClassImage = icon.ClassListContains("diamant");
+            icon.style.display = sprite != null || hasClassImage ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        /// v7 : la vue « toutes les infos » montre le bloc de détails en plus.
+        void SetDetailed(bool on)
+        {
+            detailed = on;
+            Show(details, on);
+            ShopUi.SetClass(card, "rc7--details", on);
         }
 
         static void Show(VisualElement e, bool on) => e.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
@@ -219,6 +305,8 @@ namespace TourDeLaChance
         {
             if (game.State != GameState.Choosing) return;
             Fill();
+            SetDetailed(false);
+            bigDuration = sticker.text.Length > 0 ? BigTimeBanner : BigTime;
             SetPhase(Phase.Arriving);
             if (SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.RecapEtage);
             if ((game.NewRecordThisFloor || game.TrophyDiamondsThisFloor > 0) && SoundManager.Instance != null) SoundManager.Instance.Play(Sfx.Record);
@@ -232,6 +320,7 @@ namespace TourDeLaChance
             if (phase == Phase.Hidden && game.State == GameState.Choosing && !game.TransitionLocked)
             {
                 Fill();
+                SetDetailed(false);
                 SetPhase(Phase.Compact);
             }
             // Dès qu'un coffre est choisi, la carte se range aussitôt.
@@ -251,12 +340,15 @@ namespace TourDeLaChance
             SetPhase(Phase.Folding);
         }
 
-        /// v6 §8.3 : la barre compacte ouvre L'Ascension (le GameManager décide si
-        /// c'est permis). L'ancien « rouvrir la carte 2 s » est remplacé.
+        /// v7 (mandat point 3) : un clic sur la barre compacte ROUVRE la carte pendant 2 s, avec
+        /// « toutes les infos » (comme avant la v6). L'Ascension s'ouvre par le badge ÉTAGE.
         void OnBarClicked(ClickEvent evt)
         {
             if (phase != Phase.Compact || !Allowed) return;
-            if (game.CanOpen(PanelId.Route)) game.OpenPanel(PanelId.Route);
+            Fill();
+            SetDetailed(true);
+            bigDuration = ReopenTime;
+            SetPhase(Phase.Arriving);
         }
 
         void SetPhase(Phase p)

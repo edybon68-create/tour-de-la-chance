@@ -1,0 +1,623 @@
+/* =====================================================================
+   V7 (art bible §17) : épurer. Tailles en pixels de référence 1920 × 1080
+   (Unity réduit tout ensemble en 1280 × 720). Encre = #110D1F.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. Boutique : les packs de diamants, « Bientôt disponible » (§17.3.5)
+   Une vitrine FERMÉE : rien n'y est cliquable, aucun prix, aucun bouton.
+   --------------------------------------------------------------------- */
+.pk-section { margin-top: 40px; }
+.pk-vitrine {
+    width: 100%; max-width: 1100px; height: 340px; align-self: center;
+    background-color: #E9E3D6;
+    border-width: 4px; border-color: #110D1F; border-radius: 28px;
+    padding: 24px;
+    overflow: hidden;
+    justify-content: center;
+}
+.pk-cartes { flex-direction: row; justify-content: center; align-items: center; }
+/* Contour adouci #8F89A6 (pas l'encre) : il dit « pas encore actif ». */
+.pk-carte {
+    width: 248px; height: 292px; margin: 0 10px; flex-shrink: 1;
+    border-width: 4px; border-color: #8F89A6; border-radius: 24px;
+    -unity-background-scale-mode: stretch-to-fill;
+    align-items: center; justify-content: center;
+}
+.pk-image { width: 180px; height: 180px; align-items: center; justify-content: center; }
+.pk-lueur { position: absolute; left: 0; top: 0; width: 180px; height: 180px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.4); }
+.pk-image__pack {
+    width: 140px; height: 140px; align-items: center; justify-content: center;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #CFC8DE; opacity: 0.85;
+}
+.pk-quantite { flex-direction: row; align-items: center; margin-top: 10px; }
+.pk-quantite__texte {
+    font-size: 34px; -unity-font-style: bold; color: #6E6A84; margin: 0; padding: 0;
+    -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.pk-quantite__diamant { width: 30px; height: 30px; margin-left: 6px; opacity: 0.7; }
+
+/* Le reflet : bande blanche à 22 %, 60 px, penchée de 20°, déplacée par le code. */
+.pk-reflet {
+    position: absolute; top: -60px; bottom: -60px; left: -120px; width: 60px;
+    background-color: rgba(255, 255, 255, 0.22); rotate: 20deg; opacity: 0;
+}
+
+/* LE badge : centré sur la vitrine, penché de −3°, avec un relief de 6 px. */
+.pk-badge {
+    position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+    height: 76px; padding: 0 32px 0 20px; flex-direction: row; align-items: center;
+    background-color: #8F89A6;
+    border-width: 4px; border-color: #110D1F; border-bottom-width: 10px; border-radius: 38px;
+    rotate: -3deg;
+}
+.pk-badge--sans-image { padding: 0 32px; }
+.pk-badge__sablier { width: 72px; height: 72px; margin: 0 8px 0 -30px; -unity-background-scale-mode: scale-to-fit; }
+.boutique-page .pk-badge__texte {
+    font-size: 32px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #45425A; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.boutique-page .pk-phrase {
+    font-size: 20px; color: #6E6A80; -unity-text-align: middle-center; margin: 12px 0 0 0;
+    -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+/* ---------------------------------------------------------------------
+   2. Inventaire « Casier » moins large (mandat V7, point 2)
+   La fenêtre passe de 1600 à 1510 px (PanelsController) : elle laisse au moins 24 px d'écran
+   entre son bord et les bulles des colonnes, en 1280 × 720 comme en 1920 × 1080.
+   On reprend les 90 px dans la grille du milieu : cases de 122 px (au lieu de 136) et écarts
+   de 11 px. 5 cases × 122 + 4 écarts × 11 = 654 px ; avec la marge droite de la dernière
+   case, la grille fait 665 px et rend les 11 px de trop par une marge négative.
+   Le menu de gauche (280) et la vitrine du cheval (440) ne changent pas.
+   --------------------------------------------------------------------- */
+.casier-milieu { width: 686px; }
+.casier-grille { width: 665px; margin-right: -11px; }
+.casier .casier-place { width: 122px; height: 122px; margin: 0 11px 11px 0; }
+.casier-case__visuel { width: 96px; height: 96px; }
+.casier-case__visuel .item-icon { width: 96px; height: 96px; }
+.casier-case__visuel .item-placeholder { width: 72px; height: 72px; border-radius: 36px; }
+
+/* ---------------------------------------------------------------------
+   3. La carte d'étage allégée (§17.5). Construite par FloorRecapView.cs.
+   Un titre, un héros (le gain du trésor, le plus gros texte), une rangée de pastilles,
+   un autocollant penché. « Toutes les infos » (.rc7-details) n'apparaît qu'après un clic
+   sur la barre compacte.
+   --------------------------------------------------------------------- */
+.recap-card.rc7 {
+    width: 640px;
+    padding: 20px 28px 22px 28px;
+    border-width: 5px; border-color: #110D1F; border-radius: 28px;
+    overflow: visible;
+}
+/* Avec un autocollant, un peu d'air en haut pour qu'il ne touche pas le titre. */
+.recap-card.rc7.rc7--autocollant { padding-top: 30px; margin-top: 128px; }
+.rc7-titre {
+    font-size: 48px; -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F;
+    text-shadow: 0 4px 0 #110D1F;
+}
+
+/* L'autocollant : à cheval sur le bord haut, penché de −4°. */
+.rc7-autocollant {
+    position: absolute; top: -30px; align-self: center;
+    height: 52px; padding: 0 20px; margin: 0;
+    border-width: 4px; border-color: #110D1F; border-radius: 26px;
+    background-color: #FF5FA2; rotate: -4deg;
+    font-size: 24px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F;
+}
+.rc7-autocollant--record { background-color: #FFD54A; color: #3A2200; -unity-text-outline-width: 0; }
+.rc7-autocollant--reprise { background-color: #3BC8FF; }
+
+/* LE HÉROS (v7, retour de l'auteur, point 13) : plus de pilule. Le gain est un grand chiffre
+   or posé sur une lueur douce, avec le petit mot « TRÉSOR » au-dessus.
+   La carte n'a que 3 niveaux de texte : titre 44 px, gain 76 px, tout le reste 22 px. */
+.rc7-titre { font-size: 44px; }
+.rc7-heros { align-items: center; margin-top: 6px; }
+.rc7-heros__lueur { position: absolute; left: -60px; right: -60px; top: -30px; bottom: -40px; -unity-background-image-tint-color: rgba(255, 228, 140, 0.45); }
+.rc7-heros__mot {
+    font-size: 22px; -unity-font-style: bold; color: #FFF3C4; margin: 0; padding: 0; letter-spacing: 3px;
+    -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.7);
+}
+.rc7-heros__ligne { flex-direction: row; align-items: center; margin-top: -6px; }
+.coin.rc7-heros__piece { width: 64px; height: 64px; margin: 0 12px 0 0; }
+.rc7-heros__gain {
+    font-size: 76px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #3A2200;
+    text-shadow: 0 5px 0 #3A2200;
+}
+
+/* Les pastilles : TOUTES pareilles (même fond, même hauteur, même texte 22 px) ; seule l'icône
+   change. Le texte n'a plus de contour (illisible en petit), juste une ombre. */
+.rc7-pastilles { flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.rc7-pastille {
+    flex-direction: row; align-items: center;
+    height: 42px; padding: 0 14px 0 8px; margin: 0 5px 6px 5px;
+    border-width: 0; border-radius: 21px;
+    background-color: rgba(17, 13, 31, 0.40);
+}
+.rc7-pastille.rc7-pastille--diamants { background-color: rgba(17, 13, 31, 0.40); }
+.rc7-pastille--sombre { background-color: rgba(17, 13, 31, 0.40); }
+.rc7-pastille__icone { width: 30px; height: 30px; margin: 0 6px 0 0; -unity-background-scale-mode: scale-to-fit; flex-shrink: 0; }
+.rc7-pastille__texte {
+    font-size: 22px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.6);
+}
+
+/* « Toutes les infos » : caché par défaut (le code l'affiche après un clic sur la barre).
+   Toutes les lignes au même niveau : 22 px, blanc, ombre légère, sans contour. */
+.rc7-details { display: none; align-items: center; margin-top: 10px; padding-top: 10px; border-top-width: 3px; border-color: rgba(17, 13, 31, 0.25); width: 100%; }
+.recap-card .rc7-details__ligne {
+    font-size: 22px; -unity-font-style: normal; color: #FFFFFF; margin: 2px 0; padding: 0;
+    -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.6);
+    white-space: normal; -unity-text-align: middle-center;
+}
+
+/* La barre compacte : pièce + « +103 » en or d'abord, puis le reste en blanc. */
+.recap-bar.rc7-barre { flex-direction: row; align-items: center; }
+.recap-bar.rc7-barre:hover { scale: 1.03 1.03; }
+.coin.rc7-barre__piece { width: 36px; height: 36px; margin: 0 6px 0 0; }
+.rc7-barre__gain {
+    font-size: 34px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #3A2200;
+}
+.rc7-barre .recap-bar-text { font-size: 24px; color: #FFFFFF; }
+
+/* ---------------------------------------------------------------------
+   4. L'Ascension vivante et festive (§17.2). Construite par TrophyRoadPage.cs.
+   Couloirs (x dans le contenu de 1022 px) : barre 20 → 60, numéros centrés sur 118,
+   dalles centrées sur 560, « i » centrés sur 962 (28 px d'air avant la barre de défilement).
+   --------------------------------------------------------------------- */
+.asc-contenu { width: 1022px; }
+/* La barre de défilement : 24 px en tout (16 + 4 + 4), pour que 1022 + 24 tienne pile. */
+.popup-window .asc-scroll.shop-scroll .unity-scroller--vertical,
+.asc-scroll .unity-scroller--vertical { width: 16px; margin-left: 4px; margin-right: 4px; }
+.asc-scroll .unity-scroller--horizontal { display: none; }
+
+/* La barre de progression : piste de 40 px, remplissage en dégradé avec rayures. */
+.asc-barre.asc-barre7 { left: 20px; width: 40px; border-radius: 20px; }
+.asc-barre__plein.asc-barre7__plein {
+    left: 24px; width: 32px; border-radius: 16px; overflow: hidden;
+    background-color: #FFB020; -unity-background-scale-mode: stretch-to-fill;
+}
+.asc-barre__reflet.asc-barre7__reflet { left: 5px; width: 8px; border-radius: 4px; }
+.asc-cran { position: absolute; left: 33px; width: 14px; height: 4px; border-radius: 2px; background-color: rgba(17, 13, 31, 0.45); }
+.asc-cran.asc-cran--plein { background-color: rgba(138, 75, 0, 0.35); }
+.asc-tiret { position: absolute; left: 38px; width: 4px; height: 12px; border-radius: 2px; background-color: rgba(255, 255, 255, 0.55); }
+.asc-jalon {
+    position: absolute; left: 20px; width: 40px; height: 40px; border-radius: 20px;
+    border-width: 4px; border-color: #110D1F; background-color: #4A4566;
+    align-items: center; justify-content: center;
+}
+.asc-jalon.asc-jalon--atteint { background-color: #FFD54A; }
+.asc-jalon__diamant { width: 24px; height: 24px; background-image: url("../Art/icones_detourees/diamant.png"); -unity-background-scale-mode: scale-to-fit; }
+.asc-mini-cadenas { width: 16px; height: 22px; align-items: center; }
+.asc-mini-cadenas__anse { width: 10px; height: 10px; border-width: 2px; border-color: #B8B4C8; border-bottom-width: 0; border-top-left-radius: 5px; border-top-right-radius: 5px; }
+.asc-mini-cadenas__corps { width: 14px; height: 11px; border-radius: 2px; background-color: #B8B4C8; }
+/* La pilule du record suit la piste plus large. */
+.asc-record { left: 14px; }
+/* Le repère « toi » sur la piste : bulle or 60 px, icône du skin 40 px. */
+.asc-toi-piste {
+    position: absolute; width: 60px; height: 60px;
+    background-image: url("Bulles/bulle_petit_or.png"); -unity-background-scale-mode: scale-to-fit;
+    align-items: center; justify-content: center;
+}
+.asc-toi-piste__icone { width: 40px; height: 40px; margin-bottom: 6px; -unity-background-scale-mode: scale-to-fit; }
+
+/* Les médaillons : bleu (étage du joueur), or (palier atteint), gris (palier pas encore atteint). */
+.asc-medaillon {
+    position: absolute; align-items: center; justify-content: center;
+    border-width: 5px; border-color: #110D1F; border-bottom-width: 11px; border-radius: 50%;
+}
+.asc-medaillon--toi { background-color: #3B7DD8; border-bottom-color: #1F4A8C; }
+.asc-medaillon--palier { background-color: #FFD54A; border-bottom-color: #D99A1A; }
+.asc-medaillon--palier.asc-medaillon--verrou { background-color: #4A4566; border-bottom-color: #2E2A4E; }
+.asc-medaillon__texte {
+    font-size: 40px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; -unity-text-align: middle-center;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #1F4A8C;
+}
+.asc-medaillon--palier .asc-medaillon__texte { color: #3A2200; -unity-text-outline-width: 0; }
+.asc-medaillon--verrou .asc-medaillon__texte { color: #D9D2F0; }
+
+/* Le joueur sous le projecteur : cheval 110 px, deux anneaux or 140 × 44. */
+.asc-toi.asc-toi7 { width: 110px; height: 110px; }
+.asc-toi7__anneau {
+    position: absolute; width: 140px; height: 44px; border-radius: 22px;
+    border-width: 4px; border-color: #FFD54A; background-color: rgba(255, 213, 74, 0.25);
+}
+
+/* Les paliers en fête : guirlande 640 × 160, ruban du palier d'altitude. */
+.asc-guirlande {
+    position: absolute; width: 640px; height: 160px; transform-origin: 50% 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.asc-ruban {
+    position: absolute; height: 88px; padding: 0 80px; translate: -50% 0; rotate: -2deg;
+    align-items: center; justify-content: center;
+    background-color: #FFD54A; border-width: 4px; border-color: #110D1F; border-bottom-width: 9px; border-bottom-color: #D99A1A;
+    border-radius: 20px;
+}
+.asc-ruban.asc-ruban--image {
+    background-color: rgba(0, 0, 0, 0); border-width: 0;
+    -unity-slice-left: 120; -unity-slice-right: 120; -unity-slice-scale: 0.5px;
+}
+.asc-ruban__texte { font-size: 30px; -unity-font-style: bold; color: #3A2200; margin: 0; padding: 0; -unity-text-outline-width: 0; white-space: nowrap; }
+
+/* La carte récompense grandit un peu : 220 × 250, diamant 130, « +2 » 50 px. */
+.asc-carte.asc-carte7 { width: 220px; height: 250px; overflow: visible; }
+.asc-carte7 .asc-carte__lueur { left: 35px; top: 14px; width: 140px; height: 140px; border-radius: 70px; }
+.asc-carte7 .asc-carte__diamant { width: 130px; height: 130px; }
+.asc-carte7 .asc-carte__nombre { font-size: 50px; }
+/* L'anneau or (6 px) autour du contour d'encre, qui « respire » (par le code). */
+.asc-carte7__anneau {
+    position: absolute; left: -12px; top: -12px; right: -12px; bottom: -12px;
+    border-width: 6px; border-color: #FFD54A; border-radius: 32px;
+}
+.btn.bulle-rect.asc-recuperer.asc-recuperer7 { width: 300px; min-width: 300px; height: 112px; }
+.asc-recuperer7 .bulle-rect__texte { font-size: 34px; }
+/* La flèche or au-dessus du bouton (chevron de 2 barres 26 × 10), qui pointe vers la carte. */
+.asc-fleche { position: absolute; width: 40px; height: 30px; }
+.asc-fleche .asc-chevron__barre {
+    position: absolute; top: 10px; width: 26px; height: 10px; border-radius: 4px;
+    background-color: #FFD54A; border-width: 3px; border-color: #110D1F;
+}
+.asc-fleche .asc-chevron__barre--a { left: 0; rotate: -35deg; }
+.asc-fleche .asc-chevron__barre--b { left: 16px; rotate: 35deg; }
+
+/* L'étoile filante : un trait de 140 × 3 penché de 25°. */
+.asc-filante { position: absolute; width: 140px; height: 3px; rotate: 25deg; transform-origin: 100% 50%; }
+
+/* « Ma position » : SORT de la route, dans la bande de titre (à gauche de la croix). */
+.btn.asc-ma-position7 {
+    position: absolute; top: -54px; right: 78px; width: 240px; height: 52px; min-width: 0;
+    margin: 0; padding: 0 16px 0 52px; flex-direction: row; align-items: center; justify-content: space-between;
+    background-color: #FFD54A; background-image: none;
+    border-width: 4px; border-color: #110D1F; border-bottom-width: 9px; border-bottom-color: #D99A1A;
+    border-radius: 26px;
+}
+.btn.asc-ma-position7:hover { background-color: #FFE070; }
+.asc-ma-position7__icone { position: absolute; left: -8px; top: -14px; width: 48px; height: 48px; -unity-background-scale-mode: scale-to-fit; }
+.asc-ma-position7__texte { font-size: 22px; -unity-font-style: bold; color: #3A2200; margin: 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.asc-ma-position7__chevron { width: 24px; height: 14px; rotate: 180deg; }
+.asc-ma-position7__chevron.asc-ma-position7__chevron--bas { rotate: 0deg; }
+.asc-ma-position7__chevron .asc-chevron__barre { position: absolute; top: 4px; width: 14px; height: 5px; border-radius: 2px; background-color: #3A2200; }
+.asc-ma-position7__chevron .asc-chevron__barre--a { left: 0; rotate: 35deg; }
+.asc-ma-position7__chevron .asc-chevron__barre--b { left: 9px; rotate: -35deg; }
+
+/* ---------------------------------------------------------------------
+   5. La Boutique épurée (§17.3). Construite par BoutiquePage.cs.
+   Règles d'épure : un héros par carte, 3 tailles de texte au plus, pas de phrase dans une
+   carte, le détail derrière le « i », un seul bouton vert, de l'air (grille de 8 px).
+   --------------------------------------------------------------------- */
+/* Le titre de section : l'autocollant du Casier, aligné à gauche, puis un filet. */
+.btq-section.bq7-section { margin-bottom: 40px; }
+.bq7-titre { flex-direction: row; align-items: center; height: 72px; }
+.bq7-titre__icone { width: 64px; height: 64px; margin-right: 14px; -unity-background-scale-mode: scale-to-fit; flex-shrink: 0; }
+.boutique-page .bq7-titre__texte {
+    font-size: 44px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F; text-shadow: 0 5px 0 #110D1F;
+}
+.bq7-filet { height: 3px; border-radius: 2px; background-color: rgba(17, 13, 31, 0.12); margin: 4px 0 24px 0; }
+.btn.bulle-petit.bq7-info { width: 56px; height: 56px; min-width: 0; margin: 0; padding: 0; }
+.bq7-titre__info { margin-left: 16px; }
+.boutique-page .bq7-info__texte {
+    position: absolute; left: 0; right: 0; top: 1px; height: 44px; margin: 0; padding: 0;
+    font-size: 34px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1E1A33; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+/* Échanges : le taux en pilule, à droite du titre. */
+.bq7-taux {
+    flex-direction: row; align-items: center; margin-left: auto;
+    height: 48px; padding: 0 18px; border-radius: 24px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F;
+}
+.boutique-page .bq7-taux__texte { font-size: 24px; -unity-font-style: bold; color: #2A2440; margin: 0 4px; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.bq7-taux__icone { width: 30px; height: 30px; margin: 0 2px; }
+
+/* La carte d'une boîte : 538 × 470, deux par rangée, 24 px d'écart. */
+.bq7-grille { justify-content: space-between; }
+.btq-card.bq7-carte {
+    width: 538px; height: 470px; flex-shrink: 1; margin-bottom: 24px; padding: 24px;
+    border-width: 5px; border-radius: 28px; overflow: hidden;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.btq-card.bq7-carte:hover { scale: 1.02 1.02; }
+.bq7-haut { flex-direction: row; height: 180px; flex-shrink: 0; }
+.bq7-heros { width: 180px; height: 180px; align-items: center; justify-content: center; flex-shrink: 0; }
+.bq7-heros__lueur { position: absolute; left: -20px; top: -20px; width: 220px; height: 220px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.35); }
+.bq7-heros__rayons { position: absolute; left: -30px; top: -30px; width: 240px; height: 240px; }
+.bq7-heros__boite { width: 170px; height: 170px; -unity-background-scale-mode: scale-to-fit; align-items: center; justify-content: center; transition-property: margin-top; transition-duration: 0.15s; }
+.bq7-carte:hover .bq7-heros__boite { margin-top: -16px; }
+.bq7-cadenas { position: absolute; right: 18px; bottom: 18px; }
+.bq7-droite { flex-grow: 1; flex-shrink: 1; margin-left: 20px; padding-right: 60px; justify-content: center; }
+.boutique-page .bq7-titre-carte {
+    font-size: 32px; -unity-font-style: bold; color: #FFFFFF; margin: 0 0 12px 0; padding: 0; white-space: normal;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.bq7-jauge {
+    width: 260px; height: 28px; border-radius: 14px; overflow: hidden;
+    background-color: rgba(17, 13, 31, 0.30); border-width: 3px; border-color: #110D1F;
+    justify-content: center;
+}
+.bq7-jauge__plein { position: absolute; left: 0; top: 0; bottom: 0; background-color: #FFB020; border-radius: 11px; }
+.boutique-page .bq7-jauge .bq7-jauge__texte {
+    font-size: 20px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.bq7-recompense {
+    flex-direction: row; align-items: center; align-self: flex-start; margin-top: 10px;
+    height: 38px; padding: 0 14px 0 6px; border-radius: 19px; background-color: rgba(17, 13, 31, 0.40);
+}
+.bq7-recompense.bq7-recompense--recue { background-color: #6BE34A; }
+.bq7-recompense__medaille { width: 28px; height: 28px; background-image: url("../Art/icones_detourees/medaille_or.png"); -unity-background-scale-mode: scale-to-fit; }
+.bq7-recompense__coche { width: 28px; height: 28px; }
+.bq7-recompense__coche .casier-coche__court { left: 4px; top: 12px; }
+.bq7-recompense__coche .casier-coche__long { left: 12px; top: 3px; height: 22px; }
+.bq7-recompense__diamant { width: 26px; height: 26px; margin: 0 4px; }
+.boutique-page .bq7-recompense__texte { font-size: 22px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.btn.bulle-petit.bq7-carte__info { position: absolute; top: 14px; right: 14px; }
+
+/* Les aperçus : mini-cases du Casier 70 × 70, % dessous qui chevauche le bas de la case. */
+.bq7-cases { flex-direction: row; justify-content: center; align-items: flex-start; height: 110px; margin-top: 20px; flex-shrink: 0; }
+.bq7-groupe { align-items: center; margin: 0 5px; }
+.bq7-groupe__cases { flex-direction: row; }
+.bq7-case {
+    width: 70px; height: 70px; margin: 0 5px; align-items: center; justify-content: center;
+    border-width: 4px; border-color: #110D1F; border-radius: 16px; overflow: hidden;
+    -unity-background-scale-mode: stretch-to-fill;
+    transition-property: scale; transition-duration: 0.12s;
+}
+.bq7-case:hover { scale: 1.1 1.1; }
+.bq7-case__visuel { width: 56px; height: 56px; }
+.bq7-case__visuel .item-question { font-size: 40px; -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F; }
+.boutique-page .taux-badge.bq7-pourcent {
+    height: 26px; padding: 0 8px; margin: -8px 0 0 0; border-radius: 13px;
+    background-color: rgba(17, 13, 31, 0.62); -unity-text-align: middle-center;
+    font-size: 17px; -unity-font-style: bold; color: #FFFFFF; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+/* LE bouton : bulle verte 490 × 96 ; gris « Encore ● 120 » ; verrouillé « Après la Renaissance ». */
+.btn.bulle-rect.bq7-ouvrir { width: 490px; min-width: 0; height: 96px; margin: auto 0 0 0; align-self: center; padding: 0 24px 12px 24px; }
+.bq7-ouvrir .bq7-ouvrir__verbe { font-size: 32px; }
+.bq7-ouvrir .bq7-ouvrir__prix { font-size: 34px; }
+.bq7-ouvrir .bq7-ouvrir__petit { font-size: 28px; }
+.bulle-rect .bq7-ouvrir__monnaie { width: 36px; height: 36px; margin: 0 8px 0 14px; }
+.bulle-rect .bq7-ouvrir__monnaie.bq7-ouvrir__monnaie--petite { width: 32px; height: 32px; margin: 0 6px 0 10px; }
+.bq7-ouvrir__renaissance { width: 40px; height: 40px; margin-right: 10px; background-image: url("../Art/icones_detourees/icone_rebirth.png"); -unity-background-scale-mode: scale-to-fit; }
+/* Verrouillée (Animaux avant la Renaissance) : fond et boîte grisés. */
+.bq7-carte.bq7-carte--verrou { -unity-background-image-tint-color: #B8B4C8; }
+.bq7-carte--verrou .bq7-heros__boite { -unity-background-image-tint-color: #A8A4BC; }
+
+/* Les échanges (v7 §1.4) : 8 cartes or sur 2 lignes de 4, environ 260 × 300, 20 px d'écart. */
+.bq7-ech-cartes { flex-direction: row; flex-wrap: wrap; justify-content: space-between; }
+.ech-carte.bq7-ech-carte {
+    width: 24%; height: 300px; margin: 0 0 20px 0; padding: 16px 12px; border-radius: 26px;
+    justify-content: space-between; overflow: hidden;
+}
+.ech-image.bq7-ech-image { width: 100%; height: 130px; }
+.bq7-ech-gain { flex-direction: row; align-items: center; justify-content: center; }
+.coin.bq7-ech-gain__piece { width: 36px; height: 36px; margin: 0 6px 0 0; }
+.boutique-page .bq7-ech-gain__texte {
+    font-size: 40px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #8A4B00; text-shadow: 0 3px 0 #8A4B00;
+}
+.btn.bulle-rect.bq7-ech-btn { width: 200px; min-width: 0; height: 84px; margin: 0; align-self: center; padding: 0 16px 12px 16px; }
+.bq7-ech-btn .bq7-ech-btn__texte { font-size: 34px; }
+.bulle-rect .bq7-ech-btn__diamant { width: 32px; height: 32px; margin: 0 8px 0 0; }
+/* Le ruban de bonus « +15 % » (couleur des bonus de pièces des tenues), penché dans le coin. */
+.bq7-ech-ruban {
+    position: absolute; top: 14px; right: -34px; width: 140px; height: 34px; rotate: 35deg;
+    background-color: #3BB273; border-top-width: 3px; border-bottom-width: 3px; border-color: #110D1F;
+    align-items: center; justify-content: center;
+}
+.boutique-page .bq7-ech-ruban__texte { font-size: 20px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.5); }
+/* Les pièces volantes de l'échange. */
+.coin.bq7-piece-volante { width: 36px; height: 36px; margin: 0; }
+
+/* ---------------------------------------------------------------------
+   6. Les Améliorations épurées (§17.4). Construites par UpgradesPage.cs.
+   Fenêtre 1280 × 800, 3 cartes 384 × 590 côte à côte, SANS défilement.
+   --------------------------------------------------------------------- */
+.up7-page .unity-scroll-view__content-container { flex-grow: 1; }
+.up7-entete { flex-direction: row; justify-content: flex-end; height: 52px; margin-bottom: 16px; flex-shrink: 0; }
+.up7-solde {
+    flex-direction: row; align-items: center; height: 52px; padding: 0 18px 0 10px; border-radius: 26px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F;
+}
+.coin.up7-solde__piece { width: 34px; height: 34px; margin: 0 8px 0 0; }
+.up7-solde__texte { font-size: 28px; -unity-font-style: bold; color: #2A2440; margin: 0; padding: 0; -unity-text-outline-width: 0; }
+.up7-cartes { flex-direction: row; justify-content: space-between; flex-shrink: 0; }
+.up-card.up7-carte {
+    width: 384px; height: 590px; margin: 0; padding: 24px; flex-shrink: 1;
+    border-width: 5px; border-radius: 28px; align-items: center;
+}
+.btn.bulle-petit.up7-info { position: absolute; top: 14px; right: 14px; width: 56px; height: 56px; min-width: 0; margin: 0; padding: 0; }
+.up7-info__texte {
+    position: absolute; left: 0; right: 0; top: 1px; height: 44px; margin: 0; padding: 0;
+    font-size: 34px; -unity-font-style: bold; color: #FFFFFF; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #1E1A33;
+}
+.up7-heros { width: 230px; height: 170px; align-items: center; justify-content: center; flex-shrink: 0; }
+.up7-heros__lueur { position: absolute; left: 15px; top: -15px; width: 200px; height: 200px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.35); }
+.up7-heros__rayons { position: absolute; left: 0; top: -30px; width: 230px; height: 230px; }
+.up7-heros__icone { width: 150px; height: 150px; -unity-background-scale-mode: scale-to-fit; }
+.up7-nom {
+    font-size: 34px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0; white-space: nowrap;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 4px 0 #110D1F;
+}
+.up7-niveau { flex-direction: row; align-items: center; margin-top: 16px; }
+.up7-segments { flex-direction: row; }
+.up7-segment { width: 24px; height: 26px; margin-right: 4px; border-radius: 6px; background-color: rgba(17, 13, 31, 0.22); }
+.up7-segment.up7-segment--plein { background-color: #FFFFFF; border-width: 3px; border-color: #110D1F; }
+.up7-segment.up7-segment--or { background-color: #FFD54A; border-width: 3px; border-color: #110D1F; }
+.up7-niveau__texte {
+    font-size: 22px; -unity-font-style: bold; color: #FFFFFF; margin: 0 0 0 8px; padding: 0;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F;
+}
+/* Le puits « Effet » : le héros de la carte. */
+.up7-effet {
+    width: 336px; height: 170px; margin-top: 20px; padding: 14px; border-radius: 22px;
+    background-color: rgba(17, 13, 31, 0.28); align-items: center; justify-content: center; flex-shrink: 0;
+}
+.up7-avant-apres { flex-direction: row; align-items: center; }
+.up7-avant {
+    font-size: 36px; -unity-font-style: bold; color: rgba(255, 255, 255, 0.75); margin: 0; padding: 0;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F;
+}
+.up7-apres {
+    font-size: 52px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F;
+}
+.up7-chevron { width: 22px; height: 30px; margin: 0 14px; }
+.up7-chevron__barre {
+    position: absolute; left: 0; width: 18px; height: 7px; border-radius: 3px;
+    background-color: #FFFFFF; border-width: 2px; border-color: #110D1F;
+}
+.up7-chevron__barre--a { top: 7px; rotate: 40deg; }
+.up7-chevron__barre--b { top: 16px; rotate: -40deg; }
+.up7-etiquette {
+    font-size: 22px; -unity-font-style: bold; color: #FFFFFF; margin: 6px 0 0 0; padding: 0; -unity-text-align: middle-center;
+    -unity-text-outline-width: 3px; -unity-text-outline-color: #110D1F;
+}
+.up7-risque {
+    font-size: 20px; color: #FFFFFF; margin: 4px 0 0 0; padding: 0;
+    -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F;
+}
+.up7-barre-ligne { flex-direction: row; align-items: center; margin: 4px 0; }
+.up7-barre-ligne__texte {
+    width: 64px; font-size: 18px; -unity-font-style: bold; color: #FFFFFF; margin: 0 6px 0 0; padding: 0;
+    -unity-text-outline-width: 2px; -unity-text-outline-color: #110D1F;
+}
+.up7-barre { flex-direction: row; width: 230px; height: 24px; border-radius: 12px; overflow: hidden; border-width: 3px; border-color: #110D1F; }
+.up7-barre__part { height: 100%; }
+/* Le bouton (prix seul), collé en bas de la carte. */
+.btn.bulle-rect.up7-acheter { width: 336px; min-width: 0; height: 100px; margin: auto 0 0 0; padding: 0 20px 12px 20px; }
+.up7-acheter .up7-acheter__prix { font-size: 40px; }
+.up7-acheter .up7-acheter__petit { font-size: 28px; }
+.bulle-rect .up7-acheter__piece { width: 40px; height: 40px; margin: 0 10px 0 0; }
+.bulle-rect .up7-acheter__piece.up7-acheter__piece--petite { width: 32px; height: 32px; margin: 0 6px 0 10px; }
+/* Niveau max : la pilule or « MAX » avec la médaille. */
+.up7-max {
+    flex-direction: row; align-items: center; justify-content: center; margin-top: auto;
+    width: 336px; height: 100px; border-radius: 30px;
+    background-color: #FFD54A; border-width: 4px; border-color: #110D1F; border-bottom-width: 12px; border-bottom-color: #D99A1A;
+}
+.up7-max__medaille { width: 56px; height: 56px; margin-right: 12px; background-image: url("../Art/icones_detourees/medaille_or.png"); -unity-background-scale-mode: scale-to-fit; }
+.up7-max__texte { font-size: 44px; -unity-font-style: bold; color: #3A2200; margin: 0; padding: 0; -unity-text-outline-width: 0; }
+.up7-pied { font-size: 20px; color: #6E6A80; -unity-text-align: middle-center; margin: 16px 0 0 0; -unity-text-outline-width: 0; flex-shrink: 0; }
+/* La petite fenêtre « i » (620 × 520), dans le style de celle de L'Ascension. */
+.up7-info-voile {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-color: rgba(17, 13, 31, 0.45); align-items: center; justify-content: center;
+}
+.up7-info-boite {
+    width: 620px; min-height: 420px; padding: 28px 32px; border-radius: 28px;
+    background-color: #FBF8F2; border-width: 6px; border-color: #110D1F;
+}
+.up7-info-titre { font-size: 40px; -unity-font-style: bold; color: #FFFFFF; margin: 0 0 8px 0; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; }
+.up7-info-texte { font-size: 22px; color: #2A2440; margin: 4px 0; white-space: normal; -unity-text-outline-width: 0; }
+.up7-info-prix { -unity-font-style: bold; margin-top: 10px; }
+.up7-info-details { background-color: #3A3358; border-radius: 18px; padding: 12px 16px; margin-top: 10px; border-width: 4px; border-color: #110D1F; }
+
+/* ---------------------------------------------------------------------
+   7. Améliorations : la phrase de chaque carte (retour de l'auteur, point 14).
+   Pour garder tout sur un écran, l'icône et le puits rapetissent un peu.
+   --------------------------------------------------------------------- */
+.up7-heros { height: 130px; }
+.up7-heros__icone { width: 120px; height: 120px; }
+.up7-heros__lueur { top: -35px; }
+.up7-heros__rayons { top: -50px; }
+.up7-phrase {
+    font-size: 20px; color: #FFFFFF; margin: 6px 0 0 0; padding: 0 6px; white-space: normal; -unity-text-align: middle-center;
+    -unity-font-style: bold; -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.55);
+}
+.up7-niveau { margin-top: 12px; }
+.up7-effet { height: 140px; margin-top: 14px; }
+.up7-apres { font-size: 48px; }
+/* Point 16 : les petits textes du puits perdent leur contour (une ombre suffit). */
+.up7-etiquette, .up7-risque, .up7-barre-ligne__texte, .up7-niveau__texte {
+    -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.55);
+}
+
+/* ---------------------------------------------------------------------
+   8. « Contenu et taux » refait (retour de l'auteur, point 15), esprit Casier / Renaissance.
+   --------------------------------------------------------------------- */
+.btq-content.ct7 { flex-direction: row; flex-grow: 1; margin-top: 10px; }
+.ct7-vitrine {
+    width: 400px; flex-shrink: 0; margin-right: 24px; padding: 20px 20px 18px 20px;
+    border-width: 6px; border-radius: 28px; align-items: center;
+}
+.ct7-heros { width: 220px; height: 170px; align-items: center; justify-content: center; flex-shrink: 0; }
+.ct7-heros__lueur { position: absolute; left: -10px; top: -35px; width: 240px; height: 240px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.4); }
+.ct7-heros__rayons { position: absolute; left: -20px; top: -45px; width: 260px; height: 260px; }
+.ct7-heros__boite { width: 160px; height: 160px; -unity-background-scale-mode: scale-to-fit; align-items: center; justify-content: center; }
+.boutique-page .ct7-nom {
+    font-size: 34px; -unity-font-style: bold; color: #FFFFFF; margin: 4px 0 10px 0; padding: 0; white-space: normal; -unity-text-align: middle-center;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; text-shadow: 0 4px 0 #110D1F;
+}
+.bq7-jauge.ct7-jauge { width: 300px; margin-bottom: 14px; }
+/* La liste des raretés, dans un « puits » clair (même matière que le menu du Casier). */
+.ct7-taux {
+    align-self: stretch; padding: 8px 12px; border-radius: 20px;
+    background-color: #F4EFE4; border-width: 4px; border-color: #110D1F;
+}
+.ct7-ligne { flex-direction: row; align-items: center; height: 40px; }
+.ct7-ligne__case { width: 26px; height: 26px; border-radius: 8px; border-width: 3px; border-color: #110D1F; -unity-background-scale-mode: stretch-to-fill; margin-right: 10px; }
+.boutique-page .ct7-ligne__nom { flex-grow: 1; font-size: 22px; -unity-font-style: bold; color: #2A2440; margin: 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.boutique-page .ct7-ligne__chance { width: 76px; font-size: 22px; -unity-font-style: bold; color: #2A2440; -unity-text-align: middle-right; margin: 0 10px 0 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.ct7-ligne__bonus { flex-direction: row; align-items: center; width: 80px; height: 28px; padding: 0 8px 0 4px; border-radius: 14px; background-color: rgba(17, 13, 31, 0.78); }
+.coin.ct7-ligne__piece { width: 20px; height: 20px; margin: 0 4px 0 0; }
+.boutique-page .ct7-ligne__bonus-texte { font-size: 17px; -unity-font-style: bold; color: #FFD54A; margin: 0; padding: 0; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+.btn.bulle-rect.ct7-ouvrir { width: 340px; min-width: 0; height: 96px; margin: auto 0 0 0; padding: 0 20px 12px 20px; }
+/* À droite : titre « autocollant », compteur, filet, grille de cases de rareté. */
+.ct7-droite { flex-grow: 1; flex-shrink: 1; }
+.ct7-entete { flex-direction: row; align-items: center; height: 64px; flex-shrink: 0; }
+.boutique-page .ct7-titre {
+    font-size: 44px; -unity-font-style: bold; color: #FFFFFF; margin: 0; padding: 0;
+    -unity-text-outline-width: 5px; -unity-text-outline-color: #110D1F; text-shadow: 0 5px 0 #110D1F;
+}
+.boutique-page .ct7-compteur {
+    height: 40px; padding: 0 14px; margin: 0 0 0 14px; border-radius: 20px;
+    background-color: #E9E3D6; border-width: 4px; border-color: #110D1F;
+    font-size: 22px; -unity-font-style: bold; color: #2A2440; -unity-text-align: middle-center; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.ct7-liste { flex-grow: 1; }
+.ct7-liste .unity-scroll-view__content-container { padding: 8px 6px 8px 8px; }
+.ct7-grille { flex-direction: row; flex-wrap: wrap; }
+.ct7-case {
+    width: 124px; height: 124px; margin: 0 12px 12px 0; padding: 0;
+    border-width: 5px; border-color: #110D1F; border-radius: 20px; overflow: hidden;
+    -unity-background-scale-mode: stretch-to-fill; align-items: center; justify-content: center;
+    transition-property: scale; transition-duration: 0.15s; transition-timing-function: ease-out-back;
+}
+.ct7-case:hover { scale: 1.06 1.06; }
+.ct7-case__visuel { width: 92px; height: 92px; translate: 0 -8px; }
+.ct7-case__visuel .item-question { font-size: 56px; -unity-text-outline-width: 4px; -unity-text-outline-color: #110D1F; }
+.boutique-page .ct7-case__chance {
+    position: absolute; bottom: 6px; height: 24px; padding: 0 8px; margin: 0; border-radius: 12px;
+    background-color: rgba(17, 13, 31, 0.78); font-size: 16px; -unity-font-style: bold; color: #FFFFFF;
+    -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.ct7-case__coche { position: absolute; top: 4px; right: 4px; width: 30px; height: 30px; border-radius: 15px; background-color: #6BE34A; border-width: 3px; border-color: #110D1F; }
+.ct7-case__coche .casier-coche__court { left: 5px; top: 12px; }
+.ct7-case__coche .casier-coche__long { left: 11px; top: 4px; height: 18px; }
+.boutique-page .ct7-pied { font-size: 20px; color: #6E6A80; -unity-text-align: middle-center; margin: 8px 0 0 0; -unity-font-style: normal; -unity-text-outline-width: 0; text-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+
+/* ---------------------------------------------------------------------
+   9. Raccourci : le compteur de diamants du HUD se clique (il ouvre la Boutique, « Diamants »).
+   --------------------------------------------------------------------- */
+.diamond-counter.diamond-counter--cliquable:hover { scale: 1.06 1.06; }
+
+/* ---------------------------------------------------------------------
+   10. Contours noirs (retour de l'auteur, point 16) : on les GARDE sur les gros titres et les
+   boutons ; on les RETIRE des petits textes (moins de ~24 px) où ils bouchent les lettres.
+   Une ombre légère garde le relief sans manger le dessin des lettres.
+   --------------------------------------------------------------------- */
+/* Boutique : jauges, récompense, pourcentages. */
+.boutique-page .bq7-jauge .bq7-jauge__texte { -unity-text-outline-width: 0; text-shadow: 0 2px 0 rgba(17, 13, 31, 0.7); }
+/* Ascension : numéros d'étage (fins), ruban, x2. */
+.asc-numero { -unity-text-outline-width: 3px; }
+.asc-x2 { -unity-text-outline-width: 0; text-shadow: 0 2px 0 #3A2200; }
+/* Inventaire : le bouton « Aucun doublon » (gris clair sur gris, illisible) devient lisible. */
+.btn.casier-vente__btn:disabled { opacity: 1; background-color: #5A5670; background-image: none; color: #FFFFFF; -unity-text-outline-width: 0; }

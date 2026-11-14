@@ -411,6 +411,7 @@ namespace TourDeLaChance
                              || (shownPanel == PanelId.Inventaire && inventory.HandleEscape())
                              || (shownPanel == PanelId.Renaissance && rebirthPage.HandleEscape())
                              || (shownPanel == PanelId.Route && routePage.HandleEscape())
+                             || (shownPanel == PanelId.Ameliorations && upgrades.HandleEscape())
                              || (shownPanel == PanelId.Inventaire && inventory.HandleEscape());
                 if (!consumed) game.ClosePanel();
             }
@@ -419,6 +420,7 @@ namespace TourDeLaChance
             if (shownPanel == PanelId.Route) routePage.Tick(Time.deltaTime);
             if (shownPanel == PanelId.Inventaire) inventory.Tick(Time.deltaTime);
             if (shownPanel == PanelId.Renaissance) rebirthPage.Tick(Time.deltaTime);
+            if (shownPanel == PanelId.Ameliorations) upgrades.Tick();
             TickToastQueue(Time.deltaTime);
             infoBulle.Tick(Time.deltaTime);
             TickToasts(Time.deltaTime);
@@ -564,10 +566,10 @@ namespace TourDeLaChance
             }
             else switch (panel)
             {
-                case PanelId.Boutique: size = new Vector2(1160f, 820f); key = "boutique"; text = "Boutique"; break;
-                case PanelId.Inventaire: size = new Vector2(1600f, 860f); key = "inventaire"; text = "Inventaire"; break; // v6.5 : « Casier » (art bible §16.1.1)
+                case PanelId.Boutique: size = new Vector2(1200f, 860f); key = "boutique"; text = "Boutique"; break; // v7 §17.3.1
+                case PanelId.Inventaire: size = new Vector2(1510f, 860f); key = "inventaire"; text = "Inventaire"; break; // v6.5 : « Casier » (art bible §16.1.1) ; v7 : 1600 → 1510, pour laisser une marge nette avec les bulles des colonnes (V7.uss §2)
                 case PanelId.Index: size = new Vector2(1360f, 820f); key = "index"; text = "Index"; break;
-                case PanelId.Ameliorations: size = new Vector2(1000f, 840f); key = "ameliorations"; text = "Améliorations"; break;
+                case PanelId.Ameliorations: size = new Vector2(1280f, 800f); /* v7 §17.4.1 : 3 cartes côte à côte */ key = "ameliorations"; text = "Améliorations"; break;
                 case PanelId.Classement: size = new Vector2(920f, 840f); key = "classement"; text = "Classement"; break;
                 case PanelId.Renaissance: size = new Vector2(1100f, 840f); key = "renaissance"; text = "Renaissance"; break;  // v6 §15.4
                 case PanelId.Route: size = new Vector2(1120f, 860f); key = "route"; text = "L'Ascension"; break;      // v6.5 : art bible §16.2.1
@@ -580,14 +582,15 @@ namespace TourDeLaChance
             foreach (var k in new[] { "boutique", "inventaire", "index", "ameliorations", "classement", "reglages", "pseudo", "renaissance", "route" })
                 ShopUi.SetClass(header, "popup-header--" + k, k == key);
             SetHeaderIcon(panel);
-            // v6.5 : la croix de l'Inventaire (fenêtre de 1600 px) rentre un peu, pour ne pas
+            // v6.5 : la croix de l'Inventaire (fenêtre très large, 1510 px en v7) rentre un peu, pour ne pas
             // toucher le compteur de diamants du HUD en 1280 × 720.
             ShopUi.SetClass(closeButton, "popup-close--interieur", panel == PanelId.Inventaire);
 
             // Le porte-monnaie et la note de la cagnotte : Inventaire, Index, Améliorations (la
             // Boutique et la Renaissance affichent leurs propres soldes).
             // v6.5 : plus dans l'Inventaire « Casier », dont les 3 zones prennent toute la hauteur.
-            bool shopPopup = panel == PanelId.Index || panel == PanelId.Ameliorations;
+            // v7 (§17.4) : plus dans les Améliorations, qui affichent leur propre solde en pilule.
+            bool shopPopup = panel == PanelId.Index;
             walletRow.style.display = shopPopup ? DisplayStyle.Flex : DisplayStyle.None;
             potNote.style.display = (shopPopup || panel == PanelId.Boutique) && game.Pot > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 

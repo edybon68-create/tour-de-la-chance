@@ -20,6 +20,7 @@
     <Style src="V51.uss" />
     <Style src="V6.uss" />
     <Style src="V65.uss" />
+    <Style src="V7.uss" />
     <ui:VisualElement name="panels-root" class="panels-root" picking-mode="Ignore">
         <ui:VisualElement name="popup-dim" class="popup-dim" />
         <ui:VisualElement name="popup-layer" class="popup-layer" picking-mode="Ignore">

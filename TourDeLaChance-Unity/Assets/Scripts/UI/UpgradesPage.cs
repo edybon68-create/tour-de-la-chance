@@ -14,6 +14,12 @@ namespace TourDeLaChance
     /// Il AFFICHE et TRANSMET : l'achat est décidé par Upgrades.TryBuy, et TOUS les chiffres
     /// (prix, multiplicateurs, chances, risque) sont lus dans UpgradeCatalog via Upgrades :
     /// changer un poids dans le catalogue change le pourcentage affiché, sans toucher à l'UI.
+    ///
+    /// v7 (art bible §17.4) : ÉPURÉ, comme les trois cartes de la Renaissance. Les 3 cartes
+    /// sont côte à côte, SANS défilement : l'icône (qui flotte, sur ses rayons), le nom, le
+    /// niveau en jauge de 10 segments, l'effet AVANT → APRÈS en grand (règle d'or : l'effet reste
+    /// visible sans rien ouvrir), un gros bouton (prix seul). La description et le tableau
+    /// détaillé sont derrière le bouton « i ». Une seule phrase pour toute la fenêtre, en pied.
     /// </summary>
     public class UpgradesPage : IDisposable
     {
@@ -43,17 +49,68 @@ namespace TourDeLaChance
 
         public void Open()
         {
+            CloseInfo();
             Refresh();
             list.scrollOffset = Vector2.zero;
         }
 
+        // Les icônes qui flottent et leurs rayons qui tournent (animés par Tick).
+        readonly List<(VisualElement icon, RaysElement rays, float phase)> floaters = new List<(VisualElement, RaysElement, float)>();
+        readonly List<VisualElement> nextSegments = new List<VisualElement>();
+        VisualElement infoVeil;
+
         public void Refresh()
         {
             list.Clear();
+            floaters.Clear();
+            nextSegments.Clear();
             var catalog = Upgrades.Catalog;
             if (catalog == null) return;
-            foreach (var def in catalog.Upgrades) list.Add(Card(def));
+            // Pas de défilement : tout tient dans la fenêtre (1280 × 800).
+            list.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            list.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            list.AddToClassList("up7-page");
+
+            // En haut à droite : le solde de pièces.
+            var head = new VisualElement { pickingMode = PickingMode.Ignore };
+            head.AddToClassList("up7-entete");
+            var balance = new VisualElement { pickingMode = PickingMode.Ignore };
+            balance.AddToClassList("up7-solde");
+            balance.Add(Icon("coin up7-solde__piece"));
+            balance.Add(ShopUi.NewLabel(ShopUi.Thousands(Wallet.Coins), "up7-solde__texte"));
+            head.Add(balance);
+            list.Add(head);
+
+            var row = new VisualElement { pickingMode = PickingMode.Ignore };
+            row.AddToClassList("up7-cartes");
+            foreach (var def in catalog.Upgrades) row.Add(Card(def));
+            list.Add(row);
+            // UNE phrase pour toutes les cartes.
+            list.Add(ShopUi.NewLabel("Chaque amélioration compte à partir du prochain étage.", "up7-pied"));
             ButtonStyler.Apply(list);
+        }
+
+        /// À chaque image (appelé par PanelsController) : les icônes flottent (±5 px en 2,4 s),
+        /// leurs rayons tournent (un tour en 40 s), le prochain segment clignote doucement.
+        public void Tick()
+        {
+            // v7 (point 14) : AUCUN défilement : tout tient dans la fenêtre, la liste reste en haut.
+            if (list.scrollOffset != Vector2.zero) list.scrollOffset = Vector2.zero;
+            float t = Time.realtimeSinceStartup;
+            foreach (var (icon, rays, phase) in floaters)
+            {
+                icon.style.translate = new Translate(0f, 5f * Mathf.Sin(t * Mathf.PI * 2f / 2.4f + phase));
+                rays.style.rotate = new Rotate(t * 9f);
+            }
+            float blink = 0.22f + 0.115f * (1f - Mathf.Cos(t * Mathf.PI * 2f / 1.2f));
+            foreach (var seg in nextSegments) seg.style.backgroundColor = new Color(0.067f, 0.051f, 0.122f, blink);
+        }
+
+        static VisualElement Icon(string classes)
+        {
+            var e = new VisualElement { pickingMode = PickingMode.Ignore };
+            foreach (var c in classes.Split(' ')) e.AddToClassList(c);
+            return e;
         }
 
         VisualElement Card(UpgradeDef def)
@@ -63,6 +120,7 @@ namespace TourDeLaChance
 
             var card = new VisualElement();
             card.AddToClassList("up-card");
+            card.AddToClassList("up7-carte");
             // v5.1 (art bible §12.18) : une couleur vive par amélioration.
             card.AddToClassList("carte");
             card.AddToClassList(def.id switch
@@ -72,68 +130,84 @@ namespace TourDeLaChance
                 _ => "carte--bleue"
             });
 
-            // 1. Icône, nom, phrase
-            var top = new VisualElement { pickingMode = PickingMode.Ignore };
-            top.AddToClassList("up-top");
-            var icon = new VisualElement { pickingMode = PickingMode.Ignore };
-            icon.AddToClassList("up-icon");
-            if (def.icon != null) icon.style.backgroundImage = new StyleBackground(def.icon);
-            top.Add(icon);
-            var titles = new VisualElement { pickingMode = PickingMode.Ignore };
-            titles.AddToClassList("up-title-col");
-            titles.Add(ShopUi.NewLabel(def.displayName, "up-name"));
-            titles.Add(ShopUi.NewLabel(def.description, "up-desc"));
-            top.Add(titles);
-            card.Add(top);
+            // Le bouton « i » : la description, le tableau détaillé et le prix du niveau suivant.
+            var info = new Button(() => OpenInfo(def));
+            foreach (var c in new[] { "btn", "bulle", "bulle-petit", "bulle-petit--ardoise", "up7-info" }) info.AddToClassList(c);
+            info.Add(ShopUi.NewLabel("i", "up7-info__texte"));
+            card.Add(info);
 
-            // 2. Niveau : « Niveau 7 / 10 » + 10 pastilles
+            // 1. L'icône (150 px) sur sa lueur et ses rayons ; elle flotte.
+            var hero = new VisualElement { pickingMode = PickingMode.Ignore };
+            hero.AddToClassList("up7-heros");
+            var glow = new VisualElement { pickingMode = PickingMode.Ignore };
+            glow.AddToClassList("up7-heros__lueur");
+            glow.style.backgroundImage = new StyleBackground(UiFxTextures.Halo);
+            hero.Add(glow);
+            var rays = new RaysElement();
+            rays.AddToClassList("up7-heros__rayons");
+            rays.Configure(10, new Color(1f, 1f, 1f, 0.30f));
+            hero.Add(rays);
+            var icon = Icon("up7-heros__icone");
+            if (def.icon != null) icon.style.backgroundImage = new StyleBackground(def.icon);
+            hero.Add(icon);
+            floaters.Add((icon, rays, floaters.Count * 0.8f));
+            card.Add(hero);
+
+            // 2. Le nom, puis (v7, retour de l'auteur, point 14) UNE phrase courte qui dit ce que
+            //    fait l'amélioration, visible sans ouvrir le « i » (texte des données du catalogue).
+            card.Add(ShopUi.NewLabel(def.displayName, "up7-nom"));
+            if (!string.IsNullOrEmpty(def.description)) card.Add(ShopUi.NewLabel(def.description, "up7-phrase"));
+
+            // 3. Le niveau : 10 segments, et « 2/10 ».
             var levelRow = new VisualElement { pickingMode = PickingMode.Ignore };
-            levelRow.AddToClassList("up-level-row");
-            levelRow.Add(ShopUi.NewLabel($"Niveau {level} / {Upgrades_.MaxLevel}", "up-level"));
+            levelRow.AddToClassList("up7-niveau");
             var dots = new List<VisualElement>();
+            var segments = new VisualElement { pickingMode = PickingMode.Ignore };
+            segments.AddToClassList("up7-segments");
             for (int i = 1; i <= Upgrades_.MaxLevel; i++)
             {
-                var dot = new VisualElement { pickingMode = PickingMode.Ignore };
-                dot.AddToClassList("up-dot");
-                if (i <= level) dot.AddToClassList("up-dot--full");
-                levelRow.Add(dot);
-                dots.Add(dot);
+                var seg = Icon("up7-segment");
+                if (i <= level) seg.AddToClassList(max ? "up7-segment--or" : "up7-segment--plein");
+                if (i == level + 1) nextSegments.Add(seg);
+                segments.Add(seg);
+                dots.Add(seg);
             }
+            levelRow.Add(segments);
+            levelRow.Add(ShopUi.NewLabel($"{level}/{Upgrades_.MaxLevel}", "up7-niveau__texte"));
             card.Add(levelRow);
 
-            // 3. Effet actuel → effet suivant
+            // 4. L'effet, le héros de la carte : AVANT › APRÈS (ou la valeur actuelle au max).
+            var well = Icon("up7-effet");
             switch (def.id)
             {
-                case Upgrades_.Gains: AddGainsEffect(card, level, max); break;
-                case Upgrades_.Chests: AddChestsEffect(card, level, max); break;
-                case Upgrades_.Traps: AddTrapsEffect(card, level, max); break;
+                case Upgrades_.Gains: GainsEffect(well, level, max); break;
+                case Upgrades_.Chests: ChestsEffect(well, level, max); break;
+                case Upgrades_.Traps: TrapsEffect(well, level, max); break;
             }
+            card.Add(well);
 
-            // 4. Bouton « Améliorer — 900 », ou bandeau « Niveau max ! »
-            var buyRow = new VisualElement();
-            buyRow.AddToClassList("up-buy-row");
+            // 5. Le bouton : prix seul (le vert dit « améliorer »), gris s'il manque des pièces ; MAX en or.
             if (max)
             {
-                buyRow.Add(ShopUi.NewLabel("Niveau max !", "up-max"));
+                var maxPill = Icon("up7-max");
+                maxPill.Add(Icon("up7-max__medaille"));
+                maxPill.Add(ShopUi.NewLabel("MAX", "up7-max__texte"));
+                card.Add(maxPill);
             }
             else
             {
                 string id = def.id;
-                // v5.1 : la grosse pilule verte « Améliorer [pièce] 900 ».
-                var buy = PopupDecor.PriceButton(() => OnBuy(id), "Améliorer", Upgrades.NextPrice(id), false);
-                buy.AddToClassList("up-buy");
-                buy.AddToClassList(UiSounds.SilentClass); // le son d'amélioration suffit
-                buy.name = "buy-" + id;
                 bool canBuy = Upgrades.CanBuy(id) && Time.time >= buyLockedUntil;
+                // v7 (retour de l'auteur, point 15, appliqué aussi ici pour rester cohérent) :
+                // le PRIX est toujours sur le bouton ; gris s'il n'y a pas assez de pièces.
+                var buy = new Button(() => OnBuy(id));
+                buy.Add(Icon("coin up7-acheter__piece"));
+                buy.Add(ShopUi.NewLabel(ShopUi.Thousands(Upgrades.NextPrice(id)), "bulle-rect__texte up7-acheter__prix"));
+                foreach (var c in new[] { "btn", "bulle", "bulle-rect", "bulle-rect--vert", "up-buy", "up7-acheter", UiSounds.SilentClass }) buy.AddToClassList(c);
+                buy.name = "buy-" + id;
                 buy.SetEnabled(canBuy);
-                buyRow.Add(buy);
-                int missing = Upgrades.MissingCoins(id);
-                if (missing > 0) buyRow.Add(ShopUi.NewLabel($"Il te manque {missing} pièces", "up-missing"));
+                card.Add(buy);
             }
-            card.Add(buyRow);
-
-            // 5. Rappel en petit
-            card.Add(ShopUi.NewLabel("S'applique à partir du prochain étage.", "up-note"));
 
             // Animation de l'achat qui vient d'avoir lieu sur CETTE carte.
             if (flashId == def.id && host != null)
@@ -141,11 +215,140 @@ namespace TourDeLaChance
                 flashId = null;
                 host.StartCoroutine(FlashCard(card));
                 if (popLevel >= 1 && popLevel <= dots.Count) host.StartCoroutine(PopDot(dots[popLevel - 1]));
+                host.StartCoroutine(JumpIcon(icon));
             }
             return card;
         }
 
-        // ---------- Les trois façons d'afficher l'effet ----------
+        // ---------- Le puits « Effet » (tous les nombres viennent des fonctions du jeu) ----------
+
+        /// « ×1,4 › ×1,6 » : l'avant en petit (75 %), l'après en grand ; dessous « par trésor ».
+        static VisualElement BeforeAfter(string before, string after, bool max)
+        {
+            var line = Icon("up7-avant-apres");
+            if (max) { line.Add(ShopUi.NewLabel(after, "up7-apres")); return line; }
+            line.Add(ShopUi.NewLabel(before, "up7-avant"));
+            line.Add(Chevron());
+            line.Add(ShopUi.NewLabel(after, "up7-apres"));
+            return line;
+        }
+
+        /// Le chevron « › » : deux barres blanches contour d'encre.
+        static VisualElement Chevron()
+        {
+            var c = Icon("up7-chevron");
+            c.Add(Icon("up7-chevron__barre up7-chevron__barre--a"));
+            c.Add(Icon("up7-chevron__barre up7-chevron__barre--b"));
+            return c;
+        }
+
+        static void GainsEffect(VisualElement well, int level, bool max)
+        {
+            string now = $"×{ShopUi.Number(Upgrades.GainMultiplier(level))}";
+            string next = $"×{ShopUi.Number(Upgrades.GainMultiplier(max ? level : level + 1))}";
+            well.Add(BeforeAfter(now, next, max));
+            well.Add(ShopUi.NewLabel("par trésor", "up7-etiquette"));
+        }
+
+        /// Deux barres empilées « Avant » / « Après », découpées selon les chances de chaque
+        /// rareté de coffre (une part sous 4 % garde au moins 6 px pour rester visible).
+        static void ChestsEffect(VisualElement well, int level, bool max)
+        {
+            well.Add(ChanceBar(max ? "Niveau" : "Avant", Upgrades.ChestWeights(level)));
+            if (!max) well.Add(ChanceBar("Après", Upgrades.ChestWeights(level + 1)));
+            well.Add(ShopUi.NewLabel("Coffres plus précieux", "up7-etiquette"));
+        }
+
+        static VisualElement ChanceBar(string label, int[] weights)
+        {
+            var row = Icon("up7-barre-ligne");
+            row.Add(ShopUi.NewLabel(label, "up7-barre-ligne__texte"));
+            var bar = Icon("up7-barre");
+            int total = 0;
+            for (int i = 0; i < weights.Length; i++) total += Mathf.Max(0, weights[i]);
+            for (int i = 0; i < weights.Length && i < Upgrades.RarityCount; i++)
+            {
+                if (weights[i] <= 0 || total <= 0) continue;
+                var part = Icon("up7-barre__part");
+                part.style.flexGrow = weights[i];
+                part.style.minWidth = 6f;
+                part.style.backgroundColor = Upgrades.Rarity(i).bodyColor;
+                bar.Add(part);
+            }
+            row.Add(bar);
+            return row;
+        }
+
+        /// « 25 % › 50 % » des étages au plus grand nombre de coffres possible, puis le risque.
+        static void TrapsEffect(VisualElement well, int level, bool max)
+        {
+            int[] now = Upgrades.CountWeights(level);
+            int[] next = Upgrades.CountWeights(max ? level : level + 1);
+            int baseCount = Upgrades.Catalog != null ? Upgrades.Catalog.BaseChestCount : 3;
+            // Le plus grand nombre de coffres qui a une chance (au niveau suivant).
+            int top = 0;
+            for (int i = 0; i < next.Length; i++) if (next[i] > 0) top = i;
+            int a = top < now.Length ? now[top] : 0, b = top < next.Length ? next[top] : 0;
+            well.Add(BeforeAfter($"{a}\u00A0%", $"{b}\u00A0%", max));
+            well.Add(ShopUi.NewLabel($"étages à {baseCount + top} coffres", "up7-etiquette"));
+            int riskNow = Mathf.RoundToInt(Upgrades.AverageRiskPercent(level));
+            int riskNext = Mathf.RoundToInt(Upgrades.AverageRiskPercent(max ? level : level + 1));
+            well.Add(ShopUi.NewLabel(max ? $"Risque : {riskNow}\u00A0%" : $"Risque : {riskNow}\u00A0% › {riskNext}\u00A0%", "up7-risque"));
+        }
+
+        // ---------- La petite fenêtre « i » ----------
+
+        void OpenInfo(UpgradeDef def)
+        {
+            CloseInfo();
+            int level = Upgrades.Level(def.id);
+            bool max = level >= Upgrades_.MaxLevel;
+            infoVeil = Icon("up7-info-voile");
+            infoVeil.pickingMode = PickingMode.Position;
+            infoVeil.RegisterCallback<PointerDownEvent>(e => { if (e.target == infoVeil) CloseInfo(); });
+            var box = Icon("up7-info-boite");
+            box.pickingMode = PickingMode.Position;
+            box.Add(ShopUi.NewLabel(def.displayName, "up7-info-titre"));
+            // Le détail d'avant (inchangé) : il garde tous les chiffres.
+            var details = Icon("up7-info-details");
+            switch (def.id)
+            {
+                case Upgrades_.Gains: AddGainsEffect(details, level, max); break;
+                case Upgrades_.Chests: AddChestsEffect(details, level, max); break;
+                case Upgrades_.Traps: AddTrapsEffect(details, level, max); break;
+            }
+            box.Add(details);
+            box.Add(ShopUi.NewLabel(max ? "Niveau maximum atteint." : $"Niveau {level + 1} : {ShopUi.Thousands(Upgrades.NextPrice(def.id))} pièces", "up7-info-texte up7-info-prix"));
+            var ok = new Button(CloseInfo) { text = "OK" };
+            ok.AddToClassList("btn"); ok.AddToClassList("btn--vert"); ok.AddToClassList("asc-info-ok");
+            box.Add(ok);
+            infoVeil.Add(box);
+            // Posée DANS la page (hiérarchie de la ScrollView, par-dessus la liste) : elle disparaît
+            // avec la page quand on change de fenêtre.
+            list.hierarchy.Add(infoVeil);
+            ButtonStyler.Apply(infoVeil);
+        }
+
+        void CloseInfo()
+        {
+            if (infoVeil != null) infoVeil.RemoveFromHierarchy();
+            infoVeil = null;
+        }
+
+        /// Échap ferme d'abord la fenêtre « i ».
+        public bool HandleEscape()
+        {
+            if (infoVeil == null) return false;
+            CloseInfo();
+            return true;
+        }
+
+        /// Le texte de la fenêtre « i » ouverte ("" si fermée), pour les tests.
+        public string InfoText => infoVeil != null ? string.Join(" | ", infoVeil.Query<Label>().ToList().ConvertAll(l => l.text)) : "";
+        /// OUTIL DE TEST : ouvre la fenêtre « i » d'une amélioration.
+        public void DebugInfo(string id) { var def = Upgrades.Catalog != null ? Upgrades.Catalog.Get(id) : null; if (def != null) OpenInfo(def); }
+
+        // ---------- Le détail complet (fenêtre « i ») : les trois façons d'avant ----------
 
         static void AddGainsEffect(VisualElement card, int level, bool max)
         {
@@ -260,6 +463,17 @@ namespace TourDeLaChance
                 yield return null;
             }
             card.style.unityBackgroundImageTintColor = StyleKeyword.Null;
+        }
+
+        /// L'icône saute de 16 px après un achat (0,3 s).
+        static IEnumerator JumpIcon(VisualElement icon)
+        {
+            for (float t = 0f; t < 0.3f; t += Time.deltaTime)
+            {
+                icon.style.marginTop = -16f * Mathf.Sin(t / 0.3f * Mathf.PI);
+                yield return null;
+            }
+            icon.style.marginTop = 0f;
         }
 
         /// La pastille du nouveau niveau se remplit avec un « pop » (0 → 1,3 → 1 en 0,25 s).
