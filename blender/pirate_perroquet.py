@@ -52,9 +52,9 @@ NOM = "perroquet"
 POINT = "PointDos"
 MATS = ["M5_PirAraRouge", "M5_PirAraBleu", "M5_PirAraJaune", "M5_PirBecCreme",
         "M5_PirOeilNoir"]   # 0..4
-ANGLE_PERCHOIR = math.radians(-102)    # vers la droite de l'image (V7 : moins en arrière, on le voit)
+ANGLE_PERCHOIR = math.radians(-96)     # V7 : sur l'épaule droite de l'image, bien visible
 Y_PERCHOIR = 0.95
-ECHELLE = 1.55      # V7 : 1,35 -> 1,55, il était caché par la tête (exagéré, bible §13.2)
+ECHELLE = 2.25      # V7 (retour 2) : ×1,45 encore (≈ ×1,7 depuis la v5), il doit se voir nettement sur l'épaule
 
 
 def grandir(racine, centre, k):

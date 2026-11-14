@@ -66,13 +66,13 @@ S_PLAQUE = 0.33          # au-delà de |s| = 0,33, la plaque devient le lien
 S_DOS = math.pi * R      # |s| du milieu de la nuque
 LIEN = 0.045             # demi-hauteur du lien (9 cm)
 ECART = 0.015            # le masque est posé 1,5 cm au-dessus de la peau
-EPAISSEUR = 0.02
+EPAISSEUR = 0.035          # V7 (retour 2) : tissu épais et plein
 # V7 (point 17) : galon plus fin et plus fin et à flancs inclinés (3 cm × 2,4 cm), lissé : l'ancien
 # (4,4 cm, section carrée) mangeait le bandeau et faisait « lunettes jaunes ».
-GALON = [(-0.015, 0.0), (0.015, 0.0), (0.009, 0.024), (-0.009, 0.024)]
+GALON = [(-0.008, 0.0), (0.008, 0.0), (0.006, 0.012), (-0.006, 0.012)]   # V7 (retour 2) : liseré FIN (1,6 cm)
 # Trous : centrés sur les yeux, assez grands pour que le galon (qui déborde de 2,2 cm vers
 # l'intérieur) ne touche pas l'œil (17 × 21 cm, qui dépasse de 3 cm du front).
-TROU_S, TROU_H = 0.105, 0.132
+TROU_S, TROU_H = 0.098, 0.122   # V7 : trous un peu plus serrés autour des yeux
 # La PLAQUE (devant) est posée par un « projecteur » placé devant et au-dessus du visage
 # (Blender), comme un vidéoprojecteur qui projette le patron sur le visage. Pourquoi pas
 # le même rayon depuis le centre de la tête que pour le lien ? Sous les yeux, ce rayon
@@ -113,7 +113,7 @@ def bas(s):
     """Bord du bas. Encoche au milieu (sur le chanfrein), arrondi sous chaque œil."""
     u = abs(s)
     if u <= S_PLAQUE:
-        creux = -0.09 - 0.15 * lisse(u / 0.15)                  # -0,09 -> -0,24 (V7)
+        creux = -0.10 - 0.17 * lisse(u / 0.15)                  # -0,10 -> -0,27 (V7)
         remonte = lisse((u - 0.21) / (S_PLAQUE - 0.21))
         return creux + (-LIEN - creux) * remonte
     return centre_lien(u) - LIEN
@@ -214,7 +214,7 @@ def plaque():
     epais.thickness = EPAISSEUR
     epais.offset = 1.0                 # vers l'extérieur (sens des normales)
     epais.use_rim = True
-    epais.material_offset_rim = 1      # tranche jaune
+    epais.material_offset_rim = 0      # V7 : tranche en tissu (plus de bande jaune épaisse)
     epais.use_even_offset = False     # (True fait des pics sur les triangles très fins)
     epais.use_quality_normals = True
     C.appliquer(o)
@@ -224,7 +224,7 @@ def plaque():
 def galon(points_sh, bm):
     chemin, hauts = [], []
     for s, h in points_sh:
-        p, d = vers_tete(s, h, ECART)
+        p, d = vers_tete(s, h, ECART + EPAISSEUR - 0.008)   # V7 : posé sur le bord du tissu
         chemin.append(p)
         hauts.append(d)
     C.bm_balayage_surface(bm, chemin, hauts, GALON, mat=1, ferme=True)
@@ -300,7 +300,7 @@ def construire():
     rainure(bm)
     rain = C.objet_depuis_bmesh("Rainure", bm, MATS)
     obj = C.joindre([plaque(), galons(), nd, rain], "Masque")
-    C.lisser_angle(obj, 60)   # V7 : plus lisse (plus de facettes sur le galon)
+    C.lisser_angle(obj, 75)   # V7 : tissu lisse, tranche nette
     C.deplacer_origine(obj, C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for nom, cote in (("Anim_PanGauche", -1), ("Anim_PanDroit", 1)):
         C.parenter(pan(nom, cote, p_noeud, d_noeud), obj)

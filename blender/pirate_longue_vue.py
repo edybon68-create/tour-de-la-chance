@@ -41,7 +41,8 @@ import commun_pirates as P  # noqa: E402
 
 NOM = "longue_vue"
 POINT = "PointDos"
-MATS = ["M5_PirLaiton", "M5_PirCuir", "M5_PirVerre"]   # 0, 1, 2
+# V7 (retour 2) : laiton CLAIR et verre bleu bien visible (nouveaux matériaux M7_)
+MATS = ["M7_LaitonClair", "M5_PirCuir", "M7_VerreBleu"]   # 0, 1, 2
 N = 28
 ANGLE = math.radians(40)        # la longue-vue penche : gauche de l'image plus haute
 # V7 : 25° la faisait passer à plat derrière la tête, à hauteur des yeux : vue du jeu, elle
@@ -58,7 +59,7 @@ def hauteur(a):
 
 # Profil de la longue-vue le long de son axe : (rayon, position), du gros bout (+0,62,
 # à droite de l'image, en bas) à l'oculaire (−0,62, à gauche, en haut) ; matériau par tronçon.
-PROFIL = [(0.0, 0.615), (0.068, 0.62), (0.088, 0.615), (0.09, 0.56), (0.078, 0.55),
+PROFIL = [(0.0, 0.60), (0.078, 0.62), (0.088, 0.615), (0.09, 0.56), (0.078, 0.55),
           (0.075, 0.33), (0.084, 0.32), (0.084, 0.28), (0.075, 0.27),
           (0.075, 0.06), (0.085, 0.05), (0.085, 0.01), (0.06, 0.0),
           (0.058, -0.28), (0.066, -0.29), (0.066, -0.32), (0.047, -0.33),
@@ -92,7 +93,8 @@ def construire():
     p_dos, d_dos = tour[i_dos]
     centre = p_dos + d_dos * 0.13      # V7 : écartée du dos (tube plus gros)
     # axe : le long du dos (gauche-droite), penché de 25° (gauche de l'image = +X Blender)
-    axe = Vector((-math.cos(ANGLE), 0.0, -math.sin(ANGLE)))   # vers le gros bout (droite, bas)
+    # V7 : le gros bout (la lentille) dépasse en haut à gauche, tourné vers la caméra : on voit le verre bleu
+    axe = Vector((math.cos(ANGLE), 0.55, math.sin(ANGLE))).normalized()   # gros bout en haut à gauche
     bm = bmesh.new()
     # V7 (point 17) : tube 1,45 fois plus gros et 24 côtés. Vue du jeu, l'ancienne n'était
     # qu'une baguette sombre derrière la tête ; l'icône montre une longue-vue trapue.

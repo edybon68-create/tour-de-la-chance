@@ -116,7 +116,7 @@ def construire():
         eclats.append(p + n * 0.03)
     pierres = C.objet_depuis_bmesh("Pierres", bm, MATS)
     obj = C.joindre([M.plaque(), M.galons(), nd, pierres], "Loup")
-    C.lisser_angle(obj, 60)   # V7
+    C.lisser_angle(obj, 75)   # V7 : tissu lisse, tranche nette
     C.deplacer_origine(obj, C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for nom, cote in (("Anim_RubanGauche", -1), ("Anim_RubanDroit", 1)):
         C.parenter(ruban(nom, cote, p_noeud, d_noeud), obj)

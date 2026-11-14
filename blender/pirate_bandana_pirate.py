@@ -52,7 +52,7 @@ ARBRE = None
 def lat_bord(a):
     """Latitude (radians) du bord du tissu : haut devant (au-dessus des yeux), bas sur la
     nuque. a = 0 devant, ±π derrière."""
-    return math.radians(28 + 11 * math.cos(a))
+    return math.radians(18 + 9 * math.cos(a))   # V7 : descend plus bas (couvre le front, comme l'icône)
 
 
 def sur_tete(a, e, ecart=ECART):
@@ -93,9 +93,9 @@ def ourlet(bm):
     chemin = []
     for i in range(NA):
         a = 2 * math.pi * i / NA
-        chemin.append(sur_tete(a, lat_bord(a), ECART + 0.02)[0])
+        chemin.append(sur_tete(a, lat_bord(a), ECART + 0.008)[0])   # V7 : ourlet collé au tissu
     chemin.append(chemin[0])
-    C.bm_tube(bm, chemin, 0.032, cotes=5, mat=0, boucher=False)
+    C.bm_tube(bm, chemin, 0.022, cotes=6, mat=0, boucher=False)   # V7 : plus fin (pas un bord de chapeau)
 
 
 def pois(bm):
@@ -106,9 +106,11 @@ def pois(bm):
             (20, 70, 0.05), (-25, 68, 0.05), (130, 50, 0.05), (-130, 52, 0.05),
             (65, 62, 0.045), (-65, 60, 0.045))):
         a, e = math.radians(a_deg), math.radians(e_deg)
-        p, d = sur_tete(a, e, ECART + 0.03)
-        C.bm_coussin(bm, C.contour_ellipse(r, r, n=8), 0.012, 0.028, C.repere(p, d), mat=1,
-                      anneaux=1, dos_plat=True)
+        # V7 (retour 2) : pois PEINTS sur le tissu (posés dessus, 1 cm au plus), au lieu de
+        # boutons qui flottaient 3 cm au-dessus et faisaient « champignon »
+        p, d = sur_tete(a, e, ECART + 0.004)
+        C.bm_coussin(bm, C.contour_ellipse(r * 1.1, r * 1.1, n=12), 0.004, 0.010, C.repere(p, d),
+                      mat=1, anneaux=1, dos_plat=True)
         if k in (0, 3, 6):
             eclats.append(p + d * 0.02)
     return eclats
@@ -152,11 +154,17 @@ def construire():
     cal = calotte()
     bm = bmesh.new()
     ourlet(bm)
-    eclats = pois(bm)
     p_n, d_n = noeud(bm)
     det = C.objet_depuis_bmesh("Details", bm, MATS)
     bandana = C.joindre([cal, det], "Bandana")
     C.lisser_tout(bandana)
+    # V7 (retour 2) : les pois forment un objet à part, lissé « à l'angle » : lissés avec le
+    # tissu, ces disques fins prenaient l'ombrage de petites boules (effet champignon).
+    bm_p = bmesh.new()
+    eclats = pois(bm_p)
+    pts = C.objet_depuis_bmesh("Pois", bm_p, MATS)
+    C.lisser_angle(pts, 30)
+    bandana = C.joindre([bandana, pts], "Bandana")
     C.deplacer_origine(bandana, C.U(*C.CHEVAL_ACCROCHES[POINT]))
     for nom, cote, lg in (("Anim_PanGauche", 1, 0.30), ("Anim_PanDroit", -1, 0.22)):
         C.parenter(pan(nom, p_n, d_n, cote, lg), bandana)

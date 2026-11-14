@@ -134,6 +134,10 @@ def navire():
     """Renvoie (objet Navire, liste des points des effets : sabords, poupe, éclats)."""
     bm = bmesh.new()
     coque(bm)
+    # V7 : nuage de brume sous la coque, qui traîne un peu derrière (suit le navire)
+    for x, y, z, r in ((0.0, 0.10, -0.04, 0.09), (0.06, -0.05, -0.05, 0.08), (-0.06, -0.08, -0.05, 0.08),
+                       (0.0, -0.22, -0.04, 0.085), (0.03, -0.36, -0.02, 0.06), (-0.02, -0.46, 0.0, 0.045)):
+        C.bm_sphere(bm, r, (x, y, z), segments=10, anneaux=6, echelle=(1.3, 1.0, 0.7), mat=3)
     # château arrière
     C.bm_boite(bm, (0.17, 0.10, 0.07), (0, -0.21, 0.155), mat=0)
     # mâts (grand mât et misaine), vergues, beaupré, hune
@@ -182,11 +186,12 @@ def navire():
 
 
 def anneau_brume():
+    """V7 (retour 2) : l'anneau de brume se lisait toujours comme un cerceau autour du cheval.
+    On garde l'objet `AnneauBrume` (le code peut le chercher), mais réduit à un minuscule
+    noyau caché au centre de l'orbite, DANS le cou. La brume est maintenant un petit nuage
+    sous la coque, qui suit le navire (voir navire())."""
     bm = bmesh.new()
-    # V7 : sillage bien plus fin (avant : tube de 3,5 cm, lu comme « un anneau autour de la
-    # taille ») ; 48 segments pour un cercle bien rond.
-    C.bm_tore(bm, RAYON, 0.014, segments=48, segments_tube=4, mat=3,
-              rayon_fn=lambda a: 0.010 + 0.006 * math.sin(5 * a))
+    C.bm_sphere(bm, 0.02, (0, 0, 0), segments=4, anneaux=2, mat=3)
     return bm
 
 

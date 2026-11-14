@@ -77,25 +77,22 @@ def contour_aile():
     return [(x - cx, z) for x, z in pts]
 
 
+def lisse_aile(t):
+    return t * t * (3 - 2 * t)
+
+
 def aile(nom, cote, origine, n):
+    # V7 (retour 2) : chaque aile est une BOUCLE GONFLÉE lisse (un ballon ovale), pincée vers
+    # le nœud, comme sur l'icône. Plus de coussin plat à plis (il paraissait froissé).
     bm = bmesh.new()
-    contour = contour_aile()
-    if cote < 0:
-        contour = [(-x, z) for x, z in reversed(contour)]
-    v = C.bm_coussin(bm, contour, 0.06, 0.13, None, mat=0, anneaux=3, dos_plat=True)
-    # 3 plis : on creuse 3 « rayons » du devant (de l'intérieur vers le bout)
+    v = C.bm_sphere(bm, 1.0, (0, 0, 0), segments=20, anneaux=14,
+                    echelle=(L_AILE / 2, 0.075, H_AILE / 2), mat=0)
     for v_ in v:
-        if v_.co.y > 0.035:
-            ang = math.atan2(v_.co.z, cote * v_.co.x + L_AILE / 2)
-            for cible in (-0.32, 0.0, 0.32):
-                if abs(ang - cible) < 0.05 and abs(v_.co.x) > 0.02:
-                    v_.co.y -= 0.005   # V7 : plis à peine marqués
-    # pincé vers le nœud : l'aile se resserre et se recule près du centre
-    for v_ in v:
-        t = (cote * v_.co.x + L_AILE / 2) / L_AILE        # 0 au nœud, 1 au bout
-        v_.co.y *= 0.55 + 0.45 * min(1.0, t * 2.2)
-    arbre = C.arbre_bm(bm)
-    # V7 : plus de pois blancs (l'icône est un satin rouge uni et brillant)
+        t = (cote * v_.co.x + L_AILE / 2) / L_AILE          # 0 côté nœud, 1 au bout
+        k = 0.42 + 0.58 * lisse_aile(min(1.0, max(0.0, t * 1.6)))
+        v_.co.z *= k                                        # pincée en hauteur près du nœud
+        v_.co.y *= 0.6 + 0.4 * k                            # et un peu moins épaisse
+        v_.co.z *= 1.0 + 0.12 * math.sin(math.pi * t)       # bout bien rond et plein
     # placement : l'aile recule de 14° pour suivre le poitrail arrondi, dans le repère
     rot = Matrix.Rotation(math.radians(cote * -14), 4, "Z")
     cote_n = Vector((1, 0, 0))
@@ -114,7 +111,7 @@ def construire():
     # V7 : le nœud central est un seul « coussin » rond et bombé, rouge plus foncé (deux
     # tons), comme sur l'icône (au lieu de 3 boudins).
     bm = bmesh.new()
-    v = C.bm_sphere(bm, 1.0, (0, 0, 0), segments=16, anneaux=10, echelle=(0.075, 0.06, 0.085), mat=1)
+    v = C.bm_sphere(bm, 1.0, (0, 0, 0), segments=16, anneaux=10, echelle=(0.07, 0.07, 0.08), mat=1)
     rot = n.to_track_quat("Y", "Z").to_matrix().to_4x4()
     bmesh.ops.transform(bm, matrix=Matrix.Translation(centre + n * 0.02) @ rot, verts=v)
     noeud = C.piece("Noeud", bm, MATS, lissage="tout", pivot=centre)
