@@ -40,7 +40,45 @@ namespace TourDeLaChance.EditorTools
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.alphaIsTransparency = true;
-            importer.mipmapEnabled = false;
+            // v7 (QA point 10) : mip maps ACTIVÉES. Les icônes sont affichées bien plus petites
+            // que leur image (1024 → 60 à 200 px) : sans mip maps, Unity saute des pixels et les
+            // contours scintillent ou crénellent ; avec, il prend une version réduite propre.
+            importer.mipmapEnabled = true;
+            PrepareSpecial(importer, Path.GetFileNameWithoutExtension(assetPath));
+        }
+
+        /// v7 : réglages propres à certaines images du dossier (appelé aussi par ReimportAll).
+        ///   - coffre_* : 1024 px au plus (au lieu de 512) : les icônes de coffres sont grandes ;
+        ///   - ruban_palier : 9-slice, bords gauche et droit de 120 px (seul le milieu s'étire).
+        public static void PrepareSpecial(TextureImporter importer, string id)
+        {
+            if (id.StartsWith("coffre_")) importer.maxTextureSize = Mathf.Max(importer.maxTextureSize, 1024);
+            // Vector4 du bord d'un sprite : (gauche, BAS, droite, haut).
+            if (id == "ruban_palier") importer.spriteBorder = new Vector4(120, 0, 120, 0);
+        }
+
+        /// v7 : passe TOUTES les icônes déjà importées en mip maps (et réglages spéciaux), puis
+        /// les réimporte. Menu « Tour de la Chance › Icônes : mip maps ».
+        [MenuItem("Tour de la Chance/Icônes : mip maps")]
+        public static int ReimportAllWithMipmaps()
+        {
+            int n = 0;
+            foreach (var path in Directory.GetFiles(IconFolder, "*.png").Select(p => p.Replace('\\', '/')))
+            {
+                var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                if (importer == null) continue;
+                bool before = importer.mipmapEnabled;
+                int size = importer.maxTextureSize;
+                var border = importer.spriteBorder;
+                importer.mipmapEnabled = true;
+                PrepareSpecial(importer, Path.GetFileNameWithoutExtension(path));
+                if (before != importer.mipmapEnabled || size != importer.maxTextureSize || border != importer.spriteBorder)
+                {
+                    importer.SaveAndReimport();
+                    n++;
+                }
+            }
+            return n;
         }
 
         /// Une bulle : Sprite, transparence, bords nets (Clamp), mip maps (elle est affichée à la

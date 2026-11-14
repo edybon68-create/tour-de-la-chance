@@ -3675,6 +3675,7 @@ MonoBehaviour:
   game: {fileID: 597386551}
   chestTrial: {fileID: 597386552}
   decor: {fileID: 935008395}
+  rebirthIcon: {fileID: 21300000, guid: f4942073456194816b09ad1a76d40b19, type: 3}
 --- !u!1 &866086859
 GameObject:
   m_ObjectHideFlags: 0

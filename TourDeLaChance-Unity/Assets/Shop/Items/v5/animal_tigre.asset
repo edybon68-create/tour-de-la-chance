@@ -29,8 +29,9 @@ MonoBehaviour:
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
   flavorText: "Grrr\u2026 mais gentil."
-  baseTexture: {fileID: 0}
+  baseTexture: {fileID: 2800000, guid: 4fd06904e247e44bf963318fff2d77f7, type: 3}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 2

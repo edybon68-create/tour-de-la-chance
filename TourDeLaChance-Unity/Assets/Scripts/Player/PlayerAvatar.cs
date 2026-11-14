@@ -264,8 +264,11 @@ namespace TourDeLaChance
             if (glows)
             {
                 mat.EnableKeyword("_EMISSION");
-                if (pattern != null && pattern.emissionMap != null) mat.SetTexture(EmissionMapId, pattern.emissionMap);
-                mat.SetColor(EmissionColorId, (pattern != null && pattern.emissionMap != null ? Color.white : item.Color) * item.EmissionStrength);
+                // v7 : la carte de lumière DESSINÉE (texture de l'artiste) passe avant celle calculée.
+                Texture emissionMap = item.BaseTexture != null && item.EmissionTexture != null ? item.EmissionTexture
+                                    : pattern != null ? pattern.emissionMap : null;
+                if (emissionMap != null) mat.SetTexture(EmissionMapId, emissionMap);
+                mat.SetColor(EmissionColorId, (emissionMap != null ? Color.white : item.Color) * item.EmissionStrength);
             }
             if (SkinFxPlayer.Needs(item))
                 skinFx = new SkinFxPlayer(item, mat, pattern, body != null ? body.transform : null, allowSound: !showcaseMode);

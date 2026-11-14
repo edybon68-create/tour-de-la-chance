@@ -29,8 +29,9 @@ MonoBehaviour:
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
   flavorText: "L\xE0 o\xF9 la lumi\xE8re n'arrive jamais."
-  baseTexture: {fileID: 0}
+  baseTexture: {fileID: 2800000, guid: eeb7d19c8030546af829072c68bfea9f, type: 3}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 2800000, guid: 9489c6f4b63fd4e09b789b5b7dd6e5bf, type: 3}
   skinFx: 5
   skinExtrasPrefab: {fileID: 919132149155446097, guid: bffcde86b949e4a8eb77484b6c235d1d, type: 3}
   pattern: 17

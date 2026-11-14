@@ -29,8 +29,9 @@ MonoBehaviour:
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
   flavorText: Il nage plus vite que les dauphins.
-  baseTexture: {fileID: 0}
+  baseTexture: {fileID: 2800000, guid: 71d960fba4ef641bc9f433020dc53a2b, type: 3}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 8

@@ -57,6 +57,8 @@ namespace TourDeLaChance
         [SerializeField] Texture2D baseTexture;
         [Tooltip("Répétition de la texture sur le corps (tiling).")]
         [SerializeField] Vector2 textureTiling = Vector2.one;
+        [Tooltip("v7 : carte de lumière propre dessinée (<id>_lumiere.png), posée avec baseTexture. Vide = émission unie.")]
+        [SerializeField] Texture2D emissionTexture;
         [Tooltip("Effet animé du skin (fumée, éclairs…). Pur affichage, arrive avec l'art.")]
         [SerializeField] SkinFx skinFx = SkinFx.Aucun;
         [Tooltip("Pièces 3D ajoutées au cheval tant que le skin est équipé (tentacules…).")]
@@ -92,6 +94,7 @@ namespace TourDeLaChance
         public string FlavorText => flavorText;
         public Texture2D BaseTexture => baseTexture;
         public Vector2 TextureTiling => textureTiling;
+        public Texture2D EmissionTexture => emissionTexture;
         public SkinFx SkinFx => skinFx;
         public GameObject SkinExtrasPrefab => skinExtrasPrefab;
         public SkinPattern Pattern => pattern;

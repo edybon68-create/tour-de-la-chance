@@ -22,3 +22,9 @@ MonoBehaviour:
   macaronOr: {fileID: 21300000, guid: 724066211eb034af6a4330fd71e231ba, type: 3}
   piece: {fileID: 21300000, guid: 608e09551b64b4a88b98c61f3371d437, type: 3}
   diamant: {fileID: 21300000, guid: 274a0327ad35640d79f791a769789a75, type: 3}
+  sablierBientot: {fileID: 21300000, guid: 2fb4e2e7b229f4fa39e1c1d83dbda961, type: 3}
+  nuage1: {fileID: 21300000, guid: 1b30764392fc949fab2db0bda8b6ef77, type: 3}
+  nuage2: {fileID: 21300000, guid: a560e533bc2e6429797e3dc1f89db1c2, type: 3}
+  nuage3: {fileID: 21300000, guid: 2e8f43240f49a48599e0d49031c8f5cc, type: 3}
+  guirlandeFanions: {fileID: 21300000, guid: a7ca03fa1ecca4963b90cfe47456b5bd, type: 3}
+  rubanPalier: {fileID: 21300000, guid: 66b4b293474ee4b68b49d03d701a2d33, type: 3}
