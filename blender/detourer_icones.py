@@ -66,6 +66,8 @@ OBJETS_TROUES = {
     # V7 : chaînes, lanières, collier, écharpe renard, yeux du loup
     "ancre_doree.png", "boussole.png", "cache_oeil.png", "longue_vue.png",
     "collier_medaille.png", "echarpe_renard.png", "loup_corsaire.png", "foulard_marin.png",
+    # V7 lot 10 : anses du panier du chaton, armature de la chauve-souris, serre-tête du cerf
+    "chaton_sac.png", "bois_cerf.png",
 }
 SEUIL_TROU = 0.06
 TROU_MIN_PX = 3     # un trou doit faire au moins ~2 × 3 px de large (pas un simple reflet)
