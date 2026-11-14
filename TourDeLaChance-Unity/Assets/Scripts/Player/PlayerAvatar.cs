@@ -211,7 +211,8 @@ namespace TourDeLaChance
 
             switch (item.SkinStyle)
             {
-                case SkinStyle.Rayures:
+                // v7 : une texture dessinée (sucre d'orge) passe AVANT les rayures calculées.
+                case SkinStyle.Rayures when item.BaseTexture == null:
                     // Les couleurs sont dans la texture : la couleur de base reste blanche.
                     mat.SetColor(BaseColorId, Color.white);
                     mat.SetTexture(BaseMapId, SkinTextures.Stripes(item.Color, item.SecondaryColor));

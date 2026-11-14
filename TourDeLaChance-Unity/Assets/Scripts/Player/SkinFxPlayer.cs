@@ -15,8 +15,8 @@ namespace TourDeLaChance
     ///   - BandeLumineuse : Fantôme (une bande monte toutes les 2,5 s, le corps flotte ±3 cm) ;
     ///   - ChangementCouleur : Caméléon (vert → turquoise → jaune → orange en 10 s) ;
     ///   - Irisation : Paon (la teinte glisse entre deux bleus) ; Pulsation : Méduse.
-    /// Le hasard (moment des éclairs) est un générateur VISUEL séparé. Les particules (fumée,
-    /// bulles, escarbilles) ne sont pas encore faites.
+    /// Le hasard (moment des éclairs) est un générateur VISUEL séparé. v7 : les particules
+    /// (fumée de l'Or maudit, bulles du Lagon, gouttes du Kraken) sont dans SkinParticles.
     /// </summary>
     public class SkinFxPlayer
     {
@@ -37,6 +37,7 @@ namespace TourDeLaChance
         Color32[] buf;
         float time, timer, nextFlash = 2f, flashTime = -1f;
         Vector2[] bolt;
+        SkinParticles particles; // v7 : null si le skin n'a pas de particules
 
         /// Ce skin a-t-il un effet animé ?
         public static bool Needs(ShopItem item) => item != null && item.SkinFx != SkinFx.Aucun;
@@ -68,8 +69,14 @@ namespace TourDeLaChance
                 mat.SetColor(EmissionColorId, Color.white * Mathf.Max(0.01f, item.EmissionStrength));
             }
             nextFlash = Range(2f, 4f);
+            var kind = SkinParticles.For(item);
+            if (kind.HasValue && body != null && body.parent != null)
+                particles = new SkinParticles(kind.Value, body.parent, body.gameObject.layer);
             Redraw();
         }
+
+        /// Les particules du skin (null s'il n'en a pas), pour les tests.
+        public SkinParticles Particles => particles;
 
         float Range(float a, float b) => a + (float)fxRandom.NextDouble() * (b - a);
 
@@ -79,12 +86,15 @@ namespace TourDeLaChance
             if (body != null) body.localPosition = bodyRest;
             if (tex != null) Object.Destroy(tex);
             tex = null;
+            particles?.Dispose();
+            particles = null;
         }
 
         /// Avance l'effet. joy = le cheval fait son saut de joie (certains effets s'excitent).
         public void Tick(float dt, bool joy)
         {
             time += dt * (joy ? 2f : 1f);
+            particles?.Tick(dt);
             switch (item.SkinFx)
             {
                 case SkinFx.Bioluminescence when item.Pattern != SkinPattern.Ventouses:
@@ -97,7 +107,11 @@ namespace TourDeLaChance
                     Color[] steps = { new Color(0.3f, 0.76f, 0.42f), new Color(0.17f, 0.72f, 0.77f), new Color(1f, 0.85f, 0.3f), new Color(0.95f, 0.55f, 0.22f) };
                     float k = Mathf.Repeat(time / 10f, 1f) * steps.Length;
                     int i = Mathf.FloorToInt(k);
-                    mat.SetColor(BaseColorId, Color.Lerp(steps[i % steps.Length], steps[(i + 1) % steps.Length], Mathf.SmoothStep(0f, 1f, k - i)));
+                    Color hue = Color.Lerp(steps[i % steps.Length], steps[(i + 1) % steps.Length], Mathf.SmoothStep(0f, 1f, k - i));
+                    // v7 : avec la texture dessinée (couleurs déjà dans l'image), on ne fait que
+                    // TEINTER légèrement (30 %) : le cheval garde ses couleurs au repos.
+                    if (item.BaseTexture != null) hue = Color.Lerp(Color.white, hue, 0.3f);
+                    mat.SetColor(BaseColorId, hue);
                     break;
                 }
                 case SkinFx.Irisation:

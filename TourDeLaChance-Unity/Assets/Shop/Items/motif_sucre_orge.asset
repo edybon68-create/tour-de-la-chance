@@ -29,8 +29,9 @@ MonoBehaviour:
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
   flavorText: "Interdit de le l\xE9cher."
-  baseTexture: {fileID: 0}
+  baseTexture: {fileID: 2800000, guid: c6659313915654b61a184661d2f0432e, type: 3}
   textureTiling: {x: 1, y: 1}
+  emissionTexture: {fileID: 0}
   skinFx: 0
   skinExtrasPrefab: {fileID: 0}
   pattern: 0

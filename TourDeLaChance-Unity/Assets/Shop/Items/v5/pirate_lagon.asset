@@ -29,7 +29,7 @@ MonoBehaviour:
   attachOffset: {x: 0, y: 0, z: 0}
   attachScale: 1
   flavorText: "Un morceau de mer des Cara\xEFbes."
-  baseTexture: {fileID: 0}
+  baseTexture: {fileID: 2800000, guid: d8c8d7d2eda874c6991be10a3fdad5fc, type: 3}
   textureTiling: {x: 1, y: 1}
   emissionTexture: {fileID: 0}
   skinFx: 3
