@@ -36,7 +36,8 @@
 6. [ ] **Améliorations épurées**, même esprit.
 7. [x] **Revue complète des détourages** : comparer chaque icône à son original, chercher les liserés, les trous, les ombres entourées de noir et les contours irréguliers. Corriger dans `blender/detourer_icones.py`, ou régénérer l'icône.
    - *Fait le 13/11* : nouvelle méthode de détourage (pente + ombre sous l'objet + matting), 27 icônes rendues dans Blender avec leur transparence exacte (`art/icones_alpha/`), 6 icônes de coffres refaites. Reste `kraken_bebe` à régénérer (lot 9, image 5). Planches : `docs/captures/qa_v7_detourage_00.png` à `_15.png`.
-8. [ ] **Revue des modèles 3D** (accessoires, skins, coffres, tour, diamant, boîtes) : meilleur rendu possible, en corrigeant les formes grossières, les matériaux plats et les placements sur le cheval.
+8. [x] **Revue des modèles 3D** (accessoires, skins, coffres, tour, diamant, boîtes) : meilleur rendu possible, en corrigeant les formes grossières, les matériaux plats et les placements sur le cheval.
+   - *Fait le 14/11* : les 60 modèles ont été rendus sur le cheval (vues jeu, 3/4 et profil) avec `blender/revue_modeles.py`. 12 ont été corrigés : longue-vue, ancre, foulard, navire, tricorne, carapace, baleine, casquette, auréole, planète, plus la doublure des 5 coffres. Planches : `docs/captures/v7_modeles_*.png`. Aucun `attachOffset` à changer.
 9. [ ] **Inspection QA complète**, puis ajout de ses trouvailles à cette liste et correction.
 10. [ ] **Restes connus** :
     - particules des objets rares ;
@@ -59,6 +60,7 @@
 
 ## Journal de travail autonome
 <!-- Une ligne par session : date, ce qui est fait, commit. -->
+- 14/11 : revue des modèles 3D (point 8 et QA 18) : 12 modèles corrigés, icône kraken rendue dans Blender ; commits 7a188b4, a9bc6ee, a71dff4, be13f17.
 - 13/11 : détourages refaits (QA 1 à 5, 8, 9) et icônes des coffres rendues dans Blender ; mipmaps à faire (Unity en mode Play).
 
 ## Trouvé par le QA (V7)
@@ -136,7 +138,7 @@
     - *Capture* : `v65_ascension_info.png`.
 17. **Index : textes des cartes trop petits** (« 10 % », « +1 % », « Pas encore »), illisibles à 1280 × 720.
     - *Capture* : `v65_index_categories.png`.
-18. **Modèles 3D sur le cheval** (captures v5, donc peut-être anciennes, à vérifier en jeu) :
+18. [x] *(corrigé le 14/11, sauf la plume : refaite plus large, c'est désormais une vraie plume)* **Modèles 3D sur le cheval** (captures v5, donc peut-être anciennes, à vérifier en jeu) :
     - la longue-vue traverse la tête comme une broche ;
     - l'ancre pend loin sur le côté ;
     - la carapace ressemble à un tambourin jaune (rien à voir avec son icône verte) ;
