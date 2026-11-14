@@ -48,7 +48,10 @@ def bois(bm, s, base):
     trois doigts ronds aux bouts crème, et une oreille de cerf caramel à la base.
     Renvoie les bouts des doigts et le tronc (points où poser les fleurs)."""
     def P(x, y, z):
-        return base + Vector((s * x, y, z)) * K
+        # V7 (retour en jeu) : les deux bois s'écartent davantage (V bien ouvert vu de face :
+        # ×1,4 vers l'extérieur) et sont décalés en profondeur (le gauche 10 cm devant, le
+        # droit 10 cm derrière, de plus en plus vers le haut) : de profil on lit deux bois.
+        return base + Vector((s * x * 1.4, y + s * 0.10 * min(1.0, z / 0.3), z)) * K
     # tronc épais (Ø 22 cm à la base) qui monte en s'écartant
     tronc = [P(0, 0, -0.03), P(0.05, 0.0, 0.12), P(0.12, -0.01, 0.26), P(0.18, -0.01, 0.36)]
     C.bm_tube(bm, tronc, 0.11, cotes=9, mat=0, rayons=[1.0, 0.95, 0.95, 1.05])

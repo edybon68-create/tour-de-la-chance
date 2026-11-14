@@ -59,7 +59,7 @@ import commun_pirates as P  # noqa: E402
 NOM = "navire_fantome"
 POINT = "PointDos"
 MATS = ["M5_PirSpectre", "M5_PirVoile", "M5_PirLanterne", "M5_PirBrume"]   # 0..3
-CENTRE_ORBITE = (0.0, 1.40, 0.02)   # V7 (retour programmeur) : orbite recentrée autour de la tête
+CENTRE_ORBITE = (0.0, 1.30, 0.02)   # V7 (retour en jeu) : 1,40 -> 1,30, jamais devant les yeux
 RAYON = 0.68         # V7 : 1,0 -> 0,68, il tourne près de la tête (il sortait du cadre de la fiche)
 INCLINAISON = 12.0
 ECHELLE = 1.35       # V7 : un peu plus petit, l'orbite est plus serrée
