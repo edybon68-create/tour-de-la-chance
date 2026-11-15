@@ -75,6 +75,9 @@
   - Règles apprises : ne JAMAIS activer le son (Mute Audio de Unity toujours activé) ; ne jamais compiler pendant le mode Play de l'auteur ; restaurer la sauvegarde par Unity (effacer puis réécrire les clés), pas par `defaults import` ; copies de sauvegarde dans `/Users/edy/TourDeLaChance-sauvegardes/`.
 
 ## En cours / prochaine étape (v6, au 13/11/2026)
+- **15/11 : pause de l'auteur** (quelques jours). Il a des retours de test à donner à son retour : les lui demander en premier.
+- **Décision : objectif Roblox.** Le jeu sera porté sur Roblox Studio (Luau, DataStore, tirages côté serveur, sans doute via Rojo). La version Unity sert de **maquette vivante** : on y perfectionne écrans et design, **pensés pour le téléphone** (capture en plus au format 19,5:9, gros boutons tactiles, rien dans la zone réservée en haut par Roblox). Modèles, icônes, textures et sons seront réutilisés. Avant le portage : vérifier les règles Roblox sur le hasard et les objets aléatoires payants (jamais de quitte ou double en Robux), puis faire un prototype minimal.
+- En attente : polissage V7.2 (4 points dans `docs/specs/v7-a-faire.md`, la Renaissance n'est pas touchée). Reprise automatique arrêtée. 1 000 diamants donnés à l'auteur à sa demande (copie de la sauvegarde avant dans `TourDeLaChance-sauvegardes/`).
 - V7 livrée (14/11), en attente des tests de l'auteur à son retour. Restes : pictogramme « pas encore vu » de l'Index, mesure des perfs sur un build, effets « tête basse » de quelques accessoires.
 - V6.5 livrée, en attente des tests de l'auteur. Petits restes : « Ma position » chevauche un peu le « i » du bas, rayons de « Récupérer » discrets sur le fond rose.
 - V6 livrée, en attente des tests de l'auteur.

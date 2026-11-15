@@ -127,6 +127,61 @@
     - **Correction** : retirer la pilule texte « Pas encore ». Les objets non obtenus gardent la silhouette « ? », plus le nom et le taux à **75 %** d'opacité.
     - Le pictogramme `pas_encore_vu.png` reste seul dans le coin haut gauche (32 px), seulement pour les objets **jamais vus**. C'est l'esprit de la grille du Casier : la case parle, pas le texte.
 
+## Polissage V7.2 (DA)
+
+> Passe du DA le 14/11 sur `v71_*` et `qa_v7p4_*`, plus les écrans peu revus. Pour ces derniers, les
+> captures les plus récentes sont `qa_v7p3_renaissance`, `_reglages`, `_classement`, `_ouverture` et `_piege`.
+>
+> **Verdict sur les écrans du polissage V7.1 : c'est bon.** L'Ascension (jour et nuit), les Améliorations,
+> la Boutique, l'Inventaire, l'Index et la barre compacte ne demandent plus rien d'important. **Les Réglages
+> sont propres** : on n'y touche pas. **La Renaissance reste le modèle** : on n'y touche pas non plus, sauf
+> sa dernière ligne (point 5).
+>
+> Les vrais écarts restants sont sur les écrans qui ont encore le style v4 : le texte posé sur la scène,
+> les panneaux sombres translucides, les petits boutons « bonbons ». Classés par impact (on les voit
+> à chaque partie). Valeurs en px de référence **1920 × 1080**.
+
+1. [ ] **Ouverture d'une boîte : le panneau du résultat est resté en v4** (`qa_v7p3_ouverture_1280.png`).
+   - Constat : panneau sombre translucide, 4 lignes de petit gris, trois petits boutons. La rareté « Commun » est grise sur le faisceau. C'est le moment le plus excitant du jeu, et c'est l'écran le moins soigné.
+   - **Correction (panneau)** : il devient une **carte du §12.18.3**, de **760 × 300**, au fond `carte_*.png` de la **famille de la boîte** (rose, bleue ou verte), contour 5 px `#110D1F`, coins 28, `padding 24px`.
+   - **Correction (textes de la carte)** :
+     - nom **52 px** Bold blanc, `text-shadow 0 4px 0 #110D1F` ;
+     - dessous, une seule rangée : pilule de rareté (h 40, fond = **base** de la rareté §16.1.6, contour 3 px encre, **22 px** blanc) et pilule bonus de la vitrine (§16.1.7 : pièce 26 px + « +1 % », `#FFD54A` sur `rgba(17,13,31,0.55)`) ;
+     - « Nouveau ! » devient un **autocollant penché** (`rotate -6deg`, `#FFD54A`, contour 3 px encre, **22 px** `#3A2200`), à cheval sur le coin haut droit de la carte ;
+     - on retire « Équipé, il donne… » (la pilule le dit) et « Boîte de skins n°1 · n°04 ».
+   - **Correction (boutons)** : des bulles 9-slice de **h 100**, 20 px d'écart :
+     - « Rouvrir ● 250 » sur `bulle_rect_vert` (le plus large, 320 px), au centre ;
+     - « Équiper » sur `bulle_rect_aqua` (240 px) ;
+     - « OK » sur `bulle_rect_violet` (180 px) ;
+     - textes **32 px**.
+   - **Correction (rareté en haut)** : l'étiquette du faisceau prend la même pilule de rareté, en **36 px**.
+   - **Équité** : on garde la même chronologie de révélation pour toutes les raretés (§14.1).
+2. [ ] **Fenêtre de reprise après un piège : le texte flotte sur la tour, sans cadre** (`qa_v7p3_piege_1280.png`). Trois tailles de texte sont empilées sur le sol, et les boutons sont encore des « bonbons » v4.
+   - **Correction (carte)** : une carte centrée en bas (bas à **y = 1000**), **720 × 330**, fond `carte_rouge.png` (`#FFA08A → #E0404A` : la seule carte rouge du jeu, réservée au piège), contour 5 px encre, coins 28.
+   - **Correction (textes)** :
+     - « Oh non, un piège ! » **44 px** Bold blanc, `text-shadow 0 4px 0 #110D1F` ;
+     - **le héros** : pièce **56 px** + « **440** » **64 px** Bold `#FFD54A`, `text-shadow 0 4px 0 #3A2200` (la cagnotte qu'on peut sauver), et dessous « à sauver » en **22 px** blanc ;
+     - une rangée de 2 pastilles h 40 (fond `rgba(17,13,31,0.45)`, **22 px** blanc) : « Reprise 1 / 5 » et diamant + « 4 ».
+   - **Correction (boutons)**, sous la carte et à cheval sur son bord bas : « Rejouer » sur `bulle_rect_violet` **300 × 104**, et « Continuer ◆ 1 » sur `bulle_rect_aqua` **380 × 104**, textes **34 px**.
+   - **Correction (révélation)** : la carte arrive **après** la révélation, comme aujourd'hui, avec `scale 0.9 → 1.03 → 1` en 0,25 s.
+3. [ ] **Compteurs du HUD (Cagnotte, Porte-monnaie, diamants) : de vieux rectangles gris translucides** (`v71_barre_compacte.png`). Ils sont présents sur tous les écrans. Le texte est long, l'or est terne sur le gris, et ils jurent avec la barre compacte et le badge ÉTAGE, qui ont un contour d'encre.
+   - **Correction (forme)** : trois pilules **h 64**, contour **4 px** `#110D1F`, coins 32, ombre `rgba(17,13,31,0.35)` décalée de 6 px, alignées à droite avec **12 px** d'écart.
+   - **Correction (icônes)** : l'icône déborde à gauche (**56 px**, `left: -20px`).
+   - **Correction (textes)** : sur deux niveaux, le libellé **16 px** à 75 % au-dessus et le nombre **32 px** Bold en dessous.
+   - **Cagnotte** (l'argent en jeu, à risque) : fond `#FFD54A`, textes `#3A2200`, icône `piece.png`.
+   - **Porte-monnaie** : fond `rgba(31,23,48,0.88)`, nombre blanc, icône `piece.png`.
+   - **Diamants** : même fond sombre, nombre `#7FE3FF`, icône `diamant.png`, sans libellé (cliquable, il ouvre la section Diamants).
+   - **Animation** : quand un compteur change, le rebond reste `scale 1 → 1.12 → 1`.
+4. [ ] **Classement : le record se lit mal, et un paragraphe ouvre la fenêtre** (`qa_v7p3_classement_1280.png`).
+   - Constat : « Ton record : étage 8 » est en or contouré sur blanc (même défaut que l'ancien « Tu gardes tout le reste ! »). La bannière explicative lavande ajoute deux lignes.
+   - **Correction (record)** : il devient la **pilule du record de L'Ascension**, centrée : h **60**, fond `#FFC83A`, contour 4 px encre, coins 30, `drapeau_record.png` **44 px** + « Record : étage 8 » **30 px** Bold `#3A2200`.
+   - **Correction (bannière)** : on la retire. Son texte passe derrière un **« i »** (`bulle_petit_ardoise` 56 px) à droite des onglets.
+   - **Correction (lien)** : « Quitter le classement » passe à **20 px** `#6E6A80`.
+5. [ ] **Renaissance (modèle, une seule retouche) : le bas de la fenêtre dit deux fois la même chose** (`qa_v7p3_renaissance_1280.png`). La jauge « 1 170 / 10 000 » est suivie de « Il te manque 8 830 pièces » en tout petit.
+   - **Correction** : retirer la ligne « Il te manque… » (la jauge le montre).
+   - La phrase de rentabilité passe à **20 px** `#6E6A80`, centrée, sur une ligne.
+   - Rien d'autre ne change.
+
 ## Règles de sécurité (toujours)
 - **Ne JAMAIS activer le son de l'ordinateur** (demande expresse de l'auteur) : ne pas toucher au volume du Mac (`osascript`, `afplay`, etc.), ne pas désactiver le « Mute Audio » de Unity, ne jouer aucun son à voix haute. Les sons se vérifient par le code ou les fichiers, pas en les écoutant.
 - Sauvegarde de l'auteur : la copier avant tout test, la restaurer après, et vérifier qu'elle est identique.
